@@ -17,6 +17,7 @@ import java.util.function.Supplier;
  */
 public enum VanillaBlocks {
 
+    ENDER_CHEST(EnderChestBlock::new),
     JUKEBOX(JukeboxBlock::new);
 
     private final Supplier<CustomBlock> blockSupplier;

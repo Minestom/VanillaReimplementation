@@ -1,14 +1,10 @@
 package net.minestom.vanilla;
 
-import fr.themode.demo.generator.ChunkGeneratorDemo;
-import fr.themode.demo.generator.NoiseTestGenerator;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.PlayerLoginEvent;
 import net.minestom.server.event.PlayerSpawnEvent;
 import net.minestom.server.instance.InstanceContainer;
-import net.minestom.server.inventory.Inventory;
-import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.ConnectionManager;
@@ -54,7 +50,6 @@ public class PlayerInit {
                 player.getInventory().addItemStack(new ItemStack(Material.DIAMOND_CHESTPLATE, (byte) 1));
 
             });
-
 
         });
     }

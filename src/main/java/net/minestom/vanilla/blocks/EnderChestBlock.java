@@ -5,17 +5,13 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.CustomBlock;
-import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.time.UpdateOption;
-import net.minestom.vanilla.blockentity.JukeboxBlockEntity;
+import net.minestom.vanilla.system.EnderChestSystem;
 
-/**
- * Reimplementation of the jukebox block
- */
-public class JukeboxBlock extends CustomBlock {
-    public JukeboxBlock() {
-        super(Block.JUKEBOX, "vanilla_jukebox");
+public class EnderChestBlock extends CustomBlock {
+    public EnderChestBlock() {
+        super(Block.ENDER_CHEST, "vanilla_ender_chest");
     }
 
     @Override
@@ -25,25 +21,18 @@ public class JukeboxBlock extends CustomBlock {
 
     @Override
     public void onDestroy(Instance instance, BlockPosition blockPosition, Data data) {
-        JukeboxBlockEntity entity = (JukeboxBlockEntity)data;
-        if(entity != null) {
-            entity.onDestroyed(instance);
-        }
+
     }
 
     @Override
     public boolean onInteract(Player player, Player.Hand hand, BlockPosition blockPosition, Data data) {
-        ItemStack heldItem = player.getInventory().getItemInMainHand();
-        JukeboxBlockEntity entity = (JukeboxBlockEntity)data;
-        if(entity != null) {
-            return entity.onInteract(player, hand, heldItem);
+        // TODO: Handle crouching players
+        Block above = Block.fromId(player.getInstance().getBlockId(blockPosition.getX(), blockPosition.getY()+1, blockPosition.getZ()));
+        if(above.isSolid()) {
+            return false;
         }
-        return false;
-    }
-
-    @Override
-    public Data createData(BlockPosition position, Data data) {
-        return new JukeboxBlockEntity(position);
+        player.openInventory(EnderChestSystem.getInstance().get(player));
+        return true;
     }
 
     @Override
@@ -53,7 +42,7 @@ public class JukeboxBlock extends CustomBlock {
 
     @Override
     public short getCustomBlockId() {
-        return Block.JUKEBOX.getBlockId();
+        return Block.ENDER_CHEST.getBlockId();
     }
 
     @Override

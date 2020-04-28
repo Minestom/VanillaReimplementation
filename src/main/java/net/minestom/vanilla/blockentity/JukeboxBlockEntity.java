@@ -1,17 +1,13 @@
 package net.minestom.vanilla.blockentity;
 
-import net.minestom.server.data.Data;
 import net.minestom.server.data.SerializableData;
 import net.minestom.server.effects.Effects;
 import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.StackingRule;
-import net.minestom.server.sound.Sound;
-import net.minestom.server.sound.SoundCategory;
 import net.minestom.server.utils.BlockPosition;
 
 import java.util.Random;
@@ -26,7 +22,7 @@ public class JukeboxBlockEntity extends SerializableData {
         set(DISC_STACK, ItemStack.getAirItem(), ItemStack.class);
     }
 
-    public void onInteract(Player player, Player.Hand hand, ItemStack heldItem) {
+    public boolean onInteract(Player player, Player.Hand hand, ItemStack heldItem) {
         ItemStack stack = get(DISC_STACK);
         if(stack.isAir()) {
             if(isMusicDisc(heldItem.getMaterial())) {
@@ -46,11 +42,14 @@ public class JukeboxBlockEntity extends SerializableData {
                         playerInInstance.playEffect(Effects.PLAY_RECORD, position.getX(), position.getY(), position.getZ(), heldItem.getMaterial().getId(), false);
                     }
                 });
+                return true;
             }
         } else {
             stopPlayback(player.getInstance());
             set(DISC_STACK, ItemStack.getAirItem(), ItemStack.class);
+            return true;
         }
+        return false;
     }
 
     /**
