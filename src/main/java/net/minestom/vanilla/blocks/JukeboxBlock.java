@@ -4,27 +4,26 @@ import net.minestom.server.data.Data;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.CustomBlock;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.BlockPosition;
-import net.minestom.server.utils.time.UpdateOption;
 import net.minestom.vanilla.blockentity.JukeboxBlockEntity;
 
 /**
  * Reimplementation of the jukebox block
  */
-public class JukeboxBlock extends CustomBlock {
+public class JukeboxBlock extends VanillaBlock {
     public JukeboxBlock() {
-        super(Block.JUKEBOX, "vanilla_jukebox");
+        super(Block.JUKEBOX);
     }
 
     @Override
-    public void onPlace(Instance instance, BlockPosition blockPosition, Data data) {
-
+    protected BlockPropertyList createPropertyValues() {
+        return new BlockPropertyList()
+                .booleanProperty("has_record");
     }
 
     @Override
-    public void onDestroy(Instance instance, BlockPosition blockPosition, Data data) {
+    public void onDestroy(Instance instance, BlockPosition blockPosition, Data data, String[] properties) {
         JukeboxBlockEntity entity = (JukeboxBlockEntity)data;
         if(entity != null) {
             entity.onDestroyed(instance);
@@ -32,7 +31,7 @@ public class JukeboxBlock extends CustomBlock {
     }
 
     @Override
-    public boolean onInteract(Player player, Player.Hand hand, BlockPosition blockPosition, Data data) {
+    public boolean onInteract(Player player, Player.Hand hand, BlockPosition blockPosition, Data data, String[] properties) {
         ItemStack heldItem = player.getInventory().getItemInMainHand();
         JukeboxBlockEntity entity = (JukeboxBlockEntity)data;
         if(entity != null) {
@@ -42,22 +41,7 @@ public class JukeboxBlock extends CustomBlock {
     }
 
     @Override
-    public Data createData(BlockPosition position, Data data) {
+    public Data createData(BlockPosition position, Data data, String[] properties) {
         return new JukeboxBlockEntity(position);
-    }
-
-    @Override
-    public UpdateOption getUpdateOption() {
-        return null;
-    }
-
-    @Override
-    public short getCustomBlockId() {
-        return Block.JUKEBOX.getBlockId();
-    }
-
-    @Override
-    public int getBreakDelay(Player player) {
-        return -1;
     }
 }

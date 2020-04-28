@@ -11,6 +11,7 @@ import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.network.packet.server.play.DeclareRecipesPacket;
 import net.minestom.server.recipe.RecipeManager;
 import net.minestom.server.recipe.ShapelessRecipe;
+import net.minestom.server.timer.TaskRunnable;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.commands.GamemodeCommand;
 import net.minestom.vanilla.commands.VanillaCommands;
@@ -40,6 +41,18 @@ public class LaunchServer {
         ingredient.items = new ItemStack[]{new ItemStack(Material.STONE, (byte) 3)};
         shapelessRecipe.addIngredient(ingredient);
         recipeManager.addRecipe(shapelessRecipe);
+
+        MinecraftServer.getSchedulerManager().addShutdownTask(new TaskRunnable() {
+            @Override
+            public void run() {
+                ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
+                connectionManager.getOnlinePlayers().forEach(player -> {
+                    // TODO: Saving
+                    player.kick("Server is closing.");
+                    connectionManager.removePlayer(player.getPlayerConnection());
+                });
+            }
+        });
 
         minecraftServer.start("localhost", 55555, (playerConnection, responseData) -> {
             responseData.setName("1.15.2");

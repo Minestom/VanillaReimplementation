@@ -2,30 +2,32 @@ package net.minestom.vanilla.blocks;
 
 import net.minestom.server.data.Data;
 import net.minestom.server.entity.Player;
-import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.CustomBlock;
 import net.minestom.server.utils.BlockPosition;
-import net.minestom.server.utils.time.UpdateOption;
+import net.minestom.server.utils.Direction;
+import net.minestom.server.utils.MathUtils;
 import net.minestom.vanilla.system.EnderChestSystem;
 
-public class EnderChestBlock extends CustomBlock {
+public class EnderChestBlock extends VanillaBlock {
     public EnderChestBlock() {
-        super(Block.ENDER_CHEST, "vanilla_ender_chest");
+        super(Block.ENDER_CHEST);
     }
 
     @Override
-    public void onPlace(Instance instance, BlockPosition blockPosition, Data data) {
-
+    protected BlockPropertyList createPropertyValues() {
+        return new BlockPropertyList().directionProperty("facing").booleanProperty("waterlogged");
     }
 
     @Override
-    public void onDestroy(Instance instance, BlockPosition blockPosition, Data data) {
-
+    public short getStateForPlacement(Player player, Player.Hand hand, BlockPosition position) {
+        boolean waterlogged = Block.fromId(player.getInstance().getBlockId(position.getX(), position.getY(), position.getZ())) == Block.WATER;
+        float yaw = player.getPosition().getYaw();
+        Direction direction = MathUtils.getHorizontalDirection(yaw).opposite();
+        return Block.ENDER_CHEST.withProperties("facing="+direction.name().toLowerCase(), "waterlogged="+waterlogged);
     }
 
     @Override
-    public boolean onInteract(Player player, Player.Hand hand, BlockPosition blockPosition, Data data) {
+    public boolean onInteract(Player player, Player.Hand hand, BlockPosition blockPosition, Data data, String[] properties) {
         // TODO: Handle crouching players
         Block above = Block.fromId(player.getInstance().getBlockId(blockPosition.getX(), blockPosition.getY()+1, blockPosition.getZ()));
         if(above.isSolid()) {
@@ -35,18 +37,4 @@ public class EnderChestBlock extends CustomBlock {
         return true;
     }
 
-    @Override
-    public UpdateOption getUpdateOption() {
-        return null;
-    }
-
-    @Override
-    public short getCustomBlockId() {
-        return Block.ENDER_CHEST.getBlockId();
-    }
-
-    @Override
-    public int getBreakDelay(Player player) {
-        return -1;
-    }
 }

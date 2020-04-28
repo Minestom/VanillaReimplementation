@@ -1,8 +1,10 @@
 package net.minestom.vanilla.commands;
 
 import fr.themode.command.Command;
+import io.netty.handler.codec.stomp.StompCommand;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Player;
+import net.minestom.server.world.Difficulty;
 
 import java.util.function.Supplier;
 
@@ -12,6 +14,9 @@ import java.util.function.Supplier;
 public enum VanillaCommands {
 
     GAMEMODE(GamemodeCommand::new),
+    DIFFICULTY(DifficultyCommand::new),
+    ME(MeCommand::new),
+    STOP(StopCommand::new),
     HELP(HelpCommand::new);
 
     private final Supplier<Command<Player>> commandCreator;

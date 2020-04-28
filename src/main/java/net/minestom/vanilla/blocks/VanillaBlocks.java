@@ -1,14 +1,10 @@
 package net.minestom.vanilla.blocks;
 
-import fr.themode.command.Command;
-import net.minestom.server.command.CommandManager;
-import net.minestom.server.entity.Player;
 import net.minestom.server.event.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.instance.block.CustomBlock;
+import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.network.ConnectionManager;
-import net.minestom.vanilla.commands.GamemodeCommand;
-import net.minestom.vanilla.commands.HelpCommand;
 
 import java.util.function.Supplier;
 
@@ -20,10 +16,16 @@ public enum VanillaBlocks {
     ENDER_CHEST(EnderChestBlock::new),
     JUKEBOX(JukeboxBlock::new);
 
-    private final Supplier<CustomBlock> blockSupplier;
+    private final Supplier<VanillaBlock> blockSupplier;
+    private final BlockPlacementRule placementRule;
 
-    private VanillaBlocks(Supplier<CustomBlock> blockSupplier) {
+    private VanillaBlocks(Supplier<VanillaBlock> blockSupplier) {
+        this(blockSupplier, null);
+    }
+
+    private VanillaBlocks(Supplier<VanillaBlock> blockSupplier, BlockPlacementRule placementRule) {
         this.blockSupplier = blockSupplier;
+        this.placementRule = placementRule;
     }
 
     /**
@@ -32,15 +34,21 @@ public enum VanillaBlocks {
      * @param blockManager
      */
     public void register(ConnectionManager connectionManager, BlockManager blockManager) {
-        CustomBlock block = this.blockSupplier.get();
+        VanillaBlock block = this.blockSupplier.get();
         connectionManager.addPlayerInitialization(player -> {
             player.addEventCallback(PlayerBlockPlaceEvent.class, event -> {
-                if(event.getBlockId() == block.getBlockId()) {
-                    event.setCustomBlockId(block.getCustomBlockId());
+                if(event.getBlockId() == block.getBaseBlockId()) {
+                    short blockID = block.getStateForPlacement(event.getPlayer(), event.getHand(), event.getBlockPosition());
+                    event.setCustomBlockId(blockID);
                 }
             });
         });
-        blockManager.registerCustomBlock(block);
+        for(CustomBlock derived : block.getAllVariants()) {
+            blockManager.registerCustomBlock(derived);
+        }
+        if(placementRule != null) {
+            blockManager.registerBlockPlacementRule(placementRule);
+        }
     }
 
     /**
