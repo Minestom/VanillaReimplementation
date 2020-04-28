@@ -36,14 +36,6 @@ public class PlayerInit {
 
     public static void init() {
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
-        connectionManager.setResponseDataConsumer((playerConnection, responseData) -> {
-            responseData.setName("1.15.2");
-            responseData.setProtocol(578);
-            responseData.setMaxPlayer(100);
-            responseData.setOnline(connectionManager.getOnlinePlayers().size());
-            responseData.setDescription("Test server for Minestom vanilla reimplementation");
-            responseData.setFavicon("data:image/png;base64,<data>");
-        });
 
         connectionManager.addPlayerInitialization(player -> {
             player.addEventCallback(PlayerLoginEvent.class, event -> {
@@ -62,6 +54,8 @@ public class PlayerInit {
                 player.getInventory().addItemStack(new ItemStack(Material.DIAMOND_CHESTPLATE, (byte) 1));
 
             });
+
+
         });
     }
 }

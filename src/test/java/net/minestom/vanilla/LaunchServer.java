@@ -11,6 +11,7 @@ import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.network.packet.server.play.DeclareRecipesPacket;
 import net.minestom.server.recipe.RecipeManager;
 import net.minestom.server.recipe.ShapelessRecipe;
+import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.commands.GamemodeCommand;
 import net.minestom.vanilla.commands.VanillaCommands;
 
@@ -23,6 +24,7 @@ public class LaunchServer {
 
         CommandManager commandManager = MinecraftServer.getCommandManager();
         VanillaCommands.registerAll(commandManager);
+        VanillaBlocks.registerAll(MinecraftServer.getConnectionManager(), MinecraftServer.getBlockManager());
 
         PlayerInit.init();
 
@@ -39,7 +41,14 @@ public class LaunchServer {
         shapelessRecipe.addIngredient(ingredient);
         recipeManager.addRecipe(shapelessRecipe);
 
-        minecraftServer.start("localhost", 55555);
+        minecraftServer.start("localhost", 55555, (playerConnection, responseData) -> {
+            responseData.setName("1.15.2");
+            responseData.setProtocol(578);
+            responseData.setMaxPlayer(100);
+            responseData.setOnline(MinecraftServer.getConnectionManager().getOnlinePlayers().size());
+            responseData.setDescription("Test server for Minestom vanilla reimplementation");
+            responseData.setFavicon("data:image/png;base64,<data>");
+        });
     }
 
 }

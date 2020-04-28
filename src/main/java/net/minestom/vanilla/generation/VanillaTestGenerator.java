@@ -29,7 +29,7 @@ public class VanillaTestGenerator extends ChunkGenerator  {
                 int height = (int) (64 - heightDelta*16);
 
                 batch.setBlock(posX, 0, posZ, Block.BEDROCK);
-                for (int level = 0; level < height; level++) {
+                for (int level = 1; level < height; level++) {
                     batch.setBlock(posX, level, posZ, Block.STONE);
                 }
                 for (int level = height; level < 64; level++) {
