@@ -4,35 +4,21 @@ import net.minestom.server.data.Data;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.CustomBlock;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.time.UpdateOption;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Represents a vanilla block implementation.
  * Will handle creation of all VanillaCustomBlock necessary to represent this block
  */
-public abstract class VanillaBlock {
+public abstract class VanillaBlock extends CustomBlock {
 
     private final Block baseBlock;
-    private final List<VanillaCustomBlock> variants;
 
     public VanillaBlock(Block baseBlock) {
+        super(baseBlock, "vanilla_"+baseBlock.name().toLowerCase());
         this.baseBlock = baseBlock;
-        this.variants = new ArrayList<>();
-        BlockPropertyList properties = createPropertyValues();
-        if(properties.isEmpty()) {
-            variants.add(new VanillaCustomBlock(this, baseBlock.getBlockId(), new String[0]));
-        } else {
-            for(String[] propertyValues : properties.getCartesianProduct()) {
-                System.out.println(">> "+baseBlock.name()+" => "+ Arrays.toString(propertyValues));
-                variants.add(new VanillaCustomBlock(this, baseBlock.withProperties(propertyValues), propertyValues));
-            }
-        }
     }
 
     protected abstract BlockPropertyList createPropertyValues();
@@ -41,51 +27,37 @@ public abstract class VanillaBlock {
         return baseBlock;
     }
 
-    public List<VanillaCustomBlock> getAllVariants() {
-        return variants;
-    }
-
     /**
      * Create data for this block
      * @param blockPosition
      * @param data
-     * @param properties allow to change depending on the block state
      * @return
      */
-    public Data createData(BlockPosition blockPosition, Data data, String[] properties) {
+    @Override
+    public Data createData(Instance instance, BlockPosition blockPosition, Data data) {
         return data;
     }
 
-    /**
-     * Place this block with given properties
-     * @param instance
-     * @param blockPosition
-     * @param data
-     * @param properties
-     */
-    public void onPlace(Instance instance, BlockPosition blockPosition, Data data, String[] properties) {
+    @Override
+    public void onPlace(Instance instance, BlockPosition blockPosition, Data data) {
 
     }
 
-    /**
-     * Destroy this block with given properties
-     * @param instance
-     * @param blockPosition
-     * @param data
-     * @param properties
-     */
-    public void onDestroy(Instance instance, BlockPosition blockPosition, Data data, String[] properties) {
+    @Override
+    public void onDestroy(Instance instance, BlockPosition blockPosition, Data data) {
 
     }
 
     /**
      * Interact with this block, depending on properties
      */
-    public boolean onInteract(Player player, Player.Hand hand, BlockPosition blockPosition, Data data, String[] properties) {
+    @Override
+    public boolean onInteract(Player player, Player.Hand hand, BlockPosition blockPosition, Data data) {
         return false;
     }
 
-    public UpdateOption getUpdateOption(String[] properties) {
+    @Override
+    public UpdateOption getUpdateOption() {
         return null;
     }
 
@@ -93,11 +65,17 @@ public abstract class VanillaBlock {
         return baseBlock.getBlockId();
     }
 
-    public int getBreakDelay(Player player, String[] properties) {
+    @Override
+    public short getCustomBlockId() {
+        return baseBlock.getBlockId();
+    }
+
+    @Override
+    public int getBreakDelay(Player player, BlockPosition position) {
         return -1;
     }
 
-    public short getStateForPlacement(Player player, Player.Hand hand, BlockPosition blockPosition) {
+    public short getVisualBlockForPlacement(Player player, Player.Hand hand, BlockPosition blockPosition) {
         return getBaseBlockId();
     }
 }

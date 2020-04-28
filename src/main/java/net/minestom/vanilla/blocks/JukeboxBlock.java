@@ -23,7 +23,7 @@ public class JukeboxBlock extends VanillaBlock {
     }
 
     @Override
-    public void onDestroy(Instance instance, BlockPosition blockPosition, Data data, String[] properties) {
+    public void onDestroy(Instance instance, BlockPosition blockPosition, Data data) {
         JukeboxBlockEntity entity = (JukeboxBlockEntity)data;
         if(entity != null) {
             entity.onDestroyed(instance);
@@ -31,7 +31,7 @@ public class JukeboxBlock extends VanillaBlock {
     }
 
     @Override
-    public boolean onInteract(Player player, Player.Hand hand, BlockPosition blockPosition, Data data, String[] properties) {
+    public boolean onInteract(Player player, Player.Hand hand, BlockPosition blockPosition, Data data) {
         ItemStack heldItem = player.getInventory().getItemInMainHand();
         JukeboxBlockEntity entity = (JukeboxBlockEntity)data;
         if(entity != null) {
@@ -41,7 +41,7 @@ public class JukeboxBlock extends VanillaBlock {
     }
 
     @Override
-    public Data createData(BlockPosition position, Data data, String[] properties) {
+    public Data createData(Instance instance, BlockPosition position, Data data) {
         return new JukeboxBlockEntity(position);
     }
 }

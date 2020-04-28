@@ -5,6 +5,7 @@ import net.minestom.server.effects.Effects;
 import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.StackingRule;
@@ -27,6 +28,7 @@ public class JukeboxBlockEntity extends SerializableData {
         if(stack.isAir()) {
             if(isMusicDisc(heldItem.getMaterial())) {
                 set(DISC_STACK, heldItem.clone(), ItemStack.class);
+                player.getInstance().refreshBlockId(position, Block.JUKEBOX.withProperties("has_record=true"));
                 if(!player.isCreative()) {
                     StackingRule stackingRule = heldItem.getStackingRule();
                     ItemStack newUsedItem = stackingRule.apply(heldItem, stackingRule.getAmount(heldItem) - 1);
@@ -47,6 +49,7 @@ public class JukeboxBlockEntity extends SerializableData {
         } else {
             stopPlayback(player.getInstance());
             set(DISC_STACK, ItemStack.getAirItem(), ItemStack.class);
+            player.getInstance().refreshBlockId(position, Block.JUKEBOX.withProperties("has_record=false"));
             return true;
         }
         return false;

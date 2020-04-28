@@ -16,14 +16,14 @@ public enum VanillaBlocks {
     ENDER_CHEST(EnderChestBlock::new),
     JUKEBOX(JukeboxBlock::new);
 
-    private final Supplier<VanillaBlock> blockSupplier;
+    private final VanillaBlockSupplier blockSupplier;
     private final BlockPlacementRule placementRule;
 
-    private VanillaBlocks(Supplier<VanillaBlock> blockSupplier) {
+    private VanillaBlocks(VanillaBlockSupplier blockSupplier) {
         this(blockSupplier, null);
     }
 
-    private VanillaBlocks(Supplier<VanillaBlock> blockSupplier, BlockPlacementRule placementRule) {
+    private VanillaBlocks(VanillaBlockSupplier blockSupplier, BlockPlacementRule placementRule) {
         this.blockSupplier = blockSupplier;
         this.placementRule = placementRule;
     }
@@ -33,19 +33,19 @@ public enum VanillaBlocks {
      * @param connectionManager
      * @param blockManager
      */
-    public void register(ConnectionManager connectionManager, BlockManager blockManager) {
-        VanillaBlock block = this.blockSupplier.get();
+    public void register(short customBlockID, ConnectionManager connectionManager, BlockManager blockManager) {
+        VanillaBlock block = this.blockSupplier.create();
         connectionManager.addPlayerInitialization(player -> {
             player.addEventCallback(PlayerBlockPlaceEvent.class, event -> {
                 if(event.getBlockId() == block.getBaseBlockId()) {
-                    short blockID = block.getStateForPlacement(event.getPlayer(), event.getHand(), event.getBlockPosition());
-                    event.setCustomBlockId(blockID);
+                    System.out.println(block);
+                    short blockID = block.getVisualBlockForPlacement(event.getPlayer(), event.getHand(), event.getBlockPosition());
+                    event.setBlockId(blockID);
+                    event.setCustomBlockId(block.getCustomBlockId());
                 }
             });
         });
-        for(CustomBlock derived : block.getAllVariants()) {
-            blockManager.registerCustomBlock(derived);
-        }
+        blockManager.registerCustomBlock(block);
         if(placementRule != null) {
             blockManager.registerBlockPlacementRule(placementRule);
         }
@@ -57,7 +57,12 @@ public enum VanillaBlocks {
      */
     public static void registerAll(ConnectionManager connectionManager, BlockManager blockManager) {
         for(VanillaBlocks vanillaBlock : values()) {
-            vanillaBlock.register(connectionManager, blockManager);
+            vanillaBlock.register((short) vanillaBlock.ordinal(), connectionManager, blockManager);
         }
+    }
+
+    @FunctionalInterface
+    private interface VanillaBlockSupplier {
+        VanillaBlock create();
     }
 }

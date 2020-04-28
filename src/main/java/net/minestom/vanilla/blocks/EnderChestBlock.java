@@ -19,7 +19,7 @@ public class EnderChestBlock extends VanillaBlock {
     }
 
     @Override
-    public short getStateForPlacement(Player player, Player.Hand hand, BlockPosition position) {
+    public short getVisualBlockForPlacement(Player player, Player.Hand hand, BlockPosition position) {
         boolean waterlogged = Block.fromId(player.getInstance().getBlockId(position.getX(), position.getY(), position.getZ())) == Block.WATER;
         float yaw = player.getPosition().getYaw();
         Direction direction = MathUtils.getHorizontalDirection(yaw).opposite();
@@ -27,7 +27,7 @@ public class EnderChestBlock extends VanillaBlock {
     }
 
     @Override
-    public boolean onInteract(Player player, Player.Hand hand, BlockPosition blockPosition, Data data, String[] properties) {
+    public boolean onInteract(Player player, Player.Hand hand, BlockPosition blockPosition, Data data) {
         // TODO: Handle crouching players
         Block above = Block.fromId(player.getInstance().getBlockId(blockPosition.getX(), blockPosition.getY()+1, blockPosition.getZ()));
         if(above.isSolid()) {
