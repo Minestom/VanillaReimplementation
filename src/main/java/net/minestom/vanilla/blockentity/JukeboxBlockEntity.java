@@ -1,10 +1,12 @@
 package net.minestom.vanilla.blockentity;
 
 import net.minestom.server.data.Data;
+import net.minestom.server.data.SerializableData;
 import net.minestom.server.effects.Effects;
 import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.StackingRule;
@@ -14,7 +16,7 @@ import net.minestom.server.utils.BlockPosition;
 
 import java.util.Random;
 
-public class JukeboxBlockEntity extends Data {
+public class JukeboxBlockEntity extends SerializableData {
 
     public static final String DISC_STACK = "disc";
     private final BlockPosition position;
@@ -40,8 +42,9 @@ public class JukeboxBlockEntity extends Data {
                     }
                 }
                 player.getInstance().getPlayers().forEach(playerInInstance -> {
-
-                    playerInInstance.playEffect(Effects.PLAY_RECORD, position.getX(), position.getY(), position.getZ(), heldItem.getMaterial().getId(), false);
+                    if(playerInInstance.getDistance(player) < 64) {
+                        playerInInstance.playEffect(Effects.PLAY_RECORD, position.getX(), position.getY(), position.getZ(), heldItem.getMaterial().getId(), false);
+                    }
                 });
             }
         } else {
