@@ -1,6 +1,5 @@
 package net.minestom.vanilla.blockentity;
 
-import net.minestom.server.data.SerializableData;
 import net.minestom.server.effects.Effects;
 import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.entity.Player;
@@ -13,13 +12,12 @@ import net.minestom.server.utils.BlockPosition;
 
 import java.util.Random;
 
-public class JukeboxBlockEntity extends SerializableData {
+public class JukeboxBlockEntity extends BlockEntity {
 
     public static final String DISC_STACK = "disc";
-    private final BlockPosition position;
 
     public JukeboxBlockEntity(BlockPosition position) {
-        this.position = position;
+        super(position);
         set(DISC_STACK, ItemStack.getAirItem(), ItemStack.class);
     }
 
@@ -28,7 +26,7 @@ public class JukeboxBlockEntity extends SerializableData {
         if(stack.isAir()) {
             if(isMusicDisc(heldItem.getMaterial())) {
                 set(DISC_STACK, heldItem.clone(), ItemStack.class);
-                player.getInstance().refreshBlockId(position, Block.JUKEBOX.withProperties("has_record=true"));
+                player.getInstance().refreshBlockId(getPosition(), Block.JUKEBOX.withProperties("has_record=true"));
                 if(!player.isCreative()) {
                     StackingRule stackingRule = heldItem.getStackingRule();
                     ItemStack newUsedItem = stackingRule.apply(heldItem, stackingRule.getAmount(heldItem) - 1);
@@ -41,7 +39,7 @@ public class JukeboxBlockEntity extends SerializableData {
                 }
                 player.getInstance().getPlayers().forEach(playerInInstance -> {
                     if(playerInInstance.getDistance(player) < 64) {
-                        playerInInstance.playEffect(Effects.PLAY_RECORD, position.getX(), position.getY(), position.getZ(), heldItem.getMaterial().getId(), false);
+                        playerInInstance.playEffect(Effects.PLAY_RECORD, getPosition().getX(), getPosition().getY(), getPosition().getZ(), heldItem.getMaterial().getId(), false);
                     }
                 });
                 return true;
@@ -49,7 +47,7 @@ public class JukeboxBlockEntity extends SerializableData {
         } else {
             stopPlayback(player.getInstance());
             set(DISC_STACK, ItemStack.getAirItem(), ItemStack.class);
-            player.getInstance().refreshBlockId(position, Block.JUKEBOX.withProperties("has_record=false"));
+            player.getInstance().refreshBlockId(getPosition(), Block.JUKEBOX.withProperties("has_record=false"));
             return true;
         }
         return false;
@@ -64,9 +62,9 @@ public class JukeboxBlockEntity extends SerializableData {
         discEntity.setPickable(true);
 
         Random rng = new Random();
-        discEntity.getPosition().setX(position.getX()+0.5f);
-        discEntity.getPosition().setY(position.getY()+1f);
-        discEntity.getPosition().setZ(position.getZ()+0.5f);
+        discEntity.getPosition().setX(getPosition().getX()+0.5f);
+        discEntity.getPosition().setY(getPosition().getY()+1f);
+        discEntity.getPosition().setZ(getPosition().getZ()+0.5f);
 
         final float horizontalSpeed = 2f;
         final float verticalSpeed = 5f;
@@ -78,7 +76,7 @@ public class JukeboxBlockEntity extends SerializableData {
         instance.addEntity(discEntity);
         instance.getPlayers().forEach(playerInInstance -> {
             // stop playback
-            playerInInstance.playEffect(Effects.PLAY_RECORD, position.getX(), position.getY(), position.getZ(), -1, false);
+            playerInInstance.playEffect(Effects.PLAY_RECORD, getPosition().getX(), getPosition().getY(), getPosition().getZ(), -1, false);
         });
     }
 

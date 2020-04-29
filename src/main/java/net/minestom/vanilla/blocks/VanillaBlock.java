@@ -8,6 +8,8 @@ import net.minestom.server.instance.block.CustomBlock;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.time.UpdateOption;
 
+import java.util.List;
+
 /**
  * Represents a vanilla block implementation.
  * Will handle creation of all VanillaCustomBlock necessary to represent this block
@@ -15,13 +17,37 @@ import net.minestom.server.utils.time.UpdateOption;
 public abstract class VanillaBlock extends CustomBlock {
 
     private final Block baseBlock;
+    private final BlockPropertyList properties;
+    private final BlockStates blockStates;
+    private final BlockState baseBlockState;
 
     public VanillaBlock(Block baseBlock) {
         super(baseBlock, "vanilla_"+baseBlock.name().toLowerCase());
         this.baseBlock = baseBlock;
+        this.properties = createPropertyValues();
+
+        // create block states
+        this.blockStates = new BlockStates(properties);
+        List<String[]> allVariants = properties.getCartesianProduct();
+        if(allVariants.isEmpty()) {
+            short id = baseBlock.getBlockId();
+            BlockState state = new BlockState(id, blockStates);
+            blockStates.add(state);
+        } else {
+            for(String[] variant : allVariants) {
+                short id = baseBlock.withProperties(variant);
+                BlockState blockState = new BlockState(id, blockStates, variant);
+                blockStates.add(blockState);
+            }
+        }
+        baseBlockState = blockStates.getDefault();
     }
 
     protected abstract BlockPropertyList createPropertyValues();
+
+    public BlockState getBaseBlockState() {
+        return baseBlockState;
+    }
 
     public Block getBaseBlock() {
         return baseBlock;

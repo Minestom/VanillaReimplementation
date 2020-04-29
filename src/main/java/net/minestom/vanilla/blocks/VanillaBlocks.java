@@ -13,6 +13,8 @@ import java.util.function.Supplier;
  */
 public enum VanillaBlocks {
 
+    CHEST(ChestBlock::new),
+    TRAPPED_CHEST(TrappedChestBlock::new),
     ENDER_CHEST(EnderChestBlock::new),
     JUKEBOX(JukeboxBlock::new);
 

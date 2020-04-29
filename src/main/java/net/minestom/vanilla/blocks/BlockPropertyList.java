@@ -7,13 +7,14 @@ import java.util.*;
  */
 public class BlockPropertyList {
 
-    private final List<BlockProperty> properties = new ArrayList<>();
+    private final List<Entry> properties = new ArrayList<>();
 
-    private class BlockProperty {
+    public static class Entry {
+
         private final String key;
         private final String[] values;
 
-        public BlockProperty(String key, String... values) {
+        public Entry(String key, String... values) {
             this.key = key;
             this.values = values;
         }
@@ -25,8 +26,8 @@ public class BlockPropertyList {
         public String[] getValues() {
             return values;
         }
-    }
 
+    }
     /**
      * Returns all possible combinations of properties from this list
      * @return
@@ -48,7 +49,7 @@ public class BlockPropertyList {
     private void computeCartesianProduct(int currentIndex, List<List<String>> out) {
         if(currentIndex == properties.size())
             return;
-        BlockProperty current = properties.get(currentIndex);
+        Entry current = properties.get(currentIndex);
         for(String value : current.values) {
             String property = current.key+"="+value;
             List<List<String>> cartesianNextProperties = new LinkedList<>();
@@ -68,7 +69,7 @@ public class BlockPropertyList {
     }
 
     public BlockPropertyList property(String key, String... values) {
-        this.properties.add(new BlockProperty(key, values));
+        this.properties.add(new Entry(key, values));
         return this;
     }
 
@@ -82,5 +83,11 @@ public class BlockPropertyList {
 
     public boolean isEmpty() {
         return properties.isEmpty();
+    }
+
+    public List<Entry> computeSortedList() {
+        List<Entry> sortedVersion = new LinkedList<>(properties);
+        Collections.sort(sortedVersion, Comparator.comparing(Entry::getKey));
+        return sortedVersion;
     }
 }
