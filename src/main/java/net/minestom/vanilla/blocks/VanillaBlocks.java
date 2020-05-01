@@ -1,6 +1,7 @@
 package net.minestom.vanilla.blocks;
 
 import net.minestom.server.event.PlayerBlockPlaceEvent;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.instance.block.CustomBlock;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
@@ -13,6 +14,10 @@ import java.util.function.Supplier;
  */
 public enum VanillaBlocks {
 
+    SAND(() -> new GravityBlock(Block.SAND)),
+    RED_SAND(() -> new GravityBlock(Block.RED_SAND)),
+    GRAVEL(() -> new GravityBlock(Block.GRAVEL)),
+    // TODO: concrete powders
     CHEST(ChestBlock::new),
     TRAPPED_CHEST(TrappedChestBlock::new),
     ENDER_CHEST(EnderChestBlock::new),
@@ -40,7 +45,6 @@ public enum VanillaBlocks {
         connectionManager.addPlayerInitialization(player -> {
             player.addEventCallback(PlayerBlockPlaceEvent.class, event -> {
                 if(event.getBlockId() == block.getBaseBlockId()) {
-                    System.out.println(block);
                     short blockID = block.getVisualBlockForPlacement(event.getPlayer(), event.getHand(), event.getBlockPosition());
                     event.setBlockId(blockID);
                     event.setCustomBlockId(block.getCustomBlockId());

@@ -73,7 +73,7 @@ public class JukeboxBlockEntity extends BlockEntity {
 
         discEntity.getVelocity().setY(rng.nextFloat()*verticalSpeed);
 
-        instance.addEntity(discEntity);
+        discEntity.setInstance(instance);
         instance.getPlayers().forEach(playerInInstance -> {
             // stop playback
             playerInInstance.playEffect(Effects.PLAY_RECORD, getPosition().getX(), getPosition().getY(), getPosition().getZ(), -1, false);
