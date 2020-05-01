@@ -28,3 +28,7 @@ hs_err_pid*
 .idea/
 out/
 .gradle/
+
+# Minestom
+/minecraft_data/
+/.minestom_tmp/

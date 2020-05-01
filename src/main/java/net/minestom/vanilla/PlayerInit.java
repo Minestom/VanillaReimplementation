@@ -2,6 +2,7 @@ package net.minestom.vanilla;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.event.PickupItemEvent;
 import net.minestom.server.event.PlayerLoginEvent;
 import net.minestom.server.event.PlayerSpawnEvent;
 import net.minestom.server.instance.InstanceContainer;
@@ -49,6 +50,11 @@ public class PlayerInit {
                 player.getInventory().addItemStack(new ItemStack((short) 1, (byte) 100));
                 player.getInventory().addItemStack(new ItemStack(Material.DIAMOND_CHESTPLATE, (byte) 1));
 
+            });
+
+            player.addEventCallback(PickupItemEvent.class, event -> {
+                boolean couldAdd = player.getInventory().addItemStack(event.getItemStack());
+                event.setCancelled(!couldAdd); // Cancel event if player does not have enough inventory space
             });
 
         });

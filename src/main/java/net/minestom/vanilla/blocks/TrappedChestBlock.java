@@ -19,6 +19,11 @@ public class TrappedChestBlock extends ChestLikeBlock {
     }
 
     @Override
+    public boolean dropContentsOnDestroy() {
+        return true;
+    }
+
+    @Override
     public Data createData(Instance instance, BlockPosition blockPosition, Data data) {
         return new ChestBlockEntity(blockPosition);
     }

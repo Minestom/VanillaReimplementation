@@ -13,6 +13,11 @@ public class EnderChestBlock extends ChestLikeBlock {
     }
 
     @Override
+    public boolean dropContentsOnDestroy() {
+        return false;
+    }
+
+    @Override
     protected Inventory getInventory(Player player, BlockPosition blockPosition, Data data) {
         return EnderChestSystem.getInstance().get(player);
     }
