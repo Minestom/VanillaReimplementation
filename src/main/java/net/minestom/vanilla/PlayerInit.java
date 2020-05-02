@@ -61,29 +61,14 @@ public class PlayerInit {
             });
 
             player.addEventCallback(ItemDropEvent.class, event -> {
-                ItemStack stack = event.getItemStack();
-                ItemEntity itemEntity = new ItemEntity(stack);
-                itemEntity.getPosition().setX(player.getPosition().getX());
-                itemEntity.getPosition().setY(player.getPosition().getY()+1f/* TODO: Custom height? */);
-                itemEntity.getPosition().setZ(player.getPosition().getZ());
+                ItemStack droppedItem = event.getItemStack();
 
-                Vector throwDirection = itemEntity.getVelocity();
-                // x = -cos(pitch) * sin(yaw)
-                // y = -sin(pitch)
-                // z =  cos(pitch) * cos(yaw)
-                float pitch = (float) Math.toRadians(player.getPosition().getPitch());
-                float yaw = (float)Math.toRadians(player.getPosition().getYaw());
-                throwDirection.setX((float) (-Math.cos(pitch) * Math.sin(yaw)));
-                throwDirection.setY((float) -Math.sin(pitch));
-                throwDirection.setZ((float) (Math.cos(pitch) * Math.cos(yaw)));
-
-                float throwSpeed = 3.5f;
-                throwDirection.multiply(throwSpeed);
-                throwDirection.setY(throwDirection.getY() + 5f);
-
-                itemEntity.setPickupDelay(1000L*2);
-
+                ItemEntity itemEntity = new ItemEntity(droppedItem);
+                itemEntity.setPickupDelay(500);
+                itemEntity.refreshPosition(player.getPosition().clone().add(0, 1.5f, 0));
                 itemEntity.setInstance(player.getInstance());
+                Vector velocity = player.getPosition().clone().getDirection().multiply(6);
+                itemEntity.setVelocity(velocity);
             });
         });
     }
