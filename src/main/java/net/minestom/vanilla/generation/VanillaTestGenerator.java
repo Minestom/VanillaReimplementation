@@ -1,23 +1,18 @@
 package net.minestom.vanilla.generation;
 
+import de.articdive.jnoise.JNoise;
 import net.minestom.server.instance.Biome;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.ChunkGenerator;
 import net.minestom.server.instance.batch.ChunkBatch;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.noise.FastNoise;
 
 import java.util.Random;
 
 public class VanillaTestGenerator extends ChunkGenerator  {
 
     private Random random = new Random();
-    private FastNoise fastNoise = new FastNoise();
-
-    {
-        fastNoise.SetNoiseType(FastNoise.NoiseType.Simplex);
-        fastNoise.SetInterp(FastNoise.Interp.Linear);
-    }
+    private JNoise noise = JNoise.newBuilder().openSimplex().build();
 
     @Override
     public void generateChunkData(ChunkBatch batch, int chunkX, int chunkZ) {
@@ -25,7 +20,7 @@ public class VanillaTestGenerator extends ChunkGenerator  {
             for (byte z = 0; z < Chunk.CHUNK_SIZE_Z; z++) {
                 int posX = chunkX*16+x;
                 int posZ = chunkZ*16+z;
-                float heightDelta = fastNoise.GetSimplex(posX, posZ);
+                double heightDelta = noise.getNoise(posX/16.0, posZ/16.0);
                 int height = (int) (64 - heightDelta*16);
 
                 batch.setBlock(posX, 0, posZ, Block.BEDROCK);
