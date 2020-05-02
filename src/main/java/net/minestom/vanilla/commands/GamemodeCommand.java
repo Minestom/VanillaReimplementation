@@ -1,5 +1,6 @@
 package net.minestom.vanilla.commands;
 
+import club.thectm.minecraft.text.TextBuilder;
 import fr.themode.command.Arguments;
 import fr.themode.command.Command;
 import fr.themode.command.arguments.Argument;
@@ -44,7 +45,7 @@ public class GamemodeCommand extends Command<Player> {
         GameMode mode = GameMode.valueOf(gamemodeName.toUpperCase());
         assert mode != null; // mode is not supposed to be null, because gamemodeName will be valid
         player.setGameMode(mode);
-        player.sendMessage("You are now playing in " + gamemodeName);
+        player.sendMessage(TextBuilder.ofTranslation("commands.gamemode.success.self", TextBuilder.of(gamemodeName).build()).build());
     }
 
     private void executeOnOther(Player player, Arguments arguments) {
@@ -55,9 +56,9 @@ public class GamemodeCommand extends Command<Player> {
         Optional<Player> target = player.getInstance().getPlayers().stream().filter(p -> p.getUsername().equalsIgnoreCase(targetName)).findFirst();
         if (target.isPresent()) {
             target.get().setGameMode(mode);
-            target.get().sendMessage("You are now playing in " + gamemodeName);
+            player.sendMessage(TextBuilder.ofTranslation("commands.gamemode.success.other", TextBuilder.of(targetName).build(), TextBuilder.of(gamemodeName).build()).build());
         } else {
-            player.sendMessage("'" + targetName + "' is not a valid player name.");
+            player.sendMessage(TextBuilder.ofTranslation("argument.player.unknown").build());
         }
     }
 

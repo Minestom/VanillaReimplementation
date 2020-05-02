@@ -2,6 +2,8 @@ package net.minestom.vanilla;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.ItemEntity;
+import net.minestom.server.event.ItemDropEvent;
 import net.minestom.server.event.PickupItemEvent;
 import net.minestom.server.event.PlayerLoginEvent;
 import net.minestom.server.event.PlayerSpawnEvent;
@@ -10,6 +12,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.Position;
+import net.minestom.server.utils.Vector;
 import net.minestom.vanilla.generation.VanillaTestGenerator;
 
 public class PlayerInit {
@@ -57,6 +60,31 @@ public class PlayerInit {
                 event.setCancelled(!couldAdd); // Cancel event if player does not have enough inventory space
             });
 
+            player.addEventCallback(ItemDropEvent.class, event -> {
+                ItemStack stack = event.getItemStack();
+                ItemEntity itemEntity = new ItemEntity(stack);
+                itemEntity.getPosition().setX(player.getPosition().getX());
+                itemEntity.getPosition().setY(player.getPosition().getY()+1f/* TODO: Custom height? */);
+                itemEntity.getPosition().setZ(player.getPosition().getZ());
+
+                Vector throwDirection = itemEntity.getVelocity();
+                // x = -cos(pitch) * sin(yaw)
+                // y = -sin(pitch)
+                // z =  cos(pitch) * cos(yaw)
+                float pitch = (float) Math.toRadians(player.getPosition().getPitch());
+                float yaw = (float)Math.toRadians(player.getPosition().getYaw());
+                throwDirection.setX((float) (-Math.cos(pitch) * Math.sin(yaw)));
+                throwDirection.setY((float) -Math.sin(pitch));
+                throwDirection.setZ((float) (Math.cos(pitch) * Math.cos(yaw)));
+
+                float throwSpeed = 3.5f;
+                throwDirection.multiply(throwSpeed);
+                throwDirection.setY(throwDirection.getY() + 5f);
+
+                itemEntity.setPickupDelay(1000L*2);
+
+                itemEntity.setInstance(player.getInstance());
+            });
         });
     }
 }
