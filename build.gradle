@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'java-library'
     id 'net.ltgt.apt' version '0.10'
 }
 
@@ -14,36 +14,8 @@ repositories {
 
 }
 
-def lombokDependency = 'org.projectlombok:lombok:1.18.2'
-
-
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
-    compileOnly lombokDependency
-
-    apt lombokDependency
-
-    // https://mvnrepository.com/artifact/io.netty/netty-all
-    compile group: 'io.netty', name: 'netty-all', version: '4.1.48.Final'
-
-    implementation 'com.github.jhg023:Pbbl:1.0.1'
-
-    // https://mvnrepository.com/artifact/it.unimi.dsi/fastutil
-    implementation group: 'it.unimi.dsi', name: 'fastutil', version: '8.3.0'
-
-    implementation 'com.github.Querz:NBT:4.1'
-    implementation 'com.github.luben:zstd-jni:1.4.3-1'
-    implementation 'com.esotericsoftware:reflectasm:1.11.9'
-
-    // https://mvnrepository.com/artifact/com.google.code.gson/gson
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
-
-    compile 'com.github.Minestom:Minestom:1aefbca70a'
-
-    compile 'com.github.TheMode:CommandBuilder:f893cfbfe4'
-
-    // https://mvnrepository.com/artifact/javax.vecmath/vecmath
-    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2' // Used for Fastnoise
-
+    api 'com.github.Minestom:Minestom:c28b0364ba'
 }
