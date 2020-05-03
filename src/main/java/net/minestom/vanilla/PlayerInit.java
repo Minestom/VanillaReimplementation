@@ -45,13 +45,8 @@ public class PlayerInit {
             player.addEventCallback(PlayerSpawnEvent.class, event -> {
                 player.setGameMode(GameMode.CREATIVE);
                 player.teleport(new Position(0, 75, 0));
-
-                ItemStack item = new ItemStack((short) 1, (byte) 43);
-                item.setDisplayName("Item name");
-                item.getLore().add("a lore line");
-                player.getInventory().addItemStack(item);
-                player.getInventory().addItemStack(new ItemStack((short) 1, (byte) 100));
-                player.getInventory().addItemStack(new ItemStack(Material.DIAMOND_CHESTPLATE, (byte) 1));
+                player.getInventory().addItemStack(new ItemStack(Material.OBSIDIAN, (byte) 1));
+                player.getInventory().addItemStack(new ItemStack(Material.FLINT_AND_STEEL, (byte) 1));
 
             });
 

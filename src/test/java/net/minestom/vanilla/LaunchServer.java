@@ -15,6 +15,7 @@ import net.minestom.server.timer.TaskRunnable;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.commands.GamemodeCommand;
 import net.minestom.vanilla.commands.VanillaCommands;
+import net.minestom.vanilla.items.VanillaItems;
 
 public class LaunchServer {
 
@@ -25,6 +26,7 @@ public class LaunchServer {
 
         CommandManager commandManager = MinecraftServer.getCommandManager();
         VanillaCommands.registerAll(commandManager);
+        VanillaItems.registerAll(MinecraftServer.getConnectionManager());
         VanillaBlocks.registerAll(MinecraftServer.getConnectionManager(), MinecraftServer.getBlockManager());
 
         PlayerInit.init();

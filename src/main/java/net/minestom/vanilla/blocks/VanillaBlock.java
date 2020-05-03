@@ -74,6 +74,11 @@ public abstract class VanillaBlock extends CustomBlock {
 
     }
 
+    @Override
+    public void update(Instance instance, BlockPosition blockPosition, Data data) {
+
+    }
+
     /**
      * Interact with this block, depending on properties
      */

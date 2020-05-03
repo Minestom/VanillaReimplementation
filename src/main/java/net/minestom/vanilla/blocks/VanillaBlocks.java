@@ -3,11 +3,8 @@ package net.minestom.vanilla.blocks;
 import net.minestom.server.event.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockManager;
-import net.minestom.server.instance.block.CustomBlock;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.network.ConnectionManager;
-
-import java.util.function.Supplier;
 
 /**
  * All blocks available in the vanilla reimplementation
@@ -37,6 +34,9 @@ public enum VanillaBlocks {
     LIME_CONCRETE_POWDER(() -> new ConcretePowderBlock(Block.LIME_CONCRETE_POWDER, Block.LIME_CONCRETE)),
     // End of concrete powders
 
+    FIRE(FireBlock::new),
+    NETHER_PORTAL(NetherPortalBlock::new),
+
     CHEST(ChestBlock::new),
     TRAPPED_CHEST(TrappedChestBlock::new),
     ENDER_CHEST(EnderChestBlock::new),
@@ -44,6 +44,8 @@ public enum VanillaBlocks {
 
     private final VanillaBlockSupplier blockSupplier;
     private final BlockPlacementRule placementRule;
+    private boolean registered;
+    private VanillaBlock instance;
 
     private VanillaBlocks(VanillaBlockSupplier blockSupplier) {
         this(blockSupplier, null);
@@ -74,6 +76,24 @@ public enum VanillaBlocks {
         if(placementRule != null) {
             blockManager.registerBlockPlacementRule(placementRule);
         }
+        instance = block;
+        registered = true;
+    }
+
+    /**
+     * Used to know if this block has been registered. Can be used to disable mechanics if this block is not registered (ie nether portals and nether portal blocks)
+     * @return
+     */
+    public boolean isRegistered() {
+        return registered;
+    }
+
+    /**
+     * Gets this block instance. 'null' if this block has not been registered
+     * @return
+     */
+    public VanillaBlock getInstance() {
+        return instance;
     }
 
     /**

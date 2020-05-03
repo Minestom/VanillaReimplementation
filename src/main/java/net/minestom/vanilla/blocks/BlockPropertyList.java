@@ -45,7 +45,6 @@ public class BlockPropertyList {
         }
         return cartesianProduct; // TODO
     }
-
     private void computeCartesianProduct(int currentIndex, List<List<String>> out) {
         if(currentIndex == properties.size())
             return;
@@ -66,6 +65,22 @@ public class BlockPropertyList {
                 }
             }
         }
+    }
+
+    /**
+     * Defines an int range property. Bounds are inclusive
+     * @param key
+     * @param rangeStart
+     * @param rangeEnd
+     * @return
+     */
+    public BlockPropertyList intRange(String key, int rangeStart, int rangeEnd) {
+        assert rangeStart <= rangeEnd;
+        String[] values = new String[rangeEnd-rangeStart+1];
+        for (int i = rangeStart; i <= rangeEnd; i++) {
+            values[i] = String.valueOf(i);
+        }
+        return property(key, values);
     }
 
     public BlockPropertyList property(String key, String... values) {
