@@ -16,6 +16,7 @@ import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.commands.GamemodeCommand;
 import net.minestom.vanilla.commands.VanillaCommands;
 import net.minestom.vanilla.items.VanillaItems;
+import net.minestom.vanilla.system.NetherPortalSystem;
 
 public class LaunchServer {
 
@@ -28,6 +29,7 @@ public class LaunchServer {
         VanillaCommands.registerAll(commandManager);
         VanillaItems.registerAll(MinecraftServer.getConnectionManager());
         VanillaBlocks.registerAll(MinecraftServer.getConnectionManager(), MinecraftServer.getBlockManager());
+        NetherPortalSystem.registerData(MinecraftServer.getDataManager());
 
         PlayerInit.init();
 

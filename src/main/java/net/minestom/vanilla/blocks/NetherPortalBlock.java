@@ -4,6 +4,8 @@ import net.minestom.server.data.Data;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.BlockPosition;
+import net.minestom.vanilla.blockentity.BlockEntity;
+import net.minestom.vanilla.blockentity.NetherPortalBlockEntity;
 import net.minestom.vanilla.system.NetherPortalSystem;
 
 public class NetherPortalBlock extends VanillaBlock {
@@ -14,18 +16,25 @@ public class NetherPortalBlock extends VanillaBlock {
 
     @Override
     public Data createData(Instance instance, BlockPosition blockPosition, Data data) {
-        return new Data();
+        if(data instanceof NetherPortalBlockEntity && ((BlockEntity) data).getPosition().equals(blockPosition))
+            return data;
+        return new NetherPortalBlockEntity(blockPosition);
     }
 
     @Override
     public void onDestroy(Instance instance, BlockPosition blockPosition, Data data) {
-        if(data.getOrDefault("unbroken", true)) {
-            data.set("unbroken", false, Boolean.class);
-            NetherPortalSystem.NetherPortal netherPortal = NetherPortalSystem.findPortalFrameFromFrameBlock(instance, blockPosition);
-            if(netherPortal != null) {
-                netherPortal.breakFrame(instance);
-            }
+        NetherPortalSystem.NetherPortal netherPortal = getPortal(data);
+        if(netherPortal != null) {
+            netherPortal.breakFrame(instance);
         }
+    }
+
+    private NetherPortalSystem.NetherPortal getPortal(Data data) {
+        if(data instanceof NetherPortalBlockEntity) {
+            NetherPortalBlockEntity blockEntity = (NetherPortalBlockEntity)data;
+            return blockEntity.getRelatedPortal();
+        }
+        return null;
     }
 
     @Override
@@ -34,9 +43,7 @@ public class NetherPortalBlock extends VanillaBlock {
     }
 
     private void breakPortalIfNoLongerValid(Instance instance, BlockPosition blockPosition) {
-        // FIXME this cannot work because the frame no longer exists if an obsidian block is removed
-        // TODO: Add new method to get portal only from frames?
-        NetherPortalSystem.NetherPortal netherPortal = NetherPortalSystem.findPortalFrameFromFrameBlock(instance, blockPosition);
+        NetherPortalSystem.NetherPortal netherPortal = getPortal(instance.getBlockData(blockPosition));
         if(netherPortal != null) {
             if(!netherPortal.isStillValid(instance)) {
                 netherPortal.breakFrame(instance);

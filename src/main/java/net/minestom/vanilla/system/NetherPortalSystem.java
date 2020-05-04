@@ -1,10 +1,21 @@
 package net.minestom.vanilla.system;
 
+import net.minestom.server.data.DataManager;
+import net.minestom.server.effects.Effects;
+import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.network.packet.server.play.EffectPacket;
+import net.minestom.server.network.packet.server.play.ParticlePacket;
+import net.minestom.server.particle.Particle;
+import net.minestom.server.particle.ParticleCreator;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.world.Dimension;
+import net.minestom.vanilla.blockentity.NetherPortalBlockEntity;
+import net.minestom.vanilla.blocks.NetherPortalBlock;
+import net.minestom.vanilla.blocks.VanillaBlock;
 import net.minestom.vanilla.blocks.VanillaBlocks;
+import net.minestom.vanilla.data.NetherPortalDataType;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -24,6 +35,13 @@ public final class NetherPortalSystem {
     private static final int MINIMUM_HEIGHT = 3;
     private static final int MAXIMUM_HEIGHT = 22;
     private static final int MAXIMUM_WIDTH = 22;
+
+    /**
+     * Register necessary data types to the given DataManager
+     */
+    public static void registerData(DataManager dataManager) {
+        dataManager.registerType(NetherPortal.class, new NetherPortalDataType());
+    }
 
     /**
      * Gets a {@link NetherPortal} frame description from a block that would be contained inside the frame.
@@ -259,6 +277,28 @@ public final class NetherPortalSystem {
         public void breakFrame(Instance instance) {
             replaceFrameContents(instance, pos -> {
                 instance.setBlock(pos, Block.AIR);
+
+                // play break animation for each portal block
+                int x = pos.getX();
+                int y = pos.getY();
+                int z = pos.getZ();
+                ParticlePacket particlePacket = ParticleCreator.createParticlePacket(Particle.BLOCK, false,
+                        x + 0.5f, y, z + 0.5f,
+                        0.4f, 0.5f, 0.4f,
+                        0.3f, 10, writer -> {
+                            writer.writeVarInt(Block.NETHER_PORTAL.getBlockId());
+                        });
+
+                EffectPacket effectPacket = new EffectPacket();
+                effectPacket.effectId = Effects.BLOCK_BREAK.getId();
+                effectPacket.position = pos;
+                effectPacket.data = Block.NETHER_PORTAL.getBlockId();
+
+                Chunk chunk = instance.getChunkAt(pos);
+                if(chunk != null) {
+                    chunk.sendPacketToViewers(particlePacket);
+                    chunk.sendPacketToViewers(effectPacket);
+                }
             });
         }
 
@@ -269,8 +309,11 @@ public final class NetherPortalSystem {
                 return false;
             }
 
+            NetherPortalBlock portalBlock = (NetherPortalBlock) VanillaBlocks.NETHER_PORTAL.getInstance();
             return replaceFrameContents(instance, pos -> {
-                instance.setCustomBlock(pos.getX(), pos.getY(), pos.getZ(), VanillaBlocks.NETHER_PORTAL.getInstance().getBaseBlockState().with("axis", axis.toString()).getBlockId());
+                NetherPortalBlockEntity data = (NetherPortalBlockEntity) portalBlock.createData(instance, pos, null);
+                data.setRelatedPortal(this);
+                instance.setSeparateBlocks(pos.getX(), pos.getY(), pos.getZ(), portalBlock.getBaseBlockState().with("axis", axis.toString()).getBlockId(), portalBlock.getCustomBlockId(), data);
             });
         }
 
