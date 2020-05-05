@@ -36,4 +36,15 @@ public abstract class VanillaItem {
      * @param blockFace
      */
     public abstract void onUseOnBlock(Player player, ItemStack itemStack, Player.Hand hand, BlockPosition position, Direction blockFace);
+
+    public static void damageItem(Player player, Player.Hand hand, ItemStack itemStack) {
+        ItemStack newUsedItem = itemStack.clone();
+        newUsedItem.setDamage((byte) (itemStack.getDamage()+1));
+
+        if (hand == Player.Hand.OFF) {
+            player.getInventory().setItemInOffHand(newUsedItem);
+        } else { // Main
+            player.getInventory().setItemInMainHand(newUsedItem);
+        }
+    }
 }

@@ -1,10 +1,13 @@
 package net.minestom.vanilla.blocks;
 
 import net.minestom.server.data.Data;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.time.TimeUnit;
+import net.minestom.vanilla.damage.DamageTypes;
 import net.minestom.vanilla.system.NetherPortalSystem;
 
 public class FireBlock extends VanillaBlock {
@@ -15,6 +18,16 @@ public class FireBlock extends VanillaBlock {
     @Override
     protected BlockPropertyList createPropertyValues() {
         return new BlockPropertyList().intRange("age", 0, 15);
+    }
+
+    @Override
+    public void handleContact(Instance instance, BlockPosition position, Entity touching) {
+        if(touching instanceof LivingEntity) {
+            if(!touching.isOnFire()) {
+                ((LivingEntity) touching).damage(DamageTypes.IN_FIRE, 1.0f);
+                ((LivingEntity) touching).setFireForDuration(8000, TimeUnit.MILLISECOND);
+            }
+        }
     }
 
     @Override

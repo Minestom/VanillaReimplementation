@@ -7,6 +7,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.CustomBlock;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.StackingRule;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.Direction;
 
@@ -29,6 +30,9 @@ public class FlintAndSteel extends VanillaItem {
         Block atFirePosition = Block.fromId(instance.getBlockId(firePosition));
         if(atFirePosition.isAir()) {
             CustomBlock fireBlock = MinecraftServer.getBlockManager().getCustomBlock(Block.FIRE.getBlockId());
+            if(!player.isCreative()) {
+                VanillaItem.damageItem(player, hand, itemStack);
+            }
             if(fireBlock != null) {
                 instance.setCustomBlock(firePosition.getX(), firePosition.getY(), firePosition.getZ(), fireBlock.getCustomBlockId());
             } else {
@@ -36,4 +40,5 @@ public class FlintAndSteel extends VanillaItem {
             }
         }
     }
+
 }
