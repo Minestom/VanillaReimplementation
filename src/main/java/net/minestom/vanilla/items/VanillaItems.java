@@ -1,8 +1,8 @@
 package net.minestom.vanilla.items;
 
-import net.minestom.server.event.PlayerInteractEvent;
-import net.minestom.server.event.PlayerUseItemEvent;
-import net.minestom.server.event.PlayerUseItemOnBlockEvent;
+import net.minestom.server.event.player.PlayerInteractEvent;
+import net.minestom.server.event.player.PlayerUseItemEvent;
+import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.network.ConnectionManager;
 
 import java.util.function.Supplier;
@@ -40,7 +40,6 @@ public enum VanillaItems {
                 });
 
                 player.addEventCallback(PlayerUseItemOnBlockEvent.class, event -> {
-                    System.out.println(event.getItemStack().getMaterial());
                     if(event.getItemStack().getMaterial() == item.getMaterial()) {
                         item.onUseOnBlock(player, event.getItemStack(), event.getHand(), event.getPosition(), event.getBlockFace());
                     }

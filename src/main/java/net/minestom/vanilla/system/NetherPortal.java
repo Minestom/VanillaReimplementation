@@ -1,5 +1,6 @@
 package net.minestom.vanilla.system;
 
+import net.minestom.server.data.Data;
 import net.minestom.server.data.DataManager;
 import net.minestom.server.effects.Effects;
 import net.minestom.server.instance.Chunk;
@@ -13,9 +14,9 @@ import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.world.Dimension;
 import net.minestom.vanilla.blockentity.NetherPortalBlockEntity;
 import net.minestom.vanilla.blocks.NetherPortalBlock;
-import net.minestom.vanilla.blocks.VanillaBlock;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.data.NetherPortalDataType;
+import net.minestom.vanilla.data.NetherPortalList;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -29,18 +30,155 @@ import java.util.function.Consumer;
  *
  * @author jglrxavpok
  */
-public final class NetherPortalSystem {
+public final class NetherPortal {
 
     private static final int MINIMUM_WIDTH = 2;
     private static final int MINIMUM_HEIGHT = 3;
     private static final int MAXIMUM_HEIGHT = 22;
     private static final int MAXIMUM_WIDTH = 22;
 
+    public static final String LIST_KEY = "minestom:nether_portals";
+
+    /**
+     * Only NORTH and WEST are valid
+     */
+    private Axis axis;
+    private BlockPosition frameTopLeftCorner;
+    private BlockPosition frameBottomRightCorner;
+    private BlockPosition averagePosition;
+
+    public static final NetherPortal NONE = new NetherPortal(Axis.X, new BlockPosition(0, -1, 0), new BlockPosition(0, -1, 0));
+
+    public NetherPortal(Axis axis, BlockPosition frameBottomRightCorner, BlockPosition frameTopLeftCorner) {
+        this.axis = axis;
+        this.frameBottomRightCorner = frameBottomRightCorner;
+        this.frameTopLeftCorner = frameTopLeftCorner;
+        this.averagePosition = new BlockPosition(frameBottomRightCorner.getX(), frameBottomRightCorner.getY(), frameBottomRightCorner.getZ());
+        this.averagePosition.add(frameTopLeftCorner.getX(), frameTopLeftCorner.getY(), frameTopLeftCorner.getZ());
+        this.averagePosition.setX(this.averagePosition.getX()/2);
+        this.averagePosition.setY(this.averagePosition.getY()/2);
+        this.averagePosition.setZ(this.averagePosition.getZ()/2);
+    }
+
+    public Axis getAxis() {
+        return axis;
+    }
+
+    public BlockPosition getFrameBottomRightCorner() {
+        return frameBottomRightCorner;
+    }
+
+    public BlockPosition getFrameTopLeftCorner() {
+        return frameTopLeftCorner;
+    }
+
+    /**
+     * Position of the center of the frame
+     * Used to compute closest portal when linking portals
+     * @return
+     */
+    public BlockPosition getCenter() {
+        return averagePosition;
+    }
+
+    public boolean isStillValid(Instance instance) {
+        return checkFrameIsObsidian(instance, axis, frameBottomRightCorner, frameTopLeftCorner);
+    }
+
+    public void breakFrame(Instance instance) {
+        replaceFrameContents(instance, true, pos -> {
+            instance.setBlock(pos, Block.AIR);
+
+            // play break animation for each portal block
+            int x = pos.getX();
+            int y = pos.getY();
+            int z = pos.getZ();
+            ParticlePacket particlePacket = ParticleCreator.createParticlePacket(Particle.BLOCK, false,
+                    x + 0.5f, y, z + 0.5f,
+                    0.4f, 0.5f, 0.4f,
+                    0.3f, 10, writer -> {
+                        writer.writeVarInt(Block.NETHER_PORTAL.getBlockId());
+                    });
+
+            EffectPacket effectPacket = new EffectPacket();
+            effectPacket.effectId = Effects.BLOCK_BREAK.getId();
+            effectPacket.position = pos;
+            effectPacket.data = Block.NETHER_PORTAL.getBlockId();
+
+            Chunk chunk = instance.getChunkAt(pos);
+            if(chunk != null) {
+                chunk.sendPacketToViewers(particlePacket);
+                chunk.sendPacketToViewers(effectPacket);
+            }
+        });
+    }
+
+    public boolean tryFillFrame(Instance instance) {
+        if(instance.getDimension() == Dimension.END)
+            return false;
+        if(!VanillaBlocks.NETHER_PORTAL.isRegistered()) {
+            return false;
+        }
+
+        NetherPortalBlock portalBlock = (NetherPortalBlock) VanillaBlocks.NETHER_PORTAL.getInstance();
+        return replaceFrameContents(instance, true, pos -> {
+            NetherPortalBlockEntity data = (NetherPortalBlockEntity) portalBlock.createData(instance, pos, null);
+            data.setRelatedPortal(this);
+            instance.setSeparateBlocks(pos.getX(), pos.getY(), pos.getZ(), portalBlock.getBaseBlockState().with("axis", axis.toString()).getBlockId(), portalBlock.getCustomBlockId(), data);
+        });
+    }
+
+    /**
+     *
+     * @param instance
+     * @param checkPreviousBlocks should check if frame is full of air/portal/fire
+     * @param blockPlacer
+     * @return
+     */
+    private boolean replaceFrameContents(Instance instance, boolean checkPreviousBlocks, Consumer<BlockPosition> blockPlacer) {
+        int minX = Math.min(frameTopLeftCorner.getX(), frameBottomRightCorner.getX());
+        int minY = frameBottomRightCorner.getY();
+        int minZ = Math.min(frameTopLeftCorner.getZ(), frameBottomRightCorner.getZ());
+
+        int maxX = Math.max(frameTopLeftCorner.getX(), frameBottomRightCorner.getX());
+        int maxY = frameTopLeftCorner.getY();
+        int maxZ = Math.max(frameTopLeftCorner.getZ(), frameBottomRightCorner.getZ());
+
+        int width = (maxX-minX)*axis.xMultiplier + (maxZ-minZ)*axis.zMultiplier; // encompasses frame blocks
+
+        if(checkPreviousBlocks) {
+            if(!checkInsideFrameForAir(instance, minX, maxX, minY, maxY, minZ, maxZ, axis)) {
+                return false;
+            }
+        }
+
+        BlockPosition pos = new BlockPosition(0,0,0);
+        // fill nether portal
+        for (int i = 1; i <= width-1; i++) {
+            for(int y = minY+1; y <= maxY-1; y++) {
+                int x = minX;
+                int z = minZ;
+                if(axis == Axis.X) {
+                    x += i;
+                } else {
+                    z += i;
+                }
+                pos.setX(x);
+                pos.setY(y);
+                pos.setZ(z);
+                blockPlacer.accept(pos);
+            }
+        }
+        return true;
+    }
+
+
     /**
      * Register necessary data types to the given DataManager
      */
     public static void registerData(DataManager dataManager) {
         dataManager.registerType(NetherPortal.class, new NetherPortalDataType());
+        dataManager.registerType(NetherPortalList.class, new NetherPortalList.DataType());
     }
 
     /**
@@ -238,120 +376,6 @@ public final class NetherPortalSystem {
         return true;
     }
 
-    /**
-     * Detailed informations about a nether portal
-     * One should not hold such an instance for too long, this does not check that the obsidian is still present when
-     * trying to fill the frame (only checks against fire and air blocks)
-     */
-    public static class NetherPortal {
-
-        /**
-         * Only NORTH and WEST are valid
-         */
-        private Axis axis;
-        private BlockPosition frameTopLeftCorner;
-        private BlockPosition frameBottomRightCorner;
-
-        public NetherPortal(Axis axis, BlockPosition frameBottomRightCorner, BlockPosition frameTopLeftCorner) {
-            this.axis = axis;
-            this.frameBottomRightCorner = frameBottomRightCorner;
-            this.frameTopLeftCorner = frameTopLeftCorner;
-        }
-
-        public Axis getAxis() {
-            return axis;
-        }
-
-        public BlockPosition getFrameBottomRightCorner() {
-            return frameBottomRightCorner;
-        }
-
-        public BlockPosition getFrameTopLeftCorner() {
-            return frameTopLeftCorner;
-        }
-
-        public boolean isStillValid(Instance instance) {
-            return checkFrameIsObsidian(instance, axis, frameBottomRightCorner, frameTopLeftCorner);
-        }
-
-        public void breakFrame(Instance instance) {
-            replaceFrameContents(instance, pos -> {
-                instance.setBlock(pos, Block.AIR);
-
-                // play break animation for each portal block
-                int x = pos.getX();
-                int y = pos.getY();
-                int z = pos.getZ();
-                ParticlePacket particlePacket = ParticleCreator.createParticlePacket(Particle.BLOCK, false,
-                        x + 0.5f, y, z + 0.5f,
-                        0.4f, 0.5f, 0.4f,
-                        0.3f, 10, writer -> {
-                            writer.writeVarInt(Block.NETHER_PORTAL.getBlockId());
-                        });
-
-                EffectPacket effectPacket = new EffectPacket();
-                effectPacket.effectId = Effects.BLOCK_BREAK.getId();
-                effectPacket.position = pos;
-                effectPacket.data = Block.NETHER_PORTAL.getBlockId();
-
-                Chunk chunk = instance.getChunkAt(pos);
-                if(chunk != null) {
-                    chunk.sendPacketToViewers(particlePacket);
-                    chunk.sendPacketToViewers(effectPacket);
-                }
-            });
-        }
-
-        public boolean tryFillFrame(Instance instance) {
-            if(instance.getDimension() == Dimension.END)
-                return false;
-            if(!VanillaBlocks.NETHER_PORTAL.isRegistered()) {
-                return false;
-            }
-
-            NetherPortalBlock portalBlock = (NetherPortalBlock) VanillaBlocks.NETHER_PORTAL.getInstance();
-            return replaceFrameContents(instance, pos -> {
-                NetherPortalBlockEntity data = (NetherPortalBlockEntity) portalBlock.createData(instance, pos, null);
-                data.setRelatedPortal(this);
-                instance.setSeparateBlocks(pos.getX(), pos.getY(), pos.getZ(), portalBlock.getBaseBlockState().with("axis", axis.toString()).getBlockId(), portalBlock.getCustomBlockId(), data);
-            });
-        }
-
-        private boolean replaceFrameContents(Instance instance, Consumer<BlockPosition> blockPlacer) {
-            int minX = Math.min(frameTopLeftCorner.getX(), frameBottomRightCorner.getX());
-            int minY = frameBottomRightCorner.getY();
-            int minZ = Math.min(frameTopLeftCorner.getZ(), frameBottomRightCorner.getZ());
-
-            int maxX = Math.max(frameTopLeftCorner.getX(), frameBottomRightCorner.getX());
-            int maxY = frameTopLeftCorner.getY();
-            int maxZ = Math.max(frameTopLeftCorner.getZ(), frameBottomRightCorner.getZ());
-
-            int width = (maxX-minX)*axis.xMultiplier + (maxZ-minZ)*axis.zMultiplier; // encompasses frame blocks
-
-            if(!checkInsideFrameForAir(instance, minX, maxX, minY, maxY, minZ, maxZ, axis)) {
-                return false;
-            }
-
-            BlockPosition pos = new BlockPosition(0,0,0);
-            // fill nether portal
-            for (int i = 1; i <= width-1; i++) {
-                for(int y = minY+1; y <= maxY-1; y++) {
-                    int x = minX;
-                    int z = minZ;
-                    if(axis == Axis.X) {
-                        x += i;
-                    } else {
-                        z += i;
-                    }
-                    pos.setX(x);
-                    pos.setY(y);
-                    pos.setZ(z);
-                    blockPlacer.accept(pos);
-                }
-            }
-            return true;
-        }
-    }
 
     private static boolean checkInsideFrameForAir(Instance instance, int minX, int maxX, int minY, int maxY, int minZ, int maxZ, Axis axis) {
         int width = (maxX-minX)*axis.xMultiplier + (maxZ-minZ)*axis.zMultiplier;
@@ -371,6 +395,88 @@ public final class NetherPortalSystem {
             }
         }
         return true;
+    }
+
+    public void unregister(Instance instance) {
+        if(instance.getData() != null) {
+            Data data = instance.getData();
+            NetherPortalList list = data.getOrDefault(LIST_KEY, null);
+            if(list != null) {
+                list.remove(this);
+            }
+        }
+    }
+
+    public void register(Instance instance) {
+        if(instance.getData() != null) {
+            Data data = instance.getData();
+            NetherPortalList list = data.getOrDefault(LIST_KEY, null);
+            if(list == null) {
+                NetherPortalList newList = new NetherPortalList();
+                data.set(LIST_KEY, newList, NetherPortalList.class);
+                list = newList;
+            }
+
+            list.add(this);
+        }
+    }
+
+    public void generate(Instance instance) {
+        NetherPortalBlock portalBlock = (NetherPortalBlock) VanillaBlocks.NETHER_PORTAL.getInstance();
+        createFrame(instance);
+        replaceFrameContents(instance, false, pos -> {
+            NetherPortalBlockEntity data = (NetherPortalBlockEntity) portalBlock.createData(instance, pos, null);
+            data.setRelatedPortal(this);
+            instance.setSeparateBlocks(pos.getX(), pos.getY(), pos.getZ(), portalBlock.getBaseBlockState().with("axis", axis.toString()).getBlockId(), portalBlock.getCustomBlockId(), data);
+        });
+    }
+
+    private void createFrame(Instance instance) {
+        int minX = Math.min(frameTopLeftCorner.getX(), frameBottomRightCorner.getX());
+        int minY = frameBottomRightCorner.getY();
+        int minZ = Math.min(frameTopLeftCorner.getZ(), frameBottomRightCorner.getZ());
+
+        int maxX = Math.max(frameTopLeftCorner.getX(), frameBottomRightCorner.getX());
+        int maxY = frameTopLeftCorner.getY();
+        int maxZ = Math.max(frameTopLeftCorner.getZ(), frameBottomRightCorner.getZ());
+
+        int width = (maxX-minX)*axis.xMultiplier + (maxZ-minZ)*axis.zMultiplier +1; // encompasses frame blocks
+        int height = maxY - minY +1;
+
+        // top and bottom
+        for (int i = 0; i < width; i++) {
+            int x = minX;
+            int z = minZ;
+            if(axis == Axis.X) {
+                x += i;
+            } else {
+                z += i;
+            }
+
+            // bottom
+            instance.setBlock(x, minY, z, Block.OBSIDIAN);
+
+            // top
+            instance.setBlock(x, maxY, z, Block.OBSIDIAN);
+        }
+
+        // left and right
+        for (int j = 0; j < height; j++) {
+            int x = minX;
+            int z = minZ;
+
+            // left
+            instance.setBlock(x, minY+j, z, Block.OBSIDIAN);
+
+            if(axis == Axis.X) {
+                x += width-1;
+            } else {
+                z += width-1;
+            }
+
+            // right
+            instance.setBlock(x, minY+j, z, Block.OBSIDIAN);
+        }
     }
 
     public enum Axis {

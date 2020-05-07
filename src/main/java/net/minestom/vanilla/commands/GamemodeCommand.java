@@ -1,10 +1,11 @@
 package net.minestom.vanilla.commands;
 
-import club.thectm.minecraft.text.TextBuilder;
 import fr.themode.command.Arguments;
 import fr.themode.command.Command;
 import fr.themode.command.arguments.Argument;
 import fr.themode.command.arguments.ArgumentType;
+import net.kyori.text.TextComponent;
+import net.kyori.text.TranslatableComponent;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 
@@ -45,7 +46,7 @@ public class GamemodeCommand extends Command<Player> {
         GameMode mode = GameMode.valueOf(gamemodeName.toUpperCase());
         assert mode != null; // mode is not supposed to be null, because gamemodeName will be valid
         player.setGameMode(mode);
-        player.sendMessage(TextBuilder.ofTranslation("commands.gamemode.success.self", TextBuilder.of(gamemodeName).build()).build());
+        player.sendMessage(TranslatableComponent.of("commands.gamemode.success.self", TextComponent.of(gamemodeName)));
     }
 
     private void executeOnOther(Player player, Arguments arguments) {
@@ -56,9 +57,9 @@ public class GamemodeCommand extends Command<Player> {
         Optional<Player> target = player.getInstance().getPlayers().stream().filter(p -> p.getUsername().equalsIgnoreCase(targetName)).findFirst();
         if (target.isPresent()) {
             target.get().setGameMode(mode);
-            player.sendMessage(TextBuilder.ofTranslation("commands.gamemode.success.other", TextBuilder.of(targetName).build(), TextBuilder.of(gamemodeName).build()).build());
+            player.sendMessage(TranslatableComponent.of("commands.gamemode.success.other", TextComponent.of(targetName), TextComponent.of(gamemodeName)));
         } else {
-            player.sendMessage(TextBuilder.ofTranslation("argument.player.unknown").build());
+            player.sendMessage(TranslatableComponent.of("argument.player.unknown"));
         }
     }
 

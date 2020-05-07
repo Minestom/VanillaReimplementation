@@ -1,37 +1,62 @@
 package net.minestom.vanilla;
 
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.data.Data;
+import net.minestom.server.data.SerializableData;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.ItemEntity;
-import net.minestom.server.event.ItemDropEvent;
-import net.minestom.server.event.PickupItemEvent;
-import net.minestom.server.event.PlayerLoginEvent;
-import net.minestom.server.event.PlayerSpawnEvent;
+import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventCallback;
+import net.minestom.server.event.entity.AddEntityToInstanceEvent;
+import net.minestom.server.event.item.ItemDropEvent;
+import net.minestom.server.event.item.PickupItemEvent;
+import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.Position;
 import net.minestom.server.utils.Vector;
+import net.minestom.server.world.Dimension;
+import net.minestom.vanilla.blocks.NetherPortalBlock;
 import net.minestom.vanilla.generation.VanillaTestGenerator;
 
 public class PlayerInit {
 
-    private static volatile InstanceContainer instanceContainer;
+    private static volatile InstanceContainer overworld;
+    private static volatile InstanceContainer nether;
 
     static {
         VanillaTestGenerator noiseTestGenerator = new VanillaTestGenerator();
-        instanceContainer = MinecraftServer.getInstanceManager().createInstanceContainer();
-        instanceContainer.enableAutoChunkLoad(true);
-        instanceContainer.setChunkGenerator(noiseTestGenerator);
+        overworld = MinecraftServer.getInstanceManager().createInstanceContainer();
+        overworld.enableAutoChunkLoad(true);
+        overworld.setChunkGenerator(noiseTestGenerator);
+        overworld.setData(new SerializableData());
+
+        nether = MinecraftServer.getInstanceManager().createInstanceContainer(Dimension.NETHER);
+        nether.enableAutoChunkLoad(true);
+        nether.setChunkGenerator(noiseTestGenerator);
+        nether.setData(new SerializableData());
 
         // Load some chunks beforehand
         int loopStart = -2;
         int loopEnd = 2;
         for (int x = loopStart; x < loopEnd; x++)
             for (int z = loopStart; z < loopEnd; z++) {
-                instanceContainer.loadChunk(x, z);
+                overworld.loadChunk(x, z);
+                nether.loadChunk(x, z);
             }
+
+        EventCallback<AddEntityToInstanceEvent> callback = event -> {
+            event.getEntity().setData(new SerializableData());
+            Data data = event.getEntity().getData();
+            if(event.getEntity() instanceof Player) {
+                data.set(NetherPortalBlock.PORTAL_COOLDOWN_TIME_KEY, 5*20L, Long.class);
+            }
+        };
+        overworld.addEventCallback(AddEntityToInstanceEvent.class, callback);
+        nether.addEventCallback(AddEntityToInstanceEvent.class, callback);
     }
 
     public static void init() {
@@ -39,7 +64,7 @@ public class PlayerInit {
 
         connectionManager.addPlayerInitialization(player -> {
             player.addEventCallback(PlayerLoginEvent.class, event -> {
-                event.setSpawningInstance(instanceContainer);
+                event.setSpawningInstance(overworld);
             });
 
             player.addEventCallback(PlayerSpawnEvent.class, event -> {

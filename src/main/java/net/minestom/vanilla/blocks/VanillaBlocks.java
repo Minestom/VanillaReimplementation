@@ -1,6 +1,6 @@
 package net.minestom.vanilla.blocks;
 
-import net.minestom.server.event.PlayerBlockPlaceEvent;
+import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;

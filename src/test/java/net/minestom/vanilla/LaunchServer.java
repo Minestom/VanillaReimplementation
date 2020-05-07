@@ -3,7 +3,6 @@ package net.minestom.vanilla;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.PlayerLoginEvent;
 import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -13,10 +12,9 @@ import net.minestom.server.recipe.RecipeManager;
 import net.minestom.server.recipe.ShapelessRecipe;
 import net.minestom.server.timer.TaskRunnable;
 import net.minestom.vanilla.blocks.VanillaBlocks;
-import net.minestom.vanilla.commands.GamemodeCommand;
 import net.minestom.vanilla.commands.VanillaCommands;
 import net.minestom.vanilla.items.VanillaItems;
-import net.minestom.vanilla.system.NetherPortalSystem;
+import net.minestom.vanilla.system.NetherPortal;
 
 public class LaunchServer {
 
@@ -29,7 +27,7 @@ public class LaunchServer {
         VanillaCommands.registerAll(commandManager);
         VanillaItems.registerAll(MinecraftServer.getConnectionManager());
         VanillaBlocks.registerAll(MinecraftServer.getConnectionManager(), MinecraftServer.getBlockManager());
-        NetherPortalSystem.registerData(MinecraftServer.getDataManager());
+        NetherPortal.registerData(MinecraftServer.getDataManager());
 
         PlayerInit.init();
 

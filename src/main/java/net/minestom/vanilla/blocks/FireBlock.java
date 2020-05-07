@@ -8,7 +8,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.vanilla.damage.DamageTypes;
-import net.minestom.vanilla.system.NetherPortalSystem;
+import net.minestom.vanilla.system.NetherPortal;
 
 public class FireBlock extends VanillaBlock {
     public FireBlock() {
@@ -32,9 +32,11 @@ public class FireBlock extends VanillaBlock {
 
     @Override
     public void scheduledUpdate(Instance instance, BlockPosition position, Data blockData) {
-        NetherPortalSystem.NetherPortal portal = NetherPortalSystem.findPortalFrameFromFrameBlock(instance, position.clone());
+        NetherPortal portal = NetherPortal.findPortalFrameFromFrameBlock(instance, position.clone());
         if(portal != null) {
-            portal.tryFillFrame(instance);
+            if(portal.tryFillFrame(instance)) {
+                portal.register(instance);
+            }
         }
     }
 
