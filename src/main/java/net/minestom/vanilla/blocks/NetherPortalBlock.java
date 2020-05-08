@@ -3,9 +3,11 @@ package net.minestom.vanilla.blocks;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.data.Data;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.BlockPosition;
+import net.minestom.server.utils.Position;
 import net.minestom.server.world.Dimension;
 import net.minestom.vanilla.blockentity.BlockEntity;
 import net.minestom.vanilla.blockentity.NetherPortalBlockEntity;
@@ -64,28 +66,48 @@ public class NetherPortalBlock extends VanillaBlock {
 
                 if(ticksSpentInPortal >= data.getOrDefault(PORTAL_COOLDOWN_TIME_KEY, 0L)) {
                     Dimension targetDimension = Dimension.NETHER;
-                    BlockPosition targetPosition = new BlockPosition(position.getX()/8, position.getY(), position.getZ()/8);
+                    Position targetPosition = new Position(position.getX()/8, position.getY(), position.getZ()/8);
                     if(instance.getDimension() == Dimension.NETHER) {
                         targetDimension = Dimension.OVERWORLD;
                         targetPosition.setX(position.getX()*8);
                         targetPosition.setZ(position.getZ()*8);
                     }
-                    NetherPortalList availablePortals = instance.getData().get(NetherPortal.LIST_KEY);
 
-                    NetherPortal targetPortal = availablePortals.findClosest(targetPosition);
+                    // TODO: event to change portal linking
+
+                    final Dimension finalTargetDimension = targetDimension;
+                    Optional<Instance> potentialTargetInstance = MinecraftServer.getInstanceManager().getInstances().stream()
+                            .filter(in -> in.getDimension() == finalTargetDimension)
+                            .findFirst();
+                    if(!potentialTargetInstance.isPresent())
+                        return;
+                    Instance targetInstance = potentialTargetInstance.get();
+
+                    NetherPortalList availablePortals = targetInstance.getData().get(NetherPortal.LIST_KEY);
+
+                    NetherPortal targetPortal = null;
+                    if(availablePortals != null) {
+                        targetPortal = availablePortals.findClosest(targetPosition);
+                    }
 
                     boolean createNewPortal = false;
                     if(targetPortal == null) { // no existing portal, will create one
-                        BlockPosition bottomRight = targetPosition.clone();
-                        BlockPosition topLeft = targetPosition.clone();
-                        bottomRight.add(-portal.getAxis().xMultiplier, -2, -portal.getAxis().zMultiplier);
-                        topLeft.add(portal.getAxis().xMultiplier, 1, portal.getAxis().zMultiplier);
+                        BlockPosition bottomRight = targetPosition.toBlockPosition().add(-portal.getAxis().xMultiplier, -1, -portal.getAxis().zMultiplier);
+                        BlockPosition topLeft = targetPosition.toBlockPosition().add(2*portal.getAxis().xMultiplier, 3, 2*portal.getAxis().zMultiplier);
                         targetPortal = new NetherPortal(portal.getAxis(), bottomRight, topLeft);
                         createNewPortal = true;
+                    } else {
+                        // TODO: compute relative position to this portal center and copy (with respect to frame size)
+                        targetPosition.setX(targetPortal.getCenter().getX()+0.5f);
+                        targetPosition.setZ(targetPortal.getCenter().getZ()+0.5f);
+                        targetPosition.setY(targetPortal.getCenter().getY());
                     }
 
                     NetherPortalTeleportEvent event = new NetherPortalTeleportEvent(touching, position, portal, ticksSpentInPortal, targetDimension, targetPosition, targetPortal, createNewPortal);
                     touching.callCancellableEvent(NetherPortalTeleportEvent.class, event, () -> {
+                        data.set(LAST_PORTAL_UPDATE_KEY, 0L, Long.class);
+                        data.set(LAST_PORTAL_KEY, NetherPortal.NONE, NetherPortal.class);
+                        data.set(TICKS_SPENT_IN_PORTAL_KEY, 0L, Long.class);
                         teleport(instance, touching, event);
                     });
                 }
@@ -102,17 +124,21 @@ public class NetherPortalBlock extends VanillaBlock {
             return; // fail teleportation
         }
         Instance targetInstance = potentialTargetInstance.get();
-        BlockPosition targetTeleportationPosition = event.getPortalBlockPosition();
         if(event.createsNewPortal()) {
             event.getTargetPortal().generate(targetInstance);
+            System.out.println("CREATING NEW PORTAL ON OTHER SIDE "+event.getTargetPortal());
         }
 
-        touching.getPosition().setX(targetTeleportationPosition.getX());
-        touching.getPosition().setY(targetTeleportationPosition.getY());
-        touching.getPosition().setZ(targetTeleportationPosition.getZ());
         if(targetInstance != instance) {
             touching.setInstance(targetInstance);
         }
+        Position targetTeleportationPosition = event.getTargetPosition();
+        touching.teleport(targetTeleportationPosition, () -> {
+            if(touching instanceof Player) {
+                ((Player) touching).refreshAfterTeleport();
+            }
+        });
+        System.out.println("teleporting to: "+targetTeleportationPosition);
     }
 
     @Override

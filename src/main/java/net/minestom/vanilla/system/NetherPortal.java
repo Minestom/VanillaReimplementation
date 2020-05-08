@@ -423,12 +423,26 @@ public final class NetherPortal {
 
     public void generate(Instance instance) {
         NetherPortalBlock portalBlock = (NetherPortalBlock) VanillaBlocks.NETHER_PORTAL.getInstance();
+        loadAround(instance, frameTopLeftCorner);
+        loadAround(instance, frameBottomRightCorner);
         createFrame(instance);
         replaceFrameContents(instance, false, pos -> {
             NetherPortalBlockEntity data = (NetherPortalBlockEntity) portalBlock.createData(instance, pos, null);
             data.setRelatedPortal(this);
             instance.setSeparateBlocks(pos.getX(), pos.getY(), pos.getZ(), portalBlock.getBaseBlockState().with("axis", axis.toString()).getBlockId(), portalBlock.getCustomBlockId(), data);
         });
+        register(instance);
+    }
+
+    private void loadAround(Instance instance, BlockPosition corner) {
+        int chunkX = corner.getX() >> 4;
+        int chunkZ = corner.getZ() >> 4;
+
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+                instance.loadChunk(chunkX+x, chunkZ+z);
+            }
+        }
     }
 
     private void createFrame(Instance instance) {

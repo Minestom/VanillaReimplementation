@@ -3,6 +3,7 @@ package net.minestom.vanilla.event.entity;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.event.CancellableEvent;
 import net.minestom.server.utils.BlockPosition;
+import net.minestom.server.utils.Position;
 import net.minestom.server.world.Dimension;
 import net.minestom.vanilla.system.NetherPortal;
 
@@ -17,11 +18,11 @@ public class NetherPortalTeleportEvent extends CancellableEvent {
     private final NetherPortal portal;
     private final long ticksSpentInPortal;
     private Dimension targetDimension;
-    private BlockPosition targetPosition;
+    private Position targetPosition;
     private NetherPortal targetPortal;
     private boolean createNewPortal;
 
-    public NetherPortalTeleportEvent(Entity entity, BlockPosition portalBlockPosition, NetherPortal portal, long ticksSpentInPortal, Dimension targetDimension, BlockPosition targetPosition, NetherPortal targetPortal, boolean createNewPortal) {
+    public NetherPortalTeleportEvent(Entity entity, BlockPosition portalBlockPosition, NetherPortal portal, long ticksSpentInPortal, Dimension targetDimension, Position targetPosition, NetherPortal targetPortal, boolean createNewPortal) {
         this.entity = entity;
         this.portalBlockPosition = portalBlockPosition;
         this.portal = portal;
@@ -84,7 +85,7 @@ public class NetherPortalTeleportEvent extends CancellableEvent {
      * Position to teleport the entity to. Set to the center of the linked portal, if available
      * @return
      */
-    public BlockPosition getTargetPosition() {
+    public Position getTargetPosition() {
         return targetPosition;
     }
 
@@ -92,7 +93,7 @@ public class NetherPortalTeleportEvent extends CancellableEvent {
      * Position to teleport the entity to. Set by default to the center of the linked portal, if available
      * @param targetPosition
      */
-    public void setTargetPosition(BlockPosition targetPosition) {
+    public void setTargetPosition(Position targetPosition) {
         this.targetPosition = targetPosition;
     }
 

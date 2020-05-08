@@ -68,11 +68,12 @@ public class PlayerInit {
             });
 
             player.addEventCallback(PlayerSpawnEvent.class, event -> {
-                player.setGameMode(GameMode.CREATIVE);
-                player.teleport(new Position(0, 75, 0));
-                player.getInventory().addItemStack(new ItemStack(Material.OBSIDIAN, (byte) 1));
-                player.getInventory().addItemStack(new ItemStack(Material.FLINT_AND_STEEL, (byte) 1));
-
+                if(event.isFirstSpawn()) {
+                    player.setGameMode(GameMode.CREATIVE);
+                    player.teleport(new Position(0, 75, 0));
+                    player.getInventory().addItemStack(new ItemStack(Material.OBSIDIAN, (byte) 1));
+                    player.getInventory().addItemStack(new ItemStack(Material.FLINT_AND_STEEL, (byte) 1));
+                }
             });
 
             player.addEventCallback(PickupItemEvent.class, event -> {

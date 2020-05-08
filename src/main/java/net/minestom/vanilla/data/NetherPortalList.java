@@ -4,17 +4,22 @@ import net.minestom.server.data.DataType;
 import net.minestom.server.network.packet.PacketReader;
 import net.minestom.server.network.packet.PacketWriter;
 import net.minestom.server.utils.BlockPosition;
+import net.minestom.server.utils.Position;
 import net.minestom.vanilla.system.NetherPortal;
 
 import java.util.concurrent.CopyOnWriteArraySet;
 
 public class NetherPortalList extends CopyOnWriteArraySet<NetherPortal> {
 
-    public NetherPortal findClosest(BlockPosition targetPosition) {
+    public NetherPortal findClosest(Position targetPosition) {
         NetherPortal targetPortal = null;
-        double closestDistance = 1024.0; // don't select portals which are too far away
+        BlockPosition targetBlockPosition = targetPosition.toBlockPosition();
+        double closestDistance = 128.0; // don't select portals which are too far away
         for (NetherPortal possiblePortal : this) {
-            double distance = targetPosition.getDistance(possiblePortal.getCenter());
+            // only X/Z coordinates are important for portal search
+            double dx = Math.abs(targetBlockPosition.getX() - possiblePortal.getCenter().getX());
+            double dz = Math.abs(targetBlockPosition.getZ() - possiblePortal.getCenter().getZ());
+            double distance = Math.max(dx, dz);
             if(distance < closestDistance) {
                 closestDistance = distance;
                 targetPortal = possiblePortal;
