@@ -47,6 +47,12 @@ public final class NetherPortal {
     private BlockPosition frameBottomRightCorner;
     private BlockPosition averagePosition;
 
+    /**
+     * Prevents considering this portal as non-valid during generation (otherwise portals may try to break themselves when
+     * they are being placed due to neighbor updates of portal blocks)
+     */
+    private boolean generating;
+
     public static final NetherPortal NONE = new NetherPortal(Axis.X, new BlockPosition(0, -1, 0), new BlockPosition(0, -1, 0));
 
     public NetherPortal(Axis axis, BlockPosition frameBottomRightCorner, BlockPosition frameTopLeftCorner) {
@@ -82,7 +88,7 @@ public final class NetherPortal {
     }
 
     public boolean isStillValid(Instance instance) {
-        return checkFrameIsObsidian(instance, axis, frameBottomRightCorner, frameTopLeftCorner);
+        return generating || checkFrameIsObsidian(instance, axis, frameBottomRightCorner, frameTopLeftCorner);
     }
 
     public void breakFrame(Instance instance) {
@@ -422,6 +428,7 @@ public final class NetherPortal {
     }
 
     public void generate(Instance instance) {
+        generating = true;
         NetherPortalBlock portalBlock = (NetherPortalBlock) VanillaBlocks.NETHER_PORTAL.getInstance();
         loadAround(instance, frameTopLeftCorner);
         loadAround(instance, frameBottomRightCorner);
@@ -432,8 +439,14 @@ public final class NetherPortal {
             instance.setSeparateBlocks(pos.getX(), pos.getY(), pos.getZ(), portalBlock.getBaseBlockState().with("axis", axis.toString()).getBlockId(), portalBlock.getCustomBlockId(), data);
         });
         register(instance);
+        generating = false;
     }
 
+    /**
+     * Ensure chunks around the portal corner are loaded (3x3 area centered on chunk containing frame corner)
+     * @param instance
+     * @param corner
+     */
     private void loadAround(Instance instance, BlockPosition corner) {
         int chunkX = corner.getX() >> 4;
         int chunkZ = corner.getZ() >> 4;

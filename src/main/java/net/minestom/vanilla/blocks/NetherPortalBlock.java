@@ -135,7 +135,8 @@ public class NetherPortalBlock extends VanillaBlock {
         Position targetTeleportationPosition = event.getTargetPosition();
         touching.teleport(targetTeleportationPosition, () -> {
             if(touching instanceof Player) {
-                ((Player) touching).refreshAfterTeleport();
+                Player player = ((Player) touching);
+                player.refreshAfterTeleport();
             }
         });
         System.out.println("teleporting to: "+targetTeleportationPosition);

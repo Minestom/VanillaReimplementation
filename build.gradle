@@ -17,5 +17,5 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
-    api 'com.github.Minestom:Minestom:5dd08cf19b'
+    api 'com.github.Minestom:Minestom:59c5bbdfe5'
 }

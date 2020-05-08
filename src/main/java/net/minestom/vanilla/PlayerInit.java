@@ -11,6 +11,7 @@ import net.minestom.server.event.entity.AddEntityToInstanceEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.item.PickupItemEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.item.ItemStack;
@@ -65,6 +66,32 @@ public class PlayerInit {
         connectionManager.addPlayerInitialization(player -> {
             player.addEventCallback(PlayerLoginEvent.class, event -> {
                 event.setSpawningInstance(overworld);
+            });
+
+            // anticheat method
+            // but also prevents client and server fighting for player position after a teleport due to a Nether portal
+            player.addEventCallback(PlayerMoveEvent.class, moveEvent -> {
+                float currentX = player.getPosition().getX();
+                float currentY = player.getPosition().getY();
+                float currentZ = player.getPosition().getZ();
+                float velocityX = player.getVelocity().getX();
+                float velocityY = player.getVelocity().getY();
+                float velocityZ = player.getVelocity().getZ();
+
+                float dx = moveEvent.getNewPosition().getX()-currentX;
+                float dy = moveEvent.getNewPosition().getY()-currentY;
+                float dz = moveEvent.getNewPosition().getZ()-currentZ;
+
+                float actualDisplacement = dx*dx+dy*dy+dz*dz;
+                float expectedDisplacement = velocityX*velocityX+velocityY*velocityY+velocityZ*velocityZ;
+
+                float upperLimit = 100; // TODO: 300 if elytra deployed
+
+                if(actualDisplacement - expectedDisplacement >= upperLimit) {
+                    moveEvent.setCancelled(true);
+                    player.teleport(player.getPosition()); // force teleport to previous position
+                    System.out.println(player.getUsername()+" moved too fast! "+dx+" "+dy+" "+dz);
+                }
             });
 
             player.addEventCallback(PlayerSpawnEvent.class, event -> {

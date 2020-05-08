@@ -8,6 +8,7 @@ import net.minestom.server.instance.ChunkPopulator;
 import net.minestom.server.instance.batch.ChunkBatch;
 import net.minestom.server.instance.block.Block;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -49,6 +50,11 @@ public class VanillaTestGenerator extends ChunkGenerator  {
         }
     }
 
+    @Override
+    public void fillBiomes(Biome[] biomes, int chunkX, int chunkZ) {
+        Arrays.fill(biomes, Biome.PLAINS);
+    }
+
     private void spawnTree(ChunkBatch batch, int trunkX, int trunkBottomY, int trunkZ) {
         for (int i = 0; i < 2; i++) {
             batch.setBlock(trunkX+1, trunkBottomY+3+i, trunkZ, Block.OAK_LEAVES);
@@ -68,11 +74,6 @@ public class VanillaTestGenerator extends ChunkGenerator  {
         batch.setBlock(trunkX, trunkBottomY+2, trunkZ, Block.OAK_LOG);
         batch.setBlock(trunkX, trunkBottomY+3, trunkZ, Block.OAK_LOG);
         batch.setBlock(trunkX, trunkBottomY+4, trunkZ, Block.OAK_LEAVES);
-    }
-
-    @Override
-    public Biome getBiome(int chunkX, int chunkZ) {
-        return Biome.PLAINS;
     }
 
     @Override
