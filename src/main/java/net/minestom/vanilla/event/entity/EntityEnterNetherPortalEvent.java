@@ -24,10 +24,18 @@ public class EntityEnterNetherPortalEvent extends Event {
         return entity;
     }
 
+    /**
+     * Position of the portal block which triggered the update
+     * @return
+     */
     public BlockPosition getPosition() {
         return position;
     }
 
+    /**
+     * The nether portal the entity is in. Can be null if the portal was added with /setblock
+     * @return
+     */
     public NetherPortal getPortal() {
         return portal;
     }

@@ -2,6 +2,7 @@ package net.minestom.vanilla.event.entity;
 
 import net.minestom.server.entity.Entity;
 import net.minestom.server.event.CancellableEvent;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.Position;
 import net.minestom.server.world.Dimension;
@@ -17,20 +18,20 @@ public class NetherPortalTeleportEvent extends CancellableEvent {
     private final BlockPosition portalBlockPosition;
     private final NetherPortal portal;
     private final long ticksSpentInPortal;
-    private Dimension targetDimension;
+    private Instance targetInstance;
     private Position targetPosition;
     private NetherPortal targetPortal;
-    private boolean createNewPortal;
+    private boolean createsNewPortal;
 
-    public NetherPortalTeleportEvent(Entity entity, BlockPosition portalBlockPosition, NetherPortal portal, long ticksSpentInPortal, Dimension targetDimension, Position targetPosition, NetherPortal targetPortal, boolean createNewPortal) {
+    public NetherPortalTeleportEvent(Entity entity, BlockPosition portalBlockPosition, NetherPortal portal, long ticksSpentInPortal, Instance targetInstance, Position targetPosition, NetherPortal targetPortal, boolean createsNewPortal) {
         this.entity = entity;
         this.portalBlockPosition = portalBlockPosition;
         this.portal = portal;
         this.ticksSpentInPortal = ticksSpentInPortal;
-        this.targetDimension = targetDimension;
+        this.targetInstance = targetInstance;
         this.targetPosition = targetPosition;
         this.targetPortal = targetPortal;
-        this.createNewPortal = createNewPortal;
+        this.createsNewPortal = createsNewPortal;
     }
 
     /**
@@ -67,18 +68,18 @@ public class NetherPortalTeleportEvent extends CancellableEvent {
     }
 
     /**
-     * Dimension to teleport the entity to
+     * Instance to teleport the entity to
      * @return
      */
-    public Dimension getTargetDimension() {
-        return targetDimension;
+    public Instance getTargetInstance() {
+        return targetInstance;
     }
 
     /**
-     * Dimension to teleport the entity to
+     * Instance to teleport the entity to
      */
-    public void setTargetDimension(Dimension targetDimension) {
-        this.targetDimension = targetDimension;
+    public void setTargetDimension(Instance targetInstance) {
+        this.targetInstance = targetInstance;
     }
 
     /**
@@ -118,7 +119,7 @@ public class NetherPortalTeleportEvent extends CancellableEvent {
      * @return
      */
     public boolean createsNewPortal() {
-        return createNewPortal;
+        return createsNewPortal;
     }
 
     /**
@@ -126,6 +127,6 @@ public class NetherPortalTeleportEvent extends CancellableEvent {
      * @param createNewPortal
      */
     public void createsNewPortal(boolean createNewPortal) {
-        this.createNewPortal = createNewPortal;
+        this.createsNewPortal = createNewPortal;
     }
 }

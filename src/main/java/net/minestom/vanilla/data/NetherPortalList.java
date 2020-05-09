@@ -1,6 +1,5 @@
 package net.minestom.vanilla.data;
 
-import net.minestom.server.data.DataType;
 import net.minestom.server.network.packet.PacketReader;
 import net.minestom.server.network.packet.PacketWriter;
 import net.minestom.server.utils.BlockPosition;
@@ -9,6 +8,9 @@ import net.minestom.vanilla.system.NetherPortal;
 
 import java.util.concurrent.CopyOnWriteArraySet;
 
+/**
+ * List of nether portal. Used in Instances to remember generated portals
+ */
 public class NetherPortalList extends CopyOnWriteArraySet<NetherPortal> {
 
     public NetherPortal findClosest(Position targetPosition) {

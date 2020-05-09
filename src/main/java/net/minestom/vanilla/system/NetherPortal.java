@@ -11,6 +11,8 @@ import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.particle.ParticleCreator;
 import net.minestom.server.utils.BlockPosition;
+import net.minestom.server.utils.Position;
+import net.minestom.server.utils.Vector;
 import net.minestom.server.world.Dimension;
 import net.minestom.vanilla.blockentity.NetherPortalBlockEntity;
 import net.minestom.vanilla.blocks.NetherPortalBlock;
@@ -45,7 +47,7 @@ public final class NetherPortal {
     private Axis axis;
     private BlockPosition frameTopLeftCorner;
     private BlockPosition frameBottomRightCorner;
-    private BlockPosition averagePosition;
+    private Vector averagePosition;
 
     /**
      * Prevents considering this portal as non-valid during generation (otherwise portals may try to break themselves when
@@ -59,7 +61,7 @@ public final class NetherPortal {
         this.axis = axis;
         this.frameBottomRightCorner = frameBottomRightCorner;
         this.frameTopLeftCorner = frameTopLeftCorner;
-        this.averagePosition = new BlockPosition(frameBottomRightCorner.getX(), frameBottomRightCorner.getY(), frameBottomRightCorner.getZ());
+        this.averagePosition = new Vector(frameBottomRightCorner.getX(), frameBottomRightCorner.getY(), frameBottomRightCorner.getZ());
         this.averagePosition.add(frameTopLeftCorner.getX(), frameTopLeftCorner.getY(), frameTopLeftCorner.getZ());
         this.averagePosition.setX(this.averagePosition.getX()/2);
         this.averagePosition.setY(this.averagePosition.getY()/2);
@@ -83,7 +85,7 @@ public final class NetherPortal {
      * Used to compute closest portal when linking portals
      * @return
      */
-    public BlockPosition getCenter() {
+    public Vector getCenter() {
         return averagePosition;
     }
 
@@ -150,7 +152,7 @@ public final class NetherPortal {
         int maxY = frameTopLeftCorner.getY();
         int maxZ = Math.max(frameTopLeftCorner.getZ(), frameBottomRightCorner.getZ());
 
-        int width = (maxX-minX)*axis.xMultiplier + (maxZ-minZ)*axis.zMultiplier; // encompasses frame blocks
+        int width = computeWidth()-1; // encompasses frame blocks
 
         if(checkPreviousBlocks) {
             if(!checkInsideFrameForAir(instance, minX, maxX, minY, maxY, minZ, maxZ, axis)) {
@@ -463,12 +465,10 @@ public final class NetherPortal {
         int minY = frameBottomRightCorner.getY();
         int minZ = Math.min(frameTopLeftCorner.getZ(), frameBottomRightCorner.getZ());
 
-        int maxX = Math.max(frameTopLeftCorner.getX(), frameBottomRightCorner.getX());
         int maxY = frameTopLeftCorner.getY();
-        int maxZ = Math.max(frameTopLeftCorner.getZ(), frameBottomRightCorner.getZ());
 
-        int width = (maxX-minX)*axis.xMultiplier + (maxZ-minZ)*axis.zMultiplier +1; // encompasses frame blocks
-        int height = maxY - minY +1;
+        int width = computeWidth(); // encompasses frame blocks
+        int height = computeHeight();
 
         // top and bottom
         for (int i = 0; i < width; i++) {
@@ -504,6 +504,21 @@ public final class NetherPortal {
             // right
             instance.setBlock(x, minY+j, z, Block.OBSIDIAN);
         }
+    }
+
+    public int computeWidth() {
+        int minX = Math.min(frameTopLeftCorner.getX(), frameBottomRightCorner.getX());
+        int minZ = Math.min(frameTopLeftCorner.getZ(), frameBottomRightCorner.getZ());
+
+        int maxX = Math.max(frameTopLeftCorner.getX(), frameBottomRightCorner.getX());
+        int maxZ = Math.max(frameTopLeftCorner.getZ(), frameBottomRightCorner.getZ());
+        return (maxX-minX)*axis.xMultiplier + (maxZ-minZ)*axis.zMultiplier +1;
+    }
+
+    public int computeHeight() {
+        int minY = frameBottomRightCorner.getY();
+        int maxY = frameTopLeftCorner.getY();
+        return maxY-minY+1;
     }
 
     public enum Axis {
