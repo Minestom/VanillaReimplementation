@@ -13,6 +13,7 @@ import net.minestom.server.event.item.PickupItemEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.instance.ExplosionSupplier;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -22,6 +23,7 @@ import net.minestom.server.utils.Vector;
 import net.minestom.server.world.Dimension;
 import net.minestom.vanilla.blocks.NetherPortalBlock;
 import net.minestom.vanilla.generation.VanillaTestGenerator;
+import net.minestom.vanilla.instance.VanillaExplosion;
 
 public class PlayerInit {
 
@@ -29,16 +31,22 @@ public class PlayerInit {
     private static volatile InstanceContainer nether;
 
     static {
+        ExplosionSupplier explosionGenerator = (centerX, centerY, centerZ, strength, additionalData) -> {
+            boolean isTNT = additionalData != null ? additionalData.getOrDefault(VanillaExplosion.IS_FLAMING_KEY, false) : false;
+            return new VanillaExplosion(centerX, centerY, centerZ, strength, false, isTNT);
+        };
         VanillaTestGenerator noiseTestGenerator = new VanillaTestGenerator();
         overworld = MinecraftServer.getInstanceManager().createInstanceContainer();
         overworld.enableAutoChunkLoad(true);
         overworld.setChunkGenerator(noiseTestGenerator);
         overworld.setData(new SerializableData());
+        overworld.setExplosionSupplier(explosionGenerator);
 
         nether = MinecraftServer.getInstanceManager().createInstanceContainer(Dimension.NETHER);
         nether.enableAutoChunkLoad(true);
         nether.setChunkGenerator(noiseTestGenerator);
         nether.setData(new SerializableData());
+        nether.setExplosionSupplier(explosionGenerator);
 
         // Load some chunks beforehand
         int loopStart = -2;

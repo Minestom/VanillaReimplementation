@@ -29,7 +29,6 @@ public enum VanillaItems {
             for (VanillaItems itemDescription : values()) {
                 VanillaItem item = itemDescription.itemCreator.get();
                 player.addEventCallback(PlayerUseItemEvent.class, event -> {
-                    System.out.println(event.getItemStack().getMaterial());
                     if(event.getItemStack().getMaterial() == item.getMaterial()) {
                         item.onUseInAir(player, event.getItemStack(), event.getHand());
                     }

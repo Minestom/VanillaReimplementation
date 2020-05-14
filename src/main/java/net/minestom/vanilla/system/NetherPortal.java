@@ -211,7 +211,6 @@ public final class NetherPortal {
 
         while(!neighbors.isEmpty()) {
             BlockPosition position = neighbors.poll();
-          //  System.out.println("considering "+position);
             considered.add(position);
 
             int xDistance = Math.abs(position.getX() - frameBlock.getX());

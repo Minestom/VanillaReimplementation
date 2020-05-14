@@ -37,6 +37,8 @@ public enum VanillaBlocks {
     FIRE(FireBlock::new),
     NETHER_PORTAL(NetherPortalBlock::new),
 
+    TNT(TNTBlock::new),
+
     CHEST(ChestBlock::new),
     TRAPPED_CHEST(TrappedChestBlock::new),
     ENDER_CHEST(EnderChestBlock::new),
