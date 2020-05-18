@@ -88,7 +88,9 @@ public class VanillaExplosion extends Explosion {
                 try {
                     LootTable table = lootTableManager.load(NamespaceID.from("blocks/"+block.name().toLowerCase()));
                     Data arguments = new Data();
-                    arguments.set("explosionPower", (double)getStrength(), Double.class);
+                    if(!dropsEverything) {
+                        arguments.set("explosionPower", (double)getStrength(), Double.class);
+                    }
                     List<ItemStack> output = table.generate(arguments);
                     for (ItemStack out : output) {
                         ItemEntity itemEntity = new ItemEntity(out);
