@@ -1,10 +1,20 @@
 package net.minestom.vanilla.instance;
 
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.data.Data;
+import net.minestom.server.entity.ItemEntity;
+import net.minestom.server.gamedata.loottables.LootTable;
+import net.minestom.server.gamedata.loottables.LootTableManager;
 import net.minestom.server.instance.Explosion;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.CustomBlock;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.BlockPosition;
+import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.Vector;
 
+import java.io.FileNotFoundException;
 import java.util.*;
 
 public class VanillaExplosion extends Explosion {
@@ -47,6 +57,9 @@ public class VanillaExplosion extends Explosion {
                         blockPos.setY((int) Math.floor(position.getY()));
                         blockPos.setZ((int) Math.floor(position.getZ()));
 
+                        Block block = Block.fromId(instance.getBlockId(blockPos));
+                        CustomBlock customBlock = instance.getCustomBlock(blockPos);
+
                         float blastResistance = 0.05f; // TODO: custom blast resistances
                         intensity -= (blastResistance+stepLength)*stepLength;
                         if(intensity < 0f) {
@@ -54,16 +67,41 @@ public class VanillaExplosion extends Explosion {
                         }
 
                         if(!positions.contains(blockPos)) {
-                            // TODO: Drop item entities
-                            // TODO: call onExplode callback on custom blocks
                             positions.add(new BlockPosition(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
-                            System.out.println(blockPos);
                         }
 
                         position.add(ray.getX(), ray.getY(), ray.getZ());
                     }
                 }
             }
+        }
+
+        for(BlockPosition position : positions) {
+            Block block = Block.fromId(instance.getBlockId(position));
+            CustomBlock customBlock = instance.getCustomBlock(position);
+
+            if(block.isAir())
+                continue;
+            double p = explosionRNG.nextDouble();
+            if(p <= 1/getStrength()) {
+                LootTableManager lootTableManager = MinecraftServer.getLootTableManager();
+                try {
+                    LootTable table = lootTableManager.load(NamespaceID.from("blocks/"+block.name().toLowerCase()));
+                    Data arguments = new Data();
+                    arguments.set("explosionPower", (double)getStrength(), Double.class);
+                    List<ItemStack> output = table.generate(arguments);
+                    for (ItemStack out : output) {
+                        ItemEntity itemEntity = new ItemEntity(out);
+                        itemEntity.getPosition().setX(position.getX()+0.5f);
+                        itemEntity.getPosition().setY(position.getY()+0.5f);
+                        itemEntity.getPosition().setZ(position.getZ()+0.5f);
+                        itemEntity.setInstance(instance);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            // TODO: call onExplode callback on custom blocks
         }
 
         // TODO: entities
