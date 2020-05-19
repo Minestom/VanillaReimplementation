@@ -18,6 +18,7 @@ import net.minestom.server.timer.TaskRunnable;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.commands.VanillaCommands;
+import net.minestom.vanilla.gamedata.loottables.VanillaLootTables;
 import net.minestom.vanilla.items.VanillaItems;
 import net.minestom.vanilla.system.NetherPortal;
 
@@ -34,9 +35,7 @@ public class LaunchServer {
         VanillaBlocks.registerAll(MinecraftServer.getConnectionManager(), MinecraftServer.getBlockManager());
         NetherPortal.registerData(MinecraftServer.getDataManager());
         LootTableManager lootTableManager = MinecraftServer.getLootTableManager();
-        lootTableManager.registerCondition(NamespaceID.from("minecraft:survives_explosion"), new SurvivesExplosionCondition());
-        lootTableManager.registerTableType(NamespaceID.from("minecraft:block"), new BlockType());
-        lootTableManager.registerEntryType(NamespaceID.from("minecraft:item"), new ItemType());
+        VanillaLootTables.register(lootTableManager);
 
         PlayerInit.init();
 

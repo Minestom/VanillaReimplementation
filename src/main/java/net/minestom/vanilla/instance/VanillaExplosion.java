@@ -66,6 +66,9 @@ public class VanillaExplosion extends Explosion {
                             break;
                         }
 
+                        if(blockPos.getY() < 0 || blockPos.getY() >= 255) { // out of bounds
+                            break;
+                        }
                         if(!positions.contains(blockPos)) {
                             positions.add(new BlockPosition(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
                         }
@@ -94,13 +97,14 @@ public class VanillaExplosion extends Explosion {
                     List<ItemStack> output = table.generate(arguments);
                     for (ItemStack out : output) {
                         ItemEntity itemEntity = new ItemEntity(out);
-                        itemEntity.getPosition().setX(position.getX()+0.5f);
-                        itemEntity.getPosition().setY(position.getY()+0.5f);
-                        itemEntity.getPosition().setZ(position.getZ()+0.5f);
+                        itemEntity.getPosition().setX(position.getX()+explosionRNG.nextFloat());
+                        itemEntity.getPosition().setY(position.getY()+explosionRNG.nextFloat());
+                        itemEntity.getPosition().setZ(position.getZ()+explosionRNG.nextFloat());
+                        itemEntity.setPickupDelay(500L);
                         itemEntity.setInstance(instance);
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (FileNotFoundException e) {
+                    // loot table does not exist, ignore
                 }
             }
             // TODO: call onExplode callback on custom blocks

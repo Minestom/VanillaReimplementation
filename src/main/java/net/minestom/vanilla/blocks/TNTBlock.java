@@ -13,7 +13,7 @@ public class TNTBlock extends VanillaBlock {
 
     @Override
     protected BlockPropertyList createPropertyValues() {
-        return new BlockPropertyList();
+        return new BlockPropertyList().booleanProperty("unstable");
     }
 
     @Override
