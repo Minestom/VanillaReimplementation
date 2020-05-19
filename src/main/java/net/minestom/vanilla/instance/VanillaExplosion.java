@@ -57,6 +57,10 @@ public class VanillaExplosion extends Explosion {
                         blockPos.setY((int) Math.floor(position.getY()));
                         blockPos.setZ((int) Math.floor(position.getZ()));
 
+                        if(blockPos.getY() < 0 || blockPos.getY() >= 255) { // out of bounds
+                            break;
+                        }
+
                         Block block = Block.fromId(instance.getBlockId(blockPos));
                         CustomBlock customBlock = instance.getCustomBlock(blockPos);
 
@@ -66,9 +70,7 @@ public class VanillaExplosion extends Explosion {
                             break;
                         }
 
-                        if(blockPos.getY() < 0 || blockPos.getY() >= 255) { // out of bounds
-                            break;
-                        }
+
                         if(!positions.contains(blockPos)) {
                             positions.add(new BlockPosition(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
                         }
@@ -86,15 +88,27 @@ public class VanillaExplosion extends Explosion {
             if(block.isAir())
                 continue;
             double p = explosionRNG.nextDouble();
-            if(p <= 1/getStrength()) {
+            boolean shouldExplode = p <= 1/getStrength();
+            if(shouldExplode) {
+                Data lootTableArguments = new Data();
+                if(!dropsEverything) {
+                    lootTableArguments.set("explosionPower", (double)getStrength(), Double.class);
+                }
+                if(customBlock != null) {
+                    if(!customBlock.onExplode(instance, position, lootTableArguments)) {
+                        continue;
+                    }
+                }
                 LootTableManager lootTableManager = MinecraftServer.getLootTableManager();
                 try {
-                    LootTable table = lootTableManager.load(NamespaceID.from("blocks/"+block.name().toLowerCase()));
-                    Data arguments = new Data();
-                    if(!dropsEverything) {
-                        arguments.set("explosionPower", (double)getStrength(), Double.class);
+                    LootTable table = null;
+                    if(customBlock != null) {
+                        table = customBlock.getLootTable(lootTableManager);
                     }
-                    List<ItemStack> output = table.generate(arguments);
+                    if(table == null) {
+                        table = lootTableManager.load(NamespaceID.from("blocks/"+block.name().toLowerCase()));
+                    }
+                    List<ItemStack> output = table.generate(lootTableArguments);
                     for (ItemStack out : output) {
                         ItemEntity itemEntity = new ItemEntity(out);
                         itemEntity.getPosition().setX(position.getX()+explosionRNG.nextFloat());
@@ -107,7 +121,6 @@ public class VanillaExplosion extends Explosion {
                     // loot table does not exist, ignore
                 }
             }
-            // TODO: call onExplode callback on custom blocks
         }
 
         // TODO: entities
