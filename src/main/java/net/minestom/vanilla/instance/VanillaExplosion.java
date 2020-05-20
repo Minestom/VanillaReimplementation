@@ -2,7 +2,9 @@ package net.minestom.vanilla.instance;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.data.Data;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.ItemEntity;
+import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.gamedata.loottables.LootTable;
 import net.minestom.server.gamedata.loottables.LootTableManager;
 import net.minestom.server.instance.Explosion;
@@ -12,10 +14,17 @@ import net.minestom.server.instance.block.CustomBlock;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.utils.Position;
 import net.minestom.server.utils.Vector;
+import net.minestom.server.utils.thread.MinestomThread;
+import net.minestom.vanilla.damage.DamageTypes;
+import net.minestom.vanilla.math.RayCast;
 
 import java.io.FileNotFoundException;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class VanillaExplosion extends Explosion {
 
@@ -26,8 +35,14 @@ public class VanillaExplosion extends Explosion {
     private final boolean startsFires;
     private final boolean dropsEverything;
 
+    public static final String THREAD_POOL_NAME = "MSVanilla-Explosion";
+    public static final int THREAD_POOL_COUNT = 2;
+    private static final MinestomThread threadPool = new MinestomThread(THREAD_POOL_COUNT, THREAD_POOL_NAME);
+    private final Position center;
+
     public VanillaExplosion(float centerX, float centerY, float centerZ, float strength, boolean startsFires, boolean dropsEverything) {
         super(centerX, centerY, centerZ, strength);
+        this.center = new Position(centerX, centerY, centerZ);
         this.startsFires = startsFires;
         this.dropsEverything = dropsEverything;
     }
@@ -81,24 +96,36 @@ public class VanillaExplosion extends Explosion {
             }
         }
 
+        final float damageRadius = maximumBlastRadius; // TODO: should be different from blast radius
+        List<Entity> potentiallyDamagedEntities = getEntitiesAround(instance, damageRadius);
+
+        try {
+            threadPool.invokeAll(potentiallyDamagedEntities.stream().map(ent -> (Callable<Void>) () -> {
+                affect(ent, damageRadius);
+                return null;
+            }).collect(Collectors.toList()));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         for(BlockPosition position : positions) {
             Block block = Block.fromId(instance.getBlockId(position));
             CustomBlock customBlock = instance.getCustomBlock(position);
 
             if(block.isAir())
                 continue;
+            Data lootTableArguments = new Data();
+            if(!dropsEverything) {
+                lootTableArguments.set("explosionPower", (double)getStrength(), Double.class);
+            }
+            if(customBlock != null) {
+                if(!customBlock.onExplode(instance, position, lootTableArguments)) {
+                    continue;
+                }
+            }
             double p = explosionRNG.nextDouble();
-            boolean shouldExplode = p <= 1/getStrength();
-            if(shouldExplode) {
-                Data lootTableArguments = new Data();
-                if(!dropsEverything) {
-                    lootTableArguments.set("explosionPower", (double)getStrength(), Double.class);
-                }
-                if(customBlock != null) {
-                    if(!customBlock.onExplode(instance, position, lootTableArguments)) {
-                        continue;
-                    }
-                }
+            boolean shouldDropItem = p <= 1/getStrength();
+            if(shouldDropItem || dropsEverything) {
                 LootTableManager lootTableManager = MinecraftServer.getLootTableManager();
                 try {
                     LootTable table = null;
@@ -123,8 +150,83 @@ public class VanillaExplosion extends Explosion {
             }
         }
 
-        // TODO: entities
-
         return new LinkedList<>(positions);
     }
+
+    private void affect(Entity e, final float damageRadius) {
+        float exposure = calculateExposure(e, damageRadius);
+        float distance = e.getPosition().getDistance(center);
+        double impact = (1.0-distance/damageRadius)*exposure;
+        double damage = Math.floor((impact*impact+impact)*7*getStrength()+1);
+        if(e instanceof LivingEntity) {
+            ((LivingEntity) e).damage(DamageTypes.EXPLOSION, (float)damage);
+        } else {
+            // TODO: different entities will react differently (items despawn, boats, minecarts drop as items, etc.)
+        }
+
+        float blastProtection = 0f; // TODO
+        exposure -= exposure * 0.15f * blastProtection;
+        Vector velocityBoost = e.getPosition().toVector().add(0f, e.getEyeHeight(), 0f).subtract(center.toVector());
+        velocityBoost.normalize().multiply(exposure*MinecraftServer.TICK_PER_SECOND);
+        e.setVelocity(e.getVelocity().clone().add(velocityBoost));
+    }
+
+    private float calculateExposure(Entity e, final float damageRadius) {
+        int w = (int) (Math.floor(e.getBoundingBox().getWidth()*2))+1;
+        int h = (int) (Math.floor(e.getBoundingBox().getHeight()*2))+1;
+        int d = (int) (Math.floor(e.getBoundingBox().getDepth()*2))+1;
+
+        Instance instance = e.getInstance();
+        Position pos = e.getPosition();
+        float entX = pos.getX();
+        float entY = pos.getY();
+        float entZ = pos.getZ();
+        int hits = 0;
+        int rays = w*h*d;
+        for(int dx = (int) -Math.ceil(w/2); dx<Math.floor(w/2); dx++) {
+            for(int dy = 0; dy<h; dy++) {
+                for(int dz = (int) -Math.ceil(d/2); dz<Math.floor(d/2); dz++) {
+                    float deltaX = entX+dx-getCenterX();
+                    float deltaY = entY+dy-getCenterY();
+                    float deltaZ = entZ+dz-getCenterZ();
+                    RayCast.Result result = RayCast.rayCastBlocks(instance, getCenterX(), getCenterY(), getCenterZ(),
+                            deltaX, deltaY, deltaZ,
+                            (float) Math.sqrt(deltaX*deltaX+deltaY*deltaY+deltaZ*deltaZ), 0.3f,
+                            position -> instance.getBlockId(position) == Block.AIR.getBlockId(),
+                            _pos -> {});
+                    if(result.getHitType() != RayCast.HitType.BLOCK) {
+                        hits++;
+                    }
+                }
+            }
+        }
+        return (float)hits / rays;
+    }
+
+    private List<Entity> getEntitiesAround(Instance instance, double damageRadius) {
+        int intRadius = (int) Math.ceil(damageRadius);
+        List<Entity> affected = new LinkedList<>();
+        double radiusSq = damageRadius*damageRadius;
+        for (int x = -intRadius; x <= intRadius; x++) {
+            for (int z = -intRadius; z <= intRadius; z++) {
+                int posX = (int) Math.floor(getCenterX()+x);
+                int posZ = (int) Math.floor(getCenterZ()+z);
+                var list = instance.getChunkEntities(instance.getChunk(posX >> 4, posZ >> 4));
+                if(list != null) {
+                    for(Entity e : list) {
+                        float dx = e.getPosition().getX()-getCenterX();
+                        float dy = e.getPosition().getY()-getCenterY();
+                        float dz = e.getPosition().getZ()-getCenterZ();
+                        if(dx*dx+dy*dy+dz*dz <= radiusSq) {
+                            if(!affected.contains(e)) {
+                                affected.add(e);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return affected;
+    }
+
 }
