@@ -24,12 +24,14 @@ import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class VanillaExplosion extends Explosion {
 
     public static final String DROP_EVERYTHING_KEY = "minestom:drop_everything";
     public static final String IS_FLAMING_KEY = "minestom:is_flaming";
+    public static final String DONT_DESTROY_BLOCKS_KEY = "minestom:no_block_damage";
     private static final Random explosionRNG = new Random();
 
     private final boolean startsFires;
@@ -39,9 +41,11 @@ public class VanillaExplosion extends Explosion {
     public static final int THREAD_POOL_COUNT = 2;
     private static final MinestomThread threadPool = new MinestomThread(THREAD_POOL_COUNT, THREAD_POOL_NAME);
     private final Position center;
+    private final boolean blockDamage;
 
-    public VanillaExplosion(float centerX, float centerY, float centerZ, float strength, boolean startsFires, boolean dropsEverything) {
+    public VanillaExplosion(float centerX, float centerY, float centerZ, float strength, boolean startsFires, boolean dropsEverything, boolean blockDamage) {
         super(centerX, centerY, centerZ, strength);
+        this.blockDamage = blockDamage;
         this.center = new Position(centerX, centerY, centerZ);
         this.startsFires = startsFires;
         this.dropsEverything = dropsEverything;
@@ -49,48 +53,40 @@ public class VanillaExplosion extends Explosion {
 
     @Override
     protected List<BlockPosition> prepare(Instance instance) {
-        Set<BlockPosition> positions = new HashSet<>();
-
         float stepLength = 0.3f;
         float maximumBlastRadius = (float) Math.floor(1.3f*getStrength()/(stepLength*0.75))*stepLength;
-        for (int x = 0; x < 16; x++) {
-            for (int y = 0; y < 16; y++) {
-                for (int z = 0; z < 16; z++) {
-                    if(!(x == 0 || x == 15 || y == 0 || y == 15 || z == 0 || z == 15)) { // must be on outer edge of 16x16x16 cube
-                        continue;
-                    }
-                    Vector ray = new Vector(x-8.5f, y-8.5f, z-8.5f);
-                    ray.normalize().multiply(stepLength);
-                    float intensity = (0.7f + explosionRNG.nextFloat() * 0.6f) * getStrength();
+        Set<BlockPosition> positions = new HashSet<>();
+        if(blockDamage) {
 
-                    Vector position = new Vector(getCenterX(), getCenterY(), getCenterZ());
-                    BlockPosition blockPos = new BlockPosition(position);
-                    for (float step = 0f; step < maximumBlastRadius; step += stepLength) {
-                        intensity -= 0.225f; // air attenuation
-
-                        blockPos.setX((int) Math.floor(position.getX()));
-                        blockPos.setY((int) Math.floor(position.getY()));
-                        blockPos.setZ((int) Math.floor(position.getZ()));
-
-                        if(blockPos.getY() < 0 || blockPos.getY() >= 255) { // out of bounds
-                            break;
+            for (int x = 0; x < 16; x++) {
+                for (int y = 0; y < 16; y++) {
+                    for (int z = 0; z < 16; z++) {
+                        if(!(x == 0 || x == 15 || y == 0 || y == 15 || z == 0 || z == 15)) { // must be on outer edge of 16x16x16 cube
+                            continue;
                         }
+                        Vector ray = new Vector(x-8.5f, y-8.5f, z-8.5f);
+                        ray.normalize().multiply(stepLength);
 
-                        Block block = Block.fromId(instance.getBlockId(blockPos));
-                        CustomBlock customBlock = instance.getCustomBlock(blockPos);
+                        Predicate<BlockPosition> shouldContinue = new Predicate<BlockPosition>() {
+                            private float intensity = (0.7f + explosionRNG.nextFloat() * 0.6f) * getStrength();
 
-                        float blastResistance = 0.05f; // TODO: custom blast resistances
-                        intensity -= (blastResistance+stepLength)*stepLength;
-                        if(intensity < 0f) {
-                            break;
-                        }
+                            @Override
+                            public boolean test(BlockPosition position) {
+                                intensity -= 0.225f; // air attenuation
 
+                                Block block = Block.fromId(instance.getBlockId(position));
+                                CustomBlock customBlock = instance.getCustomBlock(position);
 
-                        if(!positions.contains(blockPos)) {
-                            positions.add(new BlockPosition(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
-                        }
+                                float blastResistance = 0.05f; // TODO: custom blast resistances
+                                intensity -= (blastResistance+stepLength)*stepLength;
+                                return intensity > 0f;
+                            }
+                        };
 
-                        position.add(ray.getX(), ray.getY(), ray.getZ());
+                        RayCast.rayCastBlocks(instance, getCenterX(), getCenterY(), getCenterZ(),
+                                x-8.5f, y-8.5f, z-8.5f, maximumBlastRadius, stepLength,
+                                shouldContinue, blockPos -> positions.add(new BlockPosition(blockPos.getX(), blockPos.getY(), blockPos.getZ()))
+                        );
                     }
                 }
             }
@@ -108,44 +104,46 @@ public class VanillaExplosion extends Explosion {
             e.printStackTrace();
         }
 
-        for(BlockPosition position : positions) {
-            Block block = Block.fromId(instance.getBlockId(position));
-            CustomBlock customBlock = instance.getCustomBlock(position);
+        if(blockDamage) {
+            for(BlockPosition position : positions) {
+                Block block = Block.fromId(instance.getBlockId(position));
+                CustomBlock customBlock = instance.getCustomBlock(position);
 
-            if(block.isAir())
-                continue;
-            Data lootTableArguments = new Data();
-            if(!dropsEverything) {
-                lootTableArguments.set("explosionPower", (double)getStrength(), Double.class);
-            }
-            if(customBlock != null) {
-                if(!customBlock.onExplode(instance, position, lootTableArguments)) {
+                if(block.isAir())
                     continue;
+                Data lootTableArguments = new Data();
+                if(!dropsEverything) {
+                    lootTableArguments.set("explosionPower", (double)getStrength(), Double.class);
                 }
-            }
-            double p = explosionRNG.nextDouble();
-            boolean shouldDropItem = p <= 1/getStrength();
-            if(shouldDropItem || dropsEverything) {
-                LootTableManager lootTableManager = MinecraftServer.getLootTableManager();
-                try {
-                    LootTable table = null;
-                    if(customBlock != null) {
-                        table = customBlock.getLootTable(lootTableManager);
+                if(customBlock != null) {
+                    if(!customBlock.onExplode(instance, position, lootTableArguments)) {
+                        continue;
                     }
-                    if(table == null) {
-                        table = lootTableManager.load(NamespaceID.from("blocks/"+block.name().toLowerCase()));
+                }
+                double p = explosionRNG.nextDouble();
+                boolean shouldDropItem = p <= 1/getStrength();
+                if(shouldDropItem || dropsEverything) {
+                    LootTableManager lootTableManager = MinecraftServer.getLootTableManager();
+                    try {
+                        LootTable table = null;
+                        if(customBlock != null) {
+                            table = customBlock.getLootTable(lootTableManager);
+                        }
+                        if(table == null) {
+                            table = lootTableManager.load(NamespaceID.from("blocks/"+block.name().toLowerCase()));
+                        }
+                        List<ItemStack> output = table.generate(lootTableArguments);
+                        for (ItemStack out : output) {
+                            ItemEntity itemEntity = new ItemEntity(out);
+                            itemEntity.getPosition().setX(position.getX()+explosionRNG.nextFloat());
+                            itemEntity.getPosition().setY(position.getY()+explosionRNG.nextFloat());
+                            itemEntity.getPosition().setZ(position.getZ()+explosionRNG.nextFloat());
+                            itemEntity.setPickupDelay(500L);
+                            itemEntity.setInstance(instance);
+                        }
+                    } catch (FileNotFoundException e) {
+                        // loot table does not exist, ignore
                     }
-                    List<ItemStack> output = table.generate(lootTableArguments);
-                    for (ItemStack out : output) {
-                        ItemEntity itemEntity = new ItemEntity(out);
-                        itemEntity.getPosition().setX(position.getX()+explosionRNG.nextFloat());
-                        itemEntity.getPosition().setY(position.getY()+explosionRNG.nextFloat());
-                        itemEntity.getPosition().setZ(position.getZ()+explosionRNG.nextFloat());
-                        itemEntity.setPickupDelay(500L);
-                        itemEntity.setInstance(instance);
-                    }
-                } catch (FileNotFoundException e) {
-                    // loot table does not exist, ignore
                 }
             }
         }

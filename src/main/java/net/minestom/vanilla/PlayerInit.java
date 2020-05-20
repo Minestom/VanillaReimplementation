@@ -32,8 +32,9 @@ public class PlayerInit {
 
     static {
         ExplosionSupplier explosionGenerator = (centerX, centerY, centerZ, strength, additionalData) -> {
-            boolean isTNT = additionalData != null ? additionalData.getOrDefault(VanillaExplosion.IS_FLAMING_KEY, false) : false;
-            return new VanillaExplosion(centerX, centerY, centerZ, strength, false, isTNT);
+            boolean isTNT = additionalData != null ? additionalData.getOrDefault(VanillaExplosion.DROP_EVERYTHING_KEY, false) : false;
+            boolean noBlockDamage = additionalData != null ? additionalData.getOrDefault(VanillaExplosion.DONT_DESTROY_BLOCKS_KEY, false) : false;
+            return new VanillaExplosion(centerX, centerY, centerZ, strength, false, isTNT, !noBlockDamage);
         };
         VanillaTestGenerator noiseTestGenerator = new VanillaTestGenerator();
         overworld = MinecraftServer.getInstanceManager().createInstanceContainer();
