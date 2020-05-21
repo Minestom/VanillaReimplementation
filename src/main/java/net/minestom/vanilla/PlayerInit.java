@@ -10,20 +10,29 @@ import net.minestom.server.event.EventCallback;
 import net.minestom.server.event.entity.AddEntityToInstanceEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.item.PickupItemEvent;
+import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.gamedata.loottables.LootTable;
+import net.minestom.server.gamedata.loottables.LootTableManager;
 import net.minestom.server.instance.ExplosionSupplier;
 import net.minestom.server.instance.InstanceContainer;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.CustomBlock;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.ConnectionManager;
+import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.Position;
 import net.minestom.server.utils.Vector;
 import net.minestom.server.world.Dimension;
 import net.minestom.vanilla.blocks.NetherPortalBlock;
 import net.minestom.vanilla.generation.VanillaTestGenerator;
 import net.minestom.vanilla.instance.VanillaExplosion;
+
+import java.io.FileNotFoundException;
+import java.util.List;
 
 public class PlayerInit {
 
@@ -100,6 +109,39 @@ public class PlayerInit {
                     moveEvent.setCancelled(true);
                     player.teleport(player.getPosition()); // force teleport to previous position
                     System.out.println(player.getUsername()+" moved too fast! "+dx+" "+dy+" "+dz);
+                }
+            });
+
+            player.addEventCallback(PlayerBlockBreakEvent.class, event -> {
+                LootTable table = null;
+                LootTableManager lootTableManager = MinecraftServer.getLootTableManager();
+                if(event.isResultCustomBlock()) {
+                    CustomBlock customBlock = MinecraftServer.getBlockManager().getCustomBlock(event.getResultCustomBlockId());
+                    table = customBlock.getLootTable(lootTableManager);
+                }
+                Block block = Block.fromId(player.getInstance().getBlockId(event.getBlockPosition()));
+                Data lootTableArguments = new Data();
+                // TODO: tool used, silk touch, etc.
+                try {
+                    if(table == null) {
+                        table = lootTableManager.load(NamespaceID.from("blocks/" + block.name().toLowerCase()));
+                    }
+                    List<ItemStack> stacks = table.generate(lootTableArguments);
+                    for (ItemStack item : stacks) {
+                        ItemEntity itemEntity = new ItemEntity(item);
+                        itemEntity.getPosition().setX((float) (event.getBlockPosition().getX()+0.2f+Math.random()*0.6f));
+                        itemEntity.getPosition().setY((float) (event.getBlockPosition().getY()+0.5f));
+                        itemEntity.getPosition().setZ((float) (event.getBlockPosition().getZ()+0.2f+Math.random()*0.6f));
+
+                        itemEntity.getVelocity().setX((float) (Math.random()*2f-1f));
+                        itemEntity.getVelocity().setY((float) (Math.random()*2f));
+                        itemEntity.getVelocity().setZ((float) (Math.random()*2f-1f));
+
+                        itemEntity.setPickupDelay(500);
+                        itemEntity.setInstance(player.getInstance());
+                    }
+                } catch (FileNotFoundException e) {
+                    // ignore missing table
                 }
             });
 
