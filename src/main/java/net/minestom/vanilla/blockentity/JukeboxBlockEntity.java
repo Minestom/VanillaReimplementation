@@ -9,6 +9,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.StackingRule;
 import net.minestom.server.utils.BlockPosition;
+import net.minestom.server.utils.Position;
 
 import java.util.Random;
 
@@ -58,14 +59,10 @@ public class JukeboxBlockEntity extends BlockEntity {
      * @param instance
      */
     private void stopPlayback(Instance instance) {
-        ItemEntity discEntity = new ItemEntity(get(DISC_STACK));
+        ItemEntity discEntity = new ItemEntity(get(DISC_STACK), new Position(getPosition().getX()+0.5f, getPosition().getY()+1f, getPosition().getZ()+0.5f));
         discEntity.setPickable(true);
 
         Random rng = new Random();
-        discEntity.getPosition().setX(getPosition().getX()+0.5f);
-        discEntity.getPosition().setY(getPosition().getY()+1f);
-        discEntity.getPosition().setZ(getPosition().getZ()+0.5f);
-
         final float horizontalSpeed = 2f;
         final float verticalSpeed = 5f;
         discEntity.getVelocity().setX((float) rng.nextGaussian()*horizontalSpeed);

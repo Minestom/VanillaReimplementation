@@ -9,6 +9,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.PacketWriter;
 import net.minestom.server.utils.BlockPosition;
+import net.minestom.server.utils.Position;
 
 import java.util.Random;
 import java.util.function.Consumer;
@@ -17,8 +18,8 @@ public class FallingBlockEntity extends ObjectEntity {
     private final Block baseBlock;
     private final CustomBlock toPlace;
 
-    public FallingBlockEntity(Block baseBlock, CustomBlock toPlace) {
-        super(EntityType.FALLING_BLOCK.getId());
+    public FallingBlockEntity(Block baseBlock, CustomBlock toPlace, Position initialPosition) {
+        super(EntityType.FALLING_BLOCK, initialPosition);
         this.baseBlock = baseBlock;
         this.toPlace = toPlace;
         setGravity(0.025f);
@@ -43,10 +44,7 @@ public class FallingBlockEntity extends ObjectEntity {
                 // landed on non-full block, break into item
                 Material correspondingItem = Material.valueOf(baseBlock.name()); // TODO: ugly way of finding corresponding item, change
                 ItemStack stack = new ItemStack(correspondingItem, (byte) 1);
-                ItemEntity itemForm = new ItemEntity(stack);
-                itemForm.getPosition().setX(position.getX()+0.5f);
-                itemForm.getPosition().setY(position.getY());
-                itemForm.getPosition().setZ(position.getZ()+0.5f);
+                ItemEntity itemForm = new ItemEntity(stack, new Position(position.getX()+0.5f, position.getY(), position.getZ()+0.5f));
 
                 Random rng = new Random();
                 itemForm.getVelocity().setX((float) rng.nextGaussian()*2f);

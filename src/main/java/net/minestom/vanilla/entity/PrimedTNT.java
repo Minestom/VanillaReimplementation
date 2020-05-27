@@ -5,6 +5,7 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.ObjectEntity;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.packet.PacketWriter;
+import net.minestom.server.utils.Position;
 import net.minestom.vanilla.instance.VanillaExplosion;
 
 import java.util.function.Consumer;
@@ -13,8 +14,8 @@ public class PrimedTNT extends ObjectEntity {
 
     private int fuseTime = 0;
 
-    public PrimedTNT() {
-        super(EntityType.TNT.getId());
+    public PrimedTNT(Position initialPosition) {
+        super(EntityType.TNT, initialPosition);
         setGravity(0.025f);
         setBoundingBox(0.98f, 0.98f, 0.98f);
     }

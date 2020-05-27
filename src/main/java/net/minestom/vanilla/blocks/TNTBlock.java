@@ -6,6 +6,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.BlockPosition;
+import net.minestom.server.utils.Position;
 import net.minestom.server.utils.Vector;
 import net.minestom.vanilla.entity.PrimedTNT;
 
@@ -43,10 +44,8 @@ public class TNTBlock extends VanillaBlock {
     }
 
     private void spawnPrimedTNT(Instance instance, BlockPosition blockPosition, int fuseTime) {
-        PrimedTNT primedTNT = new PrimedTNT();
-        primedTNT.getPosition().setX(blockPosition.getX()+0.5f);
-        primedTNT.getPosition().setY(blockPosition.getY()+0f);
-        primedTNT.getPosition().setZ(blockPosition.getZ()+0.5f);
+        Position initialPosition = new Position(blockPosition.getX() + 0.5f, blockPosition.getY() + 0f, blockPosition.getZ() + 0.5f);
+        PrimedTNT primedTNT = new PrimedTNT(initialPosition);
 
         primedTNT.setVelocity(new Vector(tntRNG.nextFloat()*2f-1f, tntRNG.nextFloat()*5f, tntRNG.nextFloat()*2f-1f));
 

@@ -17,13 +17,13 @@ import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.Position;
 import net.minestom.server.utils.Vector;
 import net.minestom.server.utils.thread.MinestomThread;
+import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.vanilla.damage.DamageTypes;
 import net.minestom.vanilla.math.RayCast;
 
 import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -134,11 +134,8 @@ public class VanillaExplosion extends Explosion {
                         }
                         List<ItemStack> output = table.generate(lootTableArguments);
                         for (ItemStack out : output) {
-                            ItemEntity itemEntity = new ItemEntity(out);
-                            itemEntity.getPosition().setX(position.getX()+explosionRNG.nextFloat());
-                            itemEntity.getPosition().setY(position.getY()+explosionRNG.nextFloat());
-                            itemEntity.getPosition().setZ(position.getZ()+explosionRNG.nextFloat());
-                            itemEntity.setPickupDelay(500L);
+                            ItemEntity itemEntity = new ItemEntity(out, new Position(position.getX()+explosionRNG.nextFloat(), position.getY()+explosionRNG.nextFloat(), position.getZ()+explosionRNG.nextFloat()));
+                            itemEntity.setPickupDelay(500L, TimeUnit.MILLISECOND);
                             itemEntity.setInstance(instance);
                         }
                     } catch (FileNotFoundException e) {

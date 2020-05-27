@@ -4,6 +4,7 @@ import net.minestom.server.data.Data;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.BlockPosition;
+import net.minestom.server.utils.Position;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.vanilla.entity.FallingBlockEntity;
 
@@ -31,10 +32,8 @@ public class GravityBlock extends VanillaBlock {
         if(below.isAir()) {
             instance.setBlock(blockPosition, Block.AIR);
 
-            FallingBlockEntity fallingBlockEntity = new FallingBlockEntity(getBaseBlock(), this);
-            fallingBlockEntity.getPosition().setX(blockPosition.getX() + 0.5f);
-            fallingBlockEntity.getPosition().setY(Math.round(blockPosition.getY()));
-            fallingBlockEntity.getPosition().setZ(blockPosition.getZ() + 0.5f);
+            Position initialPosition = new Position(blockPosition.getX() + 0.5f, Math.round(blockPosition.getY()), blockPosition.getZ() + 0.5f);
+            FallingBlockEntity fallingBlockEntity = new FallingBlockEntity(getBaseBlock(), this, initialPosition);
 
             fallingBlockEntity.setInstance(instance);
         }

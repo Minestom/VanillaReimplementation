@@ -10,6 +10,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.MathUtils;
+import net.minestom.server.utils.Position;
 import net.minestom.vanilla.blockentity.ChestBlockEntity;
 import net.minestom.vanilla.system.EnderChestSystem;
 
@@ -35,12 +36,8 @@ public abstract class ChestLikeBlock extends VanillaBlock {
         if(dropContentsOnDestroy()) {
             ChestBlockEntity blockEntity = (ChestBlockEntity)data;
             for(ItemStack stack : blockEntity.getInventory().getItemStacks()) {
-                ItemEntity entity = new ItemEntity(stack);
                 Random rng = new Random();
-                entity.getPosition().setX((float) (blockPosition.getX()+rng.nextDouble()));
-                entity.getPosition().setY(blockPosition.getY()+.5f);
-                entity.getPosition().setZ((float) (blockPosition.getZ()+rng.nextDouble()));
-
+                ItemEntity entity = new ItemEntity(stack, new Position((float) (blockPosition.getX()+rng.nextDouble()), blockPosition.getY()+.5f, (float) (blockPosition.getZ()+rng.nextDouble())));
                 instance.addEntity(entity);
             }
         }

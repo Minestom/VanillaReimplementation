@@ -26,6 +26,7 @@ import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.Position;
 import net.minestom.server.utils.Vector;
+import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.server.world.Dimension;
 import net.minestom.vanilla.blocks.NetherPortalBlock;
 import net.minestom.vanilla.generation.VanillaTestGenerator;
@@ -128,16 +129,14 @@ public class PlayerInit {
                     }
                     List<ItemStack> stacks = table.generate(lootTableArguments);
                     for (ItemStack item : stacks) {
-                        ItemEntity itemEntity = new ItemEntity(item);
-                        itemEntity.getPosition().setX((float) (event.getBlockPosition().getX()+0.2f+Math.random()*0.6f));
-                        itemEntity.getPosition().setY((float) (event.getBlockPosition().getY()+0.5f));
-                        itemEntity.getPosition().setZ((float) (event.getBlockPosition().getZ()+0.2f+Math.random()*0.6f));
+                        Position spawnPosition = new Position((float) (event.getBlockPosition().getX() + 0.2f + Math.random() * 0.6f), (float) (event.getBlockPosition().getY() + 0.5f), (float) (event.getBlockPosition().getZ() + 0.2f + Math.random() * 0.6f));
+                        ItemEntity itemEntity = new ItemEntity(item, spawnPosition);
 
                         itemEntity.getVelocity().setX((float) (Math.random()*2f-1f));
                         itemEntity.getVelocity().setY((float) (Math.random()*2f));
                         itemEntity.getVelocity().setZ((float) (Math.random()*2f-1f));
 
-                        itemEntity.setPickupDelay(500);
+                        itemEntity.setPickupDelay(500, TimeUnit.MILLISECOND);
                         itemEntity.setInstance(player.getInstance());
                     }
                 } catch (FileNotFoundException e) {
@@ -162,9 +161,8 @@ public class PlayerInit {
             player.addEventCallback(ItemDropEvent.class, event -> {
                 ItemStack droppedItem = event.getItemStack();
 
-                ItemEntity itemEntity = new ItemEntity(droppedItem);
-                itemEntity.setPickupDelay(500);
-                itemEntity.refreshPosition(player.getPosition().clone().add(0, 1.5f, 0));
+                ItemEntity itemEntity = new ItemEntity(droppedItem, player.getPosition().clone().add(0, 1.5f, 0));
+                itemEntity.setPickupDelay(500, TimeUnit.MILLISECOND);
                 itemEntity.setInstance(player.getInstance());
                 Vector velocity = player.getPosition().clone().getDirection().multiply(6);
                 itemEntity.setVelocity(velocity);
