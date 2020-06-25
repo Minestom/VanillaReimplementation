@@ -29,7 +29,7 @@ import net.minestom.server.utils.Vector;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.server.world.Dimension;
 import net.minestom.vanilla.blocks.NetherPortalBlock;
-import net.minestom.vanilla.generation.VanillaTestGenerator;
+import net.minestom.vanilla.generation.VanillaGenerator;
 import net.minestom.vanilla.instance.VanillaExplosion;
 
 import java.io.FileNotFoundException;
@@ -46,7 +46,7 @@ public class PlayerInit {
             boolean noBlockDamage = additionalData != null ? additionalData.getOrDefault(VanillaExplosion.DONT_DESTROY_BLOCKS_KEY, false) : false;
             return new VanillaExplosion(centerX, centerY, centerZ, strength, false, isTNT, !noBlockDamage);
         };
-        VanillaTestGenerator noiseTestGenerator = new VanillaTestGenerator();
+        VanillaGenerator noiseTestGenerator = new VanillaGenerator();
         overworld = MinecraftServer.getInstanceManager().createInstanceContainer();
         overworld.enableAutoChunkLoad(true);
         overworld.setChunkGenerator(noiseTestGenerator);
