@@ -37,7 +37,7 @@ public class FallingBlockEntity extends ObjectEntity {
     }
 
     @Override
-    public void update() {
+    public void update(long time) {
         if(isOnGround()) {
             BlockPosition position = getPosition().toBlockPosition().subtract(0, 1, 0);
             if(instance.getBlockId(position) != Block.AIR.getBlockId()) {

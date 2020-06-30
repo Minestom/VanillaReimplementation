@@ -44,7 +44,7 @@ public class PrimedTNT extends ObjectEntity {
     }
 
     @Override
-    public void update() {
+    public void update(long time) {
         if(fuseTime-- <= 0) {
             explode();
         }

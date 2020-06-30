@@ -168,10 +168,6 @@ public class NetherPortalBlock extends VanillaBlock {
         }
         Position targetTeleportationPosition = event.getTargetPosition();
         touching.teleport(targetTeleportationPosition, () -> {
-            if(touching instanceof Player) {
-                Player player = ((Player) touching);
-                player.refreshAfterTeleport();
-            }
             if(event.getPortal() != null && event.getPortal().getAxis() != event.getTargetPortal().getAxis()) {
                 float swapTmp = touching.getVelocity().getX();
                 touching.getVelocity().setX(touching.getVelocity().getZ());

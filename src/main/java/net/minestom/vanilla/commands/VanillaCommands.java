@@ -3,6 +3,7 @@ package net.minestom.vanilla.commands;
 import fr.themode.command.Command;
 import io.netty.handler.codec.stomp.StompCommand;
 import net.minestom.server.command.CommandManager;
+import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import net.minestom.server.world.Difficulty;
 
@@ -19,9 +20,9 @@ public enum VanillaCommands {
     STOP(StopCommand::new),
     HELP(HelpCommand::new);
 
-    private final Supplier<Command<Player>> commandCreator;
+    private final Supplier<Command<? extends CommandSender>> commandCreator;
 
-    private VanillaCommands(Supplier<Command<Player>> commandCreator) {
+    private VanillaCommands(Supplier<Command<? extends CommandSender>> commandCreator) {
         this.commandCreator = commandCreator;
     }
 
@@ -31,8 +32,8 @@ public enum VanillaCommands {
      */
     public static void registerAll(CommandManager manager) {
         for(VanillaCommands vanillaCommand : values()) {
-            Command<Player> command = vanillaCommand.commandCreator.get();
-            manager.register(command);
+            Command<? extends CommandSender> command = vanillaCommand.commandCreator.get();
+            manager.register((Command<CommandSender>) command);
         }
     }
 }

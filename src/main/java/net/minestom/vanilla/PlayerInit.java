@@ -116,7 +116,7 @@ public class PlayerInit {
             player.addEventCallback(PlayerBlockBreakEvent.class, event -> {
                 LootTable table = null;
                 LootTableManager lootTableManager = MinecraftServer.getLootTableManager();
-                if(event.isResultCustomBlock()) {
+                if(event.getResultCustomBlockId() != 0) {
                     CustomBlock customBlock = MinecraftServer.getBlockManager().getCustomBlock(event.getResultCustomBlockId());
                     table = customBlock.getLootTable(lootTableManager);
                 }
