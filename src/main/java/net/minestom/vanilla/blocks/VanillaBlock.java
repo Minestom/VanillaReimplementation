@@ -7,6 +7,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.CustomBlock;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.time.UpdateOption;
+import net.querz.nbt.tag.CompoundTag;
 
 import java.util.List;
 
@@ -108,5 +109,21 @@ public abstract class VanillaBlock extends CustomBlock {
 
     public short getVisualBlockForPlacement(Player player, Player.Hand hand, BlockPosition blockPosition) {
         return getBaseBlockId();
+    }
+
+    /**
+     * Loads the TileEntity information from the given NBT, during world loading from the Anvil format.
+     * Should be stored in the Data object returned by this function.
+     * It is allowed (and encouraged) to modify 'originalData' and returning it.
+     *
+     * Your method {@link #createData(Instance, BlockPosition, Data)} should return a non-null data object if you want to use this method easily
+     * @param nbt
+     * @param instance instance in which the tile entity is being loaded
+     * @param position position at which this block is. DON'T CACHE IT
+     * @param originalData data present at the current position
+     * @return a Data object with the loaded information. Can be originalData, a new object, or even null if you don't use the TE info
+     */
+    public Data readTileEntity(CompoundTag nbt, Instance instance, BlockPosition position, Data originalData) {
+        return originalData;
     }
 }

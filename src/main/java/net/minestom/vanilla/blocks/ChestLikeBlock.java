@@ -11,8 +11,12 @@ import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.MathUtils;
 import net.minestom.server.utils.Position;
+import net.minestom.server.utils.nbt.NbtWriter;
 import net.minestom.vanilla.blockentity.ChestBlockEntity;
+import net.minestom.vanilla.gamedata.NBTUtils;
 import net.minestom.vanilla.system.EnderChestSystem;
+import net.querz.nbt.tag.CompoundTag;
+import net.querz.nbt.tag.ListTag;
 
 import java.util.Random;
 
@@ -54,9 +58,10 @@ public abstract class ChestLikeBlock extends VanillaBlock {
 
     @Override
     public boolean onInteract(Player player, Player.Hand hand, BlockPosition blockPosition, Data data) {
+        // TODO: handle double chests
         // TODO: Handle crouching players
         Block above = Block.fromId(player.getInstance().getBlockId(blockPosition.getX(), blockPosition.getY()+1, blockPosition.getZ()));
-        if(above.isSolid()) {
+        if(above.isSolid()) { // FIXME: chests below transparent blocks cannot be opened
             return false;
         }
         player.openInventory(getInventory(player, blockPosition, data));
@@ -70,4 +75,35 @@ public abstract class ChestLikeBlock extends VanillaBlock {
      */
     protected abstract Inventory getInventory(Player player, BlockPosition blockPosition, Data data);
 
+    @Override
+    public Data readTileEntity(CompoundTag nbt, Instance instance, BlockPosition position, Data originalData) {
+        ChestBlockEntity data;
+        if(originalData instanceof ChestBlockEntity) {
+            data = (ChestBlockEntity) originalData;
+        } else {
+            data = new ChestBlockEntity(position.clone());
+        }
+
+        // TODO: CustomName
+        // TODO: Lock
+        // TODO: LootTable
+        // TODO: LootTableSeed
+
+        NBTUtils.loadAllItems(nbt.getListTag("Items").asCompoundTagList(), data.getInventory());
+        return data;
+    }
+
+    @Override
+    public void writeBlockEntity(BlockPosition position, Data blockData, NbtWriter nbt) {
+        // TODO: CustomName
+        // TODO: Lock
+        // TODO: LootTable
+        // TODO: LootTableSeed
+        if(blockData instanceof ChestBlockEntity) {
+            ChestBlockEntity data = (ChestBlockEntity) blockData;
+            ListTag<CompoundTag> list = new ListTag<>(CompoundTag.class);
+            NBTUtils.saveAllItems(list, data.getInventory());
+            NBTUtils.writeTag(nbt, "Items", list);
+        }
+    }
 }

@@ -152,7 +152,7 @@ public class PlayerInit {
             player.addEventCallback(PlayerSpawnEvent.class, event -> {
                 if(event.isFirstSpawn()) {
                     player.setGameMode(GameMode.CREATIVE);
-                    player.teleport(new Position(0, 75, 0));
+                    player.teleport(new Position(185, 100, 227));
                     player.getInventory().addItemStack(new ItemStack(Material.OBSIDIAN, (byte) 1));
                     player.getInventory().addItemStack(new ItemStack(Material.FLINT_AND_STEEL, (byte) 1));
                 }
