@@ -5,6 +5,7 @@ import fr.themode.command.Command;
 import fr.themode.command.arguments.Argument;
 import fr.themode.command.arguments.ArgumentType;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import net.minestom.server.world.Difficulty;
 
