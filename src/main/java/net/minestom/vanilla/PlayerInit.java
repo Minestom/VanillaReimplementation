@@ -23,11 +23,13 @@ import net.minestom.server.instance.block.CustomBlock;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.ConnectionManager;
+import net.minestom.server.storage.StorageManager;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.Position;
 import net.minestom.server.utils.Vector;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.server.world.Dimension;
+import net.minestom.vanilla.anvil.AnvilChunkLoader;
 import net.minestom.vanilla.blocks.NetherPortalBlock;
 import net.minestom.vanilla.generation.VanillaTestGenerator;
 import net.minestom.vanilla.instance.VanillaExplosion;
@@ -46,18 +48,21 @@ public class PlayerInit {
             boolean noBlockDamage = additionalData != null ? additionalData.getOrDefault(VanillaExplosion.DONT_DESTROY_BLOCKS_KEY, false) : false;
             return new VanillaExplosion(centerX, centerY, centerZ, strength, false, isTNT, !noBlockDamage);
         };
+        StorageManager storageManager = MinecraftServer.getStorageManager();
         VanillaTestGenerator noiseTestGenerator = new VanillaTestGenerator();
-        overworld = MinecraftServer.getInstanceManager().createInstanceContainer();
+        overworld = MinecraftServer.getInstanceManager().createInstanceContainer(Dimension.OVERWORLD, storageManager.getFolder("testworld/data")); // TODO: configurable
         overworld.enableAutoChunkLoad(true);
         overworld.setChunkGenerator(noiseTestGenerator);
         overworld.setData(new SerializableData());
         overworld.setExplosionSupplier(explosionGenerator);
+        overworld.setChunkLoader(new AnvilChunkLoader(storageManager.getFolder("testworld/region")));
 
-        nether = MinecraftServer.getInstanceManager().createInstanceContainer(Dimension.NETHER);
+        nether = MinecraftServer.getInstanceManager().createInstanceContainer(Dimension.NETHER, MinecraftServer.getStorageManager().getFolder("testworld/DIM-1/data"));
         nether.enableAutoChunkLoad(true);
         nether.setChunkGenerator(noiseTestGenerator);
         nether.setData(new SerializableData());
         nether.setExplosionSupplier(explosionGenerator);
+        nether.setChunkLoader(new AnvilChunkLoader(storageManager.getFolder("testworld/DIM-1/region")));
 
         // Load some chunks beforehand
         int loopStart = -2;

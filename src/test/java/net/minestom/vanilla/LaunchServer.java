@@ -3,10 +3,7 @@ package net.minestom.vanilla;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Player;
-import net.minestom.server.gamedata.conditions.SurvivesExplosionCondition;
 import net.minestom.server.gamedata.loottables.LootTableManager;
-import net.minestom.server.gamedata.loottables.entries.ItemType;
-import net.minestom.server.gamedata.loottables.tabletypes.BlockType;
 import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -15,7 +12,7 @@ import net.minestom.server.network.packet.server.play.DeclareRecipesPacket;
 import net.minestom.server.recipe.RecipeManager;
 import net.minestom.server.recipe.ShapelessRecipe;
 import net.minestom.server.timer.TaskRunnable;
-import net.minestom.server.utils.NamespaceID;
+import net.minestom.vanilla.anvil.FileSystemStorage;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.commands.VanillaCommands;
 import net.minestom.vanilla.gamedata.loottables.VanillaLootTables;
@@ -36,6 +33,8 @@ public class LaunchServer {
         NetherPortal.registerData(MinecraftServer.getDataManager());
         LootTableManager lootTableManager = MinecraftServer.getLootTableManager();
         VanillaLootTables.register(lootTableManager);
+
+        MinecraftServer.getStorageManager().defineDefaultStorageSystem(FileSystemStorage::new);
 
         PlayerInit.init();
 
