@@ -17,15 +17,15 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class AnvilChunkLoader implements IChunkLoader {
     private final static Logger LOGGER = LoggerFactory.getLogger(AnvilChunkLoader.class);
 
     private StorageFolder regionFolder;
+    private ConcurrentHashMap<String, MCAFile> alreadyLoaded = new ConcurrentHashMap<>();
 
     public AnvilChunkLoader(StorageFolder regionFolder) {
         this.regionFolder = regionFolder;
@@ -44,7 +44,14 @@ public class AnvilChunkLoader implements IChunkLoader {
     }
 
     private Chunk loadMCA(Instance instance, int chunkX, int chunkZ, Consumer<Chunk> callback) throws IOException {
-        MCAFile mcaFile = MCAUtil.read(new File(regionFolder.getFolderPath(), MCAUtil.createNameFromChunkLocation(chunkX, chunkZ)));
+        MCAFile mcaFile = alreadyLoaded.computeIfAbsent(MCAUtil.createNameFromChunkLocation(chunkX, chunkZ), n -> {
+            try {
+                return MCAUtil.read(new File(regionFolder.getFolderPath(), n));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
         if (mcaFile != null) {
             net.querz.mca.Chunk fileChunk = mcaFile.getChunk(chunkX, chunkZ);
             if (fileChunk != null) {
@@ -99,6 +106,8 @@ public class AnvilChunkLoader implements IChunkLoader {
         }
         return null;
     }
+
+    // TODO: find a way to unload MCAFiles when an entire region is unloaded
 
     @Override
     public void saveChunk(Chunk chunk, Runnable callback) {
