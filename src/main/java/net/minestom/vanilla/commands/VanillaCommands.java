@@ -18,7 +18,9 @@ public enum VanillaCommands {
     DIFFICULTY(DifficultyCommand::new),
     ME(MeCommand::new),
     STOP(StopCommand::new),
-    HELP(HelpCommand::new);
+    HELP(HelpCommand::new),
+    SAVE_ALL(SaveAllCommand::new),
+    ;
 
     private final Supplier<Command<? extends CommandSender>> commandCreator;
 

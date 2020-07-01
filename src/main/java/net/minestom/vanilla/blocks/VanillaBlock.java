@@ -19,7 +19,7 @@ public abstract class VanillaBlock extends CustomBlock {
 
     private final Block baseBlock;
     private final BlockPropertyList properties;
-    protected final BlockStates blockStates;
+    private final BlockStates blockStates;
     private final BlockState baseBlockState;
 
     public VanillaBlock(Block baseBlock) {
@@ -125,5 +125,9 @@ public abstract class VanillaBlock extends CustomBlock {
      */
     public Data readTileEntity(CompoundTag nbt, Instance instance, BlockPosition position, Data originalData) {
         return originalData;
+    }
+
+    public BlockStates getBlockStates() {
+        return blockStates;
     }
 }

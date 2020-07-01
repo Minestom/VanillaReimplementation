@@ -1,5 +1,6 @@
 package net.minestom.vanilla.blocks;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ public class BlockState {
 
     public BlockState(short blockId, BlockStates parent, String... propertyList) {
         this.blockId = blockId;
-        this.properties = new HashMap<>();
+        Map<String, String> properties = new HashMap<>();
         this.parent = parent;
         for(String property : propertyList) {
             String[] parts = property.split("=");
@@ -22,6 +23,8 @@ public class BlockState {
             String value = parts[1];
             properties.put(key, value);
         }
+
+        this.properties = Collections.unmodifiableMap(properties);
     }
 
     public short getBlockId() {
@@ -40,6 +43,10 @@ public class BlockState {
             throw new IllegalArgumentException("Property '" + key + "' does not exist in blockstate "+this);
         }
         return result;
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
     }
 
     /**

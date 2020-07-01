@@ -34,7 +34,7 @@ public class TrappedChestBlock extends ChestLikeBlock {
 
     @Override
     protected Inventory getInventory(Player player, BlockPosition blockPosition, Data data) {
-        BlockState state = blockStates.fromStateID(player.getInstance().getBlockId(blockPosition));
+        BlockState state = getBlockStates().fromStateID(player.getInstance().getBlockId(blockPosition));
         String type = state.get("type");
 
         Inventory selfInventory = ((ChestBlockEntity) data).getInventory();

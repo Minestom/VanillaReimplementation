@@ -24,6 +24,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.storage.StorageManager;
+import net.minestom.server.timer.TaskRunnable;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.Position;
 import net.minestom.server.utils.Vector;
@@ -82,6 +83,18 @@ public class PlayerInit {
         };
         overworld.addEventCallback(AddEntityToInstanceEvent.class, callback);
         nether.addEventCallback(AddEntityToInstanceEvent.class, callback);
+
+        MinecraftServer.getSchedulerManager().addShutdownTask(new TaskRunnable() {
+            @Override
+            public void run() {
+                try {
+                    overworld.saveInstance(() -> System.out.println("Overworld saved"));
+                    nether.saveInstance(() -> System.out.println("Nether saved"));
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     public static void init() {
