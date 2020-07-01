@@ -1,5 +1,7 @@
 package net.minestom.vanilla.blocks;
 
+import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -14,7 +16,8 @@ public class BlockStates {
      * Map that stores a comma-separated list of properties, sorted by alphabetical order as key,
      * and the corresponding block state as value
      */
-    private final Map<String, BlockState> lookup = new HashMap<>();
+    private final Map<String, BlockState> nameLookup = new HashMap<>();
+    private final Short2ObjectOpenHashMap<BlockState> idLookup = new Short2ObjectOpenHashMap<>();
     private final BlockPropertyList properties;
 
     public BlockStates(BlockPropertyList properties) {
@@ -30,7 +33,8 @@ public class BlockStates {
         String lookupKey = properties.computeSortedList().stream()
                 .map(property -> property.getKey()+"="+blockState.get(property.getKey()))
                 .collect(Collectors.joining(","));
-        lookup.put(lookupKey, blockState);
+        nameLookup.put(lookupKey, blockState);
+        idLookup.put(blockState.getBlockId(), blockState);
     }
 
     /**
@@ -44,7 +48,16 @@ public class BlockStates {
                 .sorted(Comparator.comparing(Map.Entry::getKey))
                 .map(entry -> entry.getKey()+"="+entry.getValue())
                 .collect(Collectors.joining(","));
-        return lookup.get(lookupKey);
+        return nameLookup.get(lookupKey);
+    }
+
+    /**
+     * Gets a BlockState based on its protocol id. Return {@link #getDefault()} if none found
+     * @param id
+     * @return
+     */
+    public BlockState fromStateID(short id) {
+        return idLookup.getOrDefault(id, getDefault());
     }
 
     /**
@@ -66,7 +79,7 @@ public class BlockStates {
                     return prefix+entry.getValue();
                 })
                 .collect(Collectors.joining(","));
-        return lookup.get(lookupKey);
+        return nameLookup.get(lookupKey);
     }
 
     public BlockState getDefault() {

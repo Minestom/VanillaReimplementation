@@ -19,7 +19,7 @@ public abstract class VanillaBlock extends CustomBlock {
 
     private final Block baseBlock;
     private final BlockPropertyList properties;
-    private final BlockStates blockStates;
+    protected final BlockStates blockStates;
     private final BlockState baseBlockState;
 
     public VanillaBlock(Block baseBlock) {

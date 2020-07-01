@@ -6,9 +6,13 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.utils.BlockPosition;
+import net.minestom.server.utils.Direction;
 import net.minestom.vanilla.blockentity.ChestBlockEntity;
+import net.minestom.vanilla.inventory.DoubleChestInventory;
 
 public class TrappedChestBlock extends ChestLikeBlock {
+    // TODO: redstone signal
+
     public TrappedChestBlock() {
         super(Block.TRAPPED_CHEST);
     }
@@ -30,6 +34,41 @@ public class TrappedChestBlock extends ChestLikeBlock {
 
     @Override
     protected Inventory getInventory(Player player, BlockPosition blockPosition, Data data) {
-        return ((ChestBlockEntity)data).getInventory();
+        BlockState state = blockStates.fromStateID(player.getInstance().getBlockId(blockPosition));
+        String type = state.get("type");
+
+        Inventory selfInventory = ((ChestBlockEntity) data).getInventory();
+
+        BlockPosition positionOfOtherChest = blockPosition.clone();
+        Direction facing = Direction.valueOf(state.get("facing").toUpperCase());
+        switch (type) {
+            case "single":
+                return selfInventory;
+
+            case "left":
+                positionOfOtherChest.add(-facing.normalZ(), 0, facing.normalX());
+                break;
+
+            case "right":
+                positionOfOtherChest.add(facing.normalZ(), 0, facing.normalX()*-1);
+                break;
+
+            default:
+                throw new IllegalArgumentException("Invalid chest type: "+type);
+        }
+
+        Data otherData = player.getInstance().getBlockData(positionOfOtherChest);
+        if(otherData instanceof ChestBlockEntity) {
+            Inventory otherInventory = ((ChestBlockEntity) otherData).getInventory();
+            switch (type) {
+                case "left":
+                    return new DoubleChestInventory(otherInventory, selfInventory, "Chest"); // TODO: custom name
+
+                case "right":
+                    return new DoubleChestInventory(selfInventory, otherInventory, "Chest"); // TODO: custom name
+            }
+        }
+
+        return selfInventory;
     }
 }
