@@ -31,7 +31,7 @@ public abstract class ChestLikeBlock extends VanillaBlock {
 
     @Override
     protected BlockPropertyList createPropertyValues() {
-        return new BlockPropertyList().directionProperty("facing").booleanProperty("waterlogged");
+        return new BlockPropertyList().facingProperty("facing").booleanProperty("waterlogged");
     }
 
     @Override

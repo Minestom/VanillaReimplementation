@@ -96,6 +96,10 @@ public class BlockPropertyList {
         return property(key, "north", "east", "south", "west", "up", "down");
     }
 
+    public BlockPropertyList facingProperty(String key) {
+        return property(key, "north", "east", "south", "west");
+    }
+
     public boolean isEmpty() {
         return properties.isEmpty();
     }
