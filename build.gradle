@@ -11,12 +11,15 @@ sourceCompatibility = 1.11
 repositories {
     mavenCentral()
     maven { url 'https://jitpack.io' }
+     maven { url 'https://libraries.minecraft.net' }
 
 }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+     api 'io.netty:netty-handler:4.1.45.Final'
+     api 'io.netty:netty-codec:4.1.45.Final'
 
-    api 'com.github.Minestom:Minestom:b98232eab6'
+    api 'com.github.Minestom:Minestom:aa689d0df0'
     implementation 'com.github.Querz:NBT:5.2'
 }
