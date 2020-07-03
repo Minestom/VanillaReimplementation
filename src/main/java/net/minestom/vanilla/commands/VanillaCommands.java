@@ -20,6 +20,7 @@ public enum VanillaCommands {
     STOP(StopCommand::new),
     HELP(HelpCommand::new),
     SAVE_ALL(SaveAllCommand::new),
+    SUMMON(SummonCommand::new),
     ;
 
     private final Supplier<Command<? extends CommandSender>> commandCreator;
