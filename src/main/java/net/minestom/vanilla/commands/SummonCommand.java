@@ -4,12 +4,13 @@ import fr.themode.command.Command;
 import fr.themode.command.Arguments;
 import fr.themode.command.arguments.Argument; 
 import fr.themode.command.arguments.ArgumentType; 
-import net.minestom.server.entity.type.*; 
+import net.minestom.server.entity.type.*;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Entity; 
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.ExperienceOrb; 
 import net.minestom.server.utils.Position; 
+import net.minestom.server.instance.Instance;
 
 
 
@@ -27,6 +28,7 @@ import net.minestom.server.utils.Position;
  * </p> 
  *
  * TODO: allow the user to specify a compound NBT tag  
+ * TODO: implement relative positioning arguments.  
  * see: <a href="https://minecraft.gamepedia.com/Commands/summon">
  */
 public class SummonCommand extends Command<Player> { 
@@ -66,10 +68,11 @@ public class SummonCommand extends Command<Player> {
         assert entityType != null;
 
         Position pos = player.getPosition();  
+        Instance instance = player.getInstance(); 
 
         Entity summoned = createEntity( entityType, pos ); 
-        summoned.addViewer(player); 
-        summoned.setAutoViewable(true);
+        summoned.setInstance( instance ); 
+
 
         player.sendMessage("Summoned a " + entityName );
     } 
@@ -92,10 +95,10 @@ public class SummonCommand extends Command<Player> {
         float z = arguments.getFloat("z"); 
 
         Position pos = new Position( x, y, z ); 
+        Instance instance = player.getInstance(); 
 
         Entity summoned = createEntity( entityType, pos ); 
-        summoned.addViewer(player); 
-        summoned.setAutoViewable(true);
+        summoned.setInstance( instance ); 
         
         player.sendMessage("Summoned a " + entityName );
     }
@@ -114,6 +117,12 @@ public class SummonCommand extends Command<Player> {
 
     /** 
      * Spawn a new enitty based on the entity type. 
+     * @param entityType - the type of entity to spawn.
+     * @param pos - the position of the entity to spawn. 
+     *
+     * <p> All of the entities that are implemented in the vanillia 
+     * reimplementation are here. But there are more entities 
+     * that will need to be added once they are implemented. </p>   
      */
     private Entity createEntity( EntityType entityType, Position pos ){
         Entity result = null; 
