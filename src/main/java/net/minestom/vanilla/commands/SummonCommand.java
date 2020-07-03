@@ -16,7 +16,7 @@ import net.minestom.server.utils.Position;
 /**
  * Command that spawns a specifed entity. 
  *
- * <p> Usage: /summon \<entity\> [pos] [nbt] <br> 
+ * <p> Usage: <pre>/summon &lt;entity&gt; [pos] [nbt]<pre> <br> 
  * where pos and nbt are  optional arguments, 
  * and entity is required.
  *
