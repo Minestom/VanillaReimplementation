@@ -158,7 +158,7 @@ public class SummonCommand extends Command<Player> {
             case PIG:
                 result = new EntityPig(pos); 
                 break;
-            case ZOMBIE_PIGMAN:
+            case ZOMBIFIED_PIGLIN:
                 result = new EntityPigZombie(pos); 
                 break;
             case POLAR_BEAR:

@@ -1,7 +1,6 @@
 package net.minestom.vanilla.commands;
 
 import fr.themode.command.Command;
-import io.netty.handler.codec.stomp.StompCommand;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
