@@ -68,6 +68,7 @@ public class SummonCommand extends Command<Player> {
         Position pos = player.getPosition();  
 
         Entity summoned = createEntity( entityType, pos ); 
+        summoned.addViewer(player); 
         summoned.setAutoViewable(true);
 
         player.sendMessage("Summoned a " + entityName );
@@ -93,6 +94,7 @@ public class SummonCommand extends Command<Player> {
         Position pos = new Position( x, y, z ); 
 
         Entity summoned = createEntity( entityType, pos ); 
+        summoned.addViewer(player); 
         summoned.setAutoViewable(true);
         
         player.sendMessage("Summoned a " + entityName );
