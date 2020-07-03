@@ -32,3 +32,7 @@ out/
 # Minestom
 /minecraft_data/
 /.minestom_tmp/
+.classpath
+.project
+.settings/org.eclipse.buildship.core.prefs
+.settings/org.eclipse.jdt.core.prefs
