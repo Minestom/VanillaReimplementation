@@ -8,34 +8,22 @@ import net.minestom.server.instance.IChunkLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.batch.ChunkBatch;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.instance.block.CustomBlock;
-import net.minestom.server.network.packet.PacketWriter;
 import net.minestom.server.registry.Registries;
 import net.minestom.server.storage.StorageFolder;
 import net.minestom.server.utils.BlockPosition;
-import net.minestom.server.utils.SerializerUtils;
-import net.minestom.server.utils.chunk.ChunkUtils;
-import net.minestom.server.utils.nbt.NbtWriter;
-import net.minestom.vanilla.blocks.BlockState;
-import net.minestom.vanilla.blocks.BlockStates;
 import net.minestom.vanilla.blocks.VanillaBlock;
-import net.querz.mca.MCAFile;
-import net.querz.mca.MCAUtil;
-import net.querz.mca.Section;
-import net.querz.nbt.io.NBTDeserializer;
-import net.querz.nbt.tag.CompoundTag;
-import net.querz.nbt.tag.ListTag;
-import net.querz.nbt.tag.Tag;
+import org.jglrxavpok.hephaistos.mca.*;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
@@ -43,8 +31,7 @@ public class AnvilChunkLoader implements IChunkLoader {
     private final static Logger LOGGER = LoggerFactory.getLogger(AnvilChunkLoader.class);
 
     private StorageFolder regionFolder;
-    private ConcurrentHashMap<String, MCAFile> alreadyLoaded = new ConcurrentHashMap<>();
-    private NBTDeserializer nbtDeserializer = new NBTDeserializer();
+    private ConcurrentHashMap<String, RegionFile> alreadyLoaded = new ConcurrentHashMap<>();
 
     public AnvilChunkLoader(StorageFolder regionFolder) {
         this.regionFolder = regionFolder;
@@ -56,22 +43,26 @@ public class AnvilChunkLoader implements IChunkLoader {
         try {
             Chunk chunk = loadMCA(instance, chunkX, chunkZ, callback);
             return chunk != null;
-        } catch (IOException e) {
+        } catch (IOException | AnvilException e) {
             e.printStackTrace();
         }
         return false;
     }
 
-    private Chunk loadMCA(Instance instance, int chunkX, int chunkZ, Consumer<Chunk> callback) throws IOException {
-        MCAFile mcaFile = getMCAFile(chunkX, chunkZ);
+    private Chunk loadMCA(Instance instance, int chunkX, int chunkZ, Consumer<Chunk> callback) throws IOException, AnvilException {
+        RegionFile mcaFile = getMCAFile(chunkX, chunkZ);
         if (mcaFile != null) {
-            net.querz.mca.Chunk fileChunk = mcaFile.getChunk(chunkX, chunkZ);
+            ChunkColumn fileChunk = mcaFile.getChunk(chunkX, chunkZ);
             if (fileChunk != null) {
                 Biome[] biomes = new Biome[Chunk.BIOME_COUNT];
                 int[] fileChunkBiomes = fileChunk.getBiomes();
                 for (int i = 0; i < fileChunkBiomes.length; i++) {
                     int id = fileChunkBiomes[i];
-                    biomes[i] = Biome.fromId(id);
+                    Biome biome = Biome.fromId(id);
+                    if(biome == null) {
+                        biome = Biome.THE_VOID;
+                    }
+                    biomes[i] = biome;
                 }
                 Chunk loadedChunk = new Chunk(biomes, chunkX, chunkZ);
                 ChunkBatch batch = instance.createChunkBatch(loadedChunk);
@@ -88,20 +79,22 @@ public class AnvilChunkLoader implements IChunkLoader {
         return null;
     }
 
-    private MCAFile getMCAFile(int chunkX, int chunkZ) {
-        return alreadyLoaded.computeIfAbsent(MCAUtil.createNameFromChunkLocation(chunkX, chunkZ), n -> {
+    private RegionFile getMCAFile(int chunkX, int chunkZ) {
+        int regionX = CoordinatesKt.chunkToRegion(chunkX);
+        int regionZ = CoordinatesKt.chunkToRegion(chunkZ);
+        return alreadyLoaded.computeIfAbsent(RegionFile.Companion.createFileName(regionX, regionZ), n -> {
             try {
-                return MCAUtil.read(new File(regionFolder.getFolderPath(), n));
-            } catch (IOException e) {
+                return new RegionFile(new RandomAccessFile(new File(regionFolder.getFolderPath(), n), "rw"), regionX, regionZ);
+            } catch (IOException | AnvilException e) {
                 e.printStackTrace();
                 return null;
             }
         });
     }
 
-    private void loadTileEntities(Chunk loadedChunk, int chunkX, int chunkZ, Instance instance, net.querz.mca.Chunk fileChunk) {
+    private void loadTileEntities(Chunk loadedChunk, int chunkX, int chunkZ, Instance instance, ChunkColumn fileChunk) {
         BlockPosition pos = new BlockPosition(0,0,0);
-        for(CompoundTag te : fileChunk.getTileEntities()) {
+        for(NBTCompound te : fileChunk.getTileEntities()) {
             String tileEntityID = te.getString("id");
             int x = te.getInt("x")+chunkX*16;
             int y = te.getInt("y");
@@ -120,18 +113,13 @@ public class AnvilChunkLoader implements IChunkLoader {
         }
     }
 
-    private void loadBlocks(Instance instance, int chunkX, int chunkZ, ChunkBatch batch, net.querz.mca.Chunk fileChunk) {
+    private void loadBlocks(Instance instance, int chunkX, int chunkZ, ChunkBatch batch, ChunkColumn fileChunk) {
         for (int x = 0; x < Chunk.CHUNK_SIZE_X; x++) {
             for (int z = 0; z < Chunk.CHUNK_SIZE_Z; z++) {
                 for (int y = 0; y < Chunk.CHUNK_SIZE_Y; y++) {
                     try {
-                        CompoundTag blockState = fileChunk.getBlockStateAt(x, y, z);
-                        if (blockState == null) {
-                            continue;
-                        }
-                        String name = blockState.get("Name").valueToString();
-                        name = name.substring(1, name.length()-1); // trim quotes
-                        Block rBlock = Registries.getBlock(name);
+                        BlockState blockState = fileChunk.getBlockState(x, y, z);
+                        Block rBlock = Registries.getBlock(blockState.getName());
 
                         short customBlockId = 0;
                         Data data = null;
@@ -141,12 +129,10 @@ public class AnvilChunkLoader implements IChunkLoader {
 
                             data = customBlock.createData(instance, new BlockPosition(x+chunkX*16, y, z+chunkZ*16), null);
                         }
-                        if (blockState.getCompoundTag("Properties") != null) {
-                            CompoundTag properties = blockState.getCompoundTag("Properties");
+                        if (!blockState.getProperties().isEmpty()) {
                             List<String> propertiesArray = new ArrayList<>();
-                            properties.forEach((key, value2) -> {
-                                Tag<String> value = (Tag<String>) value2;
-                                propertiesArray.add(key + "=" + value.valueToString().replace("\"", ""));
+                            blockState.getProperties().forEach((key, value2) -> {
+                                propertiesArray.add(key + "=" + value2.replace("\"", ""));
                             });
                             Collections.sort(propertiesArray);
                             short block = rBlock.withProperties(propertiesArray.toArray(new String[0]));
@@ -163,8 +149,6 @@ public class AnvilChunkLoader implements IChunkLoader {
                                 batch.setBlock(x, y, z, rBlock.getBlockId());
                             }
                         }
-                    } catch (NullPointerException ignored) {
-
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -177,7 +161,7 @@ public class AnvilChunkLoader implements IChunkLoader {
 
     @Override
     public void saveChunk(Chunk chunk, Runnable callback) {
-        int chunkX = chunk.getChunkX();
+      /*  int chunkX = chunk.getChunkX();
         int chunkZ = chunk.getChunkZ();
         MCAFile mcaFile;
         synchronized (alreadyLoaded) {
@@ -206,12 +190,12 @@ public class AnvilChunkLoader implements IChunkLoader {
             e.printStackTrace();
             LOGGER.error("AAAA", e);
         }
-
+*/
         if(callback != null)
             callback.run();
     }
 
-    private void saveTileEntities(Chunk chunk, net.querz.mca.Chunk fileChunk) {
+  /*  private void saveTileEntities(Chunk chunk, net.querz.mca.Chunk fileChunk) {
         ListTag<CompoundTag> tileEntities = new ListTag<>(CompoundTag.class);
         BlockPosition position = new BlockPosition(0, 0, 0);
 
@@ -291,5 +275,5 @@ public class AnvilChunkLoader implements IChunkLoader {
                 }
             }
         }
-    }
+    }*/
 }

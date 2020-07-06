@@ -7,7 +7,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.vanilla.system.EnderChestSystem;
-import net.querz.nbt.tag.CompoundTag;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 public class EnderChestBlock extends ChestLikeBlock {
     public EnderChestBlock() {
@@ -25,7 +25,7 @@ public class EnderChestBlock extends ChestLikeBlock {
     }
 
     @Override
-    public Data readTileEntity(CompoundTag nbt, Instance instance, BlockPosition position, Data originalData) {
+    public Data readTileEntity(NBTCompound nbt, Instance instance, BlockPosition position, Data originalData) {
         return null;
     }
 }

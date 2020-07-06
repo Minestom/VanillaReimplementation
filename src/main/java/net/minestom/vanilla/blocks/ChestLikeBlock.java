@@ -14,9 +14,9 @@ import net.minestom.server.utils.Position;
 import net.minestom.server.utils.nbt.NbtWriter;
 import net.minestom.vanilla.blockentity.ChestBlockEntity;
 import net.minestom.vanilla.gamedata.NBTUtils;
-import net.minestom.vanilla.system.EnderChestSystem;
-import net.querz.nbt.tag.CompoundTag;
-import net.querz.nbt.tag.ListTag;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.jglrxavpok.hephaistos.nbt.NBTList;
+import org.jglrxavpok.hephaistos.nbt.NBTTypes;
 
 import java.util.Random;
 
@@ -76,7 +76,7 @@ public abstract class ChestLikeBlock extends VanillaBlock {
     protected abstract Inventory getInventory(Player player, BlockPosition blockPosition, Data data);
 
     @Override
-    public Data readTileEntity(CompoundTag nbt, Instance instance, BlockPosition position, Data originalData) {
+    public Data readTileEntity(NBTCompound nbt, Instance instance, BlockPosition position, Data originalData) {
         ChestBlockEntity data;
         if(originalData instanceof ChestBlockEntity) {
             data = (ChestBlockEntity) originalData;
@@ -89,7 +89,7 @@ public abstract class ChestLikeBlock extends VanillaBlock {
         // TODO: LootTable
         // TODO: LootTableSeed
 
-        NBTUtils.loadAllItems(nbt.getListTag("Items").asCompoundTagList(), data.getInventory());
+        NBTUtils.loadAllItems(nbt.getList("Items"), data.getInventory());
         return data;
     }
 
@@ -101,9 +101,9 @@ public abstract class ChestLikeBlock extends VanillaBlock {
         // TODO: LootTableSeed
         if(blockData instanceof ChestBlockEntity) {
             ChestBlockEntity data = (ChestBlockEntity) blockData;
-            ListTag<CompoundTag> list = new ListTag<>(CompoundTag.class);
+            NBTList<NBTCompound> list = new NBTList<>(NBTTypes.TAG_Compound);
             NBTUtils.saveAllItems(list, data.getInventory());
-            NBTUtils.writeTag(nbt, "Items", list);
+           // TODO NBTUtils.writeTag(nbt, "Items", list);
         }
     }
 }
