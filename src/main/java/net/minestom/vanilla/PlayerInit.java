@@ -14,6 +14,7 @@ import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.gamedata.loottables.LootTable;
 import net.minestom.server.gamedata.loottables.LootTableManager;
 import net.minestom.server.instance.ExplosionSupplier;
@@ -98,6 +99,9 @@ public class PlayerInit {
     }
 
     public static void init() {
+        // TODO: turn off if offline mode is set to true
+        MojangAuth.init();
+
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
 
         connectionManager.addPlayerInitialization(player -> {

@@ -11,15 +11,12 @@ sourceCompatibility = 1.11
 
 repositories {
     mavenCentral()
+    maven { url 'https://libraries.minecraft.net/' }
     maven { url 'https://jitpack.io' }
-
 }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
-    api 'com.github.Minestom:Minestom:b98232eab6'
-
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    implementation 'com.github.jglrxavpok:Hephaistos:v1.0.3'
+    api 'com.github.Minestom:Minestom:9bc4915d6c'
 }

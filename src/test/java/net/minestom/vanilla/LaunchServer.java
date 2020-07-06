@@ -64,8 +64,7 @@ public class LaunchServer {
         });
 
         minecraftServer.start("localhost", 55555, (playerConnection, responseData) -> {
-            responseData.setName("1.15.2");
-            responseData.setProtocol(578);
+            responseData.setName("1.16.1");
             responseData.setMaxPlayer(100);
             responseData.setOnline(MinecraftServer.getConnectionManager().getOnlinePlayers().size());
             responseData.setDescription("Test server for Minestom vanilla reimplementation");

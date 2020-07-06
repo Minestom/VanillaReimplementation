@@ -105,7 +105,7 @@ public class AnvilChunkLoader implements IChunkLoader {
                 pos.setY(y);
                 pos.setZ(z);
                 Data data = loadedChunk.getData(x, y, z);
-                data = ((VanillaBlock) block).readTileEntity(te, instance, pos, data);
+                data = ((VanillaBlock) block).readBlockEntity(te, instance, pos, data);
                 loadedChunk.setBlockData(x, y, z, data);
             } else if(tileEntityID.equals("minecraft:chest")) {
                 System.err.println("ouch "+block);

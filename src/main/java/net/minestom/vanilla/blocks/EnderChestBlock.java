@@ -25,7 +25,7 @@ public class EnderChestBlock extends ChestLikeBlock {
     }
 
     @Override
-    public Data readTileEntity(NBTCompound nbt, Instance instance, BlockPosition position, Data originalData) {
+    public Data readBlockEntity(NBTCompound nbt, Instance instance, BlockPosition position, Data originalData) {
         return null;
     }
 }
