@@ -84,7 +84,11 @@ public class AnvilChunkLoader implements IChunkLoader {
         int regionZ = CoordinatesKt.chunkToRegion(chunkZ);
         return alreadyLoaded.computeIfAbsent(RegionFile.Companion.createFileName(regionX, regionZ), n -> {
             try {
-                return new RegionFile(new RandomAccessFile(new File(regionFolder.getFolderPath(), n), "rw"), regionX, regionZ);
+                File regionFile = new File(regionFolder.getFolderPath(), n);
+                if(!regionFile.exists()) {
+                    return null;
+                }
+                return new RegionFile(new RandomAccessFile(regionFile, "rw"), regionX, regionZ);
             } catch (IOException | AnvilException e) {
                 e.printStackTrace();
                 return null;
