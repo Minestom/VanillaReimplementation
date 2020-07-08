@@ -4,6 +4,7 @@ import fr.themode.command.Command;
 import fr.themode.command.Arguments;
 import fr.themode.command.arguments.Argument; 
 import fr.themode.command.arguments.ArgumentType; 
+import fr.themode.command.coordinate.Coordinate;
 import net.minestom.server.entity.type.*;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Entity; 
@@ -28,8 +29,7 @@ import net.minestom.server.instance.Instance;
  * </p> 
  *
  * TODO: allow the user to specify a compound NBT tag  
- * TODO: implement relative positioning arguments.  
- * see: <a href="https://minecraft.gamepedia.com/Commands/summon">
+ * see: <a href="https://minecraft.gamepedia.com/Commands/summon">summon command</a>. 
  */
 public class SummonCommand extends Command<Player> { 
 
@@ -45,12 +45,10 @@ public class SummonCommand extends Command<Player> {
             names[i] = entities[i].name().toLowerCase();
         }
         Argument entity = ArgumentType.Word("entity").from(names); 
-        Argument x = ArgumentType.Float("x");  
-        Argument y = ArgumentType.Float("y"); 
-        Argument z = ArgumentType.Float("z"); 
+        Argument pos = ArgumentType.Coordinate("pos"); 
 
         addSyntax( this::executeHere, entity ); 
-        addSyntax( this::executeThere, entity, x, y, z); 
+        addSyntax( this::executeThere, entity, pos); 
         //addSyntax( this::execute, entity, pos, nbt)
     }
 
@@ -73,7 +71,6 @@ public class SummonCommand extends Command<Player> {
         Entity summoned = createEntity( entityType, pos ); 
         summoned.setInstance( instance ); 
 
-
         player.sendMessage("Summoned a " + entityName );
     } 
 
@@ -90,12 +87,13 @@ public class SummonCommand extends Command<Player> {
         EntityType entityType  = EntityType.valueOf( entityName.toUpperCase()); 
         assert entityType != null;
 
-        float x = arguments.getFloat("x");  
-        float y = arguments.getFloat("y"); 
-        float z = arguments.getFloat("z"); 
+        Coordinate coordinate = arguments.getCoordinate("pos"); 
 
-        Position pos = new Position( x, y, z ); 
+        Position pos = player.getPosition();  
         Instance instance = player.getInstance(); 
+
+        float[] coords = coordinate.getAbsolute( pos.getX(), pos.getY(), pos.getZ() ); 
+        pos = new Position( coords[0], coords[1], coords[2] ); 
 
         Entity summoned = createEntity( entityType, pos ); 
         summoned.setInstance( instance ); 
@@ -120,8 +118,8 @@ public class SummonCommand extends Command<Player> {
      * @param entityType - the type of entity to spawn.
      * @param pos - the position of the entity to spawn. 
      *
-     * <p> All of the entities that are implemented in the vanillia 
-     * reimplementation are here. But there are more entities 
+     * <p> All of the entities that are implemented in minestom
+     * are here. But there are more entities 
      * that will need to be added once they are implemented. </p>   
      */
     private Entity createEntity( EntityType entityType, Position pos ){

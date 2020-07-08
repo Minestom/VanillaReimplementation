@@ -11,8 +11,7 @@ sourceCompatibility = 1.11
 repositories {
     mavenCentral()
     maven { url 'https://jitpack.io' }
-     maven { url 'https://libraries.minecraft.net' }
-
+    maven { url 'https://libraries.minecraft.net' }
 }
 
 dependencies {
@@ -20,6 +19,6 @@ dependencies {
      api 'io.netty:netty-handler:4.1.45.Final'
      api 'io.netty:netty-codec:4.1.45.Final'
 
-    api 'com.github.Minestom:Minestom:aa689d0df0'
+    api 'com.github.Minestom:Minestom:3e9194b5ec'
     implementation 'com.github.Querz:NBT:5.2'
 }
