@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'net.ltgt.apt' version '0.10'
+    id 'org.jetbrains.kotlin.jvm' version '1.3.72'
 }
 
 group 'net.minestom.vanilla'
@@ -10,8 +11,8 @@ sourceCompatibility = 1.11
 
 repositories {
     mavenCentral()
+    maven { url 'https://libraries.minecraft.net/' }
     maven { url 'https://jitpack.io' }
-    maven { url 'https://libraries.minecraft.net' }
 }
 
 dependencies {
@@ -19,6 +20,5 @@ dependencies {
      api 'io.netty:netty-handler:4.1.45.Final'
      api 'io.netty:netty-codec:4.1.45.Final'
 
-    api 'com.github.Minestom:Minestom:3e9194b5ec'
-    implementation 'com.github.Querz:NBT:5.2'
+    api 'com.github.Minestom:Minestom:53d39dbcb8'
 }

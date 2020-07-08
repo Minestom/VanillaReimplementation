@@ -8,22 +8,30 @@ import net.minestom.server.instance.IChunkLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.batch.ChunkBatch;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.BlockManager;
+import net.minestom.server.instance.block.BlockAlternative;
 import net.minestom.server.instance.block.CustomBlock;
 import net.minestom.server.registry.Registries;
 import net.minestom.server.storage.StorageFolder;
 import net.minestom.server.utils.BlockPosition;
+import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.vanilla.blocks.VanillaBlock;
-import net.querz.mca.MCAFile;
-import net.querz.mca.MCAUtil;
-import net.querz.nbt.tag.CompoundTag;
-import net.querz.nbt.tag.Tag;
+import org.jglrxavpok.hephaistos.mca.AnvilException;
+import org.jglrxavpok.hephaistos.mca.ChunkColumn;
+import org.jglrxavpok.hephaistos.mca.CoordinatesKt;
+import org.jglrxavpok.hephaistos.mca.RegionFile;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.jglrxavpok.hephaistos.nbt.NBTList;
+import org.jglrxavpok.hephaistos.nbt.NBTTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
@@ -31,7 +39,7 @@ public class AnvilChunkLoader implements IChunkLoader {
     private final static Logger LOGGER = LoggerFactory.getLogger(AnvilChunkLoader.class);
 
     private StorageFolder regionFolder;
-    private ConcurrentHashMap<String, MCAFile> alreadyLoaded = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, RegionFile> alreadyLoaded = new ConcurrentHashMap<>();
 
     public AnvilChunkLoader(StorageFolder regionFolder) {
         this.regionFolder = regionFolder;
@@ -43,29 +51,26 @@ public class AnvilChunkLoader implements IChunkLoader {
         try {
             Chunk chunk = loadMCA(instance, chunkX, chunkZ, callback);
             return chunk != null;
-        } catch (IOException e) {
+        } catch (IOException | AnvilException e) {
             e.printStackTrace();
         }
         return false;
     }
 
-    private Chunk loadMCA(Instance instance, int chunkX, int chunkZ, Consumer<Chunk> callback) throws IOException {
-        MCAFile mcaFile = alreadyLoaded.computeIfAbsent(MCAUtil.createNameFromChunkLocation(chunkX, chunkZ), n -> {
-            try {
-                return MCAUtil.read(new File(regionFolder.getFolderPath(), n));
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
-        });
+    private Chunk loadMCA(Instance instance, int chunkX, int chunkZ, Consumer<Chunk> callback) throws IOException, AnvilException {
+        RegionFile mcaFile = getMCAFile(chunkX, chunkZ);
         if (mcaFile != null) {
-            net.querz.mca.Chunk fileChunk = mcaFile.getChunk(chunkX, chunkZ);
+            ChunkColumn fileChunk = mcaFile.getChunk(chunkX, chunkZ);
             if (fileChunk != null) {
                 Biome[] biomes = new Biome[Chunk.BIOME_COUNT];
                 int[] fileChunkBiomes = fileChunk.getBiomes();
                 for (int i = 0; i < fileChunkBiomes.length; i++) {
                     int id = fileChunkBiomes[i];
-                    biomes[i] = Biome.fromId(id);
+                    Biome biome = Biome.fromId(id);
+                    if(biome == null) {
+                        biome = Biome.THE_VOID;
+                    }
+                    biomes[i] = biome;
                 }
                 Chunk loadedChunk = new Chunk(biomes, chunkX, chunkZ);
                 ChunkBatch batch = instance.createChunkBatch(loadedChunk);
@@ -73,6 +78,7 @@ public class AnvilChunkLoader implements IChunkLoader {
                 batch.flush(c -> {
                     callback.accept(c);
                     loadTileEntities(c, chunkX, chunkZ, instance, fileChunk);
+                    // TODO: Other elements to load
                 });
 
                 return loadedChunk;
@@ -81,9 +87,26 @@ public class AnvilChunkLoader implements IChunkLoader {
         return null;
     }
 
-    private void loadTileEntities(Chunk loadedChunk, int chunkX, int chunkZ, Instance instance, net.querz.mca.Chunk fileChunk) {
+    private RegionFile getMCAFile(int chunkX, int chunkZ) {
+        int regionX = CoordinatesKt.chunkToRegion(chunkX);
+        int regionZ = CoordinatesKt.chunkToRegion(chunkZ);
+        return alreadyLoaded.computeIfAbsent(RegionFile.Companion.createFileName(regionX, regionZ), n -> {
+            try {
+                File regionFile = new File(regionFolder.getFolderPath(), n);
+                if(!regionFile.exists()) {
+                    return null;
+                }
+                return new RegionFile(new RandomAccessFile(regionFile, "rw"), regionX, regionZ);
+            } catch (IOException | AnvilException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
+    }
+
+    private void loadTileEntities(Chunk loadedChunk, int chunkX, int chunkZ, Instance instance, ChunkColumn fileChunk) {
         BlockPosition pos = new BlockPosition(0,0,0);
-        for(CompoundTag te : fileChunk.getTileEntities()) {
+        for(NBTCompound te : fileChunk.getTileEntities()) {
             String tileEntityID = te.getString("id");
             int x = te.getInt("x")+chunkX*16;
             int y = te.getInt("y");
@@ -94,26 +117,19 @@ public class AnvilChunkLoader implements IChunkLoader {
                 pos.setY(y);
                 pos.setZ(z);
                 Data data = loadedChunk.getData(x, y, z);
-                data = ((VanillaBlock) block).readTileEntity(te, instance, pos, data);
+                data = ((VanillaBlock) block).readBlockEntity(te, instance, pos, data);
                 loadedChunk.setBlockData(x, y, z, data);
-            } else if(tileEntityID.equals("minecraft:chest")) {
-                System.err.println("ouch "+block);
             }
         }
     }
 
-    private void loadBlocks(Instance instance, int chunkX, int chunkZ, ChunkBatch batch, net.querz.mca.Chunk fileChunk) {
+    private void loadBlocks(Instance instance, int chunkX, int chunkZ, ChunkBatch batch, ChunkColumn fileChunk) {
         for (int x = 0; x < Chunk.CHUNK_SIZE_X; x++) {
             for (int z = 0; z < Chunk.CHUNK_SIZE_Z; z++) {
                 for (int y = 0; y < Chunk.CHUNK_SIZE_Y; y++) {
                     try {
-                        CompoundTag blockState = fileChunk.getBlockStateAt(x, y, z);
-                        if (blockState == null) {
-                            continue;
-                        }
-                        String name = blockState.get("Name").valueToString();
-                        name = name.substring(1, name.length()-1); // trim quotes
-                        Block rBlock = Registries.getBlock(name);
+                        org.jglrxavpok.hephaistos.mca.BlockState blockState = fileChunk.getBlockState(x, y, z);
+                        Block rBlock = Registries.getBlock(blockState.getName());
 
                         short customBlockId = 0;
                         Data data = null;
@@ -123,12 +139,10 @@ public class AnvilChunkLoader implements IChunkLoader {
 
                             data = customBlock.createData(instance, new BlockPosition(x+chunkX*16, y, z+chunkZ*16), null);
                         }
-                        if (blockState.getCompoundTag("Properties") != null) {
-                            CompoundTag properties = blockState.getCompoundTag("Properties");
+                        if (!blockState.getProperties().isEmpty()) {
                             List<String> propertiesArray = new ArrayList<>();
-                            properties.forEach((key, value2) -> {
-                                Tag<String> value = (Tag<String>) value2;
-                                propertiesArray.add(key + "=" + value.valueToString().replace("\"", ""));
+                            blockState.getProperties().forEach((key, value2) -> {
+                                propertiesArray.add(key + "=" + value2.replace("\"", ""));
                             });
                             Collections.sort(propertiesArray);
                             short block = rBlock.withProperties(propertiesArray.toArray(new String[0]));
@@ -145,8 +159,6 @@ public class AnvilChunkLoader implements IChunkLoader {
                                 batch.setBlock(x, y, z, rBlock.getBlockId());
                             }
                         }
-                    } catch (NullPointerException ignored) {
-
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -159,7 +171,124 @@ public class AnvilChunkLoader implements IChunkLoader {
 
     @Override
     public void saveChunk(Chunk chunk, Runnable callback) {
-        // TODO
-        LOGGER.debug("Attempt saving at {} {}", chunk.getChunkX(), chunk.getChunkZ());
+        int chunkX = chunk.getChunkX();
+        int chunkZ = chunk.getChunkZ();
+        RegionFile mcaFile;
+        synchronized (alreadyLoaded) {
+            mcaFile = getMCAFile(chunkX, chunkZ);
+            if(mcaFile == null) {
+                int regionX = CoordinatesKt.chunkToRegion(chunkX);
+                int regionZ = CoordinatesKt.chunkToRegion(chunkZ);
+                String n = RegionFile.Companion.createFileName(regionX, regionZ);
+                File regionFile = new File(regionFolder.getFolderPath(), n);
+                try {
+                    mcaFile = new RegionFile(new RandomAccessFile(regionFile, "rw"), regionX, regionZ);
+                    alreadyLoaded.put(n, mcaFile);
+                } catch (AnvilException | IOException e) {
+                    LOGGER.error("Failed to save chunk "+chunkX+", "+chunkZ, e);
+                    e.printStackTrace();
+                    return;
+                }
+            }
+        }
+        int[] biomes = new int[Chunk.BIOME_COUNT];
+        for (int i = 0; i < biomes.length; i++) {
+            Biome biome = chunk.getBiomes()[i];
+            if(biome == null) {
+                biome = Biome.THE_VOID;
+            }
+            biomes[i] = biome.getId();
+        }
+        ChunkColumn column = null;
+        try {
+            column = mcaFile.getOrCreateChunk(chunkX, chunkZ);
+        } catch (AnvilException | IOException e) {
+            LOGGER.error("Failed to save chunk "+chunkX+", "+chunkZ, e);
+            e.printStackTrace();
+            return;
+        }
+        save(chunk, column);
+
+        try {
+            LOGGER.debug("Attempt saving at {} {}", chunk.getChunkX(), chunk.getChunkZ());
+            mcaFile.writeColumn(column);
+        } catch (IOException e) {
+            LOGGER.error("Failed to save chunk "+chunkX+", "+chunkZ, e);
+            e.printStackTrace();
+            return;
+        }
+
+        if(callback != null)
+            callback.run();
+    }
+
+    private void saveTileEntities(Chunk chunk, ChunkColumn fileChunk) {
+        NBTList<NBTCompound> tileEntities = new NBTList<>(NBTTypes.TAG_Compound);
+        BlockPosition position = new BlockPosition(0, 0, 0);
+
+        for(var index : chunk.getBlockEntities()) {
+            int[] pos = ChunkUtils.indexToChunkPosition(index);
+            int x = pos[0];
+            int y = pos[1];
+            int z = pos[2];
+            position.setX(x);
+            position.setY(y);
+            position.setZ(z);
+            CustomBlock customBlock = chunk.getCustomBlock(x, y, z);
+            if(customBlock instanceof VanillaBlock) {
+                NBTCompound nbt = new NBTCompound();
+                nbt.setInt("x", x);
+                nbt.setInt("y", y);
+                nbt.setInt("z", z);
+                nbt.setByte("keepPacked", (byte) 0);
+                Block block = Block.fromId(customBlock.getBlockId());
+                Data data = chunk.getData(x, y, z);
+                customBlock.writeBlockEntity(position, data, nbt);
+                if(block.hasBlockEntity()) {
+                    nbt.setString("id", block.getBlockEntityName().toString());
+                    tileEntities.add(nbt);
+                } else {
+                    LOGGER.warn("Tried to save block entity for a block which is not a block entity? Block is {} at {},{},{}", customBlock, x, y, z);
+                }
+            }
+        }
+        fileChunk.setTileEntities(tileEntities);
+    }
+
+    private void save(Chunk chunk, ChunkColumn chunkColumn) {
+        // TODO: other elements to save
+        saveTileEntities(chunk, chunkColumn);
+
+        for (int x = 0; x < Chunk.CHUNK_SIZE_X; x++) {
+            for (int z = 0; z < Chunk.CHUNK_SIZE_Z; z++) {
+                for (int y = 0; y < Chunk.CHUNK_SIZE_Y; y++) {
+                    short id = chunk.getBlockId(x, y, z);
+                    CustomBlock customBlock = chunk.getCustomBlock(x, y, z);
+                    Block block = Block.fromId(id);
+                    BlockAlternative alt = block.getAlternative(id);
+                    Map<String, String> properties = alt.createPropertiesMap();
+                    org.jglrxavpok.hephaistos.mca.BlockState state = new org.jglrxavpok.hephaistos.mca.BlockState(block.getName(), properties);
+
+                    int blockX = x;
+                    int blockY = y;
+                    int blockZ = z;
+                    chunkColumn.setBlockState(blockX, blockY, blockZ, state);
+
+                    int index = ((y >> 2) & 63) << 4 | ((z >> 2) & 3) << 2 | ((x >> 2) & 3); // https://wiki.vg/Chunk_Format#Biomes
+                    Biome biome = chunk.getBiomes()[index];
+                    chunkColumn.setBiome(blockX, 0, blockZ, biome.getId());
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean supportsParallelLoading() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsParallelSaving() {
+        return true;
     }
 }

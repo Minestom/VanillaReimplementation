@@ -21,7 +21,11 @@ public class FileSystemStorage implements StorageSystem {
     @Override
     public byte[] get(String key) {
         try {
-            return Files.readAllBytes(getPath(key));
+            Path path = getPath(key);
+            if(!Files.exists(path)) {
+                return null;
+            }
+            return Files.readAllBytes(path);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
