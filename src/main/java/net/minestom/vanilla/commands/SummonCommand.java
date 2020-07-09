@@ -13,6 +13,7 @@ import net.minestom.server.entity.ExperienceOrb;
 import net.minestom.server.utils.Position; 
 import net.minestom.server.instance.Instance;
 
+import java.lang.Float; 
 
 
 /**
@@ -92,7 +93,7 @@ public class SummonCommand extends Command<Player> {
         Position pos = player.getPosition();  
         Instance instance = player.getInstance(); 
 
-        float[] coords = coordinate.getAbsolute( pos.getX(), pos.getY(), pos.getZ() ); 
+        Float[] coords = coordinate.getAbsolute( pos.getX(), pos.getY(), pos.getZ() ); 
         pos = new Position( coords[0], coords[1], coords[2] ); 
 
         Entity summoned = createEntity( entityType, pos ); 
