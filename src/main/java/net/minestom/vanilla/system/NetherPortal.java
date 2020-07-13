@@ -11,9 +11,8 @@ import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.particle.ParticleCreator;
 import net.minestom.server.utils.BlockPosition;
-import net.minestom.server.utils.Position;
 import net.minestom.server.utils.Vector;
-import net.minestom.server.world.Dimension;
+import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.blockentity.NetherPortalBlockEntity;
 import net.minestom.vanilla.blocks.NetherPortalBlock;
 import net.minestom.vanilla.blocks.VanillaBlocks;
@@ -122,7 +121,7 @@ public final class NetherPortal {
     }
 
     public boolean tryFillFrame(Instance instance) {
-        if(instance.getDimension() == Dimension.END)
+        if(instance.getDimensionType() == DimensionType.END)
             return false;
         if(!VanillaBlocks.NETHER_PORTAL.isRegistered()) {
             return false;

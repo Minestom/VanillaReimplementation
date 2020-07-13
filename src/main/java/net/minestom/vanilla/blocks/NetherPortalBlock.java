@@ -8,7 +8,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.Position;
-import net.minestom.server.world.Dimension;
+import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.blockentity.BlockEntity;
 import net.minestom.vanilla.blockentity.NetherPortalBlockEntity;
 import net.minestom.vanilla.data.NetherPortalList;
@@ -89,20 +89,20 @@ public class NetherPortalBlock extends VanillaBlock {
     }
 
     private void attemptTeleport(Instance instance, BlockPosition position, Entity touching, Data data, long ticksSpentInPortal, NetherPortal portal) {
-        Dimension targetDimension = Dimension.NETHER;
+        DimensionType targetDimension = DimensionType.NETHER;
         Position targetPosition = new Position(position.getX()/8, position.getY(), position.getZ()/8);
         targetPosition.setPitch(touching.getPosition().getPitch());
         targetPosition.setYaw(touching.getPosition().getYaw());
-        if(instance.getDimension() == Dimension.NETHER) {
-            targetDimension = Dimension.OVERWORLD;
+        if(instance.getDimensionType() == DimensionType.NETHER) {
+            targetDimension = DimensionType.OVERWORLD;
             targetPosition.setX(position.getX()*8);
             targetPosition.setZ(position.getZ()*8);
         }
 
         // TODO: event to change portal linking
-        final Dimension finalTargetDimension = targetDimension;
+        final DimensionType finalTargetDimension = targetDimension;
         Optional<Instance> potentialTargetInstance = MinecraftServer.getInstanceManager().getInstances().stream()
-                .filter(in -> in.getDimension() == finalTargetDimension)
+                .filter(in -> in.getDimensionType() == finalTargetDimension)
                 .findFirst();
         if(!potentialTargetInstance.isPresent())
             return;
