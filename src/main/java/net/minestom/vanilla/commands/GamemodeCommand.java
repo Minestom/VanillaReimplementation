@@ -1,10 +1,10 @@
 package net.minestom.vanilla.commands;
 
-import fr.themode.command.Arguments;
-import fr.themode.command.Command;
-import fr.themode.command.arguments.Argument;
-import fr.themode.command.arguments.ArgumentType;
 import net.minestom.server.chat.ColoredText;
+import net.minestom.server.command.builder.Arguments;
+import net.minestom.server.command.builder.Command;
+import net.minestom.server.command.builder.arguments.Argument;
+import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 

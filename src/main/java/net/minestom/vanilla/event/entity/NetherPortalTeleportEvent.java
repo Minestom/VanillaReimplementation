@@ -5,7 +5,6 @@ import net.minestom.server.event.CancellableEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.Position;
-import net.minestom.server.world.Dimension;
 import net.minestom.vanilla.system.NetherPortal;
 
 /**
