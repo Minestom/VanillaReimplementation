@@ -39,11 +39,34 @@ public enum VanillaBlocks {
 
     TNT(TNTBlock::new),
 
+    
+    // Containers
     CHEST(ChestBlock::new),
     TRAPPED_CHEST(TrappedChestBlock::new),
+    BARREL(BarrelBlock::new),
     ENDER_CHEST(EnderChestBlock::new),
-    JUKEBOX(JukeboxBlock::new);
-
+    JUKEBOX(JukeboxBlock::new),
+	
+    // Shulkers
+	SHULKER_BOX(() -> new ShulkerBoxBlock(Block.SHULKER_BOX)),
+	WHITE_SHULKER_BOX(() -> new ShulkerBoxBlock(Block.WHITE_SHULKER_BOX)),
+	ORANGE_SHULKER_BOX(() -> new ShulkerBoxBlock(Block.ORANGE_SHULKER_BOX)),
+	MAGENTA_SHULKER_BOX(() -> new ShulkerBoxBlock(Block.MAGENTA_SHULKER_BOX)),
+	LIGHT_BLUE_SHULKER_BOX(() -> new ShulkerBoxBlock(Block.LIGHT_BLUE_SHULKER_BOX)),
+	YELLOW_SHULKER_BOX(() -> new ShulkerBoxBlock(Block.YELLOW_SHULKER_BOX)),
+	LIME_SHULKER_BOX(() -> new ShulkerBoxBlock(Block.LIME_SHULKER_BOX)),
+	PINK_SHULKER_BOX(() -> new ShulkerBoxBlock(Block.PINK_SHULKER_BOX)),
+	GRAY_SHULKER_BOX(() -> new ShulkerBoxBlock(Block.GRAY_SHULKER_BOX)),
+	LIGHT_GRAY_SHULKER_BOX(() -> new ShulkerBoxBlock(Block.LIGHT_GRAY_SHULKER_BOX)),
+	CYAN_SHULKER_BOX(() -> new ShulkerBoxBlock(Block.CYAN_SHULKER_BOX)),
+	PURPLE_SHULKER_BOX(() -> new ShulkerBoxBlock(Block.PURPLE_SHULKER_BOX)),
+	BLUE_SHULKER_BOX(() -> new ShulkerBoxBlock(Block.BLUE_SHULKER_BOX)),
+	BROWN_SHULKER_BOX(() -> new ShulkerBoxBlock(Block.BROWN_SHULKER_BOX)),
+	GREEN_SHULKER_BOX(() -> new ShulkerBoxBlock(Block.GREEN_SHULKER_BOX)),
+	RED_SHULKER_BOX(() -> new ShulkerBoxBlock(Block.RED_SHULKER_BOX)),
+	BLACK_SHULKER_BOX(() -> new ShulkerBoxBlock(Block.BLACK_SHULKER_BOX));
+	
+	
     private final VanillaBlockSupplier blockSupplier;
     private final BlockPlacementRule placementRule;
     private boolean registered;
