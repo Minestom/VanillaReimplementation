@@ -7,6 +7,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.vanilla.blockentity.JukeboxBlockEntity;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 /**
  * Reimplementation of the jukebox block
@@ -43,5 +44,28 @@ public class JukeboxBlock extends VanillaBlock {
     @Override
     public Data createData(Instance instance, BlockPosition position, Data data) {
         return new JukeboxBlockEntity(position);
+    }
+
+    @Override
+    public Data readBlockEntity(NBTCompound nbt, Instance instance, BlockPosition position, Data originalData) {
+        JukeboxBlockEntity data;
+        if(originalData instanceof JukeboxBlockEntity) {
+            data = (JukeboxBlockEntity) originalData;
+        } else {
+            data = new JukeboxBlockEntity(position.clone());
+        }
+
+        if(nbt.containsKey("RecordItem")) {
+            data.setDisc(ItemStack.fromNBT(nbt.getCompound("RecordItem")));
+        }
+        return super.readBlockEntity(nbt, instance, position, originalData);
+    }
+
+    @Override
+    public void writeBlockEntity(BlockPosition position, Data blockData, NBTCompound nbt) {
+        if(blockData instanceof JukeboxBlockEntity) {
+            JukeboxBlockEntity data = (JukeboxBlockEntity) blockData;
+            nbt.set("RecordItem", data.getDisc().toNBT());
+        }
     }
 }

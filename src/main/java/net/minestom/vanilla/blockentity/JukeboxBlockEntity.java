@@ -22,8 +22,12 @@ public class JukeboxBlockEntity extends BlockEntity {
         set(DISC_STACK, ItemStack.getAirItem(), ItemStack.class);
     }
 
+    public ItemStack getDisc() {
+        return get(DISC_STACK);
+    }
+
     public boolean onInteract(Player player, Player.Hand hand, ItemStack heldItem) {
-        ItemStack stack = get(DISC_STACK);
+        ItemStack stack = getDisc();
         if(stack.isAir()) {
             if(isMusicDisc(heldItem.getMaterial())) {
                 set(DISC_STACK, heldItem.clone(), ItemStack.class);
@@ -59,7 +63,7 @@ public class JukeboxBlockEntity extends BlockEntity {
      * @param instance
      */
     private void stopPlayback(Instance instance) {
-        ItemEntity discEntity = new ItemEntity(get(DISC_STACK), new Position(getPosition().getX()+0.5f, getPosition().getY()+1f, getPosition().getZ()+0.5f));
+        ItemEntity discEntity = new ItemEntity(getDisc(), new Position(getPosition().getX()+0.5f, getPosition().getY()+1f, getPosition().getZ()+0.5f));
         discEntity.setPickable(true);
 
         Random rng = new Random();
@@ -82,9 +86,15 @@ public class JukeboxBlockEntity extends BlockEntity {
     }
 
     public void onDestroyed(Instance instance) {
-        ItemStack stack = get(DISC_STACK);
+        ItemStack stack = getDisc();
         if(!stack.isAir()) {
             stopPlayback(instance);
         }
+    }
+
+    public void setDisc(ItemStack item) {
+        if(!isMusicDisc(item.getMaterial()))
+            return;
+        set(DISC_STACK, item, ItemStack.class);
     }
 }
