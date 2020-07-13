@@ -76,8 +76,10 @@ public class AnvilChunkLoader implements IChunkLoader {
                 ChunkBatch batch = instance.createChunkBatch(loadedChunk);
                 loadBlocks(instance, chunkX, chunkZ, batch, fileChunk);
                 batch.flush(c -> {
-                    callback.accept(c);
                     loadTileEntities(c, chunkX, chunkZ, instance, fileChunk);
+                    if(callback != null) {
+                        callback.accept(c);
+                    }
                     // TODO: Other elements to load
                 });
 
@@ -182,6 +184,12 @@ public class AnvilChunkLoader implements IChunkLoader {
                 String n = RegionFile.Companion.createFileName(regionX, regionZ);
                 File regionFile = new File(regionFolder.getFolderPath(), n);
                 try {
+                    if(!regionFile.exists()) {
+                        if(!regionFile.getParentFile().exists()) {
+                            regionFile.getParentFile().mkdirs();
+                        }
+                        regionFile.createNewFile();
+                    }
                     mcaFile = new RegionFile(new RandomAccessFile(regionFile, "rw"), regionX, regionZ);
                     alreadyLoaded.put(n, mcaFile);
                 } catch (AnvilException | IOException e) {

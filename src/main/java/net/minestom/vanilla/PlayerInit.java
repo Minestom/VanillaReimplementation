@@ -35,6 +35,7 @@ import net.minestom.vanilla.anvil.AnvilChunkLoader;
 import net.minestom.vanilla.blocks.NetherPortalBlock;
 import net.minestom.vanilla.generation.VanillaTestGenerator;
 import net.minestom.vanilla.instance.VanillaExplosion;
+import net.minestom.vanilla.system.ServerProperties;
 
 import java.io.FileNotFoundException;
 import java.util.List;
@@ -45,7 +46,9 @@ public class PlayerInit {
     private static volatile InstanceContainer nether;
     private static volatile InstanceContainer end;
 
-    static {
+    public static void init(ServerProperties properties) {
+        String worldName = properties.get("level-name");
+
         ExplosionSupplier explosionGenerator = (centerX, centerY, centerZ, strength, additionalData) -> {
             boolean isTNT = additionalData != null ? additionalData.getOrDefault(VanillaExplosion.DROP_EVERYTHING_KEY, false) : false;
             boolean noBlockDamage = additionalData != null ? additionalData.getOrDefault(VanillaExplosion.DONT_DESTROY_BLOCKS_KEY, false) : false;
@@ -53,26 +56,26 @@ public class PlayerInit {
         };
         StorageManager storageManager = MinecraftServer.getStorageManager();
         VanillaTestGenerator noiseTestGenerator = new VanillaTestGenerator();
-        overworld = MinecraftServer.getInstanceManager().createInstanceContainer(DimensionType.OVERWORLD, storageManager.getFolder("testworld/data")); // TODO: configurable
+        overworld = MinecraftServer.getInstanceManager().createInstanceContainer(DimensionType.OVERWORLD, storageManager.getFolder(worldName+"/data")); // TODO: configurable
         overworld.enableAutoChunkLoad(true);
         overworld.setChunkGenerator(noiseTestGenerator);
         overworld.setData(new SerializableData());
         overworld.setExplosionSupplier(explosionGenerator);
-        overworld.setChunkLoader(new AnvilChunkLoader(storageManager.getFolder("testworld/region")));
+        overworld.setChunkLoader(new AnvilChunkLoader(storageManager.getFolder(worldName+"/region")));
 
-        nether = MinecraftServer.getInstanceManager().createInstanceContainer(DimensionType.NETHER, MinecraftServer.getStorageManager().getFolder("testworld/DIM-1/data"));
+        nether = MinecraftServer.getInstanceManager().createInstanceContainer(DimensionType.NETHER, MinecraftServer.getStorageManager().getFolder(worldName+"/DIM-1/data"));
         nether.enableAutoChunkLoad(true);
         nether.setChunkGenerator(noiseTestGenerator);
         nether.setData(new SerializableData());
         nether.setExplosionSupplier(explosionGenerator);
-        nether.setChunkLoader(new AnvilChunkLoader(storageManager.getFolder("testworld/DIM-1/region")));
+        nether.setChunkLoader(new AnvilChunkLoader(storageManager.getFolder(worldName+"/DIM-1/region")));
 
-        end = MinecraftServer.getInstanceManager().createInstanceContainer(DimensionType.END, MinecraftServer.getStorageManager().getFolder("testworld/DIM1/data"));
+        end = MinecraftServer.getInstanceManager().createInstanceContainer(DimensionType.END, MinecraftServer.getStorageManager().getFolder(worldName+"/DIM1/data"));
         end.enableAutoChunkLoad(true);
         end.setChunkGenerator(noiseTestGenerator);
         end.setData(new SerializableData());
         end.setExplosionSupplier(explosionGenerator);
-        end.setChunkLoader(new AnvilChunkLoader(storageManager.getFolder("testworld/DIM1/region")));
+        end.setChunkLoader(new AnvilChunkLoader(storageManager.getFolder(worldName+"/DIM1/region")));
 
         // Load some chunks beforehand
         int loopStart = -2;
@@ -93,6 +96,7 @@ public class PlayerInit {
         };
         overworld.addEventCallback(AddEntityToInstanceEvent.class, callback);
         nether.addEventCallback(AddEntityToInstanceEvent.class, callback);
+        end.addEventCallback(AddEntityToInstanceEvent.class, callback);
 
         MinecraftServer.getSchedulerManager().addShutdownTask(new TaskRunnable() {
             @Override
@@ -106,11 +110,10 @@ public class PlayerInit {
                 }
             }
         });
-    }
 
-    public static void init() {
-        // TODO: turn off if offline mode is set to true
-        MojangAuth.init();
+        if(Boolean.parseBoolean(properties.get("online-mode"))) {
+            MojangAuth.init();
+        }
 
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
 

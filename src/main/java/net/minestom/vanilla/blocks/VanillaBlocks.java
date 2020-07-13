@@ -36,6 +36,7 @@ public enum VanillaBlocks {
 
     FIRE(FireBlock::new),
     NETHER_PORTAL(NetherPortalBlock::new),
+    END_PORTAL(EndPortalBlock::new),
 
     TNT(TNTBlock::new),
 

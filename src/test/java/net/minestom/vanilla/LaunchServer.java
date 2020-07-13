@@ -18,10 +18,14 @@ import net.minestom.vanilla.commands.VanillaCommands;
 import net.minestom.vanilla.gamedata.loottables.VanillaLootTables;
 import net.minestom.vanilla.items.VanillaItems;
 import net.minestom.vanilla.system.NetherPortal;
+import net.minestom.vanilla.system.ServerProperties;
+
+import java.io.File;
+import java.io.IOException;
 
 public class LaunchServer {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         MinecraftServer minecraftServer = MinecraftServer.init();
 
         BlockManager blockManager = MinecraftServer.getBlockManager();
@@ -36,7 +40,8 @@ public class LaunchServer {
 
         MinecraftServer.getStorageManager().defineDefaultStorageSystem(FileSystemStorage::new);
 
-        PlayerInit.init();
+        ServerProperties properties = new ServerProperties(new File(".", "server.properties"));
+        PlayerInit.init(properties);
 
         RecipeManager recipeManager = MinecraftServer.getRecipeManager();
         ShapelessRecipe shapelessRecipe = new ShapelessRecipe("test", "groupname") {
@@ -63,11 +68,11 @@ public class LaunchServer {
             }
         });
 
-        minecraftServer.start("localhost", 55555, (playerConnection, responseData) -> {
+        minecraftServer.start(properties.get("server-ip"), Integer.parseInt(properties.get("server-port")), (playerConnection, responseData) -> {
             responseData.setName("1.16.1");
-            responseData.setMaxPlayer(100);
+            responseData.setMaxPlayer(Integer.parseInt(properties.get("max-players")));
             responseData.setOnline(MinecraftServer.getConnectionManager().getOnlinePlayers().size());
-            responseData.setDescription("Test server for Minestom vanilla reimplementation");
+            responseData.setDescription(properties.get("motd"));
             responseData.setFavicon("data:image/png;base64,<data>");
         });
     }
