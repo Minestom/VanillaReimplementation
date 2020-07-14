@@ -8,7 +8,7 @@ import net.minestom.server.command.builder.Command;
 /**
  * Stops the server
  */
-public class StopCommand extends Command<CommandSender> {
+public class StopCommand extends Command {
     public StopCommand() {
         super("stop");
         setCondition(this::condition);

@@ -1,7 +1,6 @@
 package net.minestom.vanilla.commands;
 
 import net.minestom.server.command.CommandManager;
-import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 
 import java.util.function.Supplier;
@@ -19,9 +18,9 @@ public enum VanillaCommands {
     SAVE_ALL(SaveAllCommand::new),
     ;
 
-    private final Supplier<Command<? extends CommandSender>> commandCreator;
+    private final Supplier<Command> commandCreator;
 
-    private VanillaCommands(Supplier<Command<? extends CommandSender>> commandCreator) {
+    private VanillaCommands(Supplier<Command> commandCreator) {
         this.commandCreator = commandCreator;
     }
 
@@ -31,8 +30,8 @@ public enum VanillaCommands {
      */
     public static void registerAll(CommandManager manager) {
         for(VanillaCommands vanillaCommand : values()) {
-            Command<? extends CommandSender> command = vanillaCommand.commandCreator.get();
-            manager.register((Command<CommandSender>) command);
+            Command command = vanillaCommand.commandCreator.get();
+            manager.register(command);
         }
     }
 }

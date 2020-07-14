@@ -8,7 +8,7 @@ import net.minestom.server.command.builder.Command;
 /**
  * Save the server
  */
-public class SaveAllCommand extends Command<CommandSender> {
+public class SaveAllCommand extends Command {
     public SaveAllCommand() {
         super("save-all");
         setCondition(this::condition);

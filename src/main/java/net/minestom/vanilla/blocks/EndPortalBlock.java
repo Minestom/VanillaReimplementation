@@ -61,10 +61,9 @@ public class EndPortalBlock extends VanillaBlock {
                         }
                     }
                 }
-
-                touching.teleport(spawnPoint);
-                touching.setInstance(targetInstance);
             }
+            touching.setInstance(targetInstance);
+            touching.teleport(spawnPoint);
         }
     }
 }

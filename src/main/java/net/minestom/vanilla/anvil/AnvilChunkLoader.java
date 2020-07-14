@@ -264,6 +264,8 @@ public class AnvilChunkLoader implements IChunkLoader {
     }
 
     private void save(Chunk chunk, ChunkColumn chunkColumn) {
+        chunkColumn.setGenerationStatus(ChunkColumn.GenerationStatus.Full);
+
         // TODO: other elements to save
         saveTileEntities(chunk, chunkColumn);
 

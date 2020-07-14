@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Returns the list of all available commands
  */
-public class HelpCommand extends Command<CommandSender> {
+public class HelpCommand extends Command {
     public HelpCommand() {
         super("help");
 

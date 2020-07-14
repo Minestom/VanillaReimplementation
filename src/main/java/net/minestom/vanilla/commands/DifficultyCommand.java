@@ -6,14 +6,12 @@ import net.minestom.server.command.builder.Arguments;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
-import net.minestom.server.entity.GameMode;
-import net.minestom.server.entity.Player;
 import net.minestom.server.world.Difficulty;
 
 /**
  * Command that make an instance change difficulty
  */
-public class DifficultyCommand extends Command<CommandSender> {
+public class DifficultyCommand extends Command {
     public DifficultyCommand() {
         super("difficulty");
 
