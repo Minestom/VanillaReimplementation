@@ -16,7 +16,7 @@ public class BarrelBlock extends ChestLikeBlock {
     public BarrelBlock() {
         super(Block.BARREL);
     }
-
+    
     @Override
     public boolean dropContentsOnDestroy() {
         return true;
@@ -24,7 +24,7 @@ public class BarrelBlock extends ChestLikeBlock {
     
     @Override
     protected BlockPropertyList createPropertyValues() {
-        return new BlockPropertyList().facingProperty("facing").booleanProperty("open");
+        return new BlockPropertyList().directionProperty("facing").booleanProperty("open");
     }
     
     @Override
@@ -32,26 +32,22 @@ public class BarrelBlock extends ChestLikeBlock {
     	float yaw = player.getPosition().getYaw();
     	float pitch = player.getPosition().getPitch();
     	boolean open = false; // TODO: Open Barrel
-    	Direction direction = MathUtils.getHorizontalDirection(yaw).opposite();    	
+    	Direction direction;    	
 
-    	
     	if (pitch > 45) {
-    		direction = Direction.DOWN;
-    	} else if (pitch < -45) {
     		direction = Direction.UP;
+    	} else if (pitch < -45) {
+    		direction = Direction.DOWN;
+    	} else {
+    		direction = MathUtils.getHorizontalDirection(yaw).opposite();
     	}
-    	
-    	System.out.println(String.valueOf(false));
-    	
-        return getBaseBlockState()
-        		.with("facing", direction.name().toLowerCase())
-        		.with("open", String.valueOf(false))
-        		.getBlockId();
+
+        return getBaseBlockState().with("facing", direction.name().toLowerCase()).with("open", String.valueOf(open)).getBlockId();
     }
     
     @Override
     public boolean onInteract(Player player, Player.Hand hand, BlockPosition blockPosition, Data data) {
-        player.openInventory(getInventory(player, blockPosition, data));
+    	player.openInventory(getInventory(player, blockPosition, data));
         return true;
     }
     
