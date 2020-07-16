@@ -18,6 +18,7 @@ import net.minestom.server.utils.Position;
 import net.minestom.server.utils.Vector;
 import net.minestom.server.utils.thread.MinestomThread;
 import net.minestom.server.utils.time.TimeUnit;
+import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.damage.DamageTypes;
 import net.minestom.vanilla.math.RayCast;
 
@@ -57,7 +58,6 @@ public class VanillaExplosion extends Explosion {
         float maximumBlastRadius = (float) Math.floor(1.3f*getStrength()/(stepLength*0.75))*stepLength;
         Set<BlockPosition> positions = new HashSet<>();
         if(blockDamage) {
-
             for (int x = 0; x < 16; x++) {
                 for (int y = 0; y < 16; y++) {
                     for (int z = 0; z < 16; z++) {
@@ -77,7 +77,7 @@ public class VanillaExplosion extends Explosion {
                                 Block block = Block.fromId(instance.getBlockId(position));
                                 CustomBlock customBlock = instance.getCustomBlock(position);
 
-                                float blastResistance = 0.05f; // TODO: custom blast resistances
+                                double blastResistance = block.getResistance(); // TODO: custom blast resistances
                                 intensity -= (blastResistance+stepLength)*stepLength;
                                 return intensity > 0f;
                             }
@@ -85,7 +85,9 @@ public class VanillaExplosion extends Explosion {
 
                         RayCast.rayCastBlocks(instance, getCenterX(), getCenterY(), getCenterZ(),
                                 x-8.5f, y-8.5f, z-8.5f, maximumBlastRadius, stepLength,
-                                shouldContinue, blockPos -> positions.add(new BlockPosition(blockPos.getX(), blockPos.getY(), blockPos.getZ()))
+                                shouldContinue, blockPos -> {
+                                    positions.add(new BlockPosition(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+                                }
                         );
                     }
                 }
@@ -109,8 +111,9 @@ public class VanillaExplosion extends Explosion {
                 Block block = Block.fromId(instance.getBlockId(position));
                 CustomBlock customBlock = instance.getCustomBlock(position);
 
-                if(block.isAir())
+                if(block.isAir()) {
                     continue;
+                }
                 Data lootTableArguments = new Data();
                 if(!dropsEverything) {
                     lootTableArguments.set("explosionPower", (double)getStrength(), Double.class);
@@ -148,6 +151,30 @@ public class VanillaExplosion extends Explosion {
         return new LinkedList<>(positions);
     }
 
+    @Override
+    protected void postSend(Instance instance, List<BlockPosition> blocks) {
+        if (!startsFires) {
+            return;
+        }
+        BlockPosition belowPos = new BlockPosition(0, 0, 0);
+        for (BlockPosition position : blocks) {
+            Block block = Block.fromId(instance.getBlockId(position));
+
+            if (block.isAir() && position.getY() > 0) {
+                if (explosionRNG.nextFloat() < 1 / 3f) {
+                    belowPos.setX(position.getX());
+                    belowPos.setY(position.getY() - 1);
+                    belowPos.setZ(position.getZ());
+                    // check that block below is solid
+                    Block below = Block.fromId(instance.getBlockId(belowPos));
+                    if (below.isSolid()) {
+                        instance.setSeparateBlocks(position.getX(), position.getY(), position.getZ(), Block.FIRE.getBlockId(), VanillaBlocks.FIRE.getInstance().getCustomBlockId());
+                    }
+                }
+            }
+        }
+    }
+
     private void affect(Entity e, final float damageRadius) {
         float exposure = calculateExposure(e, damageRadius);
         float distance = e.getPosition().getDistance(center);
@@ -156,10 +183,13 @@ public class VanillaExplosion extends Explosion {
         if(e instanceof LivingEntity) {
             ((LivingEntity) e).damage(DamageTypes.EXPLOSION, (float)damage);
         } else {
+            if(e instanceof ItemEntity) {
+                e.scheduleRemove(1L, TimeUnit.TICK);
+            }
             // TODO: different entities will react differently (items despawn, boats, minecarts drop as items, etc.)
         }
 
-        float blastProtection = 0f; // TODO
+        float blastProtection = 0f; // TODO: apply enchantments
         exposure -= exposure * 0.15f * blastProtection;
         Vector velocityBoost = e.getPosition().toVector().add(0f, e.getEyeHeight(), 0f).subtract(center.toVector());
         velocityBoost.normalize().multiply(exposure*MinecraftServer.TICK_PER_SECOND);
