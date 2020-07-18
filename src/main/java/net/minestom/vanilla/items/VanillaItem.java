@@ -34,8 +34,9 @@ public abstract class VanillaItem {
      * @param hand
      * @param position
      * @param blockFace
+     * @return true if it prevents normal item use (placing blocks for instance)
      */
-    public abstract void onUseOnBlock(Player player, ItemStack itemStack, Player.Hand hand, BlockPosition position, Direction blockFace);
+    public abstract boolean onUseOnBlock(Player player, ItemStack itemStack, Player.Hand hand, BlockPosition position, Direction blockFace);
 
     public static void damageItem(Player player, Player.Hand hand, ItemStack itemStack) {
         ItemStack newUsedItem = itemStack.clone();

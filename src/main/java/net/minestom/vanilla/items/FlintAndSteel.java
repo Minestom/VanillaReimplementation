@@ -7,7 +7,6 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.CustomBlock;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.StackingRule;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.Direction;
 
@@ -22,7 +21,7 @@ public class FlintAndSteel extends VanillaItem {
     }
 
     @Override
-    public void onUseOnBlock(Player player, ItemStack itemStack, Player.Hand hand, BlockPosition position, Direction blockFace) {
+    public boolean onUseOnBlock(Player player, ItemStack itemStack, Player.Hand hand, BlockPosition position, Direction blockFace) {
         // TODO: check if flammable
         BlockPosition firePosition = new BlockPosition(position.getX(), position.getY(), position.getZ());
 
@@ -39,6 +38,7 @@ public class FlintAndSteel extends VanillaItem {
                 instance.setBlock(firePosition, Block.FIRE);
             }
         }
+        return false;
     }
 
 }

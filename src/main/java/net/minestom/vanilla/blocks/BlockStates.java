@@ -1,6 +1,10 @@
 package net.minestom.vanilla.blocks;
 
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
+import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockAlternative;
+import net.minestom.server.utils.BlockPosition;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -84,5 +88,18 @@ public class BlockStates {
 
     public BlockState getDefault() {
         return states.get(0);
+    }
+
+    /**
+     * Returns the corresponding BlockState at the given position.
+     * Can return null if it does not correspond to any known state.
+     * @param instance
+     * @param blockPosition
+     * @return
+     */
+    public BlockState getFromInstance(Instance instance, BlockPosition blockPosition) {
+        short id = instance.getBlockId(blockPosition);
+        BlockAlternative alternative = Block.fromId(id).getAlternative(id);
+        return getState(alternative.createPropertiesMap());
     }
 }

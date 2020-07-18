@@ -33,6 +33,7 @@ import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.anvil.AnvilChunkLoader;
 import net.minestom.vanilla.blocks.NetherPortalBlock;
+import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.generation.VanillaTestGenerator;
 import net.minestom.vanilla.instance.VanillaExplosion;
 import net.minestom.vanilla.system.ServerProperties;
@@ -149,34 +150,7 @@ public class PlayerInit {
             });
 
             player.addEventCallback(PlayerBlockBreakEvent.class, event -> {
-                LootTable table = null;
-                LootTableManager lootTableManager = MinecraftServer.getLootTableManager();
-                if(event.getResultCustomBlockId() != 0) {
-                    CustomBlock customBlock = MinecraftServer.getBlockManager().getCustomBlock(event.getResultCustomBlockId());
-                    table = customBlock.getLootTable(lootTableManager);
-                }
-                Block block = Block.fromId(player.getInstance().getBlockId(event.getBlockPosition()));
-                Data lootTableArguments = new Data();
-                // TODO: tool used, silk touch, etc.
-                try {
-                    if(table == null) {
-                        table = lootTableManager.load(NamespaceID.from("blocks/" + block.name().toLowerCase()));
-                    }
-                    List<ItemStack> stacks = table.generate(lootTableArguments);
-                    for (ItemStack item : stacks) {
-                        Position spawnPosition = new Position((float) (event.getBlockPosition().getX() + 0.2f + Math.random() * 0.6f), (float) (event.getBlockPosition().getY() + 0.5f), (float) (event.getBlockPosition().getZ() + 0.2f + Math.random() * 0.6f));
-                        ItemEntity itemEntity = new ItemEntity(item, spawnPosition);
-
-                        itemEntity.getVelocity().setX((float) (Math.random()*2f-1f));
-                        itemEntity.getVelocity().setY((float) (Math.random()*2f));
-                        itemEntity.getVelocity().setZ((float) (Math.random()*2f-1f));
-
-                        itemEntity.setPickupDelay(500, TimeUnit.MILLISECOND);
-                        itemEntity.setInstance(player.getInstance());
-                    }
-                } catch (FileNotFoundException e) {
-                    // ignore missing table
-                }
+                VanillaBlocks.dropOnBreak(player.getInstance(), event.getBlockPosition());
             });
 
             player.addEventCallback(PlayerSpawnEvent.class, event -> {
@@ -185,6 +159,7 @@ public class PlayerInit {
                     player.teleport(new Position(185, 100, 227));
                     player.getInventory().addItemStack(new ItemStack(Material.OBSIDIAN, (byte) 1));
                     player.getInventory().addItemStack(new ItemStack(Material.FLINT_AND_STEEL, (byte) 1));
+                    player.getInventory().addItemStack(new ItemStack(Material.RED_BED, (byte) 1));
                 }
             });
 

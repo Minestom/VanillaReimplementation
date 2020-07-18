@@ -1,8 +1,11 @@
 package net.minestom.vanilla.blocks;
 
+import net.minestom.server.instance.block.Block;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Represents a block state
@@ -59,4 +62,9 @@ public class BlockState {
         return parent.getStateWithChange(properties, key, value);
     }
 
+    @Override
+    public String toString() {
+        String props = getProperties().entrySet().stream().map(e -> e.getKey()+"="+e.getValue()).collect(Collectors.joining(","));
+        return Block.fromId(blockId)+"{"+props+"}";
+    }
 }

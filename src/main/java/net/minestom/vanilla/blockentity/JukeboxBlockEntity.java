@@ -7,9 +7,9 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.StackingRule;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.Position;
+import net.minestom.vanilla.inventory.InventoryManipulation;
 
 import java.util.Random;
 
@@ -32,16 +32,7 @@ public class JukeboxBlockEntity extends BlockEntity {
             if(isMusicDisc(heldItem.getMaterial())) {
                 set(DISC_STACK, heldItem.clone(), ItemStack.class);
                 player.getInstance().refreshBlockId(getPosition(), Block.JUKEBOX.withProperties("has_record=true"));
-                if(!player.isCreative()) {
-                    StackingRule stackingRule = heldItem.getStackingRule();
-                    ItemStack newUsedItem = stackingRule.apply(heldItem, stackingRule.getAmount(heldItem) - 1);
-
-                    if (hand == Player.Hand.OFF) {
-                        player.getInventory().setItemInOffHand(newUsedItem);
-                    } else { // Main
-                        player.getInventory().setItemInMainHand(newUsedItem);
-                    }
-                }
+                InventoryManipulation.consumeItemIfNotCreative(player, heldItem, hand);
                 player.getInstance().getPlayers().forEach(playerInInstance -> {
                     if(playerInInstance.getDistance(player) < 64) {
                         playerInInstance.playEffect(Effects.PLAY_RECORD, getPosition().getX(), getPosition().getY(), getPosition().getZ(), heldItem.getMaterial().getId(), false);
