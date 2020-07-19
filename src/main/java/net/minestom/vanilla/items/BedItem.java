@@ -47,8 +47,8 @@ public class BedItem extends VanillaItem {
         instance.setSeparateBlocks(headPosition.getX(), headPosition.getY(), headPosition.getZ(), headId, bedBlock.getCustomBlockId(), null);
     }
 
-    private boolean isReplaceable(Block above) {
-        return above.isAir();
+    private boolean isReplaceable(Block blockAtPosition) {
+        return blockAtPosition.isAir() || blockAtPosition.isLiquid();
     }
 
     @Override
