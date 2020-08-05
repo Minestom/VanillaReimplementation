@@ -32,3 +32,4 @@ out/
 # Minestom
 /minecraft_data/
 /.minestom_tmp/
+/bin/

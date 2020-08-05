@@ -110,7 +110,7 @@ public class PlayerInit {
 
     public static void init() {
         // TODO: turn off if offline mode is set to true
-        MojangAuth.init();
+        // MojangAuth.init();
 
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
 

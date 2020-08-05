@@ -1,5 +1,10 @@
 package net.minestom.vanilla;
 
+import org.keplerproject.luajava.LuaState;
+import org.keplerproject.luajava.LuaStateFactory;
+
+import net.minestom.plugins.PluginCommands;
+import net.minestom.plugins.PluginLootTables;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Player;
@@ -23,16 +28,20 @@ public class LaunchServer {
 
     public static void main(String[] args) {
         MinecraftServer minecraftServer = MinecraftServer.init();
-
+        
+        LuaState luaState = LuaStateFactory.newLuaState();
+        // luaState.openLibs();
+        // luaState.LdoFile("main.lua");
+        
         BlockManager blockManager = MinecraftServer.getBlockManager();
 
         CommandManager commandManager = MinecraftServer.getCommandManager();
-        VanillaCommands.registerAll(commandManager);
+        PluginCommands.registerAll(commandManager);
         VanillaItems.registerAll(MinecraftServer.getConnectionManager());
         VanillaBlocks.registerAll(MinecraftServer.getConnectionManager(), MinecraftServer.getBlockManager());
         NetherPortal.registerData(MinecraftServer.getDataManager());
         LootTableManager lootTableManager = MinecraftServer.getLootTableManager();
-        VanillaLootTables.register(lootTableManager);
+        PluginLootTables.register(lootTableManager);
 
         MinecraftServer.getStorageManager().defineDefaultStorageSystem(FileSystemStorage::new);
 
@@ -50,7 +59,7 @@ public class LaunchServer {
         ingredient.items = new ItemStack[]{new ItemStack(Material.STONE, (byte) 3)};
         shapelessRecipe.addIngredient(ingredient);
         recipeManager.addRecipe(shapelessRecipe);
-
+        
         MinecraftServer.getSchedulerManager().addShutdownTask(new TaskRunnable() {
             @Override
             public void run() {
@@ -62,12 +71,12 @@ public class LaunchServer {
                 });
             }
         });
-
+        
         minecraftServer.start("localhost", 55555, (playerConnection, responseData) -> {
             responseData.setName("1.16.1");
             responseData.setMaxPlayer(100);
             responseData.setOnline(MinecraftServer.getConnectionManager().getOnlinePlayers().size());
-            responseData.setDescription("Test server for Minestom vanilla reimplementation");
+            responseData.setDescription("Test server for Minestom plugin implementation");
             responseData.setFavicon("data:image/png;base64,<data>");
         });
     }

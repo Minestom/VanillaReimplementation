@@ -16,6 +16,10 @@ repositories {
 }
 
 dependencies {
+
+	// https://mvnrepository.com/artifact/org.nutz/luajava
+	implementation 'org.nutz:luajava:2.0.1-beta'
+	
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
     api 'com.github.Minestom:Minestom:2cff307a20'
