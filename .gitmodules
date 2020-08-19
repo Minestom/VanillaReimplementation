@@ -1,0 +1,3 @@
+[submodule "vanilla_worldgen_example"]
+	path = vanilla_worldgen_example
+	url = https://github.com/slicedlime/examples/

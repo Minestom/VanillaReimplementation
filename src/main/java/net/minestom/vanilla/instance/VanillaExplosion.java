@@ -74,7 +74,7 @@ public class VanillaExplosion extends Explosion {
                             public boolean test(BlockPosition position) {
                                 intensity -= 0.225f; // air attenuation
 
-                                Block block = Block.fromId(instance.getBlockId(position));
+                                Block block = Block.fromStateId(instance.getBlockStateId(position));
                                 CustomBlock customBlock = instance.getCustomBlock(position);
 
                                 double blastResistance = block.getResistance(); // TODO: custom blast resistances
@@ -108,7 +108,7 @@ public class VanillaExplosion extends Explosion {
 
         if(blockDamage) {
             for(BlockPosition position : positions) {
-                Block block = Block.fromId(instance.getBlockId(position));
+                Block block = Block.fromStateId(instance.getBlockStateId(position));
                 CustomBlock customBlock = instance.getCustomBlock(position);
 
                 if(block.isAir()) {
@@ -158,7 +158,7 @@ public class VanillaExplosion extends Explosion {
         }
         BlockPosition belowPos = new BlockPosition(0, 0, 0);
         for (BlockPosition position : blocks) {
-            Block block = Block.fromId(instance.getBlockId(position));
+            Block block = Block.fromStateId(instance.getBlockStateId(position));
 
             if (block.isAir() && position.getY() > 0) {
                 if (explosionRNG.nextFloat() < 1 / 3f) {
@@ -166,7 +166,7 @@ public class VanillaExplosion extends Explosion {
                     belowPos.setY(position.getY() - 1);
                     belowPos.setZ(position.getZ());
                     // check that block below is solid
-                    Block below = Block.fromId(instance.getBlockId(belowPos));
+                    Block below = Block.fromStateId(instance.getBlockStateId(belowPos));
                     if (below.isSolid()) {
                         instance.setSeparateBlocks(position.getX(), position.getY(), position.getZ(), Block.FIRE.getBlockId(), VanillaBlocks.FIRE.getInstance().getCustomBlockId());
                     }
@@ -217,7 +217,7 @@ public class VanillaExplosion extends Explosion {
                     RayCast.Result result = RayCast.rayCastBlocks(instance, getCenterX(), getCenterY(), getCenterZ(),
                             deltaX, deltaY, deltaZ,
                             (float) Math.sqrt(deltaX*deltaX+deltaY*deltaY+deltaZ*deltaZ), 0.3f,
-                            position -> instance.getBlockId(position) == Block.AIR.getBlockId(),
+                            position -> instance.getBlockStateId(position) == Block.AIR.getBlockId(),
                             _pos -> {});
                     if(result.getHitType() != RayCast.HitType.BLOCK) {
                         hits++;

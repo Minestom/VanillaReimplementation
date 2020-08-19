@@ -1,5 +1,6 @@
 package net.minestom.vanilla.anvil;
 
+import net.minestom.server.storage.StorageOptions;
 import net.minestom.server.storage.StorageSystem;
 
 import java.io.IOException;
@@ -8,7 +9,7 @@ import java.nio.file.Path;
 
 public class FileSystemStorage implements StorageSystem {
     @Override
-    public void open(String folderPath) {}
+    public void open(String folderPath, StorageOptions options) {}
 
     @Override
     public void close() {}

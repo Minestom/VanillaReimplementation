@@ -65,6 +65,6 @@ public class BlockState {
     @Override
     public String toString() {
         String props = getProperties().entrySet().stream().map(e -> e.getKey()+"="+e.getValue()).collect(Collectors.joining(","));
-        return Block.fromId(blockId)+"{"+props+"}";
+        return Block.fromStateId(blockId)+"{"+props+"}";
     }
 }

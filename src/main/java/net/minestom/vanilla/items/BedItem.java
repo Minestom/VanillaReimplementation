@@ -24,12 +24,12 @@ public class BedItem extends VanillaItem {
     public boolean onUseOnBlock(Player player, ItemStack itemStack, Player.Hand hand, BlockPosition position, Direction blockFace) {
         BlockPosition abovePos = new BlockPosition(position.getX(), position.getY(), position.getZ()).add(0, 1, 0);
         Instance instance = player.getInstance();
-        Block above = Block.fromId(instance.getBlockId(abovePos));
+        Block above = Block.fromStateId(instance.getBlockStateId(abovePos));
         if(isReplaceable(above)) {
             Direction playerDirection = MathUtils.getHorizontalDirection(player.getPosition().getYaw());
             BlockPosition bedHeadPosition = new BlockPosition(abovePos.getX(), abovePos.getY(), abovePos.getZ());
             bedHeadPosition.add(playerDirection.normalX(), playerDirection.normalY(), playerDirection.normalZ());
-            Block blockAtPotentialBedHead = Block.fromId(instance.getBlockId(bedHeadPosition));
+            Block blockAtPotentialBedHead = Block.fromStateId(instance.getBlockStateId(bedHeadPosition));
             if(isReplaceable(blockAtPotentialBedHead)) {
                 placeBed(instance, abovePos, bedHeadPosition, playerDirection);
 

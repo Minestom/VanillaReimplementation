@@ -25,7 +25,6 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.storage.StorageManager;
-import net.minestom.server.timer.TaskRunnable;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.Position;
 import net.minestom.server.utils.Vector;
@@ -34,6 +33,7 @@ import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.anvil.AnvilChunkLoader;
 import net.minestom.vanilla.blocks.NetherPortalBlock;
 import net.minestom.vanilla.blocks.VanillaBlocks;
+import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.generation.VanillaTestGenerator;
 import net.minestom.vanilla.instance.VanillaExplosion;
 import net.minestom.vanilla.system.ServerProperties;
@@ -64,14 +64,14 @@ public class PlayerInit {
         overworld.setExplosionSupplier(explosionGenerator);
         overworld.setChunkLoader(new AnvilChunkLoader(storageManager.getFolder(worldName+"/region")));
 
-        nether = MinecraftServer.getInstanceManager().createInstanceContainer(DimensionType.NETHER, MinecraftServer.getStorageManager().getFolder(worldName+"/DIM-1/data"));
+        nether = MinecraftServer.getInstanceManager().createInstanceContainer(VanillaDimensionTypes.NETHER, MinecraftServer.getStorageManager().getFolder(worldName+"/DIM-1/data"));
         nether.enableAutoChunkLoad(true);
         nether.setChunkGenerator(noiseTestGenerator);
         nether.setData(new SerializableData());
         nether.setExplosionSupplier(explosionGenerator);
         nether.setChunkLoader(new AnvilChunkLoader(storageManager.getFolder(worldName+"/DIM-1/region")));
 
-        end = MinecraftServer.getInstanceManager().createInstanceContainer(DimensionType.END, MinecraftServer.getStorageManager().getFolder(worldName+"/DIM1/data"));
+        end = MinecraftServer.getInstanceManager().createInstanceContainer(VanillaDimensionTypes.END, MinecraftServer.getStorageManager().getFolder(worldName+"/DIM1/data"));
         end.enableAutoChunkLoad(true);
         end.setChunkGenerator(noiseTestGenerator);
         end.setData(new SerializableData());
@@ -99,16 +99,13 @@ public class PlayerInit {
         nether.addEventCallback(AddEntityToInstanceEvent.class, callback);
         end.addEventCallback(AddEntityToInstanceEvent.class, callback);
 
-        MinecraftServer.getSchedulerManager().addShutdownTask(new TaskRunnable() {
-            @Override
-            public void run() {
-                try {
-                    overworld.saveInstance(() -> System.out.println("Overworld saved"));
-                    nether.saveInstance(() -> System.out.println("Nether saved"));
-                    end.saveInstance(() -> System.out.println("End saved"));
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
+        MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
+            try {
+                overworld.saveInstance(() -> System.out.println("Overworld saved"));
+                nether.saveInstance(() -> System.out.println("Nether saved"));
+                end.saveInstance(() -> System.out.println("End saved"));
+            } catch (Throwable e) {
+                e.printStackTrace();
             }
         });
 

@@ -36,7 +36,7 @@ public class PrimedTNT extends ObjectEntity {
         remove();
         Data explosionData = new Data();
         explosionData.set(VanillaExplosion.DROP_EVERYTHING_KEY, true, Boolean.class);
-        Block block = Block.fromId(instance.getBlockId((int)Math.floor(getPosition().getX()), (int)Math.floor(getPosition().getY()+0.5f), (int)Math.floor(getPosition().getZ())));
+        Block block = Block.fromStateId(instance.getBlockStateId((int)Math.floor(getPosition().getX()), (int)Math.floor(getPosition().getY()+0.5f), (int)Math.floor(getPosition().getZ())));
         if(block.isLiquid()) {
             explosionData.set(VanillaExplosion.DONT_DESTROY_BLOCKS_KEY, true, Boolean.class);
         }

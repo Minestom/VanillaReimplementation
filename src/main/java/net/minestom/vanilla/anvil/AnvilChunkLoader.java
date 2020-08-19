@@ -2,8 +2,8 @@ package net.minestom.vanilla.anvil;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.data.Data;
-import net.minestom.server.instance.Biome;
 import net.minestom.server.instance.Chunk;
+import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.IChunkLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.batch.ChunkBatch;
@@ -13,7 +13,10 @@ import net.minestom.server.instance.block.CustomBlock;
 import net.minestom.server.registry.Registries;
 import net.minestom.server.storage.StorageFolder;
 import net.minestom.server.utils.BlockPosition;
+import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.chunk.ChunkUtils;
+import net.minestom.server.world.biomes.Biome;
+import net.minestom.server.world.biomes.BiomeManager;
 import net.minestom.vanilla.blocks.VanillaBlock;
 import org.jglrxavpok.hephaistos.mca.AnvilException;
 import org.jglrxavpok.hephaistos.mca.ChunkColumn;
@@ -37,12 +40,14 @@ import java.util.function.Consumer;
 
 public class AnvilChunkLoader implements IChunkLoader {
     private final static Logger LOGGER = LoggerFactory.getLogger(AnvilChunkLoader.class);
+    private final Biome voidBiome;
 
     private StorageFolder regionFolder;
     private ConcurrentHashMap<String, RegionFile> alreadyLoaded = new ConcurrentHashMap<>();
 
     public AnvilChunkLoader(StorageFolder regionFolder) {
         this.regionFolder = regionFolder;
+        this.voidBiome = MinecraftServer.getBiomeManager().getByName(NamespaceID.from("minecraft:the_void"));
     }
 
     @Override
@@ -66,13 +71,13 @@ public class AnvilChunkLoader implements IChunkLoader {
                 int[] fileChunkBiomes = fileChunk.getBiomes();
                 for (int i = 0; i < fileChunkBiomes.length; i++) {
                     int id = fileChunkBiomes[i];
-                    Biome biome = Biome.fromId(id);
+                    Biome biome = MinecraftServer.getBiomeManager().getById(id);
                     if(biome == null) {
-                        biome = Biome.THE_VOID;
+                        biome = voidBiome;
                     }
                     biomes[i] = biome;
                 }
-                Chunk loadedChunk = new Chunk(biomes, chunkX, chunkZ);
+                Chunk loadedChunk = new DynamicChunk(biomes, chunkX, chunkZ);
                 ChunkBatch batch = instance.createChunkBatch(loadedChunk);
                 loadBlocks(instance, chunkX, chunkZ, batch, fileChunk);
                 batch.flush(c -> {
@@ -152,13 +157,13 @@ public class AnvilChunkLoader implements IChunkLoader {
                             if(customBlock != null) {
                                 batch.setSeparateBlocks(x, y, z, block, customBlockId, data);
                             } else {
-                                batch.setBlock(x, y, z, block);
+                                batch.setBlockStateId(x, y, z, block);
                             }
                         } else {
                             if(customBlock != null) {
                                 batch.setSeparateBlocks(x, y, z, rBlock.getBlockId(), customBlockId, data);
                             } else {
-                                batch.setBlock(x, y, z, rBlock.getBlockId());
+                                batch.setBlock(x, y, z, rBlock);
                             }
                         }
                     } catch (Exception e) {
@@ -203,7 +208,7 @@ public class AnvilChunkLoader implements IChunkLoader {
         for (int i = 0; i < biomes.length; i++) {
             Biome biome = chunk.getBiomes()[i];
             if(biome == null) {
-                biome = Biome.THE_VOID;
+                biome = voidBiome;
             }
             biomes[i] = biome.getId();
         }
@@ -235,10 +240,9 @@ public class AnvilChunkLoader implements IChunkLoader {
         BlockPosition position = new BlockPosition(0, 0, 0);
 
         for(var index : chunk.getBlockEntities()) {
-            int[] pos = ChunkUtils.indexToChunkPosition(index);
-            int x = pos[0];
-            int y = pos[1];
-            int z = pos[2];
+            int x = ChunkUtils.blockIndexToChunkPositionX(index);
+            int y = ChunkUtils.blockIndexToChunkPositionY(index);
+            int z = ChunkUtils.blockIndexToChunkPositionZ(index);
             position.setX(x);
             position.setY(y);
             position.setZ(z);
@@ -249,7 +253,7 @@ public class AnvilChunkLoader implements IChunkLoader {
                 nbt.setInt("y", y);
                 nbt.setInt("z", z);
                 nbt.setByte("keepPacked", (byte) 0);
-                Block block = Block.fromId(customBlock.getBlockId());
+                Block block = Block.fromStateId(customBlock.getBlockStateId());
                 Data data = chunk.getData(x, y, z);
                 customBlock.writeBlockEntity(position, data, nbt);
                 if(block.hasBlockEntity()) {
@@ -272,9 +276,9 @@ public class AnvilChunkLoader implements IChunkLoader {
         for (int x = 0; x < Chunk.CHUNK_SIZE_X; x++) {
             for (int z = 0; z < Chunk.CHUNK_SIZE_Z; z++) {
                 for (int y = 0; y < Chunk.CHUNK_SIZE_Y; y++) {
-                    short id = chunk.getBlockId(x, y, z);
+                    short id = chunk.getBlockStateId(x, y, z);
                     CustomBlock customBlock = chunk.getCustomBlock(x, y, z);
-                    Block block = Block.fromId(id);
+                    Block block = Block.fromStateId(id);
                     BlockAlternative alt = block.getAlternative(id);
                     Map<String, String> properties = alt.createPropertiesMap();
                     org.jglrxavpok.hephaistos.mca.BlockState state = new org.jglrxavpok.hephaistos.mca.BlockState(block.getName(), properties);

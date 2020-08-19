@@ -102,9 +102,9 @@ public enum VanillaBlocks {
         VanillaBlock block = this.blockSupplier.create();
         connectionManager.addPlayerInitialization(player -> {
             player.addEventCallback(PlayerBlockPlaceEvent.class, event -> {
-                if(event.getBlockId() == block.getBaseBlockId()) {
+                if(event.getBlockStateId() == block.getBaseBlockId()) {
                     short blockID = block.getVisualBlockForPlacement(event.getPlayer(), event.getHand(), event.getBlockPosition());
-                    event.setBlockId(blockID);
+                    event.setBlockStateId(blockID);
                     event.setCustomBlockId(block.getCustomBlockId());
                 }
             });
@@ -156,7 +156,7 @@ public enum VanillaBlocks {
         if(customBlock != null) {
             table = customBlock.getLootTable(lootTableManager);
         }
-        Block block = Block.fromId(instance.getBlockId(position));
+        Block block = Block.fromStateId(instance.getBlockStateId(position));
         Data lootTableArguments = new Data();
         // TODO: tool used, silk touch, etc.
         try {

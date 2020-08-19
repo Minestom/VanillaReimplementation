@@ -98,8 +98,8 @@ public class BlockStates {
      * @return
      */
     public BlockState getFromInstance(Instance instance, BlockPosition blockPosition) {
-        short id = instance.getBlockId(blockPosition);
-        BlockAlternative alternative = Block.fromId(id).getAlternative(id);
+        short id = instance.getBlockStateId(blockPosition);
+        BlockAlternative alternative = Block.fromStateId(id).getAlternative(id);
         return getState(alternative.createPropertiesMap());
     }
 }

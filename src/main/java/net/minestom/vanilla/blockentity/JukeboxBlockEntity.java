@@ -31,7 +31,7 @@ public class JukeboxBlockEntity extends BlockEntity {
         if(stack.isAir()) {
             if(isMusicDisc(heldItem.getMaterial())) {
                 set(DISC_STACK, heldItem.clone(), ItemStack.class);
-                player.getInstance().refreshBlockId(getPosition(), Block.JUKEBOX.withProperties("has_record=true"));
+                player.getInstance().refreshBlockId(getPosition(), Block.fromStateId(Block.JUKEBOX.withProperties("has_record=true")));
                 InventoryManipulation.consumeItemIfNotCreative(player, heldItem, hand);
                 player.getInstance().getPlayers().forEach(playerInInstance -> {
                     if(playerInInstance.getDistance(player) < 64) {
@@ -43,7 +43,7 @@ public class JukeboxBlockEntity extends BlockEntity {
         } else {
             stopPlayback(player.getInstance());
             set(DISC_STACK, ItemStack.getAirItem(), ItemStack.class);
-            player.getInstance().refreshBlockId(getPosition(), Block.JUKEBOX.withProperties("has_record=false"));
+            player.getInstance().refreshBlockId(getPosition(), Block.fromStateId(Block.JUKEBOX.withProperties("has_record=false")));
             return true;
         }
         return false;

@@ -8,6 +8,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.Position;
 import net.minestom.server.world.DimensionType;
+import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 
 import java.util.Optional;
 
@@ -23,7 +24,7 @@ public class EndPortalBlock extends VanillaBlock {
 
     @Override
     public void handleContact(Instance instance, BlockPosition position, Entity touching) {
-        DimensionType targetDimension = instance.getDimensionType() == DimensionType.END ? DimensionType.OVERWORLD : DimensionType.END;
+        DimensionType targetDimension = instance.getDimensionType() == VanillaDimensionTypes.END ? VanillaDimensionTypes.OVERWORLD : VanillaDimensionTypes.END;
         Optional<Instance> potentialTargetInstance = MinecraftServer.getInstanceManager().getInstances().stream()
                 .filter(in -> in.getDimensionType() == targetDimension)
                 .findFirst();
@@ -35,7 +36,7 @@ public class EndPortalBlock extends VanillaBlock {
             final int obsidianPlatformX = 100;
             final int obsidianPlatformY = 48;
             final int obsidianPlatformZ = 0;
-            if(targetDimension == DimensionType.OVERWORLD) { // teleport to spawn point
+            if(targetDimension == VanillaDimensionTypes.OVERWORLD) { // teleport to spawn point
                 if(touching instanceof Player) {
                     spawnPoint = ((Player) touching).getRespawnPoint();
                 } else { // TODO: world spawnpoint
@@ -46,7 +47,7 @@ public class EndPortalBlock extends VanillaBlock {
                 int yLevel = touching instanceof Player ? 49 : 50;
                 spawnPoint = new Position(obsidianPlatformX, yLevel, obsidianPlatformZ);
             }
-            if(targetDimension == DimensionType.END) {
+            if(targetDimension == VanillaDimensionTypes.END) {
                 for (int x = -1; x <= 1; x++) {
                     for (int z = -1; z <= 1; z++) {
                         targetInstance.loadChunk(obsidianPlatformX/16+x, obsidianPlatformZ/16+z);

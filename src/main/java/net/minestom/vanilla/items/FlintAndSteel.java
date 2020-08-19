@@ -26,7 +26,7 @@ public class FlintAndSteel extends VanillaItem {
         BlockPosition firePosition = new BlockPosition(position.getX(), position.getY(), position.getZ());
 
         Instance instance = player.getInstance();
-        Block atFirePosition = Block.fromId(instance.getBlockId(firePosition));
+        Block atFirePosition = Block.fromStateId(instance.getBlockStateId(firePosition));
         if(atFirePosition.isAir()) {
             CustomBlock fireBlock = MinecraftServer.getBlockManager().getCustomBlock(Block.FIRE.getBlockId());
             if(!player.isCreative()) {

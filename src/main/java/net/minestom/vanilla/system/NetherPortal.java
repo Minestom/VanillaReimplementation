@@ -18,6 +18,7 @@ import net.minestom.vanilla.blocks.NetherPortalBlock;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.data.NetherPortalDataType;
 import net.minestom.vanilla.data.NetherPortalList;
+import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -121,7 +122,7 @@ public final class NetherPortal {
     }
 
     public boolean tryFillFrame(Instance instance) {
-        if(instance.getDimensionType() == DimensionType.END)
+        if(instance.getDimensionType() == VanillaDimensionTypes.END)
             return false;
         if(!VanillaBlocks.NETHER_PORTAL.isRegistered()) {
             return false;
@@ -224,7 +225,7 @@ public final class NetherPortal {
                 continue;
             }
 
-            Block block = Block.fromId(instance.getBlockId(position.getX(), position.getY(), position.getZ()));
+            Block block = Block.fromStateId(instance.getBlockStateId(position.getX(), position.getY(), position.getZ()));
             if(!block.isAir() && block != Block.FIRE && block != Block.NETHER_PORTAL)
                 continue;
 
@@ -348,12 +349,12 @@ public final class NetherPortal {
             }
 
             // bottom
-            Block frameBlock = Block.fromId(instance.getBlockId(x, minY, z));
+            Block frameBlock = Block.fromStateId(instance.getBlockStateId(x, minY, z));
             if(frameBlock != Block.OBSIDIAN)
                 return false;
 
             // top
-            frameBlock = Block.fromId(instance.getBlockId(x, maxY, z));
+            frameBlock = Block.fromStateId(instance.getBlockStateId(x, maxY, z));
             if(frameBlock != Block.OBSIDIAN)
                 return false;
         }
@@ -364,7 +365,7 @@ public final class NetherPortal {
             int z = minZ;
 
             // left
-            Block frameBlock = Block.fromId(instance.getBlockId(x, minY+j, z));
+            Block frameBlock = Block.fromStateId(instance.getBlockStateId(x, minY+j, z));
             if(frameBlock != Block.OBSIDIAN)
                 return false;
 
@@ -375,7 +376,7 @@ public final class NetherPortal {
             }
 
             // right
-            frameBlock = Block.fromId(instance.getBlockId(x, minY+j, z));
+            frameBlock = Block.fromStateId(instance.getBlockStateId(x, minY+j, z));
             if(frameBlock != Block.OBSIDIAN)
                 return false;
         }
@@ -394,7 +395,7 @@ public final class NetherPortal {
                 } else {
                     z += i;
                 }
-                Block currentBlock = Block.fromId(instance.getBlockId(x, y, z));
+                Block currentBlock = Block.fromStateId(instance.getBlockStateId(x, y, z));
                 if(!currentBlock.isAir() && currentBlock != Block.FIRE && currentBlock != Block.NETHER_PORTAL) {
                     return false;
                 }

@@ -29,11 +29,11 @@ public class ConcretePowderBlock extends GravityBlock {
     }
 
     private void tryConvert(Instance instance, BlockPosition blockPosition) {
-        Block above = Block.fromId(instance.getBlockId(blockPosition.getX(), blockPosition.getY()+1, blockPosition.getZ()));
-        Block west = Block.fromId(instance.getBlockId(blockPosition.getX()-1, blockPosition.getY(), blockPosition.getZ()));
-        Block east = Block.fromId(instance.getBlockId(blockPosition.getX()+1, blockPosition.getY(), blockPosition.getZ()));
-        Block north = Block.fromId(instance.getBlockId(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()-1));
-        Block south = Block.fromId(instance.getBlockId(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()+1));
+        Block above = Block.fromStateId(instance.getBlockStateId(blockPosition.getX(), blockPosition.getY()+1, blockPosition.getZ()));
+        Block west = Block.fromStateId(instance.getBlockStateId(blockPosition.getX()-1, blockPosition.getY(), blockPosition.getZ()));
+        Block east = Block.fromStateId(instance.getBlockStateId(blockPosition.getX()+1, blockPosition.getY(), blockPosition.getZ()));
+        Block north = Block.fromStateId(instance.getBlockStateId(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()-1));
+        Block south = Block.fromStateId(instance.getBlockStateId(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ()+1));
 
         // TODO: support block tags
         if(above == Block.WATER

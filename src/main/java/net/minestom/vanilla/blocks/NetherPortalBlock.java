@@ -12,6 +12,7 @@ import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.blockentity.BlockEntity;
 import net.minestom.vanilla.blockentity.NetherPortalBlockEntity;
 import net.minestom.vanilla.data.NetherPortalList;
+import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.event.entity.EntityEnterNetherPortalEvent;
 import net.minestom.vanilla.event.entity.NetherPortalTeleportEvent;
 import net.minestom.vanilla.event.entity.NetherPortalUpdateEvent;
@@ -89,11 +90,11 @@ public class NetherPortalBlock extends VanillaBlock {
     }
 
     private void attemptTeleport(Instance instance, BlockPosition position, Entity touching, Data data, long ticksSpentInPortal, NetherPortal portal) {
-        DimensionType targetDimension = DimensionType.NETHER;
+        DimensionType targetDimension = VanillaDimensionTypes.NETHER;
         Position targetPosition = new Position(position.getX()/8, position.getY(), position.getZ()/8);
         targetPosition.setPitch(touching.getPosition().getPitch());
         targetPosition.setYaw(touching.getPosition().getYaw());
-        if(instance.getDimensionType() == DimensionType.NETHER) {
+        if(instance.getDimensionType() == VanillaDimensionTypes.NETHER) {
             targetDimension = DimensionType.OVERWORLD;
             targetPosition.setX(position.getX()*8);
             targetPosition.setZ(position.getZ()*8);

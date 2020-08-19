@@ -20,7 +20,7 @@ public class GravityBlock extends VanillaBlock {
 
     @Override
     public void update(Instance instance, BlockPosition blockPosition, Data data) {
-        Block below = Block.fromId(instance.getBlockId(blockPosition.getX(), blockPosition.getY()-1, blockPosition.getZ()));
+        Block below = Block.fromStateId(instance.getBlockStateId(blockPosition.getX(), blockPosition.getY()-1, blockPosition.getZ()));
         if(below.isAir()) {
             instance.scheduleUpdate(2, TimeUnit.TICK, blockPosition);
         }
@@ -28,7 +28,7 @@ public class GravityBlock extends VanillaBlock {
 
     @Override
     public void scheduledUpdate(Instance instance, BlockPosition blockPosition, Data data) {
-        Block below = Block.fromId(instance.getBlockId(blockPosition.getX(), blockPosition.getY()-1, blockPosition.getZ()));
+        Block below = Block.fromStateId(instance.getBlockStateId(blockPosition.getX(), blockPosition.getY()-1, blockPosition.getZ()));
         if(below.isAir()) {
             instance.setBlock(blockPosition, Block.AIR);
 

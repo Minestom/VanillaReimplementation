@@ -45,7 +45,7 @@ public abstract class ChestLikeBlock extends VanillaBlock {
     @Override
     public short getVisualBlockForPlacement(Player player, Player.Hand hand, BlockPosition position) {
         // TODO: handle double chests
-        boolean waterlogged = Block.fromId(player.getInstance().getBlockId(position.getX(), position.getY(), position.getZ())) == Block.WATER;
+        boolean waterlogged = Block.fromStateId(player.getInstance().getBlockStateId(position.getX(), position.getY(), position.getZ())) == Block.WATER;
         float yaw = player.getPosition().getYaw();
         Direction direction = MathUtils.getHorizontalDirection(yaw).opposite();
         return getBaseBlockState().with("facing", direction.name().toLowerCase()).with("waterlogged", String.valueOf(waterlogged)).getBlockId();
@@ -55,7 +55,7 @@ public abstract class ChestLikeBlock extends VanillaBlock {
     public boolean onInteract(Player player, Player.Hand hand, BlockPosition blockPosition, Data data) {
         // TODO: handle double chests
         // TODO: Handle crouching players
-        Block above = Block.fromId(player.getInstance().getBlockId(blockPosition.getX(), blockPosition.getY()+1, blockPosition.getZ()));
+        Block above = Block.fromStateId(player.getInstance().getBlockStateId(blockPosition.getX(), blockPosition.getY()+1, blockPosition.getZ()));
         if(above.isSolid()) { // FIXME: chests below transparent blocks cannot be opened
             return false;
         }
