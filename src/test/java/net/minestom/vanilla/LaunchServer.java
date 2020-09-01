@@ -32,6 +32,7 @@ public class LaunchServer {
 
         CommandManager commandManager = MinecraftServer.getCommandManager();
         VanillaWorldgen.prepareFiles();
+        VanillaWorldgen.registerAllBiomes(MinecraftServer.getBiomeManager());
         VanillaCommands.registerAll(commandManager);
         VanillaItems.registerAll(MinecraftServer.getConnectionManager());
         VanillaBlocks.registerAll(MinecraftServer.getConnectionManager(), MinecraftServer.getBlockManager());

@@ -57,26 +57,26 @@ public class PlayerInit {
         };
         StorageManager storageManager = MinecraftServer.getStorageManager();
         VanillaTestGenerator noiseTestGenerator = new VanillaTestGenerator();
-        overworld = MinecraftServer.getInstanceManager().createInstanceContainer(DimensionType.OVERWORLD, storageManager.getFolder(worldName+"/data")); // TODO: configurable
+        overworld = MinecraftServer.getInstanceManager().createInstanceContainer(DimensionType.OVERWORLD, storageManager.getLocation(worldName+"/data")); // TODO: configurable
         overworld.enableAutoChunkLoad(true);
         overworld.setChunkGenerator(noiseTestGenerator);
         overworld.setData(new SerializableData());
         overworld.setExplosionSupplier(explosionGenerator);
-        overworld.setChunkLoader(new AnvilChunkLoader(storageManager.getFolder(worldName+"/region")));
+        overworld.setChunkLoader(new AnvilChunkLoader(storageManager.getLocation(worldName+"/region")));
 
-        nether = MinecraftServer.getInstanceManager().createInstanceContainer(VanillaDimensionTypes.NETHER, MinecraftServer.getStorageManager().getFolder(worldName+"/DIM-1/data"));
+        nether = MinecraftServer.getInstanceManager().createInstanceContainer(VanillaDimensionTypes.NETHER, MinecraftServer.getStorageManager().getLocation(worldName+"/DIM-1/data"));
         nether.enableAutoChunkLoad(true);
         nether.setChunkGenerator(noiseTestGenerator);
         nether.setData(new SerializableData());
         nether.setExplosionSupplier(explosionGenerator);
-        nether.setChunkLoader(new AnvilChunkLoader(storageManager.getFolder(worldName+"/DIM-1/region")));
+        nether.setChunkLoader(new AnvilChunkLoader(storageManager.getLocation(worldName+"/DIM-1/region")));
 
-        end = MinecraftServer.getInstanceManager().createInstanceContainer(VanillaDimensionTypes.END, MinecraftServer.getStorageManager().getFolder(worldName+"/DIM1/data"));
+        end = MinecraftServer.getInstanceManager().createInstanceContainer(VanillaDimensionTypes.END, MinecraftServer.getStorageManager().getLocation(worldName+"/DIM1/data"));
         end.enableAutoChunkLoad(true);
         end.setChunkGenerator(noiseTestGenerator);
         end.setData(new SerializableData());
         end.setExplosionSupplier(explosionGenerator);
-        end.setChunkLoader(new AnvilChunkLoader(storageManager.getFolder(worldName+"/DIM1/region")));
+        end.setChunkLoader(new AnvilChunkLoader(storageManager.getLocation(worldName+"/DIM1/region")));
 
         // Load some chunks beforehand
         int loopStart = -2;

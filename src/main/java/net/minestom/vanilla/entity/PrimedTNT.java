@@ -4,7 +4,7 @@ import net.minestom.server.data.Data;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.ObjectEntity;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.network.packet.PacketWriter;
+import net.minestom.server.utils.binary.BinaryWriter;
 import net.minestom.server.utils.Position;
 import net.minestom.vanilla.instance.VanillaExplosion;
 
@@ -21,7 +21,7 @@ public class PrimedTNT extends ObjectEntity {
     }
 
     @Override
-    public Consumer<PacketWriter> getMetadataConsumer() {
+    public Consumer<BinaryWriter> getMetadataConsumer() {
         return packet -> {
             super.getMetadataConsumer().accept(packet);
             packet.writeByte((byte)7); // data index

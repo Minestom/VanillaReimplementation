@@ -11,12 +11,11 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockAlternative;
 import net.minestom.server.instance.block.CustomBlock;
 import net.minestom.server.registry.Registries;
-import net.minestom.server.storage.StorageFolder;
+import net.minestom.server.storage.StorageLocation;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.world.biomes.Biome;
-import net.minestom.server.world.biomes.BiomeManager;
 import net.minestom.vanilla.blocks.VanillaBlock;
 import org.jglrxavpok.hephaistos.mca.AnvilException;
 import org.jglrxavpok.hephaistos.mca.ChunkColumn;
@@ -42,12 +41,17 @@ public class AnvilChunkLoader implements IChunkLoader {
     private final static Logger LOGGER = LoggerFactory.getLogger(AnvilChunkLoader.class);
     private final Biome voidBiome;
 
-    private StorageFolder regionFolder;
+    private StorageLocation regionFolder;
     private ConcurrentHashMap<String, RegionFile> alreadyLoaded = new ConcurrentHashMap<>();
 
-    public AnvilChunkLoader(StorageFolder regionFolder) {
+    public AnvilChunkLoader(StorageLocation regionFolder) {
         this.regionFolder = regionFolder;
-        this.voidBiome = MinecraftServer.getBiomeManager().getByName(NamespaceID.from("minecraft:the_void"));
+        Biome defaultBiome = null;
+        defaultBiome = MinecraftServer.getBiomeManager().getByName(NamespaceID.from("minecraft:the_void"));
+        if(defaultBiome == null) {
+            defaultBiome = Biome.PLAINS;
+        }
+        this.voidBiome = defaultBiome;
     }
 
     @Override

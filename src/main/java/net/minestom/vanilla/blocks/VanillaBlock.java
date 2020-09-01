@@ -10,6 +10,7 @@ import net.minestom.server.utils.time.UpdateOption;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Represents a vanilla block implementation.
@@ -103,7 +104,7 @@ public abstract class VanillaBlock extends CustomBlock {
     }
 
     @Override
-    public int getBreakDelay(Player player, BlockPosition position) {
+    public int getBreakDelay(Player player, BlockPosition position, byte stage, Set<Player> breakers) {
         return -1;
     }
 

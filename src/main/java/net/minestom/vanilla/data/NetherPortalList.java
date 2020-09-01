@@ -1,7 +1,7 @@
 package net.minestom.vanilla.data;
 
-import net.minestom.server.network.packet.PacketReader;
-import net.minestom.server.network.packet.PacketWriter;
+import net.minestom.server.utils.binary.BinaryReader;
+import net.minestom.server.utils.binary.BinaryWriter;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.Position;
 import net.minestom.vanilla.system.NetherPortal;
@@ -35,7 +35,7 @@ public class NetherPortalList extends CopyOnWriteArraySet<NetherPortal> {
         private static final NetherPortalDataType portalSerializer = new NetherPortalDataType();
 
         @Override
-        public void encode(PacketWriter packetWriter, NetherPortalList value) {
+        public void encode(BinaryWriter packetWriter, NetherPortalList value) {
             int count = value.size();
             packetWriter.writeVarInt(count);
             for (NetherPortal portal : value) {
@@ -44,7 +44,7 @@ public class NetherPortalList extends CopyOnWriteArraySet<NetherPortal> {
         }
 
         @Override
-        public NetherPortalList decode(PacketReader packetReader) {
+        public NetherPortalList decode(BinaryReader packetReader) {
             NetherPortalList list = new NetherPortalList();
             int count = packetReader.readVarInt();
             for (int i = 0; i < count; i++) {

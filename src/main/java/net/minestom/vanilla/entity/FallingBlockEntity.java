@@ -7,7 +7,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.CustomBlock;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.network.packet.PacketWriter;
+import net.minestom.server.utils.binary.BinaryWriter;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.Position;
 
@@ -64,7 +64,7 @@ public class FallingBlockEntity extends ObjectEntity {
     }
 
     @Override
-    public Consumer<PacketWriter> getMetadataConsumer() {
+    public Consumer<BinaryWriter> getMetadataConsumer() {
         return packet -> {
             super.getMetadataConsumer().accept(packet);
             packet.writeByte((byte)7); // data index

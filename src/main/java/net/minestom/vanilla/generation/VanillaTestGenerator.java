@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-public class VanillaTestGenerator extends ChunkGenerator  {
+public class VanillaTestGenerator implements ChunkGenerator  {
 
     private Random random = new Random();
     private JNoise noise = JNoise.newBuilder().openSimplex().build();
