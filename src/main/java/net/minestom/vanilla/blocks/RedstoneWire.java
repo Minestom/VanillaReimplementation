@@ -4,6 +4,8 @@ import net.minestom.server.data.Data;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockAlternative;
+import net.minestom.server.instance.block.CustomBlock;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.Direction;
@@ -12,7 +14,10 @@ import net.minestom.server.utils.Position;
 import net.minestom.server.utils.Vector;
 import net.minestom.vanilla.entity.PrimedTNT;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Redstone Wire:
@@ -72,10 +77,9 @@ public class RedstoneWire extends VanillaBlock {
     	if (player.isOnGround()) {
     		Power = (int) (Math.random() * 15);
     	} else {
-    		int test = getSurroundingPower(player.getInstance(), blockPosition);
-    		System.out.println(test);
-    		if (test > 0) {
-    			Power = test - 1;
+    		int SurroundPower = getSurroundingPower(player.getInstance(), blockPosition);
+    		if (SurroundPower > 0) {
+    			Power = SurroundPower - 2;
     		} else {
     			Power = 0;
     		}
@@ -160,27 +164,67 @@ private int getSurroundingPower(Instance instance, BlockPosition blockPosition) 
     	// TODO: Structuring needs work here
     	
 		int highestPower = 0;
-	
+		
+		
+		
     	int X = blockPosition.getX();
     	int Y = blockPosition.getY();
     	int Z = blockPosition.getZ();
-    	for (int i = -1; i < 2; i = i + 2) {
-    		for (int j = -1; j < 2; j = j + 2) {
-    			for (int k = -1; k < 2; k = k + 2) {
-    				int powerLevel = 0;
-    				try {
-    					powerLevel = (int) instance.getBlockData(X + i, Y + j, Z + k).get("power");
-    					System.out.println(powerLevel);
-    				} catch (Exception e) {
-    					e.printStackTrace();
-    				}
-    	    		if (powerLevel > highestPower) {
-    	    			highestPower = powerLevel;
-    	    		}
-    	    	}
-        	}
+    	
+    	
+    	System.out.println("--- New ---");
+    	
+    	int[][] Coms = { // Combinations
+    			{-1, -1, 0},
+    			{1, -1, 0},
+    			{-1, 0, 0},
+    			{1, 0, 0},
+    			{-1, 1, 0},
+    			{1, 1, 0},
+    			{0, -1, -1},
+    			{0, -1, 1},
+    			{0, 0, -1},
+    			{0, 0, 1},
+    			{0, 1, -1},
+    			{0, 1, 1},
+    			
+    	};
+    	
+    	for (int i = 0; i < Coms.length; i++) {
+    		
+    		int NewX = X + Coms[i][0];
+    		int NewY = Y + Coms[i][1];
+    		int NewZ = Z + Coms[i][2];
+    		
+	    	int powerLevel = 0;
+	    	
+			if (Block.fromStateId(instance.getBlockStateId(NewX, NewY, NewZ)).getBlockId() == Block.REDSTONE_WIRE.getBlockId()) {
+				try {
+			    	
+					VanillaBlock block = (VanillaBlock) instance.getCustomBlock(NewX, NewY, NewZ);
+					
+		        	BlockState blockState = block.getBlockStates().fromStateID(instance.getBlockStateId(NewX, NewY, NewZ));
+		        	
+		        	String powerString = blockState.get("power");
+		        	
+		        	powerLevel = Integer.valueOf(powerString);
+		        	
+		    	} catch (Exception e) {
+		    		e.printStackTrace();
+		    	}
+				if (powerLevel > highestPower) {
+					highestPower = powerLevel;
+				}
+			}
+	    	
+			
+			
     	}
     	
     	return highestPower;
     }
+
+	public int getPower(Instance instance, BlockPosition blockPosition) {
+		return Power;
+	}
 }
