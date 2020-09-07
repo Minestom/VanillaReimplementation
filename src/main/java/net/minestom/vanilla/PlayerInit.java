@@ -147,7 +147,7 @@ public class PlayerInit {
             });
 
             player.addEventCallback(PlayerBlockBreakEvent.class, event -> {
-            	if (player.isCreative()) {
+            	if (!player.isCreative()) {
             		VanillaBlocks.dropOnBreak(player.getInstance(), event.getBlockPosition());
             	}
             });
