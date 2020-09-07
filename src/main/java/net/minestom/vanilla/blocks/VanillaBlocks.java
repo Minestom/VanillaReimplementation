@@ -77,16 +77,8 @@ public enum VanillaBlocks {
     CHEST(ChestBlock::new),
     TRAPPED_CHEST(TrappedChestBlock::new),
     ENDER_CHEST(EnderChestBlock::new),
-    JUKEBOX(JukeboxBlock::new),
-	
-	// Start of Redstone
-	
-	REDSTONE_WIRE(RedstoneWire::new);
-	
-	
-	// End of Redstone
-	
-	
+    JUKEBOX(JukeboxBlock::new);
+
     private final VanillaBlockSupplier blockSupplier;
     private final BlockPlacementRule placementRule;
     private boolean registered;
