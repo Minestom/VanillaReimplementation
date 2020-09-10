@@ -1,11 +1,12 @@
 package net.minestom.vanilla.entity;
 
 import net.minestom.server.data.Data;
+import net.minestom.server.data.DataImpl;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.ObjectEntity;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.binary.BinaryWriter;
 import net.minestom.server.utils.Position;
+import net.minestom.server.utils.binary.BinaryWriter;
 import net.minestom.vanilla.instance.VanillaExplosion;
 
 import java.util.function.Consumer;
@@ -34,7 +35,7 @@ public class PrimedTNT extends ObjectEntity {
         if(shouldRemove())
             return;
         remove();
-        Data explosionData = new Data();
+        Data explosionData = new DataImpl();
         explosionData.set(VanillaExplosion.DROP_EVERYTHING_KEY, true, Boolean.class);
         Block block = Block.fromStateId(instance.getBlockStateId((int)Math.floor(getPosition().getX()), (int)Math.floor(getPosition().getY()+0.5f), (int)Math.floor(getPosition().getZ())));
         if(block.isLiquid()) {

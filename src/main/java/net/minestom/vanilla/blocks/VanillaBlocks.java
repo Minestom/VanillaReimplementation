@@ -2,6 +2,7 @@ package net.minestom.vanilla.blocks;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.data.Data;
+import net.minestom.server.data.DataImpl;
 import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.gamedata.loottables.LootTable;
@@ -95,6 +96,7 @@ public enum VanillaBlocks {
 
     /**
      * Register this vanilla block to the given BlockManager, ConnectionManager is used to replace the basic block with its custom variant
+     *
      * @param connectionManager
      * @param blockManager
      */
@@ -102,7 +104,7 @@ public enum VanillaBlocks {
         VanillaBlock block = this.blockSupplier.create();
         connectionManager.addPlayerInitialization(player -> {
             player.addEventCallback(PlayerBlockPlaceEvent.class, event -> {
-                if(event.getBlockStateId() == block.getBaseBlockId()) {
+                if (event.getBlockStateId() == block.getBaseBlockId()) {
                     short blockID = block.getVisualBlockForPlacement(event.getPlayer(), event.getHand(), event.getBlockPosition());
                     event.setBlockStateId(blockID);
                     event.setCustomBlockId(block.getCustomBlockId());
@@ -110,7 +112,7 @@ public enum VanillaBlocks {
             });
         });
         blockManager.registerCustomBlock(block);
-        if(placementRule != null) {
+        if (placementRule != null) {
             blockManager.registerBlockPlacementRule(placementRule);
         }
         instance = block;
@@ -119,6 +121,7 @@ public enum VanillaBlocks {
 
     /**
      * Used to know if this block has been registered. Can be used to disable mechanics if this block is not registered (ie nether portals and nether portal blocks)
+     *
      * @return
      */
     public boolean isRegistered() {
@@ -127,6 +130,7 @@ public enum VanillaBlocks {
 
     /**
      * Gets this block instance. 'null' if this block has not been registered
+     *
      * @return
      */
     public VanillaBlock getInstance() {
@@ -135,10 +139,11 @@ public enum VanillaBlocks {
 
     /**
      * Register all vanilla commands into the given blockManager. ConnectionManager is used to replace the basic block with its custom counterpart
+     *
      * @param blockManager
      */
     public static void registerAll(ConnectionManager connectionManager, BlockManager blockManager) {
-        for(VanillaBlocks vanillaBlock : values()) {
+        for (VanillaBlocks vanillaBlock : values()) {
             vanillaBlock.register((short) vanillaBlock.ordinal(), connectionManager, blockManager);
         }
     }
@@ -153,14 +158,14 @@ public enum VanillaBlocks {
         LootTable table = null;
         LootTableManager lootTableManager = MinecraftServer.getLootTableManager();
         CustomBlock customBlock = instance.getCustomBlock(position);
-        if(customBlock != null) {
+        if (customBlock != null) {
             table = customBlock.getLootTable(lootTableManager);
         }
         Block block = Block.fromStateId(instance.getBlockStateId(position));
-        Data lootTableArguments = new Data();
+        Data lootTableArguments = new DataImpl();
         // TODO: tool used, silk touch, etc.
         try {
-            if(table == null) {
+            if (table == null) {
                 table = lootTableManager.load(NamespaceID.from("blocks/" + block.name().toLowerCase()));
             }
             List<ItemStack> stacks = table.generate(lootTableArguments);
@@ -168,9 +173,9 @@ public enum VanillaBlocks {
                 Position spawnPosition = new Position((float) (position.getX() + 0.2f + Math.random() * 0.6f), (float) (position.getY() + 0.5f), (float) (position.getZ() + 0.2f + Math.random() * 0.6f));
                 ItemEntity itemEntity = new ItemEntity(item, spawnPosition);
 
-                itemEntity.getVelocity().setX((float) (Math.random()*2f-1f));
-                itemEntity.getVelocity().setY((float) (Math.random()*2f));
-                itemEntity.getVelocity().setZ((float) (Math.random()*2f-1f));
+                itemEntity.getVelocity().setX((float) (Math.random() * 2f - 1f));
+                itemEntity.getVelocity().setY((float) (Math.random() * 2f));
+                itemEntity.getVelocity().setZ((float) (Math.random() * 2f - 1f));
 
                 itemEntity.setPickupDelay(500, TimeUnit.MILLISECOND);
                 itemEntity.setInstance(instance);

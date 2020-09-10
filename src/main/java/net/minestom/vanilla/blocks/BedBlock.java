@@ -1,6 +1,7 @@
 package net.minestom.vanilla.blocks;
 
 import net.minestom.server.data.Data;
+import net.minestom.server.data.DataImpl;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -21,7 +22,7 @@ public class BedBlock extends VanillaBlock {
     @Override
     public boolean onInteract(Player player, Player.Hand hand, BlockPosition blockPosition, Data data) {
         Instance instance = player.getInstance();
-        if(instance.getDimensionType().isBedSafe()) {
+        if (instance.getDimensionType().isBedSafe()) {
             // TODO: make player sleep
             // TODO: checks for mobs
             // TODO: check for day
@@ -30,9 +31,9 @@ public class BedBlock extends VanillaBlock {
             //}
             return true;
         } else {
-            Data args = new Data();
+            Data args = new DataImpl();
             args.set(VanillaExplosion.IS_FLAMING_KEY, true, Boolean.TYPE);
-            instance.explode(blockPosition.getX()+0.5f, blockPosition.getY()+0.5f, blockPosition.getZ()+0.5f, 5f, data);
+            instance.explode(blockPosition.getX() + 0.5f, blockPosition.getY() + 0.5f, blockPosition.getZ() + 0.5f, 5f, data);
             return true;
         }
     }
@@ -43,7 +44,7 @@ public class BedBlock extends VanillaBlock {
         boolean isFoot = "foot".equals(currentState.get("part"));
         Direction facing = Direction.valueOf(currentState.get("facing").toUpperCase());
         BlockPosition otherPartPosition = new BlockPosition(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ());
-        if(!isFoot) {
+        if (!isFoot) {
             facing = facing.opposite();
         }
         otherPartPosition.add(facing.normalX(), facing.normalY(), facing.normalZ());

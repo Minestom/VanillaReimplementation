@@ -2,6 +2,7 @@ package net.minestom.vanilla.instance;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.data.Data;
+import net.minestom.server.data.DataImpl;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.entity.LivingEntity;
@@ -55,16 +56,16 @@ public class VanillaExplosion extends Explosion {
     @Override
     protected List<BlockPosition> prepare(Instance instance) {
         float stepLength = 0.3f;
-        float maximumBlastRadius = (float) Math.floor(1.3f*getStrength()/(stepLength*0.75))*stepLength;
+        float maximumBlastRadius = (float) Math.floor(1.3f * getStrength() / (stepLength * 0.75)) * stepLength;
         Set<BlockPosition> positions = new HashSet<>();
-        if(blockDamage) {
+        if (blockDamage) {
             for (int x = 0; x < 16; x++) {
                 for (int y = 0; y < 16; y++) {
                     for (int z = 0; z < 16; z++) {
-                        if(!(x == 0 || x == 15 || y == 0 || y == 15 || z == 0 || z == 15)) { // must be on outer edge of 16x16x16 cube
+                        if (!(x == 0 || x == 15 || y == 0 || y == 15 || z == 0 || z == 15)) { // must be on outer edge of 16x16x16 cube
                             continue;
                         }
-                        Vector ray = new Vector(x-8.5f, y-8.5f, z-8.5f);
+                        Vector ray = new Vector(x - 8.5f, y - 8.5f, z - 8.5f);
                         ray.normalize().multiply(stepLength);
 
                         Predicate<BlockPosition> shouldContinue = new Predicate<BlockPosition>() {
@@ -78,13 +79,13 @@ public class VanillaExplosion extends Explosion {
                                 CustomBlock customBlock = instance.getCustomBlock(position);
 
                                 double blastResistance = block.getResistance(); // TODO: custom blast resistances
-                                intensity -= (blastResistance+stepLength)*stepLength;
+                                intensity -= (blastResistance + stepLength) * stepLength;
                                 return intensity > 0f;
                             }
                         };
 
                         RayCast.rayCastBlocks(instance, getCenterX(), getCenterY(), getCenterZ(),
-                                x-8.5f, y-8.5f, z-8.5f, maximumBlastRadius, stepLength,
+                                x - 8.5f, y - 8.5f, z - 8.5f, maximumBlastRadius, stepLength,
                                 shouldContinue, blockPos -> {
                                     positions.add(new BlockPosition(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
                                 }
@@ -106,38 +107,38 @@ public class VanillaExplosion extends Explosion {
             e.printStackTrace();
         }
 
-        if(blockDamage) {
-            for(BlockPosition position : positions) {
+        if (blockDamage) {
+            for (BlockPosition position : positions) {
                 Block block = Block.fromStateId(instance.getBlockStateId(position));
                 CustomBlock customBlock = instance.getCustomBlock(position);
 
-                if(block.isAir()) {
+                if (block.isAir()) {
                     continue;
                 }
-                Data lootTableArguments = new Data();
-                if(!dropsEverything) {
-                    lootTableArguments.set("explosionPower", (double)getStrength(), Double.class);
+                Data lootTableArguments = new DataImpl();
+                if (!dropsEverything) {
+                    lootTableArguments.set("explosionPower", (double) getStrength(), Double.class);
                 }
-                if(customBlock != null) {
-                    if(!customBlock.onExplode(instance, position, lootTableArguments)) {
+                if (customBlock != null) {
+                    if (!customBlock.onExplode(instance, position, lootTableArguments)) {
                         continue;
                     }
                 }
                 double p = explosionRNG.nextDouble();
-                boolean shouldDropItem = p <= 1/getStrength();
-                if(shouldDropItem || dropsEverything) {
+                boolean shouldDropItem = p <= 1 / getStrength();
+                if (shouldDropItem || dropsEverything) {
                     LootTableManager lootTableManager = MinecraftServer.getLootTableManager();
                     try {
                         LootTable table = null;
-                        if(customBlock != null) {
+                        if (customBlock != null) {
                             table = customBlock.getLootTable(lootTableManager);
                         }
-                        if(table == null) {
-                            table = lootTableManager.load(NamespaceID.from("blocks/"+block.name().toLowerCase()));
+                        if (table == null) {
+                            table = lootTableManager.load(NamespaceID.from("blocks/" + block.name().toLowerCase()));
                         }
                         List<ItemStack> output = table.generate(lootTableArguments);
                         for (ItemStack out : output) {
-                            ItemEntity itemEntity = new ItemEntity(out, new Position(position.getX()+explosionRNG.nextFloat(), position.getY()+explosionRNG.nextFloat(), position.getZ()+explosionRNG.nextFloat()));
+                            ItemEntity itemEntity = new ItemEntity(out, new Position(position.getX() + explosionRNG.nextFloat(), position.getY() + explosionRNG.nextFloat(), position.getZ() + explosionRNG.nextFloat()));
                             itemEntity.setPickupDelay(500L, TimeUnit.MILLISECOND);
                             itemEntity.setInstance(instance);
                         }
@@ -178,12 +179,12 @@ public class VanillaExplosion extends Explosion {
     private void affect(Entity e, final float damageRadius) {
         float exposure = calculateExposure(e, damageRadius);
         float distance = e.getPosition().getDistance(center);
-        double impact = (1.0-distance/damageRadius)*exposure;
-        double damage = Math.floor((impact*impact+impact)*7*getStrength()+1);
-        if(e instanceof LivingEntity) {
-            ((LivingEntity) e).damage(DamageTypes.EXPLOSION, (float)damage);
+        double impact = (1.0 - distance / damageRadius) * exposure;
+        double damage = Math.floor((impact * impact + impact) * 7 * getStrength() + 1);
+        if (e instanceof LivingEntity) {
+            ((LivingEntity) e).damage(DamageTypes.EXPLOSION, (float) damage);
         } else {
-            if(e instanceof ItemEntity) {
+            if (e instanceof ItemEntity) {
                 e.scheduleRemove(1L, TimeUnit.TICK);
             }
             // TODO: different entities will react differently (items despawn, boats, minecarts drop as items, etc.)
@@ -192,14 +193,14 @@ public class VanillaExplosion extends Explosion {
         float blastProtection = 0f; // TODO: apply enchantments
         exposure -= exposure * 0.15f * blastProtection;
         Vector velocityBoost = e.getPosition().toVector().add(0f, e.getEyeHeight(), 0f).subtract(center.toVector());
-        velocityBoost.normalize().multiply(exposure*MinecraftServer.TICK_PER_SECOND);
+        velocityBoost.normalize().multiply(exposure * MinecraftServer.TICK_PER_SECOND);
         e.setVelocity(e.getVelocity().clone().add(velocityBoost));
     }
 
     private float calculateExposure(Entity e, final float damageRadius) {
-        int w = (int) (Math.floor(e.getBoundingBox().getWidth()*2))+1;
-        int h = (int) (Math.floor(e.getBoundingBox().getHeight()*2))+1;
-        int d = (int) (Math.floor(e.getBoundingBox().getDepth()*2))+1;
+        int w = (int) (Math.floor(e.getBoundingBox().getWidth() * 2)) + 1;
+        int h = (int) (Math.floor(e.getBoundingBox().getHeight() * 2)) + 1;
+        int d = (int) (Math.floor(e.getBoundingBox().getDepth() * 2)) + 1;
 
         Instance instance = e.getInstance();
         Position pos = e.getPosition();
@@ -207,43 +208,44 @@ public class VanillaExplosion extends Explosion {
         float entY = pos.getY();
         float entZ = pos.getZ();
         int hits = 0;
-        int rays = w*h*d;
-        for(int dx = (int) -Math.ceil(w/2); dx<Math.floor(w/2); dx++) {
-            for(int dy = 0; dy<h; dy++) {
-                for(int dz = (int) -Math.ceil(d/2); dz<Math.floor(d/2); dz++) {
-                    float deltaX = entX+dx-getCenterX();
-                    float deltaY = entY+dy-getCenterY();
-                    float deltaZ = entZ+dz-getCenterZ();
+        int rays = w * h * d;
+        for (int dx = (int) -Math.ceil(w / 2); dx < Math.floor(w / 2); dx++) {
+            for (int dy = 0; dy < h; dy++) {
+                for (int dz = (int) -Math.ceil(d / 2); dz < Math.floor(d / 2); dz++) {
+                    float deltaX = entX + dx - getCenterX();
+                    float deltaY = entY + dy - getCenterY();
+                    float deltaZ = entZ + dz - getCenterZ();
                     RayCast.Result result = RayCast.rayCastBlocks(instance, getCenterX(), getCenterY(), getCenterZ(),
                             deltaX, deltaY, deltaZ,
-                            (float) Math.sqrt(deltaX*deltaX+deltaY*deltaY+deltaZ*deltaZ), 0.3f,
+                            (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ), 0.3f,
                             position -> instance.getBlockStateId(position) == Block.AIR.getBlockId(),
-                            _pos -> {});
-                    if(result.getHitType() != RayCast.HitType.BLOCK) {
+                            _pos -> {
+                            });
+                    if (result.getHitType() != RayCast.HitType.BLOCK) {
                         hits++;
                     }
                 }
             }
         }
-        return (float)hits / rays;
+        return (float) hits / rays;
     }
 
     private List<Entity> getEntitiesAround(Instance instance, double damageRadius) {
         int intRadius = (int) Math.ceil(damageRadius);
         List<Entity> affected = new LinkedList<>();
-        double radiusSq = damageRadius*damageRadius;
+        double radiusSq = damageRadius * damageRadius;
         for (int x = -intRadius; x <= intRadius; x++) {
             for (int z = -intRadius; z <= intRadius; z++) {
-                int posX = (int) Math.floor(getCenterX()+x);
-                int posZ = (int) Math.floor(getCenterZ()+z);
+                int posX = (int) Math.floor(getCenterX() + x);
+                int posZ = (int) Math.floor(getCenterZ() + z);
                 var list = instance.getChunkEntities(instance.getChunk(posX >> 4, posZ >> 4));
-                if(list != null) {
-                    for(Entity e : list) {
-                        float dx = e.getPosition().getX()-getCenterX();
-                        float dy = e.getPosition().getY()-getCenterY();
-                        float dz = e.getPosition().getZ()-getCenterZ();
-                        if(dx*dx+dy*dy+dz*dz <= radiusSq) {
-                            if(!affected.contains(e)) {
+                if (list != null) {
+                    for (Entity e : list) {
+                        float dx = e.getPosition().getX() - getCenterX();
+                        float dy = e.getPosition().getY() - getCenterY();
+                        float dz = e.getPosition().getZ() - getCenterZ();
+                        if (dx * dx + dy * dy + dz * dz <= radiusSq) {
+                            if (!affected.contains(e)) {
                                 affected.add(e);
                             }
                         }
