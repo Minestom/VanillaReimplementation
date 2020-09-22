@@ -14,6 +14,7 @@ import net.minestom.server.registry.Registries;
 import net.minestom.server.storage.StorageLocation;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.utils.chunk.ChunkCallback;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.world.biomes.Biome;
 import net.minestom.vanilla.blocks.VanillaBlock;
@@ -35,7 +36,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 
 public class AnvilChunkLoader implements IChunkLoader {
     private final static Logger LOGGER = LoggerFactory.getLogger(AnvilChunkLoader.class);
@@ -55,7 +55,7 @@ public class AnvilChunkLoader implements IChunkLoader {
     }
 
     @Override
-    public boolean loadChunk(Instance instance, int chunkX, int chunkZ, Consumer<Chunk> callback) {
+    public boolean loadChunk(Instance instance, int chunkX, int chunkZ, ChunkCallback callback) {
         LOGGER.debug("Attempt loading at {} {}", chunkX, chunkZ);
         try {
             Chunk chunk = loadMCA(instance, chunkX, chunkZ, callback);
@@ -66,7 +66,7 @@ public class AnvilChunkLoader implements IChunkLoader {
         return false;
     }
 
-    private Chunk loadMCA(Instance instance, int chunkX, int chunkZ, Consumer<Chunk> callback) throws IOException, AnvilException {
+    private Chunk loadMCA(Instance instance, int chunkX, int chunkZ, ChunkCallback callback) throws IOException, AnvilException {
         RegionFile mcaFile = getMCAFile(chunkX, chunkZ);
         if (mcaFile != null) {
             ChunkColumn fileChunk = mcaFile.getChunk(chunkX, chunkZ);
@@ -84,7 +84,7 @@ public class AnvilChunkLoader implements IChunkLoader {
                 Chunk loadedChunk = new DynamicChunk(biomes, chunkX, chunkZ);
                 ChunkBatch batch = instance.createChunkBatch(loadedChunk);
                 loadBlocks(instance, chunkX, chunkZ, batch, fileChunk);
-                batch.flush(c -> {
+                batch.unsafeFlush(c -> {
                     loadTileEntities(c, chunkX, chunkZ, instance, fileChunk);
                     if (callback != null) {
                         callback.accept(c);
