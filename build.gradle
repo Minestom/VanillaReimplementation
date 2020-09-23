@@ -9,6 +9,11 @@ version '1.0'
 
 sourceCompatibility = 1.11
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 repositories {
     mavenCentral()
     maven { url 'http://repo.spongepowered.org/maven' }
