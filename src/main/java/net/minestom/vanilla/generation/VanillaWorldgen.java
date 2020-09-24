@@ -60,6 +60,7 @@ public final class VanillaWorldgen {
         // TODO: allow support for custom namespaces
         File biomeFolder = new File(ResourceGatherer.DATA_FOLDER, "data/minecraft/worldgen/biome/");
         File[] files = biomeFolder.listFiles();
+        int maxID = 0;
         if(files != null) {
             for(File biomeFile : files) {
                 String nameWithoutExtension = biomeFile.getName().substring(0, biomeFile.getName().lastIndexOf("."));
@@ -74,7 +75,9 @@ public final class VanillaWorldgen {
                         .category(Biome.Category.NONE)
                         .build();
                 biomeManager.addBiome(biome);
+                maxID = Math.max(biome.getId(), maxID);
             }
         }
+        Biome.idCounter.set(maxID);
     }
 }

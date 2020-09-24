@@ -31,10 +31,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AnvilChunkLoader implements IChunkLoader {
@@ -72,16 +69,20 @@ public class AnvilChunkLoader implements IChunkLoader {
             ChunkColumn fileChunk = mcaFile.getChunk(chunkX, chunkZ);
             if (fileChunk != null) {
                 Biome[] biomes = new Biome[Chunk.BIOME_COUNT];
-                int[] fileChunkBiomes = fileChunk.getBiomes();
-                for (int i = 0; i < fileChunkBiomes.length; i++) {
-                    int id = fileChunkBiomes[i];
-                    Biome biome = MinecraftServer.getBiomeManager().getById(id);
-                    if (biome == null) {
-                        biome = voidBiome;
+                if(fileChunk.getGenerationStatus().compareTo(ChunkColumn.GenerationStatus.Biomes) > 0) {
+                    int[] fileChunkBiomes = fileChunk.getBiomes();
+                    for (int i = 0; i < fileChunkBiomes.length; i++) {
+                        int id = fileChunkBiomes[i];
+                        Biome biome = MinecraftServer.getBiomeManager().getById(id);
+                        if (biome == null) {
+                            biome = voidBiome;
+                        }
+                        biomes[i] = biome;
                     }
-                    biomes[i] = biome;
+                } else {
+                    Arrays.fill(biomes, voidBiome);
                 }
-                Chunk loadedChunk = new DynamicChunk(biomes, chunkX, chunkZ);
+                Chunk loadedChunk = new DynamicChunk(instance, biomes, chunkX, chunkZ);
                 ChunkBatch batch = instance.createChunkBatch(loadedChunk);
                 loadBlocks(instance, chunkX, chunkZ, batch, fileChunk);
                 batch.unsafeFlush(c -> {
