@@ -69,7 +69,7 @@ public class AnvilChunkLoader implements IChunkLoader {
             ChunkColumn fileChunk = mcaFile.getChunk(chunkX, chunkZ);
             if (fileChunk != null) {
                 Biome[] biomes = new Biome[Chunk.BIOME_COUNT];
-                if(fileChunk.getGenerationStatus().compareTo(ChunkColumn.GenerationStatus.Biomes) > 0) {
+                if (fileChunk.getGenerationStatus().compareTo(ChunkColumn.GenerationStatus.Biomes) > 0) {
                     int[] fileChunkBiomes = fileChunk.getBiomes();
                     for (int i = 0; i < fileChunkBiomes.length; i++) {
                         int id = fileChunkBiomes[i];
@@ -104,7 +104,7 @@ public class AnvilChunkLoader implements IChunkLoader {
         int regionZ = CoordinatesKt.chunkToRegion(chunkZ);
         return alreadyLoaded.computeIfAbsent(RegionFile.Companion.createFileName(regionX, regionZ), n -> {
             try {
-                File regionFile = new File(regionFolder.getFolderPath(), n);
+                File regionFile = new File(regionFolder.getLocation(), n);
                 if (!regionFile.exists()) {
                     return null;
                 }
@@ -128,7 +128,7 @@ public class AnvilChunkLoader implements IChunkLoader {
                 pos.setX(x);
                 pos.setY(y);
                 pos.setZ(z);
-                Data data = loadedChunk.getData(x, y, z);
+                Data data = loadedChunk.getBlockData(ChunkUtils.getBlockIndex(x, y, z));
                 data = ((VanillaBlock) block).readBlockEntity(te, instance, pos, data);
                 loadedChunk.setBlockData(x, y, z, data);
             }
@@ -192,7 +192,7 @@ public class AnvilChunkLoader implements IChunkLoader {
                 int regionX = CoordinatesKt.chunkToRegion(chunkX);
                 int regionZ = CoordinatesKt.chunkToRegion(chunkZ);
                 String n = RegionFile.Companion.createFileName(regionX, regionZ);
-                File regionFile = new File(regionFolder.getFolderPath(), n);
+                File regionFile = new File(regionFolder.getLocation(), n);
                 try {
                     if (!regionFile.exists()) {
                         if (!regionFile.getParentFile().exists()) {
@@ -259,7 +259,7 @@ public class AnvilChunkLoader implements IChunkLoader {
                 nbt.setInt("z", z);
                 nbt.setByte("keepPacked", (byte) 0);
                 Block block = Block.fromStateId(customBlock.getDefaultBlockStateId());
-                Data data = chunk.getData(x, y, z);
+                Data data = chunk.getBlockData(ChunkUtils.getBlockIndex(x, y, z));
                 customBlock.writeBlockEntity(position, data, nbt);
                 if (block.hasBlockEntity()) {
                     nbt.setString("id", block.getBlockEntityName().toString());

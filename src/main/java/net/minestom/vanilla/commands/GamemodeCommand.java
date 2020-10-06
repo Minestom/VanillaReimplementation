@@ -41,25 +41,27 @@ public class GamemodeCommand extends Command {
         player.sendMessage("Usage: /gamemode [player] <gamemode>");
     }
 
-    private void executeOnSelf(CommandSender player, Arguments arguments) {
-        String gamemodeName = arguments.getWord("mode");
-        GameMode mode = GameMode.valueOf(gamemodeName.toUpperCase());
+    private void executeOnSelf(CommandSender sender, Arguments arguments) {
+        final Player player = sender.asPlayer();
+        final String gamemodeName = arguments.getWord("mode");
+        final GameMode mode = GameMode.valueOf(gamemodeName.toUpperCase());
         assert mode != null; // mode is not supposed to be null, because gamemodeName will be valid
-        ((Player)player).setGameMode(mode);
-        player.sendMessage(ColoredText.ofFormat("{@commands.gamemode.success.self,"+gamemodeName+"}").toString());
+        player.setGameMode(mode);
+        player.sendMessage(ColoredText.of("{@commands.gamemode.success.self," + gamemodeName + "}"));
     }
 
-    private void executeOnOther(CommandSender player, Arguments arguments) {
-        String gamemodeName = arguments.getWord("mode");
-        String targetName = arguments.getWord("player");
-        GameMode mode = GameMode.valueOf(gamemodeName.toUpperCase());
+    private void executeOnOther(CommandSender sender, Arguments arguments) {
+        final Player player = sender.asPlayer();
+        final String gamemodeName = arguments.getWord("mode");
+        final String targetName = arguments.getWord("player");
+        final GameMode mode = GameMode.valueOf(gamemodeName.toUpperCase());
         assert mode != null; // mode is not supposed to be null, because gamemodeName will be valid
-        Optional<Player> target = ((Player)player).getInstance().getPlayers().stream().filter(p -> p.getUsername().equalsIgnoreCase(targetName)).findFirst();
+        Optional<Player> target = ((Player) player).getInstance().getPlayers().stream().filter(p -> p.getUsername().equalsIgnoreCase(targetName)).findFirst();
         if (target.isPresent()) {
             target.get().setGameMode(mode);
-            player.sendMessage(ColoredText.ofFormat("{@commands.gamemode.success.other,"+targetName+","+gamemodeName+"}").toString());
+            player.sendMessage(ColoredText.of("{@commands.gamemode.success.other," + targetName + "," + gamemodeName + "}"));
         } else {
-            player.sendMessage(ColoredText.ofFormat("{@argument.player.unknown}").toString());
+            player.sendMessage(ColoredText.of("{@argument.player.unknown}"));
         }
     }
 
