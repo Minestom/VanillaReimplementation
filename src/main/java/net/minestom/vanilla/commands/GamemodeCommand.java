@@ -47,7 +47,7 @@ public class GamemodeCommand extends Command {
         final GameMode mode = GameMode.valueOf(gamemodeName.toUpperCase());
         assert mode != null; // mode is not supposed to be null, because gamemodeName will be valid
         player.setGameMode(mode);
-        player.sendMessage(ColoredText.of("{@commands.gamemode.success.self," + gamemodeName + "}"));
+        player.sendMessage(ColoredText.of("{@commands.gamemode.success.self,"+gamemodeName+"}"));
     }
 
     private void executeOnOther(CommandSender sender, Arguments arguments) {

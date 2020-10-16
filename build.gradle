@@ -48,4 +48,10 @@ dependencies {
             requireCapability("net.minestom.server:Minestom-generators")
         }
     }
+    api("com.github.jglrxavpok:Hephaistos:${project.hephaistos_version}:gson")
+    api("com.github.jglrxavpok:Hephaistos:${project.hephaistos_version}") {
+        capabilities {
+            requireCapability("org.jglrxavpok.nbt:Hephaistos-gson")
+        }
+    }
 }
