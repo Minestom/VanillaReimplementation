@@ -21,7 +21,7 @@ public class DifficultyCommand extends Command {
 
         Argument difficulty = ArgumentType.Word("difficulty").from("peaceful", "easy", "normal", "hard");
 
-        addCallback(this::difficultyCallback, difficulty);
+        setArgumentCallback(this::difficultyCallback, difficulty);
 
         addSyntax(this::execute, difficulty);
     }

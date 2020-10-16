@@ -1,6 +1,11 @@
 package net.minestom.vanilla.generation;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockAlternative;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.registry.Registries;
 import net.minestom.server.registry.ResourceGatherer;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.biomes.Biome;
@@ -10,10 +15,18 @@ import net.minestom.server.world.biomes.BiomeParticles;
 import net.minestom.vanilla.io.MinecraftData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jglrxavpok.hephaistos.json.NBTGsonReader;
+import org.jglrxavpok.hephaistos.nbt.NBT;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -165,7 +178,19 @@ public final class VanillaWorldgen {
                                 .build()
                         ).build();
 
-                // TODO: block & item
+            case "block":
+                Block block = Registries.getBlock(biomeParticles.get("Name").getAsString());
+                BlockAlternative alternative = block.getAlternative(findAlternative(block, biomeParticles.get("Properties")));
+                return builder.
+                        options(BiomeParticles.BlockParticle.builder()
+                                .block(alternative)
+                                .build()
+
+                        ).build();
+
+            case "item":
+                ItemStack stack = ItemStack.fromNBT(new NBTGsonReader(new StringReader(biomeParticles.toString())).read(NBTCompound.class));
+                return builder.options(BiomeParticles.ItemParticle.builder().item(stack).build()).build();
 
             default:
                 return builder
@@ -173,5 +198,16 @@ public final class VanillaWorldgen {
                                 .type(NamespaceID.from(type)).build())
                         .build();
         }
+    }
+
+    private static short findAlternative(Block block, JsonElement properties) {
+        if(properties == null)
+            return block.getBlockId();
+        JsonObject props = properties.getAsJsonObject();
+        PriorityQueue<String> sortedKeys = new PriorityQueue<>(props.keySet());
+        String propertiesString = sortedKeys.stream()
+                .map(key -> key+"="+props.get(key).getAsString())
+                .collect(Collectors.joining(","));
+        return block.withProperties(propertiesString);
     }
 }

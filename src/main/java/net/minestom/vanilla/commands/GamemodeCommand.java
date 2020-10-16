@@ -31,7 +31,7 @@ public class GamemodeCommand extends Command {
         }
         Argument mode = ArgumentType.Word("mode").from(names);
 
-        addCallback(this::gameModeCallback, mode);
+        setArgumentCallback(this::gameModeCallback, mode);
 
         addSyntax(this::executeOnSelf, mode);
         addSyntax(this::executeOnOther, player, mode);
@@ -46,7 +46,7 @@ public class GamemodeCommand extends Command {
         GameMode mode = GameMode.valueOf(gamemodeName.toUpperCase());
         assert mode != null; // mode is not supposed to be null, because gamemodeName will be valid
         ((Player)player).setGameMode(mode);
-        player.sendMessage(ColoredText.ofFormat("{@commands.gamemode.success.self,"+gamemodeName+"}").toString());
+        player.sendMessage(ColoredText.of("{@commands.gamemode.success.self,"+gamemodeName+"}").toString());
     }
 
     private void executeOnOther(CommandSender player, Arguments arguments) {
@@ -57,9 +57,9 @@ public class GamemodeCommand extends Command {
         Optional<Player> target = ((Player)player).getInstance().getPlayers().stream().filter(p -> p.getUsername().equalsIgnoreCase(targetName)).findFirst();
         if (target.isPresent()) {
             target.get().setGameMode(mode);
-            player.sendMessage(ColoredText.ofFormat("{@commands.gamemode.success.other,"+targetName+","+gamemodeName+"}").toString());
+            player.sendMessage(ColoredText.of("{@commands.gamemode.success.other,"+targetName+","+gamemodeName+"}").toString());
         } else {
-            player.sendMessage(ColoredText.ofFormat("{@argument.player.unknown}").toString());
+            player.sendMessage(ColoredText.of("{@argument.player.unknown}").toString());
         }
     }
 
