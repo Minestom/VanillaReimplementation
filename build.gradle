@@ -41,9 +41,8 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
-    api("com.github.Minestom:Minestom:${project.minestom_version}")
-    implementation("com.github.Minestom:Minestom:${project.minestom_version}:generators")
-    implementation("com.github.Minestom:Minestom:${project.minestom_version}") {
+    api project(":Minestom")
+    implementation(project(":Minestom")) {
         capabilities {
             requireCapability("net.minestom.server:Minestom-generators")
         }

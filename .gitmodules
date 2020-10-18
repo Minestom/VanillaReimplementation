@@ -4,3 +4,6 @@
 [submodule "prismarine-minecraft-data"]
     path = prismarine-minecraft-data
     url = https://github.com/PrismarineJS/minecraft-data
+[submodule "Minestom"]
+	path = Minestom
+	url = ./Minestom/

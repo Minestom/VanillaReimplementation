@@ -1,6 +1,9 @@
 # About Minestom
 See [Minestom Project on GitHub](https://github.com/Minestom/Minestom)
 
+# Cloning
+`git clone --recurse-submodules https://github.com/Minestom/VanillaReimplementation`
+
 # About this repository
 You will be able to find here all available vanilla reimplementation for your Minestom instance.
 
