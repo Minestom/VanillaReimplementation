@@ -32,7 +32,7 @@ public class VanillaBiomeGenerator extends MinestomEnumGenerator<VanillaBiomeCon
         targetVersion = args[0];
 
         try {
-            ResourceGatherer.ensureResourcesArePresent(targetVersion, null); // TODO
+            ResourceGatherer.ensureResourcesArePresent(targetVersion); // TODO
         } catch (IOException e) {
             e.printStackTrace();
         }
