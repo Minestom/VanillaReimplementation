@@ -6,4 +6,4 @@
     url = https://github.com/PrismarineJS/minecraft-data
 [submodule "Minestom"]
 	path = Minestom
-	url = ./Minestom/
+	url = https://github.com/Minestom/Minestom
