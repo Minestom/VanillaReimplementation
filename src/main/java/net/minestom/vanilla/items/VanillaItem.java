@@ -21,6 +21,7 @@ public abstract class VanillaItem {
 
     /**
      * Called when the player right clicks with this item in the air
+     *
      * @param player
      * @param itemStack
      * @param hand
@@ -29,6 +30,7 @@ public abstract class VanillaItem {
 
     /**
      * Called when the player right clicks with this item on a block
+     *
      * @param player
      * @param itemStack
      * @param hand
@@ -39,8 +41,8 @@ public abstract class VanillaItem {
     public abstract boolean onUseOnBlock(Player player, ItemStack itemStack, Player.Hand hand, BlockPosition position, Direction blockFace);
 
     public static void damageItem(Player player, Player.Hand hand, ItemStack itemStack) {
-        ItemStack newUsedItem = itemStack.clone();
-        newUsedItem.setDamage((byte) (itemStack.getDamage()+1));
+        ItemStack newUsedItem = itemStack.copy();
+        newUsedItem.setDamage((byte) (itemStack.getDamage() + 1));
 
         if (hand == Player.Hand.OFF) {
             player.getInventory().setItemInOffHand(newUsedItem);

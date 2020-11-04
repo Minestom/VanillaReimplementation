@@ -231,10 +231,10 @@ public final class NetherPortal {
 
             insideFrame.add(position);
 
-            BlockPosition above = position.clone().add(0, +1, 0);
-            BlockPosition below = position.clone().add(0, -1, 0);
-            BlockPosition left = position.clone().add(-1*axis.xMultiplier, 0, -1*axis.zMultiplier);
-            BlockPosition right = position.clone().add(1*axis.xMultiplier, 0, 1*axis.zMultiplier);
+            BlockPosition above = position.copy().add(0, +1, 0);
+            BlockPosition below = position.copy().add(0, -1, 0);
+            BlockPosition left = position.copy().add(-1*axis.xMultiplier, 0, -1*axis.zMultiplier);
+            BlockPosition right = position.copy().add(1*axis.xMultiplier, 0, 1*axis.zMultiplier);
 
             if(!considered.contains(above) && !neighbors.contains(above)) {
                 neighbors.add(above);

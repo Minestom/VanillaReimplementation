@@ -32,7 +32,7 @@ public class FireBlock extends VanillaBlock {
 
     @Override
     public void scheduledUpdate(Instance instance, BlockPosition position, Data blockData) {
-        NetherPortal portal = NetherPortal.findPortalFrameFromFrameBlock(instance, position.clone());
+        NetherPortal portal = NetherPortal.findPortalFrameFromFrameBlock(instance, position.copy());
         if(portal != null) {
             if(portal.tryFillFrame(instance)) {
                 portal.register(instance);

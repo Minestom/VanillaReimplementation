@@ -194,7 +194,7 @@ public class VanillaExplosion extends Explosion {
         exposure -= exposure * 0.15f * blastProtection;
         Vector velocityBoost = e.getPosition().toVector().add(0f, e.getEyeHeight(), 0f).subtract(center.toVector());
         velocityBoost.normalize().multiply(exposure * MinecraftServer.TICK_PER_SECOND);
-        e.setVelocity(e.getVelocity().clone().add(velocityBoost));
+        e.setVelocity(e.getVelocity().copy().add(velocityBoost));
     }
 
     private float calculateExposure(Entity e, final float damageRadius) {

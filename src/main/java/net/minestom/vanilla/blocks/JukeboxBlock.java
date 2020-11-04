@@ -52,7 +52,7 @@ public class JukeboxBlock extends VanillaBlock {
         if(originalData instanceof JukeboxBlockEntity) {
             data = (JukeboxBlockEntity) originalData;
         } else {
-            data = new JukeboxBlockEntity(position.clone());
+            data = new JukeboxBlockEntity(position.copy());
         }
 
         if(nbt.containsKey("RecordItem")) {

@@ -50,7 +50,7 @@ class LaunchServerStartup {
         });
 
         minecraftServer.start(properties.get("server-ip"), Integer.parseInt(properties.get("server-port")), (playerConnection, responseData) -> {
-            responseData.setName("1.16.2");
+            responseData.setName(MinecraftServer.VERSION_NAME);
             responseData.setMaxPlayer(Integer.parseInt(properties.get("max-players")));
             responseData.setOnline(MinecraftServer.getConnectionManager().getOnlinePlayers().size());
             responseData.setDescription(properties.get("motd"));

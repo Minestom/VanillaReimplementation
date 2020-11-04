@@ -32,12 +32,12 @@ public abstract class ChestLikeBlock extends VanillaBlock {
     @Override
     public void onDestroy(Instance instance, BlockPosition blockPosition, Data data) {
         super.onDestroy(instance, blockPosition, data);
-        if(dropContentsOnDestroy()) {
-            ChestBlockEntity blockEntity = (ChestBlockEntity)data;
-            for(ItemStack stack : blockEntity.getInventory().getItemStacks()) {
+        if (dropContentsOnDestroy()) {
+            ChestBlockEntity blockEntity = (ChestBlockEntity) data;
+            for (ItemStack stack : blockEntity.getInventory().getItemStacks()) {
                 Random rng = new Random();
-                ItemEntity entity = new ItemEntity(stack, new Position((float) (blockPosition.getX()+rng.nextDouble()), blockPosition.getY()+.5f, (float) (blockPosition.getZ()+rng.nextDouble())));
-                instance.addEntity(entity);
+                ItemEntity entity = new ItemEntity(stack, new Position((float) (blockPosition.getX() + rng.nextDouble()), blockPosition.getY() + .5f, (float) (blockPosition.getZ() + rng.nextDouble())));
+                entity.setInstance(instance);
             }
         }
     }
@@ -55,8 +55,8 @@ public abstract class ChestLikeBlock extends VanillaBlock {
     public boolean onInteract(Player player, Player.Hand hand, BlockPosition blockPosition, Data data) {
         // TODO: handle double chests
         // TODO: Handle crouching players
-        Block above = Block.fromStateId(player.getInstance().getBlockStateId(blockPosition.getX(), blockPosition.getY()+1, blockPosition.getZ()));
-        if(above.isSolid()) { // FIXME: chests below transparent blocks cannot be opened
+        Block above = Block.fromStateId(player.getInstance().getBlockStateId(blockPosition.getX(), blockPosition.getY() + 1, blockPosition.getZ()));
+        if (above.isSolid()) { // FIXME: chests below transparent blocks cannot be opened
             return false;
         }
         player.openInventory(getInventory(player, blockPosition, data));
@@ -73,10 +73,10 @@ public abstract class ChestLikeBlock extends VanillaBlock {
     @Override
     public Data readBlockEntity(NBTCompound nbt, Instance instance, BlockPosition position, Data originalData) {
         ChestBlockEntity data;
-        if(originalData instanceof ChestBlockEntity) {
+        if (originalData instanceof ChestBlockEntity) {
             data = (ChestBlockEntity) originalData;
         } else {
-            data = new ChestBlockEntity(position.clone());
+            data = new ChestBlockEntity(position.copy());
         }
 
         // TODO: CustomName
@@ -84,7 +84,7 @@ public abstract class ChestLikeBlock extends VanillaBlock {
         // TODO: LootTable
         // TODO: LootTableSeed
 
-        if(nbt.containsKey("Items")) {
+        if (nbt.containsKey("Items")) {
             NBTUtils.loadAllItems(nbt.getList("Items"), data.getInventory());
         }
         return data;
@@ -96,7 +96,7 @@ public abstract class ChestLikeBlock extends VanillaBlock {
         // TODO: Lock
         // TODO: LootTable
         // TODO: LootTableSeed
-        if(blockData instanceof ChestBlockEntity) {
+        if (blockData instanceof ChestBlockEntity) {
             ChestBlockEntity data = (ChestBlockEntity) blockData;
             NBTList<NBTCompound> list = new NBTList<>(NBTTypes.TAG_Compound);
             NBTUtils.saveAllItems(list, data.getInventory());

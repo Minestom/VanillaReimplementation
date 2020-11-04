@@ -30,7 +30,7 @@ public class JukeboxBlockEntity extends BlockEntity {
         ItemStack stack = getDisc();
         if(stack.isAir()) {
             if(isMusicDisc(heldItem.getMaterial())) {
-                set(DISC_STACK, heldItem.clone(), ItemStack.class);
+                set(DISC_STACK, heldItem.copy(), ItemStack.class);
                 player.getInstance().refreshBlockId(getPosition(), Block.fromStateId(Block.JUKEBOX.withProperties("has_record=true")));
                 InventoryManipulation.consumeItemIfNotCreative(player, heldItem, hand);
                 player.getInstance().getPlayers().forEach(playerInInstance -> {

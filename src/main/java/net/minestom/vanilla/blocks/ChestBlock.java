@@ -38,7 +38,7 @@ public class ChestBlock extends ChestLikeBlock {
 
         Inventory selfInventory = ((ChestBlockEntity) data).getInventory();
 
-        BlockPosition positionOfOtherChest = blockPosition.clone();
+        BlockPosition positionOfOtherChest = blockPosition.copy();
         Direction facing = Direction.valueOf(state.get("facing").toUpperCase());
         switch (type) {
             case "single":

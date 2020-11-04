@@ -42,7 +42,7 @@ public class DifficultyCommand extends Command {
         player.sendMessage("'" + difficulty + "' is not a valid difficulty!");
     }
 
-    private boolean isAllowed(CommandSender player) {
+    private boolean isAllowed(CommandSender player, String commandName) {
         return true; // TODO: permissions
     }
 }
