@@ -82,7 +82,7 @@ public class AnvilChunkLoader implements IChunkLoader {
                 } else {
                     Arrays.fill(biomes, voidBiome);
                 }
-                Chunk loadedChunk = new DynamicChunk(instance, biomes, chunkX, chunkZ);
+                Chunk loadedChunk = new DynamicChunk(biomes, chunkX, chunkZ);
                 ChunkBatch batch = instance.createChunkBatch(loadedChunk);
                 loadBlocks(instance, chunkX, chunkZ, batch, fileChunk);
                 batch.unsafeFlush(c -> {
