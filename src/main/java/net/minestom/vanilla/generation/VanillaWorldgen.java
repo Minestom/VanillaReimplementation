@@ -16,15 +16,11 @@ import net.minestom.vanilla.io.MinecraftData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jglrxavpok.hephaistos.json.NBTGsonReader;
-import org.jglrxavpok.hephaistos.nbt.NBT;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -40,31 +36,31 @@ public final class VanillaWorldgen {
     public static void prepareFiles() throws IOException {
         File root = new File(ResourceGatherer.DATA_FOLDER, "data/minecraft/");
         File toCheck = new File(root, "dimension_type");
-        if(toCheck.exists()) {
-            logger.debug(toCheck.getAbsolutePath()+" exists, assuming worldgen files are present.");
+        if (toCheck.exists()) {
+            logger.debug(toCheck.getAbsolutePath() + " exists, assuming worldgen files are present.");
             return;
         }
 
         // TODO: not production ready?
         // TODO: are we allowed to embed the zip, or redistribute it?
         // TODO: or run "git clone https://github.com/slicedlime/examples/ vanilla_worldgen_example" if possible
-        logger.debug(toCheck.getAbsolutePath()+" does not exit, assuming worldgen files are not present, extracting from vanilla_worldgen_example.");
+        logger.debug(toCheck.getAbsolutePath() + " does not exit, assuming worldgen files are not present, extracting from vanilla_worldgen_example.");
 
         File worldgen = new File("./vanilla_worldgen_example/vanilla_worldgen.zip");
-        try(ZipInputStream input = new ZipInputStream(new BufferedInputStream(new FileInputStream(worldgen)))) {
+        try (ZipInputStream input = new ZipInputStream(new BufferedInputStream(new FileInputStream(worldgen)))) {
             ZipEntry entry;
-            while((entry = input.getNextEntry()) != null) {
-                if(entry.isDirectory())
+            while ((entry = input.getNextEntry()) != null) {
+                if (entry.isDirectory())
                     continue;
                 File targetFile = new File(root, entry.getName());
-                if(!targetFile.getParentFile().exists()) {
+                if (!targetFile.getParentFile().exists()) {
                     targetFile.getParentFile().mkdirs();
                 }
-                if(!targetFile.exists()) {
+                if (!targetFile.exists()) {
                     targetFile.createNewFile();
                 }
                 Files.copy(input, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                logger.debug("Copied "+entry.getName()+" to "+targetFile.getAbsolutePath());
+                logger.debug("Copied " + entry.getName() + " to " + targetFile.getAbsolutePath());
             }
         }
     }
@@ -74,21 +70,21 @@ public final class VanillaWorldgen {
         File biomeFolder = new File(ResourceGatherer.DATA_FOLDER, "data/minecraft/worldgen/biome/");
         File[] files = biomeFolder.listFiles();
         int maxID = 0;
-        if(files != null) {
-            for(File biomeFile : files) {
+        if (files != null) {
+            for (File biomeFile : files) {
                 String nameWithoutExtension = biomeFile.getName().substring(0, biomeFile.getName().lastIndexOf("."));
-                NamespaceID id = NamespaceID.from("minecraft:"+nameWithoutExtension);
-                if(id.equals(Biome.PLAINS.getName()))
+                NamespaceID id = NamespaceID.from("minecraft:" + nameWithoutExtension);
+                if (id.equals(Biome.PLAINS.getName()))
                     continue;
                 Biome biome = buildBiome(id);
                 biomeManager.addBiome(biome);
                 maxID = Math.max(biome.getId(), maxID);
             }
         }
-        Biome.idCounter.set(maxID);
+        Biome.ID_COUNTER.set(maxID);
     }
 
-    private static Biome buildBiome(NamespaceID id) throws IOException {
+    private static Biome buildBiome(NamespaceID id) {
         JsonObject biomeJSON = MinecraftData.open(id, "worldgen/biome", JsonObject.class).orElseThrow();
         JsonObject effectsJSON = biomeJSON.getAsJsonObject("effects");
         JsonObject moodSoundsJSON = effectsJSON.getAsJsonObject("mood_sound");
@@ -109,22 +105,22 @@ public final class VanillaWorldgen {
         int grassColor = effectsJSON.has("grass_color") ? effectsJSON.get("grass_color").getAsInt() : -1;
         int foliageColor = effectsJSON.has("foliage_color") ? effectsJSON.get("foliage_color").getAsInt() : -1;
         BiomeEffects.AdditionsSound additionsSound = null;
-        if(effectsJSON.has("additions_sound")) {
+        if (effectsJSON.has("additions_sound")) {
             additionsSound = BiomeEffects.AdditionsSound.builder()
                     .sound(NamespaceID.from(effectsJSON.getAsJsonObject("additions_sound").get("sound").getAsString()))
                     .tick_chance(effectsJSON.getAsJsonObject("additions_sound").get("tick_chance").getAsFloat())
                     .build();
         }
         NamespaceID ambientSound = null;
-        if(effectsJSON.has("ambient_sound")) {
+        if (effectsJSON.has("ambient_sound")) {
             ambientSound = NamespaceID.from(effectsJSON.get("ambient_sound").getAsString());
         }
         BiomeParticles biomeParticles = null;
-        if(effectsJSON.has("biome_particles")) {
+        if (effectsJSON.has("biome_particles")) {
             biomeParticles = loadParticles(effectsJSON.getAsJsonObject("biome_particles"));
         }
         BiomeEffects.Music music = null;
-        if(effectsJSON.has("music")) {
+        if (effectsJSON.has("music")) {
             music = BiomeEffects.Music.builder()
                     .min_delay(effectsJSON.getAsJsonObject("music").get("min_delay").getAsInt())
                     .max_delay(effectsJSON.getAsJsonObject("music").get("max_delay").getAsInt())
@@ -147,7 +143,7 @@ public final class VanillaWorldgen {
                 .music(music)
                 .build();
         Biome.TemperatureModifier temperatureModifier = Biome.TemperatureModifier.NONE;
-        if(biomeJSON.has("temperature_modifier")) {
+        if (biomeJSON.has("temperature_modifier")) {
             temperatureModifier = Biome.TemperatureModifier.valueOf(biomeJSON.get("temperature_modifier").getAsString().toUpperCase());
         }
         return Biome.builder()
@@ -201,12 +197,12 @@ public final class VanillaWorldgen {
     }
 
     private static short findAlternative(Block block, JsonElement properties) {
-        if(properties == null)
+        if (properties == null)
             return block.getBlockId();
         JsonObject props = properties.getAsJsonObject();
         PriorityQueue<String> sortedKeys = new PriorityQueue<>(props.keySet());
         String propertiesString = sortedKeys.stream()
-                .map(key -> key+"="+props.get(key).getAsString())
+                .map(key -> key + "=" + props.get(key).getAsString())
                 .collect(Collectors.joining(","));
         return block.withProperties(propertiesString);
     }
