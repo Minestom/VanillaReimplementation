@@ -94,22 +94,19 @@ public final class VanillaWorldgen {
                         BiomeEffects.GrassColorModifier.NONE;
         BiomeEffects.MoodSound moodSounds = null;
         if (moodSoundsJSON == null) {
-            moodSounds = BiomeEffects.MoodSound.builder()
-                    .block_search_extent(moodSoundsJSON.get("block_search_extent").getAsInt())
-                    .tick_delay(moodSoundsJSON.get("tick_delay").getAsInt())
-                    .sound(NamespaceID.from(moodSoundsJSON.get("sound").getAsString()))
-                    .offset(moodSoundsJSON.get("offset").getAsFloat())
-                    .build();
+            final NamespaceID sound = NamespaceID.from(moodSoundsJSON.get("sound").getAsString());
+            final int tickDelay = moodSoundsJSON.get("tick_delay").getAsInt();
+            final int blockSearchExtent = moodSoundsJSON.get("block_search_extent").getAsInt();
+            final double offset = moodSoundsJSON.get("offset").getAsFloat();
+            moodSounds = new BiomeEffects.MoodSound(sound, tickDelay, blockSearchExtent, offset);
         }
 
         int grassColor = effectsJSON.has("grass_color") ? effectsJSON.get("grass_color").getAsInt() : -1;
         int foliageColor = effectsJSON.has("foliage_color") ? effectsJSON.get("foliage_color").getAsInt() : -1;
         BiomeEffects.AdditionsSound additionsSound = null;
         if (effectsJSON.has("additions_sound")) {
-            additionsSound = BiomeEffects.AdditionsSound.builder()
-                    .sound(NamespaceID.from(effectsJSON.getAsJsonObject("additions_sound").get("sound").getAsString()))
-                    .tick_chance(effectsJSON.getAsJsonObject("additions_sound").get("tick_chance").getAsFloat())
-                    .build();
+            additionsSound = new BiomeEffects.AdditionsSound(NamespaceID.from(effectsJSON.getAsJsonObject("additions_sound").get("sound").getAsString()),
+                    effectsJSON.getAsJsonObject("additions_sound").get("tick_chance").getAsFloat());
         }
         NamespaceID ambientSound = null;
         if (effectsJSON.has("ambient_sound")) {
@@ -121,24 +118,23 @@ public final class VanillaWorldgen {
         }
         BiomeEffects.Music music = null;
         if (effectsJSON.has("music")) {
-            music = BiomeEffects.Music.builder()
-                    .min_delay(effectsJSON.getAsJsonObject("music").get("min_delay").getAsInt())
-                    .max_delay(effectsJSON.getAsJsonObject("music").get("max_delay").getAsInt())
-                    .replace_current_music(effectsJSON.getAsJsonObject("music").get("replace_current_music").getAsBoolean())
-                    .sound(NamespaceID.from(effectsJSON.getAsJsonObject("music").get("sound").getAsString()))
-                    .build();
+            final NamespaceID sound = NamespaceID.from(effectsJSON.getAsJsonObject("music").get("sound").getAsString());
+            final int minDelay = effectsJSON.getAsJsonObject("music").get("min_delay").getAsInt();
+            final int maxDelay = effectsJSON.getAsJsonObject("music").get("max_delay").getAsInt();
+            final boolean replaceCurrentMusic = effectsJSON.getAsJsonObject("music").get("replace_current_music").getAsBoolean();
+            music = new BiomeEffects.Music(sound, minDelay, maxDelay, replaceCurrentMusic);
         }
         BiomeEffects effects = BiomeEffects.builder()
-                .mood_sound(moodSounds)
-                .water_fog_color(effectsJSON.get("water_fog_color").getAsInt())
-                .fog_color(effectsJSON.get("fog_color").getAsInt())
-                .sky_color(effectsJSON.get("sky_color").getAsInt())
-                .water_color(effectsJSON.get("water_color").getAsInt())
-                .grass_color_modifier(grassColorModifier)
-                .grass_color(grassColor)
-                .foliage_color(foliageColor)
-                .additions_sound(additionsSound)
-                .ambient_sound(ambientSound)
+                .moodSound(moodSounds)
+                .waterFogColor(effectsJSON.get("water_fog_color").getAsInt())
+                .fogColor(effectsJSON.get("fog_color").getAsInt())
+                .skyColor(effectsJSON.get("sky_color").getAsInt())
+                .waterColor(effectsJSON.get("water_color").getAsInt())
+                .grassColorModifier(grassColorModifier)
+                .grassColor(grassColor)
+                .foliageColor(foliageColor)
+                .additionsSound(additionsSound)
+                .ambientSound(ambientSound)
                 .biomeParticles(biomeParticles)
                 .music(music)
                 .build();
@@ -155,45 +151,34 @@ public final class VanillaWorldgen {
                 .downfall(biomeJSON.get("downfall").getAsFloat())
                 .temperature(biomeJSON.get("temperature").getAsFloat())
                 .precipitation(Biome.Precipitation.valueOf(biomeJSON.get("precipitation").getAsString().toUpperCase()))
-                .temperature_modifier(temperatureModifier)
+                .temperatureModifier(temperatureModifier)
                 .build();
     }
 
     private static BiomeParticles loadParticles(JsonObject biomeParticles) {
-        String type = biomeParticles.get("type").getAsString();
-        BiomeParticles.BiomeParticlesBuilder builder = BiomeParticles.builder()
-                .probability(biomeParticles.get("probability").getAsFloat());
+        final String type = biomeParticles.get("type").getAsString();
+        BiomeParticles.ParticleOptions particleOptions = null;
         switch (type) {
             case "dust":
-                return builder.
-                        options(BiomeParticles.DustParticle.builder()
-                                .red(biomeParticles.get("red").getAsFloat())
-                                .green(biomeParticles.get("green").getAsFloat())
-                                .blue(biomeParticles.get("blue").getAsFloat())
-                                .scale(biomeParticles.get("scale").getAsFloat())
-                                .build()
-                        ).build();
+                particleOptions = new BiomeParticles.DustParticle(
+                        biomeParticles.get("red").getAsFloat(),
+                        biomeParticles.get("green").getAsFloat(),
+                        biomeParticles.get("blue").getAsFloat(),
+                        biomeParticles.get("scale").getAsFloat());
 
             case "block":
                 Block block = Registries.getBlock(biomeParticles.get("Name").getAsString());
                 BlockAlternative alternative = block.getAlternative(findAlternative(block, biomeParticles.get("Properties")));
-                return builder.
-                        options(BiomeParticles.BlockParticle.builder()
-                                .block(alternative)
-                                .build()
-
-                        ).build();
+                particleOptions = new BiomeParticles.BlockParticle(alternative);
 
             case "item":
                 ItemStack stack = ItemStack.fromNBT(new NBTGsonReader(new StringReader(biomeParticles.toString())).read(NBTCompound.class));
-                return builder.options(BiomeParticles.ItemParticle.builder().item(stack).build()).build();
+                particleOptions = new BiomeParticles.ItemParticle(stack);
 
             default:
-                return builder
-                        .options(BiomeParticles.NormalParticle.builder()
-                                .type(NamespaceID.from(type)).build())
-                        .build();
+                particleOptions = new BiomeParticles.NormalParticle(NamespaceID.from(type));
         }
+        return new BiomeParticles(biomeParticles.get("probability").getAsFloat(), particleOptions);
     }
 
     private static short findAlternative(Block block, JsonElement properties) {
