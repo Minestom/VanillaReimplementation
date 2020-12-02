@@ -9,7 +9,6 @@ import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.Direction;
 import net.minestom.vanilla.blockentity.ChestBlockEntity;
 import net.minestom.vanilla.inventory.DoubleChestInventory;
-import net.minestom.vanilla.system.EnderChestSystem;
 
 public class ChestBlock extends ChestLikeBlock {
     public ChestBlock() {

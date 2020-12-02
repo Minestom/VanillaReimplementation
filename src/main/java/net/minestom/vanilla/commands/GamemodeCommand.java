@@ -1,5 +1,7 @@
 package net.minestom.vanilla.commands;
 
+import java.util.Optional;
+
 import net.minestom.server.chat.ColoredText;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Arguments;
@@ -8,8 +10,6 @@ import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
-
-import java.util.Optional;
 
 /**
  * Command that make a player change gamemode
@@ -22,14 +22,14 @@ public class GamemodeCommand extends Command {
 
         setDefaultExecutor(this::usage);
 
-        Argument player = ArgumentType.Word("player");
+        Argument<?> player = ArgumentType.Word("player");
 
         GameMode[] gameModes = GameMode.values();
         String[] names = new String[gameModes.length];
         for (int i = 0; i < gameModes.length; i++) {
             names[i] = gameModes[i].name().toLowerCase();
         }
-        Argument mode = ArgumentType.Word("mode").from(names);
+        Argument<?> mode = ArgumentType.Word("mode").from(names);
 
         setArgumentCallback(this::gameModeCallback, mode);
 

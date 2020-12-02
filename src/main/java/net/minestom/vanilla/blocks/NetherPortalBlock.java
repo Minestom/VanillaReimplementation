@@ -1,9 +1,10 @@
 package net.minestom.vanilla.blocks;
 
+import java.util.Optional;
+
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.data.Data;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.BlockPosition;
@@ -17,8 +18,6 @@ import net.minestom.vanilla.event.entity.EntityEnterNetherPortalEvent;
 import net.minestom.vanilla.event.entity.NetherPortalTeleportEvent;
 import net.minestom.vanilla.event.entity.NetherPortalUpdateEvent;
 import net.minestom.vanilla.system.NetherPortal;
-
-import java.util.Optional;
 
 public class NetherPortalBlock extends VanillaBlock {
 

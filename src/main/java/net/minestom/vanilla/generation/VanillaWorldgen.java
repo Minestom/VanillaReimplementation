@@ -1,7 +1,25 @@
 package net.minestom.vanilla.generation;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.PriorityQueue;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jglrxavpok.hephaistos.json.NBTGsonReader;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockAlternative;
 import net.minestom.server.item.ItemStack;
@@ -13,18 +31,6 @@ import net.minestom.server.world.biomes.BiomeEffects;
 import net.minestom.server.world.biomes.BiomeManager;
 import net.minestom.server.world.biomes.BiomeParticles;
 import net.minestom.vanilla.io.MinecraftData;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jglrxavpok.hephaistos.json.NBTGsonReader;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.util.PriorityQueue;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public final class VanillaWorldgen {
 
@@ -94,7 +100,8 @@ public final class VanillaWorldgen {
                         BiomeEffects.GrassColorModifier.NONE;
         BiomeEffects.MoodSound moodSounds = null;
         if (moodSoundsJSON == null) {
-            final NamespaceID sound = NamespaceID.from(moodSoundsJSON.get("sound").getAsString());
+            @SuppressWarnings("null")
+			final NamespaceID sound = NamespaceID.from(moodSoundsJSON.get("sound").getAsString());
             final int tickDelay = moodSoundsJSON.get("tick_delay").getAsInt();
             final int blockSearchExtent = moodSoundsJSON.get("block_search_extent").getAsInt();
             final double offset = moodSoundsJSON.get("offset").getAsFloat();

@@ -1,9 +1,11 @@
 package net.minestom.vanilla;
 
+import java.io.File;
+import java.io.IOException;
+
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.gamedata.loottables.LootTableManager;
-import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.vanilla.anvil.FileSystemStorage;
 import net.minestom.vanilla.blocks.VanillaBlocks;
@@ -14,15 +16,12 @@ import net.minestom.vanilla.items.VanillaItems;
 import net.minestom.vanilla.system.NetherPortal;
 import net.minestom.vanilla.system.ServerProperties;
 
-import java.io.File;
-import java.io.IOException;
-
 class LaunchServerStartup {
 
     public static void main(String[] args) throws IOException {
         MinecraftServer minecraftServer = MinecraftServer.init();
 
-        BlockManager blockManager = MinecraftServer.getBlockManager();
+        // BlockManager blockManager = MinecraftServer.getBlockManager();
 
         CommandManager commandManager = MinecraftServer.getCommandManager();
         VanillaWorldgen.prepareFiles();

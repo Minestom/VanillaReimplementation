@@ -19,7 +19,7 @@ public class DifficultyCommand extends Command {
 
         setDefaultExecutor(this::usage);
 
-        Argument difficulty = ArgumentType.Word("difficulty").from("peaceful", "easy", "normal", "hard");
+        Argument<?> difficulty = ArgumentType.Word("difficulty").from("peaceful", "easy", "normal", "hard");
 
         setArgumentCallback(this::difficultyCallback, difficulty);
 

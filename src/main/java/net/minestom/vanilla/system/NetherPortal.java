@@ -1,5 +1,11 @@
 package net.minestom.vanilla.system;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.function.Consumer;
+
 import net.minestom.server.data.Data;
 import net.minestom.server.data.DataManager;
 import net.minestom.server.effects.Effects;
@@ -12,19 +18,12 @@ import net.minestom.server.particle.Particle;
 import net.minestom.server.particle.ParticleCreator;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.Vector;
-import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.blockentity.NetherPortalBlockEntity;
 import net.minestom.vanilla.blocks.NetherPortalBlock;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.data.NetherPortalDataType;
 import net.minestom.vanilla.data.NetherPortalList;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.function.Consumer;
 
 /**
  * Every useful method linked to Nether portals goes here

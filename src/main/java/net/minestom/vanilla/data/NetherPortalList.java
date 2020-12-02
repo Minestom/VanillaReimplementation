@@ -11,9 +11,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * List of nether portal. Used in Instances to remember generated portals
  */
+@SuppressWarnings("serial")
 public class NetherPortalList extends CopyOnWriteArraySet<NetherPortal> {
 
-    public NetherPortal findClosest(Position targetPosition) {
+	public NetherPortal findClosest(Position targetPosition) {
         NetherPortal targetPortal = null;
         BlockPosition targetBlockPosition = targetPosition.toBlockPosition();
         double closestDistance = 128.0; // don't select portals which are too far away

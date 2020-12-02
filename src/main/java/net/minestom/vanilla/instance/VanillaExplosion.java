@@ -76,7 +76,7 @@ public class VanillaExplosion extends Explosion {
                                 intensity -= 0.225f; // air attenuation
 
                                 Block block = Block.fromStateId(instance.getBlockStateId(position));
-                                CustomBlock customBlock = instance.getCustomBlock(position);
+                                // CustomBlock customBlock = instance.getCustomBlock(position);
 
                                 double blastResistance = block.getResistance(); // TODO: custom blast resistances
                                 intensity -= (blastResistance + stepLength) * stepLength;

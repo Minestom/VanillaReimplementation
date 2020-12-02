@@ -1,5 +1,7 @@
 package net.minestom.vanilla.blockentity;
 
+import java.util.Random;
+
 import net.minestom.server.effects.Effects;
 import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.entity.Player;
@@ -10,8 +12,6 @@ import net.minestom.server.item.Material;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.Position;
 import net.minestom.vanilla.inventory.InventoryManipulation;
-
-import java.util.Random;
 
 public class JukeboxBlockEntity extends BlockEntity {
 

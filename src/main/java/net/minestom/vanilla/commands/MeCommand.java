@@ -17,7 +17,7 @@ public class MeCommand extends Command {
 
         setDefaultExecutor(this::usage);
 
-        Argument message = ArgumentType.StringArray("message");
+        Argument<?> message = ArgumentType.StringArray("message");
 
         addSyntax(this::execute, message);
     }
@@ -41,7 +41,8 @@ public class MeCommand extends Command {
         });
     }
 
-    private boolean isAllowed(CommandSender player) {
+    @SuppressWarnings("unused")
+	private boolean isAllowed(CommandSender player) {
         return player.isPlayer(); // TODO: permissions
     }
 }

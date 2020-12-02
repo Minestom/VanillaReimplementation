@@ -13,7 +13,7 @@ public final class MinecraftData {
 
     static {
         gson = new GsonBuilder()
-                .registerTypeAdapter(NamespaceID.class, (JsonDeserializer) (json, typeOfT, context) -> NamespaceID.from(json.getAsString()))
+                .registerTypeAdapter(NamespaceID.class, (JsonDeserializer<?>) (json, typeOfT, context) -> NamespaceID.from(json.getAsString()))
                 .create();
     }
 

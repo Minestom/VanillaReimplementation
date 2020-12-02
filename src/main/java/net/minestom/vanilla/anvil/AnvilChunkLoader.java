@@ -1,5 +1,25 @@
 package net.minestom.vanilla.anvil;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.jglrxavpok.hephaistos.mca.AnvilException;
+import org.jglrxavpok.hephaistos.mca.ChunkColumn;
+import org.jglrxavpok.hephaistos.mca.CoordinatesKt;
+import org.jglrxavpok.hephaistos.mca.RegionFile;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.jglrxavpok.hephaistos.nbt.NBTList;
+import org.jglrxavpok.hephaistos.nbt.NBTTypes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.data.Data;
 import net.minestom.server.instance.Chunk;
@@ -18,21 +38,6 @@ import net.minestom.server.utils.chunk.ChunkCallback;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.world.biomes.Biome;
 import net.minestom.vanilla.blocks.VanillaBlock;
-import org.jglrxavpok.hephaistos.mca.AnvilException;
-import org.jglrxavpok.hephaistos.mca.ChunkColumn;
-import org.jglrxavpok.hephaistos.mca.CoordinatesKt;
-import org.jglrxavpok.hephaistos.mca.RegionFile;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.jglrxavpok.hephaistos.nbt.NBTList;
-import org.jglrxavpok.hephaistos.nbt.NBTTypes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class AnvilChunkLoader implements IChunkLoader {
     private final static Logger LOGGER = LoggerFactory.getLogger(AnvilChunkLoader.class);
@@ -119,7 +124,7 @@ public class AnvilChunkLoader implements IChunkLoader {
     private void loadTileEntities(Chunk loadedChunk, int chunkX, int chunkZ, Instance instance, ChunkColumn fileChunk) {
         BlockPosition pos = new BlockPosition(0, 0, 0);
         for (NBTCompound te : fileChunk.getTileEntities()) {
-            String tileEntityID = te.getString("id");
+            // String tileEntityID = te.getString("id");
             int x = te.getInt("x") + chunkX * 16;
             int y = te.getInt("y");
             int z = te.getInt("z") + chunkZ * 16;
@@ -282,7 +287,7 @@ public class AnvilChunkLoader implements IChunkLoader {
             for (int z = 0; z < Chunk.CHUNK_SIZE_Z; z++) {
                 for (int y = 0; y < Chunk.CHUNK_SIZE_Y; y++) {
                     short id = chunk.getBlockStateId(x, y, z);
-                    CustomBlock customBlock = chunk.getCustomBlock(x, y, z);
+                    // CustomBlock customBlock = chunk.getCustomBlock(x, y, z);
                     Block block = Block.fromStateId(id);
                     BlockAlternative alt = block.getAlternative(id);
                     Map<String, String> properties = alt.createPropertiesMap();

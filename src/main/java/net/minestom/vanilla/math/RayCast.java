@@ -1,15 +1,13 @@
 package net.minestom.vanilla.math;
 
-import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.CustomBlock;
-import net.minestom.server.utils.BlockPosition;
-import net.minestom.server.utils.Vector;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+
+import net.minestom.server.instance.Instance;
+import net.minestom.server.utils.BlockPosition;
+import net.minestom.server.utils.Vector;
 
 /**
  * TODO: Move to Minestom Instance class
