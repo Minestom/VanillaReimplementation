@@ -22,7 +22,7 @@ public class FallingBlockEntity extends ObjectEntity {
         super(EntityType.FALLING_BLOCK, initialPosition);
         this.baseBlock = baseBlock;
         this.toPlace = toPlace;
-        setGravity(0.025f);
+        setGravity(0.025f, getGravityAcceleration(), getGravityTerminalVelocity());
         setBoundingBox(0.98f, 0.98f, 0.98f);
     }
 

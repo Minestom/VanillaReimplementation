@@ -2,6 +2,7 @@ package net.minestom.vanilla.event.entity;
 
 import net.minestom.server.entity.Entity;
 import net.minestom.server.event.CancellableEvent;
+import net.minestom.server.event.Event;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.utils.BlockPosition;
 import net.minestom.server.utils.Position;
@@ -10,9 +11,9 @@ import net.minestom.vanilla.system.NetherPortal;
 /**
  * Triggered when a nether portal attempts to teleport entities between dimensions
  */
-public class NetherPortalTeleportEvent extends CancellableEvent {
+public class NetherPortalTeleportEvent extends Event implements CancellableEvent {
 
-
+    private boolean cancelled = false;
     private final Entity entity;
     private final BlockPosition portalBlockPosition;
     private final NetherPortal portal;
@@ -127,5 +128,15 @@ public class NetherPortalTeleportEvent extends CancellableEvent {
      */
     public void createsNewPortal(boolean createNewPortal) {
         this.createsNewPortal = createNewPortal;
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    @Override
+    public void setCancelled(boolean cancel) {
+        cancelled = cancel;
     }
 }

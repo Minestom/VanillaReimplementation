@@ -17,7 +17,7 @@ public class PrimedTNT extends ObjectEntity {
 
     public PrimedTNT(Position initialPosition) {
         super(EntityType.TNT, initialPosition);
-        setGravity(0.025f);
+        setGravity(0.025f, getGravityAcceleration(), getGravityTerminalVelocity());
         setBoundingBox(0.98f, 0.98f, 0.98f);
     }
 
