@@ -1,3 +1,9 @@
+# NOT READY FOR PRODUCTION
+Priority is currently on the core of Minestom (see below). This project has only a very limited list of features:
+1. Nether portals
+2. Bed placing
+3. Anvil (partial) loading and saving
+
 # About Minestom
 See [Minestom Project on GitHub](https://github.com/Minestom/Minestom)
 
