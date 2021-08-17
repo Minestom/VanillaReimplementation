@@ -2,8 +2,10 @@ plugins {
     id 'java-library'
 }
 
-group 'net.minestom.vanilla'
-version '1.0'
+
+// Lots of this should be configured by `allprojects`
+group 'net.minestom'
+version '1.17.1-dev'
 
 sourceCompatibility = 1.11
 
@@ -32,24 +34,49 @@ sourceSets {
 repositories {
     mavenCentral()
     maven { url 'https://repo.spongepowered.org/maven' }
-    maven { url 'https://libraries.minecraft.net/' }
     maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    api "com.github.Minestom:Minestom:${project.minestom_version}"
 
-    //api project(":Minestom")
-    api("com.github.Minestom:Minestom:${project.minestom_version}")
-    implementation(project(":Minestom")) {
-        capabilities {
-            requireCapability("net.minestom.server:Minestom-generators")
-        }
-    }
     api("com.github.jglrxavpok:Hephaistos:${project.hephaistos_version}:gson")
     api("com.github.jglrxavpok:Hephaistos:${project.hephaistos_version}") {
         capabilities {
             requireCapability("org.jglrxavpok.nbt:Hephaistos-gson")
         }
+    }
+}
+
+subprojects {
+    // Some of this can be in `allprojects`
+    apply plugin: 'java'
+
+    group 'net.minestom'
+    version rootProject.version
+
+    sourceCompatibility = JavaVersion.VERSION_11
+
+    repositories {
+        mavenCentral()
+        maven { url 'https://repo.spongepowered.org/maven' }
+        maven { url 'https://jitpack.io' }
+    }
+
+    dependencies {
+        compileOnly "com.github.Minestom:Minestom:${rootProject.minestom_version}"
+
+        // Testing
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    }
+
+    java {
+        withSourcesJar()
+        withJavadocJar()
+    }
+
+    test {
+        useJUnitPlatform()
     }
 }

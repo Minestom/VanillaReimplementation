@@ -1,2 +1,4 @@
-rootProject.name = 'MinestomVanillaReimplementation'
-include "Minestom"
+rootProject.name = 'vanilla'
+include 'entity'
+include 'command'
+
