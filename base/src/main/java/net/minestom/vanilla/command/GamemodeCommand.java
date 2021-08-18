@@ -37,7 +37,7 @@ public class GamemodeCommand extends Command {
 
         ArgumentEntity player = ArgumentType.Entity("targets").onlyPlayers(true);
 
-        //Upon invalid usage, print the correct usage of the command to the sender
+        //Upon invalid usage, print the correct usage of the net.minestom.vanilla.command to the sender
         setDefaultExecutor((sender, context) -> {
             String commandName = context.getCommandName();
 
@@ -48,13 +48,13 @@ public class GamemodeCommand extends Command {
         addSyntax((sender, context) -> {
             //Limit execution to players only
             if (!sender.isPlayer()) {
-                sender.sendMessage(Component.text("Please run this command in-game.", NamedTextColor.RED));
+                sender.sendMessage(Component.text("Please run this net.minestom.vanilla.command in-game.", NamedTextColor.RED));
                 return;
             }
 
             //Check permission, this could be replaced with hasPermission
             if (sender.asPlayer().getPermissionLevel() < 2) {
-                sender.sendMessage(Component.text("You don't have permission to use this command.", NamedTextColor.RED));
+                sender.sendMessage(Component.text("You don't have permission to use this net.minestom.vanilla.command.", NamedTextColor.RED));
                 return;
             }
 
@@ -69,7 +69,7 @@ public class GamemodeCommand extends Command {
             //Check permission for players only
             //This allows the console to use this syntax too
             if (sender.isPlayer() && sender.asPlayer().getPermissionLevel() < 2) {
-                sender.sendMessage(Component.text("You don't have permission to use this command.", NamedTextColor.RED));
+                sender.sendMessage(Component.text("You don't have permission to use this net.minestom.vanilla.command.", NamedTextColor.RED));
                 return;
             }
 

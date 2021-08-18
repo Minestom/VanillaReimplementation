@@ -51,6 +51,7 @@ dependencies {
 subprojects {
     // Some of this can be in `allprojects`
     apply plugin: 'java'
+    apply plugin: 'java-library'
 
     group 'net.minestom'
     version rootProject.version
@@ -65,6 +66,7 @@ subprojects {
 
     dependencies {
         compileOnly "com.github.Minestom:Minestom:${rootProject.minestom_version}"
+        api project(':base')
 
         // Testing
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'

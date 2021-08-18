@@ -14,7 +14,7 @@ Vanilla reimplementation is usable either as a standalone jar file or as individ
 The modules and their artifacts are below, see each individual module for more information.
 > Vanilla reimplementation is not currently published, it is still a heavy work in progress
  * Entities - `net.minestom.vanilla:entity:${VERSION}`
- * Commands - `net.minestom.vanilla:command:${VERSION}`
+ * Commands - `net.minestom.vanilla:net.minestom.vanilla.command:${VERSION}`
 
 
 

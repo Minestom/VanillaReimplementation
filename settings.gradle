@@ -1,4 +1,5 @@
 rootProject.name = 'vanilla'
+include 'base'
 include 'entity'
-include 'command'
+include 'standalone'
 
