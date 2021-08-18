@@ -1,5 +1,15 @@
-
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
+}
 
 dependencies {
+    api project(':base')
+
     api project(':entity')
+    api project(':world')
+}
+
+jar {
+    manifest.attributes.put('Main-Class', 'net.minestom.vanilla.LaunchServer')
+    manifest.attributes.put('Multi-Release', 'true')
 }

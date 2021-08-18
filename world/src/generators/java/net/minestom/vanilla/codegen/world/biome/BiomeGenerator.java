@@ -1,8 +1,7 @@
-package net.minestom.codegen.biomes;
+package net.minestom.vanilla.codegen.world.biome;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import lombok.extern.slf4j.Slf4j;
 import net.minestom.codegen.EnumGenerator;
 import net.minestom.codegen.MinestomEnumGenerator;
 import net.minestom.codegen.PrismarinePaths;
@@ -16,8 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-@Slf4j
-public class VanillaBiomeGenerator extends MinestomEnumGenerator<VanillaBiomeContainer> {
+public class BiomeGenerator extends MinestomEnumGenerator<BiomeContainer> {
 
     private final String targetVersion;
     private final File targetFolder;
@@ -47,17 +45,17 @@ public class VanillaBiomeGenerator extends MinestomEnumGenerator<VanillaBiomeCon
             targetFolder.mkdirs();
         }
 
-        new VanillaBiomeGenerator(targetVersion, targetFolder);
+        new BiomeGenerator(targetVersion, targetFolder);
     }
 
-    private VanillaBiomeGenerator(String targetVersion, File targetFolder) throws IOException {
+    private BiomeGenerator(String targetVersion, File targetFolder) throws IOException {
         this.targetVersion = targetVersion;
         this.targetFolder = targetFolder;
         generateTo(targetFolder);
     }
 
     @Override
-    protected Collection<VanillaBiomeContainer> compile() throws IOException {
+    protected Collection<BiomeContainer> compile() throws IOException {
         Gson gson = new Gson();
         log.debug("Finding path for PrismarineJS biomes");
         JsonObject dataPaths = gson.fromJson(new BufferedReader(new FileReader(PRISMARINE_JS_DATA_PATHS)), JsonObject.class);
@@ -68,9 +66,9 @@ public class VanillaBiomeGenerator extends MinestomEnumGenerator<VanillaBiomeCon
         return parseBiomesFromPrismarine(gson, paths.getBiomesFile());
     }
 
-    private List<VanillaBiomeContainer> parseBiomesFromPrismarine(Gson gson, File biomeFile) throws IOException {
+    private List<BiomeContainer> parseBiomesFromPrismarine(Gson gson, File biomeFile) throws IOException {
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(biomeFile))) {
-            VanillaBiomeContainer[] blocks = gson.fromJson(bufferedReader, VanillaBiomeContainer[].class);
+            BiomeContainer[] blocks = gson.fromJson(bufferedReader, BiomeContainer[].class);
             return Arrays.asList(blocks);
         } catch (IOException e) {
             throw e;
@@ -78,7 +76,7 @@ public class VanillaBiomeGenerator extends MinestomEnumGenerator<VanillaBiomeCon
     }
 
     @Override
-    protected void writeSingle(EnumGenerator enumGenerator, VanillaBiomeContainer container) {
+    protected void writeSingle(EnumGenerator enumGenerator, BiomeContainer container) {
         enumGenerator.addInstance(container.name.toUpperCase(), container.id);
     }
 

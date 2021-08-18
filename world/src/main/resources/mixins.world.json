@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "net.minestom.vanilla.mixins",
+  "package": "net.minestom.vanilla.mixin.world",
   "target": "@env(DEFAULT)",
   "compatibilityLevel": "JAVA_11",
   "mixins": [
