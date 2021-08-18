@@ -32,7 +32,3 @@ out/
 # Minestom
 /minecraft_data/
 /.minestom_tmp/
-
-# Vanilla-like server
-server.properties
-world/
