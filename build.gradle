@@ -39,13 +39,10 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
-    //api project(":Minestom")
-    api("com.github.Minestom:Minestom:${project.minestom_version}")
-    implementation(project(":Minestom")) {
-        capabilities {
-            requireCapability("net.minestom.server:Minestom-generators")
-        }
-    }
+    implementation 'com.github.EmortalMC:Rayfast:a88bd2b'
+
+    implementation "com.github.Minestom:Minestom:${project.minestom_version}"
+
     api("com.github.jglrxavpok:Hephaistos:${project.hephaistos_version}:gson")
     api("com.github.jglrxavpok:Hephaistos:${project.hephaistos_version}") {
         capabilities {
