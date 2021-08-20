@@ -20,7 +20,7 @@ public enum VanillaCommands {
 
     private final Supplier<Command> commandCreator;
 
-    private VanillaCommands(Supplier<Command> commandCreator) {
+    VanillaCommands(Supplier<Command> commandCreator) {
         this.commandCreator = commandCreator;
     }
 
@@ -29,7 +29,7 @@ public enum VanillaCommands {
      * @param manager
      */
     public static void registerAll(CommandManager manager) {
-        for(VanillaCommands vanillaCommand : values()) {
+        for (VanillaCommands vanillaCommand : values()) {
             Command command = vanillaCommand.commandCreator.get();
             manager.register(command);
         }

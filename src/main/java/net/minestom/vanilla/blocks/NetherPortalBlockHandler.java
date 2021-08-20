@@ -1,0 +1,319 @@
+package net.minestom.vanilla.blocks;
+
+import java.util.Optional;
+
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.tag.Tag;
+import net.minestom.server.world.DimensionType;
+import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
+import net.minestom.vanilla.event.entity.NetherPortalTeleportEvent;
+import net.minestom.vanilla.system.NetherPortal;
+import org.jetbrains.annotations.NotNull;
+
+public class NetherPortalBlockHandler extends VanillaBlockHandler {
+
+    /**
+     * Time the entity has spent inside a portal. Reset when entering a different portal or by
+     * reentering a portal after leaving one
+     */
+    public static final Tag<Long> TICKS_SPENT_IN_PORTAL_KEY = Tag.Long("minestom:time_spent_in_nether_portal");
+
+    /**
+     * Prevents multiple updates from different portal blocks
+     */
+    public static final Tag<Long> LAST_PORTAL_UPDATE_KEY = Tag.Long("minestom:last_nether_portal_update_time");
+
+    /**
+     * Used to check whether the last portal entered is corresponding to this portal block or not
+     */
+    public static final Tag<Long> LAST_PORTAL_KEY = Tag.Long("minestom:last_nether_portal");
+
+    /**
+     * Time before teleporting an entity
+     */
+    public static final Tag<Long> PORTAL_COOLDOWN_TIME_KEY = Tag.Long("minestom:nether_portal_cooldown_time");
+
+    /**
+     * The portal related to this block
+     */
+    public static final Tag<Long> RELATED_PORTAL_KEY = Tag.Long("minestom:releated_portal");
+
+    public NetherPortalBlockHandler() {
+        super(Block.NETHER_PORTAL);
+    }
+
+    @Override
+    public void onTouch(@NotNull Touch touch) {
+        Block block = touch.getBlock();
+        Instance instance = touch.getInstance();
+        Point pos = touch.getBlockPosition();
+        Entity touching = touch.getTouching();
+
+        Long lastPortalUpdate = block.getTag(LAST_PORTAL_UPDATE_KEY);
+
+        if (lastPortalUpdate == null) {
+            return;
+        }
+
+        if (lastPortalUpdate < touching.getAliveTicks() - 2) { // if a tick happened with no portal update, that means the entity left the portal at some point
+            Block newBlock = block
+                    .withTag(LAST_PORTAL_UPDATE_KEY, 0L)
+                    .withTag(LAST_PORTAL_KEY, NetherPortal.NONE.id())
+                    .withTag(TICKS_SPENT_IN_PORTAL_KEY, 0L);
+
+            instance.setBlock(pos, newBlock);
+            block = newBlock;
+        }
+
+        if (lastPortalUpdate == touching.getAliveTicks()) {
+            return;
+        }
+
+        NetherPortal portal = getPortal(block);
+        long ticksSpentInPortal = updateTimeInPortal(instance, pos, touching, block, portal);
+
+        Long portalCooldownTime = block.getTag(PORTAL_COOLDOWN_TIME_KEY);
+
+        if (portalCooldownTime == null) {
+            portalCooldownTime = 0L;
+        }
+
+        if (ticksSpentInPortal >= portalCooldownTime) {
+            attemptTeleport(instance, pos, touching, block, ticksSpentInPortal, portal);
+        }
+    }
+
+    private long updateTimeInPortal(Instance instance, Point position, Entity touching, Block block, NetherPortal portal) {
+        Block newBlock = block;
+
+        newBlock = newBlock.withTag(LAST_PORTAL_UPDATE_KEY, touching.getAliveTicks());
+        Long ticksSpentInPortal = block.getTag(TICKS_SPENT_IN_PORTAL_KEY);
+
+        if (ticksSpentInPortal == null) {
+            ticksSpentInPortal = 0L;
+        }
+
+
+        NetherPortal portalEntityWasIn = NetherPortal.fromId(newBlock.getTag(LAST_PORTAL_KEY));
+
+        if(portal != portalEntityWasIn) {
+            ticksSpentInPortal = 0L; // reset counter
+        }
+
+        newBlock = newBlock.withTag(LAST_PORTAL_KEY, portal.id()); // data.set(, portal, NetherPortal.class);
+
+        if (ticksSpentInPortal == 0) {
+//            touching.callEvent(EntityEnterNetherPortalEvent.class, new EntityEnterNetherPortalEvent(touching, position, portal));
+        }
+
+        ticksSpentInPortal++;
+
+        newBlock = newBlock.withTag(TICKS_SPENT_IN_PORTAL_KEY, ticksSpentInPortal);
+
+        instance.setBlock(position, newBlock);
+
+//        touching.callEvent(NetherPortalUpdateEvent.class, new NetherPortalUpdateEvent(touching, position, portal, ticksSpentInPortal));
+        return ticksSpentInPortal;
+    }
+
+    private void attemptTeleport(Instance instance, Point position, Entity touching, Block block, long ticksSpentInPortal, NetherPortal portal) {
+        DimensionType targetDimension = VanillaDimensionTypes.NETHER;
+
+        double targetX = position.x() / 8;
+        double targetY = position.y();
+        double targetZ = position.z() / 8;
+
+        if (instance.getDimensionType() == VanillaDimensionTypes.NETHER) {
+            targetDimension = DimensionType.OVERWORLD;
+            targetX = position.x() * 8;
+            targetZ = position.z() * 8;
+        }
+
+        // TODO: event to change portal linking
+        final DimensionType finalTargetDimension = targetDimension;
+        Optional<Instance> potentialTargetInstance = MinecraftServer.getInstanceManager().getInstances().stream()
+                .filter(in -> in.getDimensionType() == finalTargetDimension)
+                .findFirst();
+
+        if (potentialTargetInstance.isEmpty()) {
+            return;
+        }
+
+        Instance targetInstance = potentialTargetInstance.get();
+        Pos targetPosition = new Pos(targetX, targetY, targetZ);
+        NetherPortal targetPortal = getCorrespondingNetherPortal(targetInstance, targetPosition);
+
+        boolean generatePortal = false;
+        if (targetPortal == null) { // no existing portal, will create one
+
+            NetherPortal.Axis axis = portal.getAxis();
+            Pos bottomRight = new Pos(
+                    targetX - axis.xMultiplier,
+                    -1,
+                    targetZ - axis.zMultiplier
+            );
+
+            Pos topLeft = new Pos(
+                    targetX + 2 * axis.xMultiplier,
+                    3,
+                    targetZ + 2 * axis.zMultiplier
+            );
+
+            targetPortal = new NetherPortal(portal.getAxis(), bottomRight, topLeft);
+            generatePortal = true;
+        }
+
+        calculateTargetPosition(touching, portal, targetPortal);
+
+        NetherPortalTeleportEvent event = new NetherPortalTeleportEvent(touching, position, portal, ticksSpentInPortal, targetInstance, targetPosition, targetPortal, generatePortal);
+        MinecraftServer.getGlobalEventHandler().call(event);
+
+        if (!event.isCancelled()) {
+            Block newBlock = block
+                    .withTag(LAST_PORTAL_UPDATE_KEY, 0L)
+                    .withTag(LAST_PORTAL_KEY, NetherPortal.NONE.id())
+                    .withTag(TICKS_SPENT_IN_PORTAL_KEY, 0L);
+            instance.setBlock(position, newBlock);
+            teleport(instance, touching, event);
+        }
+    }
+
+    private NetherPortal getCorrespondingNetherPortal(Instance targetInstance, Point targetPosition) {
+        // TODO: get Corresponding Nether portal
+        return null;
+    }
+
+    private Pos calculateTargetPosition(Entity touching, NetherPortal portal, NetherPortal targetPortal) {
+        Point targetCenter = targetPortal.getCenter();
+
+        if (portal == null) { // if this block is not isolated
+            return new Pos(
+                    targetCenter.x() + 0.5,
+                    targetCenter.y(),
+                    targetCenter.z() + 0.5
+            );
+        }
+
+        Pos touchingPos = touching.getPosition();
+        double touchingX = touchingPos.x();
+        double touchingY = touchingPos.y();
+        double touchingZ = touchingPos.z();
+
+        Vec portalCenter = portal.getCenter();
+        double portalCenterX = portalCenter.x();
+        double portalCenterY = portalCenter.y();
+        double portalCenterZ = portalCenter.z();
+
+        NetherPortal.Axis portalAxis = portal.getAxis();
+        double portalAxisXMultiplier = portalAxis.xMultiplier;
+        double portalAxisZMultiplier = portalAxis.zMultiplier;
+
+        NetherPortal.Axis targetAxis = targetPortal.getAxis();
+        double targetAxisXMultiplier = targetAxis.xMultiplier;
+        double targetAxisZMultiplier = targetAxis.zMultiplier;
+
+        double relativeX = (touchingX - portalCenterX) / (portal.computeWidth() * portalAxisXMultiplier + portalAxisZMultiplier);
+        double relativeY = (touchingY - portalCenterY) / portal.computeHeight();
+        double relativeZ = (touchingZ - portalCenterZ) / (portal.computeWidth() * portalAxisZMultiplier + portalAxisXMultiplier);
+
+        double targetMultiplierX = (targetPortal.computeWidth() * targetAxisXMultiplier + targetAxisZMultiplier);
+        double targetMultiplierY = targetPortal.computeHeight();
+        double targetMultiplierZ = (targetPortal.computeWidth() * targetAxisZMultiplier + targetAxisXMultiplier);
+
+        return new Pos(
+                targetCenter.x() + relativeX * targetMultiplierX,
+                targetCenter.y() + relativeY * targetMultiplierY,
+                targetCenter.z() + relativeZ * targetMultiplierZ
+        );
+    }
+
+    private void teleport(Instance instance, Entity touching, NetherPortalTeleportEvent event) {
+        Instance targetInstance = event.getTargetInstance();
+        if (event.createsNewPortal()) {
+            event.getTargetPortal().generate(targetInstance);
+        }
+
+        if (targetInstance != instance) {
+            touching.setInstance(targetInstance);
+        }
+
+        Pos targetTeleportationPosition = new Pos(event.getTargetPosition());
+
+        touching.teleport(targetTeleportationPosition).thenRun(() -> {
+            Vec velocity = touching.getVelocity();
+
+            if (
+                    event.getPortal() != null &&
+                    event.getPortal().getAxis()
+                    != event.getTargetPortal().getAxis()
+            ) {
+                double swapTmp = velocity.x();
+
+                touching.setVelocity(new Vec(
+                        swapTmp,
+                        velocity.z(),
+                        swapTmp
+                ));
+            }
+        });
+    }
+
+//    @Override
+//    public Data createData(Instance instance, BlockPosition blockPosition, Data data) {
+//        if (data instanceof NetherPortalBlockEntity &&
+//            ((BlockEntity) data).getPosition().equals(blockPosition)) {
+//            return data;
+//        }
+//        return new NetherPortalBlockEntity(blockPosition);
+//    }
+
+    @Override
+    public void onDestroy(Destroy destroy) {
+        Block block = destroy.getBlock();
+        Instance instance = destroy.getInstance();
+
+        NetherPortal netherPortal = getPortal(block);
+        if (netherPortal != null) {
+            netherPortal.breakFrame(instance);
+            netherPortal.unregister(instance);
+        }
+    }
+
+    private NetherPortal getPortal(Block block) {
+        return NetherPortal.fromId(block.getTag(RELATED_PORTAL_KEY));
+    }
+
+//    @Override
+//    public void updateFromNeighbor(Instance instance, Point thisPosition, Point neighborPosition, boolean directNeighbor) {
+//        breakPortalIfNoLongerValid(instance, thisPosition);
+//    }
+
+    private void breakPortalIfNoLongerValid(Instance instance, Point blockPosition) {
+        NetherPortal netherPortal = getPortal(instance.getBlock(blockPosition));
+
+        if (netherPortal == null) {
+            return;
+        }
+
+        if (netherPortal.isStillValid(instance)) {
+            return;
+        }
+
+        netherPortal.breakFrame(instance);
+    }
+
+    public void setRelatedPortal(Instance instance, Point blockPosition, Block block, NetherPortal portal) {
+        instance.setBlock(blockPosition, block.withTag(RELATED_PORTAL_KEY, portal.id()));
+    }
+
+//    @Override
+//    protected BlockPropertyList createPropertyValues() {
+//        return new BlockPropertyList().property("axis", "x", "z");
+//    }
+}

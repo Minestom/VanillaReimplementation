@@ -2,11 +2,13 @@ package net.minestom.vanilla.commands;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
-import net.minestom.server.command.builder.Arguments;
 import net.minestom.server.command.builder.Command;
+import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
+import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
 import net.minestom.server.world.Difficulty;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Command that make an instance change difficulty
@@ -21,25 +23,25 @@ public class DifficultyCommand extends Command {
 
         Argument<?> difficulty = ArgumentType.Word("difficulty").from("peaceful", "easy", "normal", "hard");
 
-        setArgumentCallback(this::difficultyCallback, difficulty);
+
+        difficulty.setCallback(this::difficultyCallback);
 
         addSyntax(this::execute, difficulty);
     }
 
-    private void usage(CommandSender player, Arguments arguments) {
+    private void usage(CommandSender player, CommandContext arguments) {
         player.sendMessage("Usage: /difficulty (peaceful|easy|normal|hard)");
     }
 
-    private void execute(CommandSender player, Arguments arguments) {
-        String difficultyName = arguments.getWord("difficulty");
+    private void execute(CommandSender player, CommandContext arguments) {
+        String difficultyName = arguments.get("difficulty");
         Difficulty difficulty = Difficulty.valueOf(difficultyName.toUpperCase());
-        assert difficulty != null; // difficulty is not supposed to be null, because difficultyName will be valid
         MinecraftServer.setDifficulty(difficulty);
         player.sendMessage("You are now playing in " + difficultyName);
     }
 
-    private void difficultyCallback(CommandSender player, String difficulty, int error) {
-        player.sendMessage("'" + difficulty + "' is not a valid difficulty!");
+    private void difficultyCallback(@NotNull CommandSender sender, @NotNull ArgumentSyntaxException exception) {
+        sender.asPlayer().sendMessage("'" + exception.getInput() + "' is not a valid difficulty!");
     }
 
     private boolean isAllowed(CommandSender player, String commandName) {

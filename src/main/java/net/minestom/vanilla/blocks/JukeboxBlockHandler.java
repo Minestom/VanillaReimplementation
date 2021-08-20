@@ -1,0 +1,179 @@
+package net.minestom.vanilla.blocks;
+
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
+import net.minestom.server.effects.Effects;
+import net.minestom.server.entity.ItemEntity;
+import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
+import net.minestom.server.tag.Tag;
+import net.minestom.vanilla.inventory.InventoryManipulation;
+import net.minestom.vanilla.inventory.ItemStackUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Random;
+
+/**
+ * Reimplementation of the jukebox block
+ */
+public class JukeboxBlockHandler extends VanillaBlockHandler {
+
+    public static final Tag<ItemStack> DISC_KEY = ItemStackUtils.itemStackTag("minestom:jokebox_disc");
+
+    public JukeboxBlockHandler() {
+        super(Block.JUKEBOX);
+    }
+
+//    @Override
+//    protected BlockPropertyList createPropertyValues() {
+//        return new BlockPropertyList()
+//                .booleanProperty("has_record");
+//    }
+
+    @Override
+    public void onDestroy(Destroy destroy) {
+        Block block = destroy.getBlock();
+        ItemStack disc = block.getTag(DISC_KEY);
+
+        if (disc == null) {
+            return;
+        }
+
+        stopPlayback(destroy.getInstance(), destroy.getBlockPosition(), block);
+    }
+
+    public @Nullable ItemStack getDisc(Block block) {
+        return block.getTag(DISC_KEY);
+    }
+
+    public @NotNull Block withDisc(Block block, @NotNull ItemStack disc) {
+        if (isNotMusicDisc(disc.getMaterial())) {
+            throw new IllegalArgumentException("disc passed to JukeboxBlockHandle#withDisc was not a music disc.");
+        }
+        return block.withTag(DISC_KEY, disc);
+    }
+
+    private boolean isNotMusicDisc(ItemStack itemStack) {
+        return isNotMusicDisc(itemStack.getMaterial());
+    }
+
+    private boolean isNotMusicDisc(Material material) {
+        return !material.name().startsWith("MUSIC_DISC"); // TODO: better recognition than based on the name?
+    }
+
+    @Override
+    public boolean onInteract(Interaction interaction) {
+        Player player = interaction.getPlayer();
+        Player.Hand hand = interaction.getHand();
+        Instance instance = interaction.getInstance();
+        Block block = interaction.getBlock();
+        Point pos = interaction.getBlockPosition();
+        ItemStack heldItem = player.getInventory().getItemInMainHand();
+
+        ItemStack stack = this.getDisc(block);
+
+        if (stack == null) {
+            return true;
+        }
+
+        if (!stack.isAir()) {
+            stopPlayback(instance, pos, block);
+            block = block.withTag(DISC_KEY, ItemStack.AIR);
+            instance.setBlock(pos, block.withProperty("has_record", "false"));
+            return true;
+        }
+
+        if (isNotMusicDisc(heldItem)) {
+            return true;
+        }
+
+        block = block.withTag(DISC_KEY, heldItem);
+        instance.setBlock(pos, block.withProperty("has_record", "true"));
+
+        InventoryManipulation.consumeItemIfNotCreative(player, heldItem, hand);
+
+
+
+        // TODO: Group packet?
+        instance.getPlayers().forEach(playerInInstance -> {
+            if (playerInInstance.getDistance(player) >= 64) {
+                return;
+            }
+
+            playerInInstance.playEffect(
+                    Effects.PLAY_RECORD,
+                    pos.blockX(),
+                    pos.blockY(),
+                    pos.blockZ(),
+                    heldItem.getMaterial().id(),
+                    false
+            );
+        });
+
+        return true;
+    }
+
+//    @Override
+//    public Data readBlockEntity(NBTCompound nbt, Instance instance, BlockPosition position, Data originalData) {
+//        JukeboxBlockEntity data;
+//        if (originalData instanceof JukeboxBlockEntity) {
+//            data = (JukeboxBlockEntity) originalData;
+//        } else {
+//            data = new JukeboxBlockEntity(position.copy());
+//        }
+//
+//        if(nbt.containsKey("RecordItem")) {
+//            data.setDisc(ItemStack.fromNBT(nbt.getCompound("RecordItem")));
+//        }
+//        return super.readBlockEntity(nbt, instance, position, originalData);
+//    }
+//
+//    @Override
+//    public void writeBlockEntity(BlockPosition position, Data blockData, NBTCompound nbt) {
+//        if(blockData instanceof JukeboxBlockEntity) {
+//            JukeboxBlockEntity data = (JukeboxBlockEntity) blockData;
+//            nbt.set("RecordItem", data.getDisc().toNBT());
+//        }
+//    }
+
+    /**
+     * Stops playback in an instance
+     * @param instance
+     */
+    private void stopPlayback(Instance instance, Point pos, Block block) {
+        ItemEntity discEntity = new ItemEntity(getDisc(block));
+        discEntity.setInstance(instance);
+        discEntity.teleport(new Pos(pos.x() + 0.5f, pos.y() + 1f, pos.z() + 0.5f));
+        discEntity.setPickable(true);
+
+        Random rng = new Random();
+        final float horizontalSpeed = 2f;
+        final float verticalSpeed = 5f;
+
+        discEntity.setVelocity(new Vec(
+                rng.nextGaussian() * horizontalSpeed,
+                rng.nextFloat() * verticalSpeed,
+                rng.nextGaussian() * horizontalSpeed
+        ));
+
+        discEntity.setInstance(instance);
+
+        // TODO: Group Packet?
+        instance.getPlayers().forEach(playerInInstance -> {
+            // stop playback
+            playerInInstance.playEffect(
+                    Effects.PLAY_RECORD,
+                    pos.blockX(),
+                    pos.blockY(),
+                    pos.blockZ(),
+                    -1,
+                    false
+            );
+        });
+    }
+}

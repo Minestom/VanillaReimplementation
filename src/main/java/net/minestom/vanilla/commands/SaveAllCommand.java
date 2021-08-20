@@ -2,8 +2,8 @@ package net.minestom.vanilla.commands;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
-import net.minestom.server.command.builder.Arguments;
 import net.minestom.server.command.builder.Command;
+import net.minestom.server.command.builder.CommandContext;
 
 /**
  * Save the server
@@ -19,9 +19,10 @@ public class SaveAllCommand extends Command {
         return true; // TODO: permissions
     }
 
-    private void execute(CommandSender player, Arguments arguments) {
+    private void execute(CommandSender player, CommandContext arguments) {
         MinecraftServer.getInstanceManager().getInstances().forEach(i -> {
-            i.saveChunksToStorage(() -> System.out.println("Saved dimension "+i.getDimensionType().getName()));
+            i.saveChunksToStorage();
+            System.out.println("Saved dimension " + i.getDimensionType().getName());
         });
     }
 }

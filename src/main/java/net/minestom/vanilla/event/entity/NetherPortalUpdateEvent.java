@@ -1,24 +1,30 @@
 package net.minestom.vanilla.event.entity;
 
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.event.Event;
-import net.minestom.server.utils.BlockPosition;
+import net.minestom.server.event.trait.EntityEvent;
+import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.instance.Instance;
 import net.minestom.vanilla.system.NetherPortal;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Called when a nether portal updates the counter inside an entity
  */
-public class NetherPortalUpdateEvent extends Event {
+public class NetherPortalUpdateEvent implements Event, EntityEvent, InstanceEvent {
 
     private final Entity entity;
-    private final BlockPosition position;
+    private final Point position;
     private final NetherPortal portal;
+    private final Instance instance;
     private final long tickSpentInPortal;
 
-    public NetherPortalUpdateEvent(Entity entity, BlockPosition position, NetherPortal portal, long tickSpentInPortal) {
+    public NetherPortalUpdateEvent(Entity entity, Point position, NetherPortal portal, Instance instance, long tickSpentInPortal) {
         this.entity = entity;
         this.position = position;
         this.portal = portal;
+        this.instance = instance;
         this.tickSpentInPortal = tickSpentInPortal;
     }
 
@@ -30,15 +36,11 @@ public class NetherPortalUpdateEvent extends Event {
         return tickSpentInPortal;
     }
 
-    public Entity getEntity() {
-        return entity;
-    }
-
     /**
      * Position of the portal block which triggered the update
      * @return
      */
-    public BlockPosition getPosition() {
+    public Point getPosition() {
         return position;
     }
 
@@ -48,5 +50,15 @@ public class NetherPortalUpdateEvent extends Event {
      */
     public NetherPortal getPortal() {
         return portal;
+    }
+
+    @Override
+    public @NotNull Entity getEntity() {
+        return entity;
+    }
+
+    @Override
+    public @NotNull Instance getInstance() {
+        return instance;
     }
 }

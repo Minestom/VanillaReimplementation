@@ -1,29 +1,38 @@
 package net.minestom.vanilla.event.entity;
 
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.event.CancellableEvent;
 import net.minestom.server.event.Event;
+import net.minestom.server.event.trait.CancellableEvent;
+import net.minestom.server.event.trait.EntityEvent;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.utils.BlockPosition;
-import net.minestom.server.utils.Position;
 import net.minestom.vanilla.system.NetherPortal;
 
 /**
  * Triggered when a nether portal attempts to teleport entities between dimensions
  */
-public class NetherPortalTeleportEvent extends Event implements CancellableEvent {
+public class NetherPortalTeleportEvent implements Event, CancellableEvent, EntityEvent {
 
     private boolean cancelled = false;
     private final Entity entity;
-    private final BlockPosition portalBlockPosition;
+    private final Point portalBlockPosition;
     private final NetherPortal portal;
     private final long ticksSpentInPortal;
     private Instance targetInstance;
-    private Position targetPosition;
+    private Point targetPosition;
     private NetherPortal targetPortal;
     private boolean createsNewPortal;
 
-    public NetherPortalTeleportEvent(Entity entity, BlockPosition portalBlockPosition, NetherPortal portal, long ticksSpentInPortal, Instance targetInstance, Position targetPosition, NetherPortal targetPortal, boolean createsNewPortal) {
+    public NetherPortalTeleportEvent(
+            Entity entity,
+            Point portalBlockPosition,
+            NetherPortal portal,
+            long ticksSpentInPortal,
+            Instance targetInstance,
+            Point targetPosition,
+            NetherPortal targetPortal,
+            boolean createsNewPortal
+    ) {
         this.entity = entity;
         this.portalBlockPosition = portalBlockPosition;
         this.portal = portal;
@@ -46,7 +55,7 @@ public class NetherPortalTeleportEvent extends Event implements CancellableEvent
      * Position of the portal block which triggered the teleportation
      * @return
      */
-    public BlockPosition getPortalBlockPosition() {
+    public Point getPortalBlockPosition() {
         return portalBlockPosition;
     }
 
@@ -86,7 +95,7 @@ public class NetherPortalTeleportEvent extends Event implements CancellableEvent
      * Position to teleport the entity to. Set to the center of the linked portal, if available
      * @return
      */
-    public Position getTargetPosition() {
+    public Point getTargetPosition() {
         return targetPosition;
     }
 
@@ -94,7 +103,7 @@ public class NetherPortalTeleportEvent extends Event implements CancellableEvent
      * Position to teleport the entity to. Set by default to the center of the linked portal, if available
      * @param targetPosition
      */
-    public void setTargetPosition(Position targetPosition) {
+    public void setTargetPosition(Point targetPosition) {
         this.targetPosition = targetPosition;
     }
 
