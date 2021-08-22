@@ -39,7 +39,9 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
-    implementation 'com.github.EmortalMC:Rayfast:a88bd2b'
+
+    // Raycasting
+    implementation 'com.github.EmortalMC:Rayfast:5b83a003de'
 
     implementation "com.github.Minestom:Minestom:${project.minestom_version}"
 

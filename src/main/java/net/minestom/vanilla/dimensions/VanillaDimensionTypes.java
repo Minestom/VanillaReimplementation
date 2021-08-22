@@ -1,7 +1,11 @@
 package net.minestom.vanilla.dimensions;
 
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
+import net.minestom.server.world.DimensionTypeManager;
+
+import java.util.List;
 
 public class VanillaDimensionTypes {
 
@@ -53,4 +57,10 @@ public class VanillaDimensionTypes {
             .effects("the_end")
             .infiniburn(NamespaceID.from("minecraft:infiniburn_end"))
             .build();
+
+    public static void registerAll(DimensionTypeManager dimensionTypeManager) {
+        for (DimensionType dimension : List.of(OVERWORLD, NETHER, END)) {
+            dimensionTypeManager.addDimension(dimension);
+        }
+    }
 }

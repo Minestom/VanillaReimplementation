@@ -33,13 +33,13 @@ import net.minestom.vanilla.generation.VanillaTestGenerator;
 import net.minestom.vanilla.instance.VanillaExplosion;
 import net.minestom.vanilla.system.ServerProperties;
 
-public class EventsInit {
+public class VanillaEvents {
 
     private static volatile InstanceContainer overworld;
     private static volatile InstanceContainer nether;
     private static volatile InstanceContainer end;
 
-    public static void init(ServerProperties properties, EventNode<Event> eventNode) {
+    public static void register(ServerProperties properties, EventNode<Event> eventNode) {
         String worldName = properties.get("level-name");
 
         ExplosionSupplier explosionGenerator = (centerX, centerY, centerZ, strength, additionalData) -> {

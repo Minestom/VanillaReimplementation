@@ -13,11 +13,6 @@ public class FlintAndSteelHandler implements VanillaItemHandler {
     public FlintAndSteelHandler() {}
 
     @Override
-    public void onUseInAir(PlayerUseItemEvent event) {
-
-    }
-
-    @Override
     public boolean onUseOnBlock(PlayerUseItemOnBlockEvent event) {
         // TODO: check if flammable
         Point pos = event.getPosition();
@@ -31,6 +26,7 @@ public class FlintAndSteelHandler implements VanillaItemHandler {
         if (atFirePosition.isAir()) {
             InventoryManipulation.damageItemIfNotCreative(player, itemStack, hand);
             instance.setBlock(pos, Block.FIRE);
+            return true;
         }
 
         return false;

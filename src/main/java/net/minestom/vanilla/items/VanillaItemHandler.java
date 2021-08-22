@@ -10,7 +10,7 @@ public interface VanillaItemHandler {
      *
      * @param event the event object
      */
-    void onUseInAir(PlayerUseItemEvent event);
+    default void onUseInAir(PlayerUseItemEvent event) {};
 
     /**
      * Called when the player right clicks with this item on a block
@@ -18,5 +18,7 @@ public interface VanillaItemHandler {
      * @param event the event object
      * @return true if it prevents normal item use (placing blocks for instance)
      */
-    boolean onUseOnBlock(PlayerUseItemOnBlockEvent event);
+    default boolean onUseOnBlock(PlayerUseItemOnBlockEvent event) {
+        return false;
+    }
 }

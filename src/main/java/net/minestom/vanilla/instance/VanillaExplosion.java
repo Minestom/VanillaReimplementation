@@ -234,12 +234,12 @@ public class VanillaExplosion extends Explosion {
                     double deltaZ = entZ + dz - getCenterZ();
 
                     // TODO: Check for distance
-                    boolean intersects = area3d.lineIntersects(
+                    double[] intersection = area3d.lineIntersection(
                             getCenterX(), getCenterY(), getCenterZ(),
                             deltaX, deltaY, deltaZ
                     );
 
-                    if (intersects) {
+                    if (intersection != null) {
                         hits++;
                     }
                 }
