@@ -15,7 +15,8 @@ import net.minestom.vanilla.inventory.InventoryManipulation;
 import org.jetbrains.annotations.NotNull;
 
 /**
- *
+ * TODO:
+ * This block handler needs to be able to override block placements in the onPlace method to work correctly.
  */
 public class BedBlockHandler extends VanillaBlockHandler {
     public BedBlockHandler(Block bedBlock) {
