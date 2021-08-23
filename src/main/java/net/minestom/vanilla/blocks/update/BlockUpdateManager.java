@@ -64,6 +64,18 @@ public class BlockUpdateManager {
         return blockUpdateManagerById.get(id);
     }
 
+    public static boolean remove(Instance instance) {
+        Long id = instance.getTag(ID);
+
+        if (id == null) {
+            throw new IllegalArgumentException("Argument 'instance' passed to BlockUpdateManager#remove did not have an associated block update manager.");
+        }
+
+        instance.setTag(ID, null);
+
+        return blockUpdateManagerById.remove(id) != null;
+    }
+
     // Public api methods
 
     /**
