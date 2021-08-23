@@ -1,5 +1,6 @@
 package net.minestom.vanilla.blocks;
 
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -11,6 +12,8 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.utils.PacketUtils;
+import net.minestom.server.utils.TickUtils;
 import net.minestom.vanilla.inventory.InventoryManipulation;
 import net.minestom.vanilla.inventory.ItemStackUtils;
 import org.jetbrains.annotations.NotNull;
@@ -20,6 +23,8 @@ import java.util.Random;
 
 /**
  * Reimplementation of the jukebox block
+ *
+ * Requires onPlace enhancements
  */
 public class JukeboxBlockHandler extends VanillaBlockHandler {
 
@@ -29,22 +34,9 @@ public class JukeboxBlockHandler extends VanillaBlockHandler {
         super(Block.JUKEBOX);
     }
 
-//    @Override
-//    protected BlockPropertyList createPropertyValues() {
-//        return new BlockPropertyList()
-//                .booleanProperty("has_record");
-//    }
-
     @Override
     public void onDestroy(Destroy destroy) {
-        Block block = destroy.getBlock();
-        ItemStack disc = block.getTag(DISC_KEY);
-
-        if (disc == null) {
-            return;
-        }
-
-        stopPlayback(destroy.getInstance(), destroy.getBlockPosition(), block);
+        stopPlayback(destroy.getInstance(), destroy.getBlockPosition(), destroy.getBlock());
     }
 
     public @Nullable ItemStack getDisc(Block block) {
@@ -63,7 +55,7 @@ public class JukeboxBlockHandler extends VanillaBlockHandler {
     }
 
     private boolean isNotMusicDisc(Material material) {
-        return !material.name().startsWith("MUSIC_DISC"); // TODO: better recognition than based on the name?
+        return !material.name().startsWith("minecraft:music_disc"); // TODO: better recognition than based on the name?
     }
 
     @Override
@@ -77,45 +69,57 @@ public class JukeboxBlockHandler extends VanillaBlockHandler {
 
         ItemStack stack = this.getDisc(block);
 
-        if (stack == null) {
-            return true;
-        }
-
-        if (!stack.isAir()) {
+        if (stack != null) {
             stopPlayback(instance, pos, block);
             block = block.withTag(DISC_KEY, ItemStack.AIR);
             instance.setBlock(pos, block.withProperty("has_record", "false"));
+            // TODO: Drop disc
             return true;
         }
+
 
         if (isNotMusicDisc(heldItem)) {
             return true;
         }
 
-        block = block.withTag(DISC_KEY, heldItem);
-        instance.setBlock(pos, block.withProperty("has_record", "true"));
+        instance.setBlock(pos, withDisc(block, heldItem).withProperty("has_record", "true"));
 
         InventoryManipulation.consumeItemIfNotCreative(player, heldItem, hand);
 
-
-
         // TODO: Group packet?
-        instance.getPlayers().forEach(playerInInstance -> {
-            if (playerInInstance.getDistance(player) >= 64) {
-                return;
-            }
-
-            playerInInstance.playEffect(
-                    Effects.PLAY_RECORD,
-                    pos.blockX(),
-                    pos.blockY(),
-                    pos.blockZ(),
-                    heldItem.getMaterial().id(),
-                    false
-            );
-        });
+        instance.getPlayers()
+                .stream()
+                .filter(player1 -> player1.getDistance(pos) < 64)
+                .forEach(player1 ->
+                        player1.playEffect(
+                            Effects.PLAY_RECORD,
+                            pos.blockX(),
+                            pos.blockY(),
+                            pos.blockZ(),
+                            heldItem.getMaterial().id(),
+                            false
+                        )
+                );
 
         return true;
+    }
+
+    @Override
+    public boolean isTickable() {
+        return true;
+    }
+
+    public void tick(@NotNull Tick tick) {
+        Instance instance = tick.getInstance();
+
+        long age = instance.getWorldAge();
+
+        // Continue only every 3 seconds
+        if (age % (MinecraftServer.TICK_PER_SECOND * 3L) != 0) {
+            return;
+        }
+
+        // TODO: Play sound to all players without the sound playing
     }
 
 //    @Override
