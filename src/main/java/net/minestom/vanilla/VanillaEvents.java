@@ -33,6 +33,8 @@ import net.minestom.vanilla.generation.VanillaTestGenerator;
 import net.minestom.vanilla.instance.VanillaExplosion;
 import net.minestom.vanilla.system.ServerProperties;
 
+import java.lang.reflect.Method;
+
 public class VanillaEvents {
 
     private static volatile InstanceContainer overworld;
@@ -89,15 +91,13 @@ public class VanillaEvents {
                 end.loadChunk(x, z);
             }
 
-        eventNode.addListener(
-                EventListener.of(AddEntityToInstanceEvent.class, event -> {
-                        Entity entity = event.getEntity();
+        eventNode.addListener(AddEntityToInstanceEvent.class, event -> {
+            Entity entity = event.getEntity();
 
-                        if (entity instanceof Player) {
-                            entity.setTag(NetherPortalBlockHandler.PORTAL_COOLDOWN_TIME_KEY, 5 * 20L);
-                        }
-                })
-        );
+            if (entity instanceof Player) {
+                entity.setTag(NetherPortalBlockHandler.PORTAL_COOLDOWN_TIME_KEY, 5 * 20L);
+            }
+        });
 
         MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
             try {
@@ -119,37 +119,35 @@ public class VanillaEvents {
                 EventListener.of(PlayerLoginEvent.class, event -> event.setSpawningInstance(overworld))
         );
 
-        eventNode.addListener(
-                EventListener.of(PlayerMoveEvent.class, event -> {
-                    Player player = event.getPlayer();
-                    Point pos = player.getPosition();
-                    Vec vel = player.getVelocity();
+        eventNode.addListener(PlayerMoveEvent.class, event -> {
+            Player player = event.getPlayer();
+            Point pos = player.getPosition();
+            Vec vel = player.getVelocity();
 
-                    double currentX = pos.x();
-                    double currentY = pos.y();
-                    double currentZ = pos.z();
-                    double velocityX = vel.x();
-                    double velocityY = vel.y();
-                    double velocityZ = vel.z();
+            double currentX = pos.x();
+            double currentY = pos.y();
+            double currentZ = pos.z();
+            double velocityX = vel.x();
+            double velocityY = vel.y();
+            double velocityZ = vel.z();
 
-                    Point newPos = event.getNewPosition();
+            Point newPos = event.getNewPosition();
 
-                    double dx = newPos.x() - currentX;
-                    double dy = newPos.y() - currentY;
-                    double dz = newPos.z() - currentZ;
+            double dx = newPos.x() - currentX;
+            double dy = newPos.y() - currentY;
+            double dz = newPos.z() - currentZ;
 
-                    double actualDisplacement = dx * dx + dy * dy + dz * dz;
-                    double expectedDisplacement = velocityX * velocityX + velocityY * velocityY + velocityZ * velocityZ;
+            double actualDisplacement = dx * dx + dy * dy + dz * dz;
+            double expectedDisplacement = velocityX * velocityX + velocityY * velocityY + velocityZ * velocityZ;
 
-                    float upperLimit = 100; // TODO: 300 if elytra deployed
+            float upperLimit = 100; // TODO: 300 if elytra deployed
 
-                    if (actualDisplacement - expectedDisplacement >= upperLimit) {
-                        event.setCancelled(true);
-                        player.teleport(player.getPosition()); // force teleport to previous position
-                        System.out.println(player.getUsername() + " moved too fast! " + dx + " " + dy + " " + dz);
-                    }
-                })
-        );
+            if (actualDisplacement - expectedDisplacement >= upperLimit) {
+                event.setCancelled(true);
+                player.teleport(player.getPosition()); // force teleport to previous position
+                System.out.println(player.getUsername() + " moved too fast! " + dx + " " + dy + " " + dz);
+            }
+        });
 
         eventNode.addListener(
                 EventListener.builder(PlayerSpawnEvent.class)
@@ -185,39 +183,33 @@ public class VanillaEvents {
                         .build()
         );
 
-        eventNode.addListener(
-                EventListener.of(ItemDropEvent.class, event -> {
-                            Player player = event.getPlayer();
-                            ItemStack droppedItem = event.getItemStack();
+        eventNode.addListener(ItemDropEvent.class, event -> {
+            Player player = event.getPlayer();
+            ItemStack droppedItem = event.getItemStack();
 
-                            ItemEntity itemEntity = new ItemEntity(droppedItem);
-                            itemEntity.setPickupDelay(500, TimeUnit.MILLISECOND);
-                            itemEntity.setInstance(player.getInstance());
-                            itemEntity.teleport(player.getPosition().add(0, 1.5f, 0));
+            ItemEntity itemEntity = new ItemEntity(droppedItem);
+            itemEntity.setPickupDelay(500, TimeUnit.MILLISECOND);
+            itemEntity.setInstance(player.getInstance());
+            itemEntity.teleport(player.getPosition().add(0, 1.5f, 0));
 
-                            Vec velocity = player.getPosition().direction().mul(6);
-                            itemEntity.setVelocity(velocity);
-                        })
+            Vec velocity = player.getPosition().direction().mul(6);
+            itemEntity.setVelocity(velocity);
+        });
+
+        eventNode.addListener(PlayerBlockBreakEvent.class, event ->
+            BlockUpdateManager.of(event.getPlayer().getInstance())
+                    .scheduleNeighborsUpdate(
+                            event.getBlockPosition(),
+                            BlockUpdateInfo.DESTROY_BLOCK(event.getBlockPosition())
+                    )
         );
 
-        eventNode.addListener(
-                EventListener.of(PlayerBlockBreakEvent.class, event ->
-                        BlockUpdateManager.of(event.getPlayer().getInstance())
-                                .scheduleNeighborsUpdate(
-                                        event.getBlockPosition(),
-                                        BlockUpdateInfo.DESTROY_BLOCK(event.getBlockPosition())
-                                )
-                )
-        );
-
-        eventNode.addListener(
-                EventListener.of(PlayerBlockPlaceEvent.class, event ->
-                        BlockUpdateManager.of(event.getPlayer().getInstance())
-                                .scheduleNeighborsUpdate(
-                                        event.getBlockPosition(),
-                                        BlockUpdateInfo.PLACE_BLOCK(event.getBlockPosition())
-                                )
-                )
+        eventNode.addListener(PlayerBlockPlaceEvent.class, event ->
+            BlockUpdateManager.of(event.getPlayer().getInstance())
+                    .scheduleNeighborsUpdate(
+                            event.getBlockPosition(),
+                            BlockUpdateInfo.PLACE_BLOCK(event.getBlockPosition())
+                    )
         );
     }
 }

@@ -72,10 +72,10 @@ public enum VanillaBlocks {
     ENDER_CHEST(Block.ENDER_CHEST, EnderChestBlockHandler::new),
     JUKEBOX(Block.JUKEBOX, JukeboxBlockHandler::new);
 
-    private static final Map<Block, Block> newBlocksByOldBlocks = new HashMap<>();
+    private static final Map<Block, BlockHandler> blockHandlerByOldBlocks = new HashMap<>();
 
     private final @NotNull Block oldBlock;
-    private final @NotNull Block newBlock;
+    private final @NotNull BlockHandler blockHandler;
 
     /**
      * @param block the block to register the handler on
@@ -83,7 +83,7 @@ public enum VanillaBlocks {
      */
     VanillaBlocks(@NotNull Block block, @NotNull Supplier<BlockHandler> blockHandlerSupplier) {
         this.oldBlock = block;
-        this.newBlock = block.withHandler(blockHandlerSupplier.get());
+        this.blockHandler = blockHandlerSupplier.get();
     }
 
     /**
@@ -94,7 +94,7 @@ public enum VanillaBlocks {
      */
     public static void registerAll(EventNode<Event> eventHandler) {
         for (VanillaBlocks vanillaBlock : values()) {
-            newBlocksByOldBlocks.put(vanillaBlock.oldBlock, vanillaBlock.newBlock);
+            blockHandlerByOldBlocks.put(vanillaBlock.oldBlock, vanillaBlock.blockHandler);
         }
 
         eventHandler.addListener(
@@ -108,13 +108,13 @@ public enum VanillaBlocks {
     private static void handlePlayerBlockPlaceEvent(PlayerBlockPlaceEvent event) {
         Block oldBlock = event.getBlock();
 
-        Block newBlock = newBlocksByOldBlocks.get(oldBlock);
+        BlockHandler handler = blockHandlerByOldBlocks.get(oldBlock);
 
-        if (newBlock == null) {
+        if (handler == null) {
             return;
         }
 
-        event.setBlock(newBlock);
+        event.setBlock(oldBlock.withHandler(handler));
     }
 
 //    public static void dropOnBreak(Instance instance, BlockPosition position) {
