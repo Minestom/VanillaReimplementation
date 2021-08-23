@@ -114,6 +114,10 @@ public enum VanillaBlocks {
             return;
         }
 
+        if (oldBlock.handler() == handler) {
+            return;
+        }
+
         event.setBlock(oldBlock.withHandler(handler));
     }
 

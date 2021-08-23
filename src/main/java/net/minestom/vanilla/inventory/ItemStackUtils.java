@@ -13,8 +13,18 @@ import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import java.util.Objects;
 
 public class ItemStackUtils {
-    public static @NotNull ItemStack fromNBTCompound(@NotNull NBTCompound tag) {
-        Material material = Material.fromNamespaceId(Objects.requireNonNull(tag.getString("id")));
+    public static @Nullable ItemStack fromNBTCompound(@NotNull NBTCompound tag) {
+        String id = tag.getString("id");
+
+        if (id == null) {
+            return null;
+        }
+
+        Material material = Material.fromNamespaceId(id);
+
+        if (material == null) {
+            return null;
+        }
 
         if (material == Material.AIR) {
             material = Material.STONE;
@@ -22,10 +32,10 @@ public class ItemStackUtils {
 
         Byte count = tag.getByte("Count");
 
-        NBTCompound nbtCompound = null;
+        NBTCompound nbtCompound = tag.getCompound("tag");
 
-        if (tag.containsKey("tag")) {
-            nbtCompound = tag.getCompound("tag");
+        if (count == null || nbtCompound == null) {
+            return null;
         }
 
         return ItemStack.fromNBT(material, nbtCompound, count);

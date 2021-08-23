@@ -1,5 +1,6 @@
 package net.minestom.vanilla.blocks;
 
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.ItemEntity;
@@ -7,18 +8,26 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
+import net.minestom.server.inventory.Inventory;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.*;
+import net.minestom.vanilla.inventory.ChestInventory;
+import net.minestom.vanilla.inventory.ItemStackUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTList;
+import org.jglrxavpok.hephaistos.nbt.NBTTypes;
 
+import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 import java.util.Random;
 
 /**
  * Base class for Ender Chest, Chest and Trapped Chest
+ *
+ * This class needs onPlace to be able to change the block being placed
  */
 public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
 
@@ -29,10 +38,23 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
         super(baseBlock);
     }
 
-//    @Override
-//    protected BlockPropertyList createPropertyValues() {
-//        return new BlockPropertyList().facingProperty("facing").booleanProperty("waterlogged");
-//    }
+    @Override
+    public void onPlace(Placement placement) {
+        Block block = placement.getBlock();
+
+        NBTList<NBTCompound> items = block.getTag(TAG_ITEMS);
+
+        if (items != null) {
+            return;
+        }
+
+        Instance instance = placement.getInstance();
+        Point pos = placement.getBlockPosition();
+        NBTList<NBTCompound> nbtCompoundNBTList = new NBTList<>(NBTTypes.TAG_Compound);
+
+        Block blockToSet = block.withTag(TAG_ITEMS, nbtCompoundNBTList);
+        // TODO: Override blockToSet
+    }
 
     @Override
     public void onDestroy(@NotNull Destroy destroy) {
@@ -43,28 +65,15 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
             return;
         }
 
-        NBTList<NBTCompound> items = block.getTag(TAG_ITEMS);
-
-        if (items == null) {
-            return;
-        }
+        NBTList<NBTCompound> items = getItems(block);
 
         for (NBTCompound item : items) {
-            // TODO: Move this item creation into minestom/utils
-            Integer count = item.getInt("Count");
-            String id = item.getString("id");
+            ItemStack itemStack = ItemStackUtils.fromNBTCompound(item);
 
-            if (count == null || id == null) {
+            if (itemStack == null) {
                 continue;
             }
 
-            Material material = Material.fromNamespaceId(id);
-
-            if (material == null) {
-                continue;
-            }
-
-            ItemStack itemStack = ItemStack.of(material, count);
             ItemEntity entity = new ItemEntity(itemStack);
 
             entity.setInstance(destroy.getInstance());
@@ -103,7 +112,8 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
             return false;
         }
 
-        // player.openInventory(getInventory(player, block, instance, pos));
+        Inventory chestInventory = new ChestInventory(getItems(block));
+        player.openInventory(chestInventory);
         return true;
     }
 
@@ -114,15 +124,14 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
      * @param block the block
      * @return the items
      */
-    protected NBTList<NBTCompound> getItems(Block block) {
-        return block.getTag(ChestLikeBlockHandler.TAG_ITEMS);
+    protected @NotNull NBTList<NBTCompound> getItems(Block block) {
+        return Objects.requireNonNull(block.getTag(TAG_ITEMS));
     }
 
     /**
      * Gets all items represented by this position in this instance
      * @param instance the instance
      * @param pos the position
-     * @param player
      * @return all items in the position in the instance
      */
     protected NBTList<NBTCompound> getAllItems(Instance instance, Point pos, Player player) {
