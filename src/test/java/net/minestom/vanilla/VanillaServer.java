@@ -1,9 +1,13 @@
 package net.minestom.vanilla;
 
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.vanilla.blocks.VanillaBlocks;
+import net.minestom.vanilla.blocks.update.BlockUpdateManager;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.items.ItemManager;
 import net.minestom.vanilla.system.RayFastManager;
@@ -45,18 +49,23 @@ class VanillaServer {
         // Set up raycasting lib
         RayFastManager.init();
 
-        BlockManager blockManager = MinecraftServer.getBlockManager();
+
+        EventNode<Event> eventHandler = MinecraftServer.getGlobalEventHandler();
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
 
         // Register dimension types
         VanillaDimensionTypes.registerAll(MinecraftServer.getDimensionTypeManager());
 
-        // Register Vanilla Events
-        VanillaEvents.register(serverProperties, MinecraftServer.getGlobalEventHandler());
-        // Register item events
-        itemManager.registerEvents(MinecraftServer.getGlobalEventHandler());
+        // Register block update managers
+        BlockUpdateManager.init(eventHandler);
 
-        VanillaBlocks.registerAll(blockManager);
+        // Register Vanilla Events
+        VanillaEvents.register(serverProperties, eventHandler);
+
+        // Register item events
+        itemManager.registerEvents(eventHandler);
+
+        VanillaBlocks.registerAll(eventHandler);
 
 //        CommandManager commandManager = MinecraftServer.getCommandManager();
 //        VanillaWorldgen.prepareFiles();

@@ -1,11 +1,17 @@
 package net.minestom.vanilla.blocks;
 
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventListener;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -66,36 +72,49 @@ public enum VanillaBlocks {
     ENDER_CHEST(Block.ENDER_CHEST, EnderChestBlockHandler::new),
     JUKEBOX(Block.JUKEBOX, JukeboxBlockHandler::new);
 
-    private final @NotNull Supplier<BlockHandler> blockHandlerSupplier;
-    private final NamespaceID namespaceID;
+    private static final Map<Block, Block> newBlocksByOldBlocks = new HashMap<>();
+
+    private final @NotNull Block oldBlock;
+    private final @NotNull Block newBlock;
 
     /**
      * @param block the block to register the handler on
      * @param blockHandlerSupplier the handler supplier to register
      */
     VanillaBlocks(@NotNull Block block, @NotNull Supplier<BlockHandler> blockHandlerSupplier) {
-        this(block.namespace(), blockHandlerSupplier);
-    }
-
-    /**
-     * @param namespaceID the namespace to register the handler on
-     * @param blockHandlerSupplier the handler supplier to register
-     */
-    VanillaBlocks(@NotNull NamespaceID namespaceID, @NotNull Supplier<BlockHandler> blockHandlerSupplier) {
-        this.namespaceID = namespaceID;
-        this.blockHandlerSupplier = blockHandlerSupplier;
+        this.oldBlock = block;
+        this.newBlock = block.withHandler(blockHandlerSupplier.get());
     }
 
     /**
      * Register all vanilla commands into the given blockManager. ConnectionManager will handle replacing the basic
      * block with its custom variant.
      *
-     * @param blockManager the block manager to register the vanilla blocks on
+     * @param eventHandler the event handler to register events on
      */
-    public static void registerAll(BlockManager blockManager) {
+    public static void registerAll(EventNode<Event> eventHandler) {
         for (VanillaBlocks vanillaBlock : values()) {
-            blockManager.registerHandler(vanillaBlock.namespaceID.namespace(), vanillaBlock.blockHandlerSupplier);
+            newBlocksByOldBlocks.put(vanillaBlock.oldBlock, vanillaBlock.newBlock);
         }
+
+        eventHandler.addListener(
+                EventListener.of(
+                        PlayerBlockPlaceEvent.class,
+                        VanillaBlocks::handlePlayerBlockPlaceEvent
+                )
+        );
+    }
+
+    private static void handlePlayerBlockPlaceEvent(PlayerBlockPlaceEvent event) {
+        Block oldBlock = event.getBlock();
+
+        Block newBlock = newBlocksByOldBlocks.get(oldBlock);
+
+        if (newBlock == null) {
+            return;
+        }
+
+        event.setBlock(newBlock);
     }
 
 //    public static void dropOnBreak(Instance instance, BlockPosition position) {

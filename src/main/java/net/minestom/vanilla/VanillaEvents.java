@@ -14,9 +14,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.AddEntityToInstanceEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.item.PickupItemEvent;
-import net.minestom.server.event.player.PlayerLoginEvent;
-import net.minestom.server.event.player.PlayerMoveEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.instance.ExplosionSupplier;
 import net.minestom.server.instance.InstanceContainer;
@@ -28,6 +26,8 @@ import net.minestom.server.storage.StorageManager;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.blocks.NetherPortalBlockHandler;
+import net.minestom.vanilla.blocks.update.BlockUpdateManager;
+import net.minestom.vanilla.blocks.update.info.BlockUpdateInfo;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.generation.VanillaTestGenerator;
 import net.minestom.vanilla.instance.VanillaExplosion;
@@ -62,18 +62,21 @@ public class VanillaEvents {
         overworld.enableAutoChunkLoad(true);
         overworld.setChunkGenerator(noiseTestGenerator);
         overworld.setExplosionSupplier(explosionGenerator);
+        new BlockUpdateManager(overworld);
 //        overworld.setChunkLoader(new AnvilChunkLoader(storageManager.getLocation(worldName + "/region")));
 
         nether = MinecraftServer.getInstanceManager().createInstanceContainer(VanillaDimensionTypes.NETHER);
         nether.enableAutoChunkLoad(true);
         nether.setChunkGenerator(noiseTestGenerator);
         nether.setExplosionSupplier(explosionGenerator);
+        new BlockUpdateManager(nether);
 //        nether.setChunkLoader(new AnvilChunkLoader(storageManager.getLocation(worldName + "/DIM-1/region")));
 
         end = MinecraftServer.getInstanceManager().createInstanceContainer(VanillaDimensionTypes.END);
         end.enableAutoChunkLoad(true);
         end.setChunkGenerator(noiseTestGenerator);
         end.setExplosionSupplier(explosionGenerator);
+        new BlockUpdateManager(end);
 //        end.setChunkLoader(new AnvilChunkLoader(storageManager.getLocation(worldName + "/DIM1/region")));
 
         // Load some chunks beforehand
@@ -155,7 +158,13 @@ public class VanillaEvents {
                             Player player = event.getPlayer();
 
                             player.setGameMode(GameMode.CREATIVE);
-                            player.teleport(new Pos(1, 42, 1));
+
+                            int y = 0;
+                            while (!player.getInstance().getBlock(1, y, 1).isAir()) {
+                                y++;
+                            }
+
+                            player.teleport(new Pos(1, y, 1));
                             PlayerInventory inventory = player.getInventory();
 
                             inventory.addItemStack(ItemStack.of(Material.OBSIDIAN, 1));
@@ -191,8 +200,24 @@ public class VanillaEvents {
                         })
         );
 
-//        player.addEventCallback(PlayerBlockBreakEvent.class, event -> {
-//            VanillaBlocks.dropOnBreak(player.getInstance(), event.getBlockPosition());
-//        });
+        eventNode.addListener(
+                EventListener.of(PlayerBlockBreakEvent.class, event ->
+                        BlockUpdateManager.of(event.getPlayer().getInstance())
+                                .scheduleNeighborsUpdate(
+                                        event.getBlockPosition(),
+                                        BlockUpdateInfo.DESTROY_BLOCK(event.getBlockPosition())
+                                )
+                )
+        );
+
+        eventNode.addListener(
+                EventListener.of(PlayerBlockPlaceEvent.class, event ->
+                        BlockUpdateManager.of(event.getPlayer().getInstance())
+                                .scheduleNeighborsUpdate(
+                                        event.getBlockPosition(),
+                                        BlockUpdateInfo.PLACE_BLOCK(event.getBlockPosition())
+                                )
+                )
+        );
     }
 }

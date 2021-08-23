@@ -3,6 +3,8 @@ package net.minestom.vanilla.blocks;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.vanilla.blocks.update.info.BlockUpdate;
+import net.minestom.vanilla.blocks.update.info.BlockUpdateInfo;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -21,5 +23,8 @@ public abstract class VanillaBlockHandler implements BlockHandler {
     @Override
     public @NotNull NamespaceID getNamespaceId() {
         return namespaceID;
+    }
+
+    public void updateBlock(BlockUpdate blockUpdate) {
     }
 }

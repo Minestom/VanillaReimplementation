@@ -18,8 +18,6 @@ public class BedBlockHandler extends VanillaBlockHandler {
 //        return new BlockPropertyList().facingProperty("facing").booleanProperty("occupied").property("part", "foot", "head");
 //    }
 
-
-
     @Override
     public boolean onInteract(@NotNull Interaction interaction) {
         Instance instance = interaction.getInstance();

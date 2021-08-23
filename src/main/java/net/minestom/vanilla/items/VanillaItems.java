@@ -43,59 +43,6 @@ public enum VanillaItems {
         this.material = material;
     }
 
-//    /**
-//     * Register all vanilla items into the given manager
-//     * @param connectionManager used to add events to new players
-//     */
-//    public static void generateItemManger(ConnectionManager connectionManager) {
-//
-//
-//
-//        connectionManager.addPlayerInitialization(player -> {
-//            for (VanillaItems itemDescription : values()) {
-//                VanillaItemHandler item = itemDescription.itemCreator.get();
-//                player.addEventCallback(PlayerUseItemEvent.class, event -> {
-//                    if(event.getItemStack().getMaterial() == item.getMaterial()) {
-//                        item.onUseInAir(player, event.getItemStack(), event.getHand());
-//                    }
-//                });
-//
-//                player.addEventCallback(PlayerBlockInteractEvent.class, event -> {
-//                    Instance instance = player.getInstance();
-//                    BlockPosition blockPosition = event.getBlockPosition();
-//
-//                    // logic from Minestom core, allows containers to be opened even if the item has a use
-//                    CustomBlock customBlock = instance.getCustomBlock(blockPosition);
-//                    if (customBlock != null) {
-//                        Data data = instance.getBlockData(blockPosition);
-//                        boolean blocksItem = customBlock.onInteract(player, event.getHand(), blockPosition, data);
-//                        if(blocksItem) {
-//                            event.setBlockingItemUse(true);
-//                            event.setCancelled(true);
-//                        }
-//                    }
-//
-//                    if(!event.isCancelled()) {
-//                        ItemStack itemStack = player.getItemInHand(event.getHand());
-//                        if(itemStack.getMaterial() == item.getMaterial()) {
-//                            if(item.onUseOnBlock(player, itemStack, event.getHand(), event.getBlockPosition(), event.getBlockFace().toDirection())) {
-//                                // prevent block placement
-//                                event.setBlockingItemUse(true);
-//                                event.setCancelled(true);
-//                            }
-//                        }
-//                    }
-//                });
-//
-//                player.addEventCallback(PlayerUseItemOnBlockEvent.class, event -> {
-//                    if(event.getItemStack().getMaterial() == item.getMaterial()) {
-//                        item.onUseOnBlock(player, event.getItemStack(), event.getHand(), event.getPosition(), event.getBlockFace());
-//                    }
-//                });
-//            }
-//        });
-//    }
-
     public @NotNull Material getMaterial() {
         return material;
     }
