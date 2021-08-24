@@ -1,6 +1,7 @@
 package net.minestom.vanilla;
 
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.command.CommandManager;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.block.Block;
@@ -8,6 +9,7 @@ import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.blocks.update.BlockUpdateManager;
+import net.minestom.vanilla.commands.VanillaCommands;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.items.ItemManager;
 import net.minestom.vanilla.system.RayFastManager;
@@ -32,7 +34,7 @@ class VanillaServer {
     public static void main(String[] args) {
         VanillaServer vanillaServer = new VanillaServer(MinecraftServer.init(), args);
 
-        vanillaServer.start("localhost", 25565);
+        vanillaServer.start("0.0.0.0", 25565);
     }
 
     private final MinecraftServer minecraftServer;
@@ -52,6 +54,7 @@ class VanillaServer {
 
         EventNode<Event> eventHandler = MinecraftServer.getGlobalEventHandler();
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
+        CommandManager commandManager = MinecraftServer.getCommandManager();
 
         // Register dimension types
         VanillaDimensionTypes.registerAll(MinecraftServer.getDimensionTypeManager());
@@ -61,6 +64,9 @@ class VanillaServer {
 
         // Register Vanilla Events
         VanillaEvents.register(serverProperties, eventHandler);
+
+        // Register commands
+        VanillaCommands.registerAll(commandManager);
 
         // Register item events
         itemManager.registerEvents(eventHandler);
@@ -92,31 +98,63 @@ class VanillaServer {
     }
 
     private ServerProperties getOrGenerateServerProperties() {
-        File relativePath = new File("server.properties");
-
-        if (relativePath.isFile()) {
-            try {
-                return new ServerProperties(relativePath);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        // TODO: Load from file correctly
+        try {
+            return new ServerProperties("#Minecraft server properties from a fresh 1.16.1 server\n" +
+                    "#Generated on Mon Jul 13 17:23:48 CEST 2020\n" +
+                    "spawn-protection=16\n" +
+                    "max-tick-time=60000\n" +
+                    "query.port=25565\n" +
+                    "generator-settings=\n" +
+                    "sync-chunk-writes=true\n" +
+                    "force-gamemode=false\n" +
+                    "allow-nether=true\n" +
+                    "enforce-whitelist=false\n" +
+                    "gamemode=survival\n" +
+                    "broadcast-console-to-ops=true\n" +
+                    "enable-query=false\n" +
+                    "player-idle-timeout=0\n" +
+                    "difficulty=easy\n" +
+                    "broadcast-rcon-to-ops=true\n" +
+                    "spawn-monsters=true\n" +
+                    "op-permission-level=4\n" +
+                    "pvp=true\n" +
+                    "entity-broadcast-range-percentage=100\n" +
+                    "snooper-enabled=true\n" +
+                    "level-type=default\n" +
+                    "enable-status=true\n" +
+                    "hardcore=false\n" +
+                    "enable-command-block=false\n" +
+                    "max-players=20\n" +
+                    "network-compression-threshold=256\n" +
+                    "max-world-size=29999984\n" +
+                    "resource-pack-sha1=\n" +
+                    "function-permission-level=2\n" +
+                    "rcon.port=25575\n" +
+                    "server-port=25565\n" +
+                    "server-ip=\n" +
+                    "spawn-npcs=true\n" +
+                    "allow-flight=false\n" +
+                    "level-name=world\n" +
+                    "view-distance=10\n" +
+                    "resource-pack=\n" +
+                    "spawn-animals=true\n" +
+                    "white-list=false\n" +
+                    "rcon.password=\n" +
+                    "generate-structures=true\n" +
+                    "online-mode=true\n" +
+                    "max-build-height=256\n" +
+                    "level-seed=\n" +
+                    "prevent-proxy-connections=false\n" +
+                    "use-native-transport=true\n" +
+                    "enable-jmx-monitoring=false\n" +
+                    "motd=A Minecraft Server\n" +
+                    "enable-rcon=false\n");
+        } catch (Throwable e) {
+            e.printStackTrace();
+            System.exit(1);
+            return null;
         }
-
-        relativePath.setWritable(true);
-        File defaultConfig = new File("server.properties.default");
-
-        if (defaultConfig.isFile()) {
-            try {
-                Files.copy(defaultConfig.toPath(), relativePath.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                return new ServerProperties(relativePath);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        new FileNotFoundException("server.properties not found, and replacement couldn't be generated.").printStackTrace();
-        System.exit(1);
-        return null;
     }
 
     public void start(String address, int port) {
