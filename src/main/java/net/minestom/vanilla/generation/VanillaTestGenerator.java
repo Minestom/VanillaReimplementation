@@ -7,6 +7,7 @@ import net.minestom.server.instance.ChunkPopulator;
 import net.minestom.server.instance.batch.ChunkBatch;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.world.biomes.Biome;
+import net.minestom.vanilla.blocks.TNTBlockHandler;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +17,7 @@ public class VanillaTestGenerator implements ChunkGenerator  {
 
     private Random random = new Random();
     private JNoise noise = JNoise.newBuilder().openSimplex().build();
+    private static Block TNTBLOCK = Block.TNT.withHandler(new TNTBlockHandler());
 
     @Override
     public void generateChunkData(ChunkBatch batch, int chunkX, int chunkZ) {
@@ -31,14 +33,14 @@ public class VanillaTestGenerator implements ChunkGenerator  {
                     batch.setBlock(posX, level, posZ, Block.STONE);
                 }
                 for (int level = height; level < 64; level++) {
-                    batch.setBlock(posX, level, posZ, Block.WATER);
+                    batch.setBlock(posX, level, posZ, TNTBLOCK);
                 }
                 for (int level = 64; level < height; level++) {
-                    batch.setBlock(posX, level, posZ, Block.DIRT);
+                    batch.setBlock(posX, level, posZ, TNTBLOCK);
                 }
 
-                if(height >= 64) {
-                    batch.setBlock(posX, height, posZ, Block.GRASS_BLOCK);
+                if (height >= 64) {
+                    batch.setBlock(posX, height, posZ, TNTBLOCK);
 
                     if(x >= 2 && z >= 2 && x < Chunk.CHUNK_SIZE_X-2 && z < Chunk.CHUNK_SIZE_X-2) { // avoid chunk borders
                         if(random.nextDouble() < 0.02) {

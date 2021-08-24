@@ -10,7 +10,7 @@ public class LaunchServer {
         System.arraycopy(args, 0, argsWithMixins, 0, args.length);
         argsWithMixins[argsWithMixins.length-2] = "--mixin";
         argsWithMixins[argsWithMixins.length-1] = "mixins.vanilla.json";
-        Bootstrap.bootstrap("net.minestom.vanilla.LaunchServerStartup", argsWithMixins);
+        Bootstrap.bootstrap("net.minestom.vanilla.VanillaServer", argsWithMixins);
     }
 
 }

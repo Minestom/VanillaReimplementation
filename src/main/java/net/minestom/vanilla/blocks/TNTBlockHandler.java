@@ -14,7 +14,7 @@ import java.util.Random;
 
 public class TNTBlockHandler extends VanillaBlockHandler {
 
-    private static final Random tntRNG = new Random();
+    public static final Random TNT_RANDOM = new Random();
 
     public TNTBlockHandler() {
         super(Block.TNT);
@@ -53,13 +53,9 @@ public class TNTBlockHandler extends VanillaBlockHandler {
     private void spawnPrimedTNT(Instance instance, Point blockPosition, int fuseTime) {
         Pos initialPosition = new Pos(blockPosition.blockX() + 0.5f, blockPosition.blockY() + 0f, blockPosition.blockZ() + 0.5f);
 
-        PrimedTNT primedTNT = new PrimedTNT();
+        PrimedTNT primedTNT = new PrimedTNT(fuseTime);
         primedTNT.setInstance(instance);
         primedTNT.teleport(initialPosition);
-
-        primedTNT.setVelocity(new Vec(tntRNG.nextFloat() * 2f - 1f, tntRNG.nextFloat() * 5f, tntRNG.nextFloat() * 2f - 1f));
-
-        primedTNT.setFuseTime(fuseTime);
-        primedTNT.setInstance(instance);
+        primedTNT.setVelocity(new Vec(TNT_RANDOM.nextFloat() * 2f - 1f, TNT_RANDOM.nextFloat() * 5f, TNT_RANDOM.nextFloat() * 2f - 1f));
     }
 }

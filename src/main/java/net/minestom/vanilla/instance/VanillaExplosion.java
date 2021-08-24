@@ -16,8 +16,9 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.thread.MinestomThread;
 import net.minestom.server.utils.time.TimeUnit;
-import net.minestom.vanilla.blocks.VanillaBlocks;
+import net.minestom.vanilla.blocks.TNTBlockHandler;
 import net.minestom.vanilla.damage.DamageTypes;
+import net.minestom.vanilla.entity.PrimedTNT;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -47,14 +48,13 @@ public class VanillaExplosion extends Explosion {
         this.dropsEverything = dontDestroyBlocks;
     }
 
-    public static VanillaExplosion.Builder builder(Point center, float strength) {
+    public static Builder builder(Point center, float strength) {
         return new Builder(center, strength);
     }
 
     @Override
     protected List<Point> prepare(Instance instance) {
-        float stepLength = 0.3f;
-        float maximumBlastRadius = (float) Math.floor(1.3f * getStrength() / (stepLength * 0.75)) * stepLength;
+        float maximumBlastRadius = getStrength();
         Set<Point> positions = new HashSet<>();
 
         if (blockDamage) {
@@ -85,7 +85,7 @@ public class VanillaExplosion extends Explosion {
                             Block block = instance.getBlock(pos);
 
                             double explosionResistance = block.registry().explosionResistance();
-                            intensity -= explosionResistance;
+                            intensity -= (explosionResistance / 5.0);
 
                             if (intensity < 0) {
                                 break;
@@ -115,6 +115,11 @@ public class VanillaExplosion extends Explosion {
                 Block block = instance.getBlock(position);
 
                 if (block.isAir()) {
+                    continue;
+                }
+
+                if (block.compare(Block.TNT)) {
+                    spawnPrimedTNT(instance, position, new Pos(getCenterX(), getCenterY(), getCenterZ()));
                     continue;
                 }
 
@@ -157,6 +162,21 @@ public class VanillaExplosion extends Explosion {
         }
 
         return new LinkedList<>(positions);
+    }
+
+    private void spawnPrimedTNT(Instance instance, Point blockPosition, Point explosionSource) {
+        Pos initialPosition = new Pos(blockPosition.blockX() + 0.5f, blockPosition.blockY() + 0f, blockPosition.blockZ() + 0.5f);
+
+        PrimedTNT primedTNT = new PrimedTNT(10 + (TNTBlockHandler.TNT_RANDOM.nextInt(5) - 2));
+        primedTNT.setInstance(instance);
+        primedTNT.teleport(initialPosition);
+
+        Point direction = blockPosition.sub(explosionSource);
+        double distance = explosionSource.distanceSquared(blockPosition);
+        Vec vec = new Vec(direction.x(), direction.y(), direction.z());
+        vec = vec.div(distance);
+
+        primedTNT.setVelocity(vec.mul(15));
     }
 
     @Override
@@ -205,7 +225,7 @@ public class VanillaExplosion extends Explosion {
 
         Vec velocityBoost = e.getPosition().asVec().add(0f, e.getEyeHeight(), 0f).sub(center);
 
-        velocityBoost.normalize().mul(exposure * MinecraftServer.TICK_PER_SECOND);
+        velocityBoost = velocityBoost.normalize().mul(exposure * MinecraftServer.TICK_PER_SECOND);
         e.setVelocity(e.getVelocity().add(velocityBoost));
     }
 

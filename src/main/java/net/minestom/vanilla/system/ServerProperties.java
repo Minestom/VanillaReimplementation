@@ -27,6 +27,13 @@ public class ServerProperties {
         }
     }
 
+    public ServerProperties(String source) throws IOException {
+        properties = new Properties();
+        properties.load(new StringReader(source));
+        this.source = null;
+
+    }
+
     private void loadDefault() throws IOException {
         try(var defaultInput = new InputStreamReader(ServerProperties.class.getResourceAsStream("/server.properties.default"))) {
             properties.load(defaultInput);

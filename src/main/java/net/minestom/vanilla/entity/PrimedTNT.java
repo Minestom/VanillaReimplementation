@@ -8,12 +8,13 @@ import net.minestom.vanilla.instance.VanillaExplosion;
 
 public class PrimedTNT extends Entity {
 
-    private int fuseTime = 0;
+    private int fuseTime;
 
-    public PrimedTNT() {
+    public PrimedTNT(int fuseTime) {
         super(EntityType.TNT);
         setGravity(0.025f, getGravityAcceleration());
         setBoundingBox(0.98f, 0.98f, 0.98f);
+        this.fuseTime = fuseTime;
 
         PrimedTntMeta meta = (PrimedTntMeta) this.getEntityMeta();
         meta.setFuseTime(fuseTime);
@@ -28,7 +29,7 @@ public class PrimedTNT extends Entity {
 
         Block block = instance.getBlock(this.getPosition());
 
-        VanillaExplosion explosion = VanillaExplosion.builder(getPosition(), 5.0f)
+        VanillaExplosion explosion = VanillaExplosion.builder(getPosition(), 3.0f)
                 .destroyBlocks(!block.isLiquid())
                 .build();
 
