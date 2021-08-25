@@ -6,7 +6,7 @@ plugins {
 group 'net.minestom.vanilla'
 version '1.0'
 
-sourceCompatibility = 1.11
+sourceCompatibility = 1.16
 
 java {
     withSourcesJar()
@@ -39,8 +39,6 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-
 
     // Raycasting
     implementation 'com.github.EmortalMC:Rayfast:5b83a003de'

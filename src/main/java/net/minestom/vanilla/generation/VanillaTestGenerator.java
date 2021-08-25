@@ -17,7 +17,6 @@ public class VanillaTestGenerator implements ChunkGenerator  {
 
     private Random random = new Random();
     private JNoise noise = JNoise.newBuilder().openSimplex().build();
-    private static Block TNTBLOCK = Block.TNT.withHandler(new TNTBlockHandler());
 
     @Override
     public void generateChunkData(ChunkBatch batch, int chunkX, int chunkZ) {
@@ -29,18 +28,19 @@ public class VanillaTestGenerator implements ChunkGenerator  {
                 int height = (int) (64 - heightDelta*16);
 
                 batch.setBlock(posX, 0, posZ, Block.BEDROCK);
+
                 for (int level = 1; level < height; level++) {
                     batch.setBlock(posX, level, posZ, Block.STONE);
                 }
                 for (int level = height; level < 64; level++) {
-                    batch.setBlock(posX, level, posZ, TNTBLOCK);
+                    batch.setBlock(posX, level, posZ, Block.WATER);
                 }
                 for (int level = 64; level < height; level++) {
-                    batch.setBlock(posX, level, posZ, TNTBLOCK);
+                    batch.setBlock(posX, level, posZ, Block.DIRT);
                 }
 
                 if (height >= 64) {
-                    batch.setBlock(posX, height, posZ, TNTBLOCK);
+                    batch.setBlock(posX, height, posZ, Block.GRASS_BLOCK);
 
                     if(x >= 2 && z >= 2 && x < Chunk.CHUNK_SIZE_X-2 && z < Chunk.CHUNK_SIZE_X-2) { // avoid chunk borders
                         if(random.nextDouble() < 0.02) {

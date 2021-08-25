@@ -4,6 +4,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 
+// TODO: When placing concrete powder in water, it turns to the solid block correctly, however it falls like a regular concrete powder block
 public class ConcretePowderBlockHandler extends GravityBlockHandler {
     private final Block solidifiedBlock;
 
@@ -14,6 +15,7 @@ public class ConcretePowderBlockHandler extends GravityBlockHandler {
 
     @Override
     public void onPlace(Placement placement) {
+        super.onPlace(placement);
         tryConvert(placement.getInstance(), placement.getBlockPosition());
     }
 
@@ -23,18 +25,19 @@ public class ConcretePowderBlockHandler extends GravityBlockHandler {
     }
 
     private void tryConvert(Instance instance, Point blockPosition) {
-        Block above = instance.getBlock(blockPosition.blockX(), blockPosition.blockY() + 1, blockPosition.blockZ());
-        Block west = instance.getBlock(blockPosition.blockX() - 1, blockPosition.blockY(), blockPosition.blockZ());
-        Block east = instance.getBlock(blockPosition.blockX() + 1, blockPosition.blockY(), blockPosition.blockZ());
-        Block north = instance.getBlock(blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ() - 1);
-        Block south = instance.getBlock(blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ() + 1);
+
+        int x = blockPosition.blockX();
+        int y = blockPosition.blockY();
+        int z = blockPosition.blockZ();
 
         // TODO: support block tags
-        if (above.compare(Block.WATER)
-                || west.compare(Block.WATER)
-                || east.compare(Block.WATER)
-                || north.compare(Block.WATER)
-                || south.compare(Block.WATER)
+
+        if (
+                instance.getBlock(x, y + 1, z).compare(Block.WATER) || // above
+                instance.getBlock(x - 1, y, z).compare(Block.WATER) || // west
+                instance.getBlock(x + 1, y, z).compare(Block.WATER) || // east
+                instance.getBlock(x, y, z - 1).compare(Block.WATER) || // north
+                instance.getBlock(x, y, z + 1).compare(Block.WATER)    // south
         ) {
             instance.setBlock(blockPosition, solidifiedBlock);
         }

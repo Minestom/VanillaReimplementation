@@ -4,6 +4,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.data.Data;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.time.TimeUnit;
@@ -46,7 +47,7 @@ public class FireBlockHandler extends VanillaBlockHandler {
             return;
         }
 
-        if(portal.tryFillFrame(instance)) {
+        if (portal.tryFillFrame(instance)) {
             portal.register(instance);
         }
     }

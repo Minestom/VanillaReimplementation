@@ -42,8 +42,9 @@ public class FallingBlockEntity extends Entity {
         }
 
         Block block = instance.getBlock(position);
+        Block belowBlock = instance.getBlock(position.add(0, -1, 0));
 
-        if (!block.isAir()) {
+        if ((!block.isAir() && !block.isLiquid()) || !belowBlock.isSolid()) {
             // TODO: Better way to get block's loot
             Material loot = Material.fromNamespaceId(toPlace.namespace());
 
@@ -51,6 +52,7 @@ public class FallingBlockEntity extends Entity {
             entity.setInstance(instance);
             entity.teleport(position);
             remove();
+            return;
         }
 
         instance.setBlock(position, toPlace);
