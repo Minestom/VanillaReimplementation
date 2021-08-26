@@ -59,23 +59,23 @@ public class VanillaTestGenerator implements ChunkGenerator  {
 
     private void spawnTree(ChunkBatch batch, int trunkX, int trunkBottomY, int trunkZ) {
         for (int i = 0; i < 2; i++) {
-            batch.setBlock(trunkX+1, trunkBottomY+3+i, trunkZ, Block.OAK_LEAVES);
-            batch.setBlock(trunkX-1, trunkBottomY+3+i, trunkZ, Block.OAK_LEAVES);
-            batch.setBlock(trunkX, trunkBottomY+3+i, trunkZ+1, Block.OAK_LEAVES);
-            batch.setBlock(trunkX, trunkBottomY+3+i, trunkZ-1, Block.OAK_LEAVES);
+            batch.setBlock(trunkX+1, trunkBottomY+3+i, trunkZ, Block.GREEN_CONCRETE_POWDER);
+            batch.setBlock(trunkX-1, trunkBottomY+3+i, trunkZ, Block.GREEN_CONCRETE_POWDER);
+            batch.setBlock(trunkX, trunkBottomY+3+i, trunkZ+1, Block.GREEN_CONCRETE_POWDER);
+            batch.setBlock(trunkX, trunkBottomY+3+i, trunkZ-1, Block.GREEN_CONCRETE_POWDER);
 
             for (int x = -1; x <= 1; x++) {
                 for (int z = -1; z <= 1; z++) {
-                    batch.setBlock(trunkX+x, trunkBottomY+2+i, trunkZ-z, Block.OAK_LEAVES);
+                    batch.setBlock(trunkX+x, trunkBottomY+2+i, trunkZ-z, Block.GREEN_CONCRETE_POWDER);
                 }
             }
         }
 
-        batch.setBlock(trunkX, trunkBottomY, trunkZ, Block.OAK_LOG);
-        batch.setBlock(trunkX, trunkBottomY+1, trunkZ, Block.OAK_LOG);
-        batch.setBlock(trunkX, trunkBottomY+2, trunkZ, Block.OAK_LOG);
-        batch.setBlock(trunkX, trunkBottomY+3, trunkZ, Block.OAK_LOG);
-        batch.setBlock(trunkX, trunkBottomY+4, trunkZ, Block.OAK_LEAVES);
+        batch.setBlock(trunkX, trunkBottomY, trunkZ, Block.TNT);
+        batch.setBlock(trunkX, trunkBottomY+1, trunkZ, Block.TNT);
+        batch.setBlock(trunkX, trunkBottomY+2, trunkZ, Block.TNT);
+        batch.setBlock(trunkX, trunkBottomY+3, trunkZ, Block.TNT);
+        batch.setBlock(trunkX, trunkBottomY+4, trunkZ, Block.TNT);
     }
 
     @Override

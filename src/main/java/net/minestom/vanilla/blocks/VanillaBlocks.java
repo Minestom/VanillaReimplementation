@@ -6,10 +6,11 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
-import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
+import sun.misc.Unsafe;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -72,9 +73,9 @@ public enum VanillaBlocks {
     ENDER_CHEST(Block.ENDER_CHEST, EnderChestBlockHandler::new),
     JUKEBOX(Block.JUKEBOX, JukeboxBlockHandler::new);
 
-    private static final Map<Block, BlockHandler> blockHandlerByOldBlocks = new HashMap<>();
+    private static final Map<String, BlockHandler> blockHandlerByNamespace = new HashMap<>();
 
-    private final @NotNull Block oldBlock;
+    private final @NotNull NamespaceID namespace;
     private final @NotNull BlockHandler blockHandler;
 
     /**
@@ -82,7 +83,7 @@ public enum VanillaBlocks {
      * @param blockHandlerSupplier the handler supplier to register
      */
     VanillaBlocks(@NotNull Block block, @NotNull Supplier<BlockHandler> blockHandlerSupplier) {
-        this.oldBlock = block;
+        this.namespace = block.namespace();
         this.blockHandler = blockHandlerSupplier.get();
     }
 
@@ -93,8 +94,29 @@ public enum VanillaBlocks {
      * @param eventHandler the event handler to register events on
      */
     public static void registerAll(EventNode<Event> eventHandler) {
+
         for (VanillaBlocks vanillaBlock : values()) {
-            blockHandlerByOldBlocks.put(vanillaBlock.oldBlock, vanillaBlock.blockHandler);
+            blockHandlerByNamespace.put(vanillaBlock.namespace.asString(), vanillaBlock.blockHandler);
+        }
+
+        // TODO: Update (& remove) once minestom has a general PlaceBlock event
+
+        try {
+            // Temporarily use reflection
+            Class<Block> clazz = Block.class;
+
+            for (Field field : clazz.getFields()) {
+                field.setAccessible(true);
+
+                Block someBlock = (Block) field.get(null);
+                BlockHandler newHandler = blockHandlerByNamespace.get(someBlock.namespace().asString());
+
+                if (newHandler != null) {
+                    setFinalStatic(field, someBlock.withHandler(newHandler));
+                }
+            }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
         }
 
         eventHandler.addListener(
@@ -108,17 +130,27 @@ public enum VanillaBlocks {
     private static void handlePlayerBlockPlaceEvent(PlayerBlockPlaceEvent event) {
         Block oldBlock = event.getBlock();
 
-        BlockHandler handler = blockHandlerByOldBlocks.get(oldBlock);
+        BlockHandler handler = blockHandlerByNamespace.get(oldBlock.namespace().asString());
 
         if (handler == null) {
             return;
         }
 
-        if (oldBlock.handler() == handler) {
-            return;
-        }
-
         event.setBlock(oldBlock.withHandler(handler));
+    }
+
+    private static void setFinalStatic(final Field ourField, Object newValue) {
+        try {
+            final Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
+            unsafeField.setAccessible(true);
+            final Unsafe unsafe = (Unsafe) unsafeField.get(null);
+            final Object staticFieldBase = unsafe.staticFieldBase(ourField);
+            final long staticFieldOffset = unsafe.staticFieldOffset(ourField);
+            unsafe.putObject(staticFieldBase, staticFieldOffset, newValue);
+        } catch (Exception ex) {
+            System.out.println("Fail!");
+            ex.printStackTrace();
+        }
     }
 
 //    public static void dropOnBreak(Instance instance, BlockPosition position) {

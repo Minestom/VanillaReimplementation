@@ -13,6 +13,7 @@ import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.Explosion;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.batch.AbsoluteBlockBatch;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.thread.MinestomThread;
 import net.minestom.server.utils.time.TimeUnit;
@@ -185,6 +186,8 @@ public class VanillaExplosion extends Explosion {
             return;
         }
 
+        AbsoluteBlockBatch batch = new AbsoluteBlockBatch();
+
         for (Point position : blocks) {
             Block block = instance.getBlock(position);
 
@@ -197,11 +200,13 @@ public class VanillaExplosion extends Explosion {
                     Block below = instance.getBlock(belowPos);
 
                     if (below.isSolid()) {
-                        instance.setBlock(position, Block.FIRE);
+                        batch.setBlock(position, Block.FIRE);
                     }
                 }
             }
         }
+
+        batch.apply(instance, null);
     }
 
     private void affect(Entity e, final float damageRadius) {
