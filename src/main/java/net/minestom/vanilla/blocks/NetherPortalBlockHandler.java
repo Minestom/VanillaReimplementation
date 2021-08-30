@@ -1,20 +1,27 @@
 package net.minestom.vanilla.blocks;
 
+import java.util.Map;
 import java.util.Optional;
 
+import com.google.common.collect.ImmutableMap;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.event.Event;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.world.DimensionType;
+import net.minestom.vanilla.blocks.update.info.BlockUpdate;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
+import net.minestom.vanilla.event.entity.EntityEnterNetherPortalEvent;
 import net.minestom.vanilla.event.entity.NetherPortalTeleportEvent;
+import net.minestom.vanilla.event.entity.NetherPortalUpdateEvent;
 import net.minestom.vanilla.system.NetherPortal;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class NetherPortalBlockHandler extends VanillaBlockHandler {
 
@@ -42,7 +49,7 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler {
     /**
      * The portal related to this block
      */
-    public static final Tag<Long> RELATED_PORTAL_KEY = Tag.Long("minestom:releated_portal");
+    public static final Tag<Long> RELATED_PORTAL_KEY = Tag.Long("minestom:related_portal");
 
     public NetherPortalBlockHandler() {
         super(Block.NETHER_PORTAL);
@@ -64,11 +71,10 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler {
         if (lastPortalUpdate < touching.getAliveTicks() - 2) { // if a tick happened with no portal update, that means the entity left the portal at some point
             Block newBlock = block
                     .withTag(LAST_PORTAL_UPDATE_KEY, 0L)
-                    .withTag(LAST_PORTAL_KEY, NetherPortal.NONE.id())
                     .withTag(TICKS_SPENT_IN_PORTAL_KEY, 0L);
 
             instance.setBlock(pos, newBlock);
-            block = newBlock;
+            return;
         }
 
         if (lastPortalUpdate == touching.getAliveTicks()) {
@@ -85,7 +91,7 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler {
         }
 
         if (ticksSpentInPortal >= portalCooldownTime) {
-            attemptTeleport(instance, pos, touching, block, ticksSpentInPortal, portal);
+            attemptTeleport(instance, touching, block, ticksSpentInPortal, portal);
         }
     }
 
@@ -99,17 +105,18 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler {
             ticksSpentInPortal = 0L;
         }
 
-
         NetherPortal portalEntityWasIn = NetherPortal.fromId(newBlock.getTag(LAST_PORTAL_KEY));
 
-        if(portal != portalEntityWasIn) {
+        if (portal != portalEntityWasIn) {
             ticksSpentInPortal = 0L; // reset counter
         }
 
         newBlock = newBlock.withTag(LAST_PORTAL_KEY, portal.id()); // data.set(, portal, NetherPortal.class);
 
         if (ticksSpentInPortal == 0) {
-//            touching.callEvent(EntityEnterNetherPortalEvent.class, new EntityEnterNetherPortalEvent(touching, position, portal));
+            Event event = new  EntityEnterNetherPortalEvent(touching, position, portal);
+
+            MinecraftServer.getGlobalEventHandler().call(event);
         }
 
         ticksSpentInPortal++;
@@ -118,12 +125,15 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler {
 
         instance.setBlock(position, newBlock);
 
-//        touching.callEvent(NetherPortalUpdateEvent.class, new NetherPortalUpdateEvent(touching, position, portal, ticksSpentInPortal));
+        Event event = new NetherPortalUpdateEvent(touching, position, portal, instance, ticksSpentInPortal);
+
+        MinecraftServer.getGlobalEventHandler().call(event);
         return ticksSpentInPortal;
     }
 
-    private void attemptTeleport(Instance instance, Point position, Entity touching, Block block, long ticksSpentInPortal, NetherPortal portal) {
+    private void attemptTeleport(Instance instance, Entity touching, Block block, long ticksSpentInPortal, NetherPortal portal) {
         DimensionType targetDimension = VanillaDimensionTypes.NETHER;
+        Point position = touching.getPosition();
 
         double targetX = position.x() / 8;
         double targetY = position.y();
@@ -155,13 +165,13 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler {
             NetherPortal.Axis axis = portal.getAxis();
             Pos bottomRight = new Pos(
                     targetX - axis.xMultiplier,
-                    -1,
+                    targetY - 1,
                     targetZ - axis.zMultiplier
             );
 
             Pos topLeft = new Pos(
                     targetX + 2 * axis.xMultiplier,
-                    3,
+                    targetY + 3,
                     targetZ + 2 * axis.zMultiplier
             );
 
@@ -169,7 +179,7 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler {
             generatePortal = true;
         }
 
-        calculateTargetPosition(touching, portal, targetPortal);
+        targetPosition = calculateTargetPosition(touching, portal, targetPortal);
 
         NetherPortalTeleportEvent event = new NetherPortalTeleportEvent(touching, position, portal, ticksSpentInPortal, targetInstance, targetPosition, targetPortal, generatePortal);
         MinecraftServer.getGlobalEventHandler().call(event);
@@ -177,16 +187,16 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler {
         if (!event.isCancelled()) {
             Block newBlock = block
                     .withTag(LAST_PORTAL_UPDATE_KEY, 0L)
-                    .withTag(LAST_PORTAL_KEY, NetherPortal.NONE.id())
+                    .withTag(LAST_PORTAL_KEY, portal.id())
                     .withTag(TICKS_SPENT_IN_PORTAL_KEY, 0L);
             instance.setBlock(position, newBlock);
             teleport(instance, touching, event);
         }
     }
 
-    private NetherPortal getCorrespondingNetherPortal(Instance targetInstance, Point targetPosition) {
-        // TODO: get Corresponding Nether portal
-        return null;
+    private @Nullable NetherPortal getCorrespondingNetherPortal(Instance targetInstance, Point targetPosition) {
+        Block block = targetInstance.getBlock(targetPosition);
+        return NetherPortal.fromId(block.getTag(RELATED_PORTAL_KEY));
     }
 
     private Pos calculateTargetPosition(Entity touching, NetherPortal portal, NetherPortal targetPortal) {
@@ -264,15 +274,6 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler {
         });
     }
 
-//    @Override
-//    public Data createData(Instance instance, BlockPosition blockPosition, Data data) {
-//        if (data instanceof NetherPortalBlockEntity &&
-//            ((BlockEntity) data).getPosition().equals(blockPosition)) {
-//            return data;
-//        }
-//        return new NetherPortalBlockEntity(blockPosition);
-//    }
-
     @Override
     public void onDestroy(Destroy destroy) {
         Block block = destroy.getBlock();
@@ -291,8 +292,14 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler {
 
 //    @Override
 //    public void updateFromNeighbor(Instance instance, Point thisPosition, Point neighborPosition, boolean directNeighbor) {
-//        breakPortalIfNoLongerValid(instance, thisPosition);
+//
 //    }
+
+    @Override
+    public void onBlockUpdate(BlockUpdate blockUpdate) {
+        breakPortalIfNoLongerValid(blockUpdate.instance(), blockUpdate.blockPosition());
+    }
+
 
     private void breakPortalIfNoLongerValid(Instance instance, Point blockPosition) {
         NetherPortal netherPortal = getPortal(instance.getBlock(blockPosition));
@@ -312,8 +319,12 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler {
         instance.setBlock(blockPosition, block.withTag(RELATED_PORTAL_KEY, portal.id()));
     }
 
-//    @Override
-//    protected BlockPropertyList createPropertyValues() {
-//        return new BlockPropertyList().property("axis", "x", "z");
-//    }
+    @Override
+    public Map<Tag<?>, ?> defaultTagValues() {
+        return ImmutableMap.of(
+                TICKS_SPENT_IN_PORTAL_KEY, 0L,
+                LAST_PORTAL_UPDATE_KEY, Long.MAX_VALUE,
+                PORTAL_COOLDOWN_TIME_KEY, 0L
+        );
+    }
 }

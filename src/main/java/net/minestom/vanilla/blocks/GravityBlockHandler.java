@@ -35,7 +35,7 @@ public class GravityBlockHandler extends VanillaBlockHandler {
     }
 
     @Override
-    public void updateBlock(BlockUpdate blockUpdate) {
+    public void onBlockUpdate(BlockUpdate blockUpdate) {
         Instance instance = blockUpdate.instance();
         Point position = blockUpdate.blockPosition();
         instance.scheduleNextTick((instance1 -> checkFall(instance1, position)));

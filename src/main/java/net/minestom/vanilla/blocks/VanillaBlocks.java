@@ -6,6 +6,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
@@ -88,6 +89,13 @@ public enum VanillaBlocks {
     }
 
     /**
+     * @return the vanilla block handler of this block
+     */
+    public @NotNull BlockHandler getBlockHandler() {
+        return blockHandler;
+    }
+
+    /**
      * Register all vanilla commands into the given blockManager. ConnectionManager will handle replacing the basic
      * block with its custom variant.
      *
@@ -110,9 +118,18 @@ public enum VanillaBlocks {
 
                 Block someBlock = (Block) field.get(null);
                 BlockHandler newHandler = blockHandlerByNamespace.get(someBlock.namespace().asString());
+                someBlock = someBlock.withHandler(newHandler);
 
+                // Apply default tag values if applicable
+                if (newHandler instanceof VanillaBlockHandler) {
+                    for (Map.Entry<Tag<?>, ?> entry : ((VanillaBlockHandler) newHandler).defaultTagValues().entrySet()) {
+                        someBlock = someBlock.withTag((Tag) entry.getKey(), entry.getValue());
+                    }
+                }
+
+                // Finally replace default block handler
                 if (newHandler != null) {
-                    setFinalStatic(field, someBlock.withHandler(newHandler));
+                    setFinalStatic(field, someBlock);
                 }
             }
         } catch (IllegalAccessException e) {

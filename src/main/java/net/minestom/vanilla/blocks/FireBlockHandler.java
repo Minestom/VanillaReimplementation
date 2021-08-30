@@ -1,5 +1,7 @@
 package net.minestom.vanilla.blocks;
 
+import net.kyori.adventure.text.Component;
+import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.data.Data;
 import net.minestom.server.entity.Entity;

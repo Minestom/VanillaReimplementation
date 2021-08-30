@@ -1,14 +1,11 @@
 package net.minestom.vanilla.blocks.update;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceTickEvent;
-import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
@@ -130,7 +127,7 @@ public class BlockUpdateManager {
                                     info
                             );
 
-                            ((VanillaBlockHandler) handler).updateBlock(blockUpdate);
+                            ((VanillaBlockHandler) handler).onBlockUpdate(blockUpdate);
                         }
                     }
         }

@@ -5,6 +5,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.Consumer;
 
 import com.google.common.primitives.Longs;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -42,9 +43,9 @@ public final class NetherPortal {
      * Only NORTH and WEST are valid
      */
     private final Axis axis;
-    private Point frameTopLeftCorner;
-    private Point frameBottomRightCorner;
-    private Vec averagePosition;
+    private final Point frameTopLeftCorner;
+    private final Point frameBottomRightCorner;
+    private final Vec averagePosition;
     private final long id;
 
     /**
@@ -99,9 +100,10 @@ public final class NetherPortal {
     }
 
     public void breakFrame(Instance instance) {
-        replaceFrameContents(instance, true, pos -> {
-            instance.setBlock(pos, Block.AIR);
+        Set<Point> blockPositions = new HashSet<>();
+        replaceFrameContents(instance, true, Block.AIR, blockPositions);
 
+        for (Point pos : blockPositions) {
             // play break animation for each portal block
             int x = pos.blockX();
             int y = pos.blockY();
@@ -124,7 +126,7 @@ public final class NetherPortal {
                 chunk.sendPacketToViewers(particlePacket);
                 chunk.sendPacketToViewers(effectPacket);
             }
-        });
+        }
     }
 
     public boolean tryFillFrame(Instance instance) {
@@ -132,27 +134,28 @@ public final class NetherPortal {
             return false;
         }
 
-        return replaceFrameContents(instance, true, pos -> {
-            Block block = Block.NETHER_PORTAL.withTag(NetherPortalBlockHandler.RELATED_PORTAL_KEY, this.id());
-            instance.setBlock(pos, block);
-        });
+        // Block to use
+        Block block = Block.NETHER_PORTAL.withTag(NetherPortalBlockHandler.RELATED_PORTAL_KEY, this.id());
+
+        return replaceFrameContents(instance, true, block, null);
     }
 
     /**
      *
-     * @param instance
+     * @param instance the instance to build the frame
      * @param checkPreviousBlocks should check if frame is full of air/portal/fire
-     * @param blockPlacer
+     * @param block the block to place
+     * @param blockPositions the set to fill with block positions
      * @return
      */
-    private boolean replaceFrameContents(Instance instance, boolean checkPreviousBlocks, Consumer<Point> blockPlacer) {
+    private boolean replaceFrameContents(Instance instance, boolean checkPreviousBlocks, Block block, @Nullable Set<Point> blockPositions) {
         int minX = Math.min(frameTopLeftCorner.blockX(), frameBottomRightCorner.blockX());
-        int minY = frameBottomRightCorner.blockY();
-        int minZ = Math.min(frameTopLeftCorner.blockY(), frameBottomRightCorner.blockY());
+        int minY = Math.min(frameBottomRightCorner.blockY(), frameTopLeftCorner.blockY());
+        int minZ = Math.min(frameTopLeftCorner.blockZ(), frameBottomRightCorner.blockZ());
 
         int maxX = Math.max(frameTopLeftCorner.blockX(), frameBottomRightCorner.blockX());
-        int maxY = frameTopLeftCorner.blockY();
-        int maxZ = Math.max(frameTopLeftCorner.blockY(), frameBottomRightCorner.blockY());
+        int maxY = Math.max(frameBottomRightCorner.blockY(), frameTopLeftCorner.blockY());
+        int maxZ = Math.max(frameTopLeftCorner.blockZ(), frameBottomRightCorner.blockZ());
 
         int width = computeWidth() - 1; // encompasses frame blocks
 
@@ -162,19 +165,20 @@ public final class NetherPortal {
             }
         }
 
-        // fill nether portal
-        for (int i = 1; i <= width - 1; i++) {
-            for(int y = minY + 1; y <= maxY - 1; y++) {
-                int x = minX;
-                int z = minZ;
+        // Fill portal
+        int xMul = axis.xMultiplier;
+        int zMul = axis.zMultiplier;
 
-                if (axis == Axis.X) {
-                    x += i;
-                } else {
-                    z += i;
+        for (int d = 1; d < width; d++) {
+            for (int y = minY + 1; y <= maxY - 1; y++) {
+                int x = minX + (d * xMul);
+                int z = minZ + (d * zMul);
+
+                instance.setBlock(x, y, z, block);
+
+                if (blockPositions != null) {
+                    blockPositions.add(new Pos(x, y, z));
                 }
-
-                blockPlacer.accept(new Pos(x, y, z));
             }
         }
         return true;
@@ -379,15 +383,15 @@ public final class NetherPortal {
             for (int y = minY + 1; y <= maxY - 1; y++) {
                 int x = minX;
                 int z = minZ;
-                if(axis == Axis.X) {
+                if (axis == Axis.X) {
                     x += i;
                 } else {
                     z += i;
                 }
                 Block currentBlock = instance.getBlock(x, y, z);
                 if (!currentBlock.isAir() &&
-                        currentBlock != Block.FIRE &&
-                        currentBlock != Block.NETHER_PORTAL
+                        (!currentBlock.compare(Block.FIRE)) &&
+                        (!currentBlock.compare(Block.NETHER_PORTAL))
                 ) {
                     return false;
                 }
@@ -430,10 +434,9 @@ public final class NetherPortal {
 
         createFrame(instance);
 
-        replaceFrameContents(instance, false, pos -> {
-            Block block = Block.NETHER_PORTAL.withTag(NetherPortalBlockHandler.RELATED_PORTAL_KEY, this.id());
-            instance.setBlock(pos, block);
-        });
+        Block block = Block.NETHER_PORTAL.withTag(NetherPortalBlockHandler.RELATED_PORTAL_KEY, this.id());
+
+        replaceFrameContents(instance, false, block, null);
 
         register(instance);
         generating = false;

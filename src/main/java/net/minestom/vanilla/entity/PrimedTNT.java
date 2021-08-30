@@ -29,7 +29,7 @@ public class PrimedTNT extends Entity {
 
         Block block = instance.getBlock(this.getPosition());
 
-        VanillaExplosion explosion = VanillaExplosion.builder(getPosition(), 3.0f)
+        VanillaExplosion explosion = VanillaExplosion.builder(getPosition(), 4.0f)
                 .destroyBlocks(!block.isLiquid())
                 .build();
 
