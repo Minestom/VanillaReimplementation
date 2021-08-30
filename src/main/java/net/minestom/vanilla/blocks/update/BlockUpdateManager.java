@@ -47,7 +47,7 @@ public class BlockUpdateManager {
         BlockUpdateManager.of(instance).tick(time);
     }
 
-    public BlockUpdateManager(@NotNull Instance instance) {
+    private BlockUpdateManager(@NotNull Instance instance) {
         this.instance = instance;
         long id = nextID++;
         instance.setTag(ID, id);
@@ -58,7 +58,7 @@ public class BlockUpdateManager {
         Long id = instance.getTag(ID);
 
         if (id == null) {
-            throw new IllegalArgumentException("Argument 'instance' passed to BlockUpdateManager#of did not have an associated block update manager.");
+            return new BlockUpdateManager(instance);
         }
 
         return blockUpdateManagerById.get(id);

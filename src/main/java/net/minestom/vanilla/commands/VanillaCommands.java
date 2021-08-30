@@ -10,6 +10,7 @@ import java.util.function.Supplier;
  */
 public enum VanillaCommands {
 
+    FORCELOAD(ForceloadCommand::new),
     GAMEMODE(GamemodeCommand::new),
     DIFFICULTY(DifficultyCommand::new),
     ME(MeCommand::new),

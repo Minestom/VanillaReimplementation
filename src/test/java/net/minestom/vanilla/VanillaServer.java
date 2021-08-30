@@ -7,10 +7,12 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.network.ConnectionManager;
+import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.blocks.update.BlockUpdateManager;
 import net.minestom.vanilla.commands.VanillaCommands;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
+import net.minestom.vanilla.instance.tickets.TicketManager;
 import net.minestom.vanilla.items.ItemManager;
 import net.minestom.vanilla.system.RayFastManager;
 import net.minestom.vanilla.system.ServerProperties;
@@ -23,6 +25,8 @@ import java.io.IOException;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.LinkedList;
+import java.util.Random;
 
 class VanillaServer {
 
@@ -56,23 +60,29 @@ class VanillaServer {
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
         CommandManager commandManager = MinecraftServer.getCommandManager();
 
-        // Register dimension types
-        VanillaDimensionTypes.registerAll(MinecraftServer.getDimensionTypeManager());
+        // Register systems
+        {
+            // dimension types
+            VanillaDimensionTypes.registerAll(MinecraftServer.getDimensionTypeManager());
 
-        // Register block update managers
-        BlockUpdateManager.init(eventHandler);
+            // block update managers
+            BlockUpdateManager.init(eventHandler);
 
-        // Register Vanilla Events
-        VanillaEvents.register(serverProperties, eventHandler);
+            // Events
+            VanillaEvents.register(serverProperties, eventHandler);
 
-        // Register commands
-        VanillaCommands.registerAll(commandManager);
+            // commands
+            VanillaCommands.registerAll(commandManager);
 
-        // Register item events
-        itemManager.registerEvents(eventHandler);
+            // item events
+            itemManager.registerEvents(eventHandler);
 
-        VanillaBlocks.registerAll(eventHandler);
+            // blocks
+            VanillaBlocks.registerAll(eventHandler);
 
+            // chunk tickets
+            TicketManager.init(eventHandler);
+        }
 //        CommandManager commandManager = MinecraftServer.getCommandManager();
 //        VanillaWorldgen.prepareFiles();
 //        VanillaWorldgen.registerAllBiomes(MinecraftServer.getBiomeManager());

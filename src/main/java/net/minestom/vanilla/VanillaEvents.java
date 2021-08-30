@@ -1,6 +1,7 @@
 package net.minestom.vanilla;
 
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.command.builder.Command;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -23,6 +24,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.storage.StorageManager;
+import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.blocks.NetherPortalBlockHandler;
@@ -31,6 +33,7 @@ import net.minestom.vanilla.blocks.update.info.BlockUpdateInfo;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.generation.VanillaTestGenerator;
 import net.minestom.vanilla.instance.VanillaExplosion;
+import net.minestom.vanilla.instance.tickets.TicketManager;
 import net.minestom.vanilla.system.ServerProperties;
 
 import java.lang.reflect.Method;
@@ -64,21 +67,21 @@ public class VanillaEvents {
         overworld.enableAutoChunkLoad(true);
         overworld.setChunkGenerator(noiseTestGenerator);
         overworld.setExplosionSupplier(explosionGenerator);
-        new BlockUpdateManager(overworld);
+        BlockUpdateManager.of(overworld);
 //        overworld.setChunkLoader(new AnvilChunkLoader(storageManager.getLocation(worldName + "/region")));
 
         nether = MinecraftServer.getInstanceManager().createInstanceContainer(VanillaDimensionTypes.NETHER);
         nether.enableAutoChunkLoad(true);
         nether.setChunkGenerator(noiseTestGenerator);
         nether.setExplosionSupplier(explosionGenerator);
-        new BlockUpdateManager(nether);
+        BlockUpdateManager.of(nether);
 //        nether.setChunkLoader(new AnvilChunkLoader(storageManager.getLocation(worldName + "/DIM-1/region")));
 
         end = MinecraftServer.getInstanceManager().createInstanceContainer(VanillaDimensionTypes.END);
         end.enableAutoChunkLoad(true);
         end.setChunkGenerator(noiseTestGenerator);
         end.setExplosionSupplier(explosionGenerator);
-        new BlockUpdateManager(end);
+        BlockUpdateManager.of(end);
 //        end.setChunkLoader(new AnvilChunkLoader(storageManager.getLocation(worldName + "/DIM1/region")));
 
         // Load some chunks beforehand
