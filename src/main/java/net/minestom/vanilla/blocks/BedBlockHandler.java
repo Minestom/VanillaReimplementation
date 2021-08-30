@@ -1,15 +1,21 @@
 package net.minestom.vanilla.blocks;
 
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.data.Data;
 import net.minestom.server.data.DataImpl;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.metadata.LivingEntityMeta;
+import net.minestom.server.entity.metadata.PlayerMeta;
 import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
+import net.minestom.server.instance.Explosion;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.MathUtils;
+import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.vanilla.instance.VanillaExplosion;
 import net.minestom.vanilla.inventory.InventoryManipulation;
 import org.jetbrains.annotations.NotNull;
@@ -29,11 +35,10 @@ public class BedBlockHandler extends VanillaBlockHandler {
 //    }
 
     public void onPlace(@NotNull Placement placement) {
-        if (!(placement instanceof PlayerPlacement)) {
+        if (!(placement instanceof PlayerPlacement playerPlacement)) {
             return;
         }
 
-        PlayerPlacement playerPlacement = (PlayerPlacement) placement;
         Instance instance = placement.getInstance();
         Point pos = placement.getBlockPosition();
         Player player = playerPlacement.getPlayer();
@@ -70,26 +75,42 @@ public class BedBlockHandler extends VanillaBlockHandler {
     public boolean onInteract(@NotNull Interaction interaction) {
         Instance instance = interaction.getInstance();
         Point pos = interaction.getBlockPosition();
+        Player player = interaction.getPlayer();
 
         if (instance.getDimensionType().isBedSafe()) {
             // TODO: make player sleep
             // TODO: checks for mobs
             // TODO: check for day
-            //if(instance.getDayTime() > 12541L && instance.getDayTime() < 23458L) {
 
-            //}
+            // If time is not day
+//            long dayTime = instance.getTime() % 24000L;
+//            if (!(dayTime > 12541L && dayTime < 23458L)) {
+//                return true;
+//            }
+
+            // Make player sleep
+            PlayerMeta meta = player.getEntityMeta();
+            meta.setBedInWhichSleepingPosition(pos);
+            meta.setPose(Entity.Pose.SLEEPING);
+
+            // Schedule player getting out of bed
+            MinecraftServer.getSchedulerManager().buildTask(() -> {
+                    if (!player.getPlayerConnection().isOnline()) {
+                        return;
+                    }
+
+                    meta.setBedInWhichSleepingPosition(null);
+                    meta.setPose(Entity.Pose.STANDING);
+                })
+                .delay(101, TimeUnit.SERVER_TICK)
+                .schedule();
             return true;
         }
 
-        Data args = new DataImpl();
-        args.set(VanillaExplosion.IS_FLAMING_KEY, true, Boolean.TYPE);
-        instance.explode(
-                (float) pos.x() + 0.5f,
-                (float) pos.y() + 0.5f,
-                (float) pos.z() + 0.5f,
-                5f,
-                args
-        );
+        VanillaExplosion.builder(pos.add(0.5), 5)
+                .isFlaming(true)
+                .build()
+                .apply(instance);
         return true;
     }
 

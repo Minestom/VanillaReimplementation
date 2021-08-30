@@ -158,6 +158,7 @@ public class VanillaEvents {
                         .handler(event -> {
                             Player player = event.getPlayer();
 
+                            player.setPermissionLevel(4);
                             player.setGameMode(GameMode.CREATIVE);
 
                             int y = 0;

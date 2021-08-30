@@ -92,7 +92,6 @@ public class BlockUpdateManager {
         updateNeighbors(time);
     }
 
-    // TODO: Clean up this method?
     private void updateNeighbors(long time) {
         if (updateNeighbors.size() == 0) {
             return;
@@ -107,27 +106,33 @@ public class BlockUpdateManager {
             int y = pos.blockY();
             int z = pos.blockZ();
 
+            // For each surrounding block
             for (int offsetX = -1; offsetX < 2; offsetX++)
-            for (int offsetY = -1; offsetY < 2; offsetY++)
-            for (int offsetZ = -1; offsetZ < 2; offsetZ++) {
+                for (int offsetY = -1; offsetY < 2; offsetY++)
+                    for (int offsetZ = -1; offsetZ < 2; offsetZ++) {
 
-                if (!(offsetX == 0 && offsetY == 0 && offsetZ == 0)) {
-                    Point blockPos = new Pos(x + offsetX, y + offsetY, z + offsetZ);
-                    Block block = instance.getBlock(blockPos);
-                    BlockHandler handler = block.handler();
+                        // If block is not the original block
+                        if (offsetX == 0 && offsetY == 0 && offsetZ == 0) {
+                            continue;
+                        }
 
-                    if (handler instanceof VanillaBlockHandler) {
-                        BlockUpdate blockUpdate = new BlockUpdate(
-                                instance,
-                                blockPos,
-                                block,
-                                info
-                        );
+                        // Get the block handler at the position
+                        Point blockPos = new Pos(x + offsetX, y + offsetY, z + offsetZ);
+                        Block block = instance.getBlock(blockPos);
+                        BlockHandler handler = block.handler();
 
-                        ((VanillaBlockHandler) handler).updateBlock(blockUpdate);
+                        // Update block handler if applicable
+                        if (handler instanceof VanillaBlockHandler) {
+                            BlockUpdate blockUpdate = new BlockUpdate(
+                                    instance,
+                                    blockPos,
+                                    block,
+                                    info
+                            );
+
+                            ((VanillaBlockHandler) handler).updateBlock(blockUpdate);
+                        }
                     }
-                }
-            }
         }
 
         updateNeighbors.clear();

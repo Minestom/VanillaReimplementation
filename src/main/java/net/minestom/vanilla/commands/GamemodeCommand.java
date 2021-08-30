@@ -92,8 +92,7 @@ public class GamemodeCommand extends Command {
             if (sender.isPlayer()) sender.sendMessage(Component.translatable("argument.entity.notfound.player", NamedTextColor.RED), MessageType.SYSTEM);
             else sender.sendMessage(Component.text("No player was found", NamedTextColor.RED), MessageType.SYSTEM);
         } else for (Entity entity : entities) {
-            if (entity instanceof Player) {
-                Player p = (Player) entity;
+            if (entity instanceof Player p) {
                 if (p == sender) {
                     //If the player is the same as the sender, call
                     //executeSelf to display one message instead of two
