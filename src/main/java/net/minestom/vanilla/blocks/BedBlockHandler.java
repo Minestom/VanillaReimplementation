@@ -2,14 +2,9 @@ package net.minestom.vanilla.blocks;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.data.Data;
-import net.minestom.server.data.DataImpl;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
-import net.minestom.server.entity.metadata.LivingEntityMeta;
 import net.minestom.server.entity.metadata.PlayerMeta;
-import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
-import net.minestom.server.instance.Explosion;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
@@ -17,13 +12,13 @@ import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.MathUtils;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.vanilla.instance.VanillaExplosion;
-import net.minestom.vanilla.inventory.InventoryManipulation;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * TODO:
  * This block handler needs to be able to override block placements in the onPlace method to work correctly.
  */
+@SuppressWarnings("UnstableApiUsage")
 public class BedBlockHandler extends VanillaBlockHandler {
     public BedBlockHandler(Block bedBlock) {
         super(bedBlock);

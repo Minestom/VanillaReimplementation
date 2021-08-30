@@ -27,6 +27,7 @@ import java.util.Set;
  * 		BE_EE_OP_Level: 0
  * 		MP_Only: false
  */
+@SuppressWarnings("UnstableApiUsage")
 public class ForceloadCommand extends Command {
 
     private final Map<Instance, Set<Long>> forceLoadedChunks = new HashMap<>();

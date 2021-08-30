@@ -1,6 +1,5 @@
 package net.minestom.vanilla.dimensions;
 
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import net.minestom.server.world.DimensionTypeManager;
@@ -9,7 +8,7 @@ import java.util.List;
 
 public class VanillaDimensionTypes {
 
-    public static DimensionType OVERWORLD = DimensionType.builder(NamespaceID.from("minecraft:overworld"))
+    public static final DimensionType OVERWORLD = DimensionType.builder(NamespaceID.from("minecraft:overworld"))
             .ultrawarm(false)
             .natural(true)
             .piglinSafe(false)
@@ -24,7 +23,7 @@ public class VanillaDimensionTypes {
             .infiniburn(NamespaceID.from("minecraft:infiniburn_overworld"))
             .build();
 
-    public static DimensionType NETHER = DimensionType.builder(NamespaceID.from("minecraft:the_nether"))
+    public static final DimensionType NETHER = DimensionType.builder(NamespaceID.from("minecraft:the_nether"))
             .ultrawarm(true)
             .respawnAnchorSafe(true)
             .piglinSafe(true)
@@ -33,7 +32,7 @@ public class VanillaDimensionTypes {
             .raidCapable(false)
             .skylightEnabled(false)
             .ceilingEnabled(true)
-            .fixedTime(18000l)
+            .fixedTime(18000L)
             .ambientLight(0.1f)
             .logicalHeight(256)
             .coordinateScale(8)
@@ -41,7 +40,7 @@ public class VanillaDimensionTypes {
             .infiniburn(NamespaceID.from("minecraft:infiniburn_nether"))
             .build();
 
-    public static DimensionType END = DimensionType.builder(NamespaceID.from("minecraft:the_end"))
+    public static final DimensionType END = DimensionType.builder(NamespaceID.from("minecraft:the_end"))
             .ultrawarm(false)
             .respawnAnchorSafe(false)
             .piglinSafe(false)
@@ -50,7 +49,7 @@ public class VanillaDimensionTypes {
             .raidCapable(true)
             .skylightEnabled(false)
             .ceilingEnabled(false)
-            .fixedTime(6000l)
+            .fixedTime(6000L)
             .ambientLight(0.0f)
             .logicalHeight(256)
             .coordinateScale(1)

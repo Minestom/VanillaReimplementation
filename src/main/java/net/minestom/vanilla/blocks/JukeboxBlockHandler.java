@@ -12,8 +12,6 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.PacketUtils;
-import net.minestom.server.utils.TickUtils;
 import net.minestom.vanilla.inventory.InventoryManipulation;
 import net.minestom.vanilla.inventory.ItemStackUtils;
 import org.jetbrains.annotations.NotNull;
@@ -147,7 +145,6 @@ public class JukeboxBlockHandler extends VanillaBlockHandler {
 
     /**
      * Stops playback in an instance
-     * @param instance
      */
     private void stopPlayback(Instance instance, Point pos, Block block) {
         ItemEntity discEntity = new ItemEntity(getDisc(block));

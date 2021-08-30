@@ -5,9 +5,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.entity.metadata.other.FallingBlockMeta;
-import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 

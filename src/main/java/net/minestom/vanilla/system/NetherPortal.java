@@ -2,14 +2,11 @@ package net.minestom.vanilla.system;
 
 import java.util.*;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.function.Consumer;
 
 import com.google.common.primitives.Longs;
-import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.data.DataManager;
 import net.minestom.server.effects.Effects;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
@@ -29,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @author jglrxavpok
  */
+@SuppressWarnings("UnstableApiUsage")
 public final class NetherPortal {
 
     private static final int MINIMUM_WIDTH = 2;
@@ -88,8 +86,7 @@ public final class NetherPortal {
 
     /**
      * Position of the center of the frame
-     * Used to compute closest portal when linking portals
-     * @return
+     * Used to compute the closest portal when linking portals
      */
     public Vec getCenter() {
         return averagePosition;
@@ -112,9 +109,7 @@ public final class NetherPortal {
             ParticlePacket particlePacket = ParticleCreator.createParticlePacket(Particle.BLOCK, false,
                     x + 0.5f, y, z + 0.5f,
                     0.4f, 0.5f, 0.4f,
-                    0.3f, 10, writer -> {
-                        writer.writeVarInt(Block.NETHER_PORTAL.id());
-                    });
+                    0.3f, 10, writer -> writer.writeVarInt(Block.NETHER_PORTAL.id()));
 
             EffectPacket effectPacket = new EffectPacket();
             effectPacket.effectId = Effects.BLOCK_BREAK.getId();
@@ -146,7 +141,6 @@ public final class NetherPortal {
      * @param checkPreviousBlocks should check if frame is full of air/portal/fire
      * @param block the block to place
      * @param blockPositions the set to fill with block positions
-     * @return
      */
     private boolean replaceFrameContents(Instance instance, boolean checkPreviousBlocks, Block block, @Nullable Set<Point> blockPositions) {
         int minX = Math.min(frameTopLeftCorner.blockX(), frameBottomRightCorner.blockX());
@@ -235,7 +229,7 @@ public final class NetherPortal {
             Point above = position.add(0, +1, 0);
             Point below = position.add(0, -1, 0);
             Point left = position.add(-1 * axis.xMultiplier, 0, -1 * axis.zMultiplier);
-            Point right = position.add(1 * axis.xMultiplier, 0, 1 * axis.zMultiplier);
+            Point right = position.add(axis.xMultiplier, 0, axis.zMultiplier);
 
             if(!considered.contains(above) && !neighbors.contains(above)) {
                 neighbors.add(above);
@@ -294,14 +288,14 @@ public final class NetherPortal {
         Pos bottomRight = null;
         Pos topLeft = null;
         switch (axis) {
-            case X:
+            case X -> {
                 bottomRight = new Pos(maxX + 1, minY - 1, minZ);
                 topLeft = new Pos(minX - 1, maxY + 1, minZ);
-                break;
-            case Z:
+            }
+            case Z -> {
                 bottomRight = new Pos(minX, minY - 1, maxZ + 1);
                 topLeft = new Pos(minX, maxY + 1, minZ - 1);
-                break;
+            }
         }
 
         // TODO: check that frame is obsidian
@@ -444,8 +438,6 @@ public final class NetherPortal {
 
     /**
      * Ensure chunks around the portal corner are loaded (3x3 area centered on chunk containing frame corner)
-     * @param instance
-     * @param corner
      */
     private void loadAround(Instance instance, Point corner) {
         int chunkX = corner.blockX() >> 4;

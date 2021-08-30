@@ -6,10 +6,8 @@ import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.blocks.update.info.BlockUpdate;
-import net.minestom.vanilla.blocks.update.info.BlockUpdateInfo;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Map;
 
 /**

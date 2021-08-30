@@ -2,17 +2,13 @@ package net.minestom.vanilla.blocks;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.data.Data;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.vanilla.blocks.update.BlockUpdateManager;
 import net.minestom.vanilla.blocks.update.info.BlockUpdate;
 import net.minestom.vanilla.blocks.update.info.BlockUpdateInfo;
 import net.minestom.vanilla.entity.FallingBlockEntity;
 import org.jetbrains.annotations.NotNull;
-
-import java.time.Duration;
 
 public class GravityBlockHandler extends VanillaBlockHandler {
     public GravityBlockHandler(Block baseBlock) {

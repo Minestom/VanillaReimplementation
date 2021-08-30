@@ -7,6 +7,7 @@ import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.event.trait.EntityEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.vanilla.system.NetherPortal;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Triggered when a nether portal attempts to teleport entities between dimensions
@@ -45,15 +46,13 @@ public class NetherPortalTeleportEvent implements Event, CancellableEvent, Entit
 
     /**
      * Teleporting entity
-     * @return
      */
-    public Entity getEntity() {
+    public @NotNull Entity getEntity() {
         return entity;
     }
 
     /**
      * Position of the portal block which triggered the teleportation
-     * @return
      */
     public Point getPortalBlockPosition() {
         return portalBlockPosition;
@@ -62,7 +61,6 @@ public class NetherPortalTeleportEvent implements Event, CancellableEvent, Entit
     /**
      * CAN BE NULL. The Nether portal trying to teleport an entity. Can be null if the portal block is not part of a nether portal frame
      * (for instance, placed with /setblock)
-     * @return
      */
     public NetherPortal getPortal() {
         return portal;
@@ -70,7 +68,6 @@ public class NetherPortalTeleportEvent implements Event, CancellableEvent, Entit
 
     /**
      * Number of ticks the entity spent in portal before this event
-     * @return
      */
     public long getTicksSpentInPortal() {
         return ticksSpentInPortal;
@@ -78,7 +75,6 @@ public class NetherPortalTeleportEvent implements Event, CancellableEvent, Entit
 
     /**
      * Instance to teleport the entity to
-     * @return
      */
     public Instance getTargetInstance() {
         return targetInstance;
@@ -93,7 +89,6 @@ public class NetherPortalTeleportEvent implements Event, CancellableEvent, Entit
 
     /**
      * Position to teleport the entity to. Set to the center of the linked portal, if available
-     * @return
      */
     public Point getTargetPosition() {
         return targetPosition;
@@ -101,7 +96,6 @@ public class NetherPortalTeleportEvent implements Event, CancellableEvent, Entit
 
     /**
      * Position to teleport the entity to. Set by default to the center of the linked portal, if available
-     * @param targetPosition
      */
     public void setTargetPosition(Point targetPosition) {
         this.targetPosition = targetPosition;
@@ -109,7 +103,6 @@ public class NetherPortalTeleportEvent implements Event, CancellableEvent, Entit
 
     /**
      * The linked Nether Portal to teleport to, if any
-     * @return
      */
     public NetherPortal getTargetPortal() {
         return targetPortal;
@@ -117,7 +110,6 @@ public class NetherPortalTeleportEvent implements Event, CancellableEvent, Entit
 
     /**
      * Set the portal to teleport to. Warning: the position to teleport the entity to is defined by {@link #getTargetPosition()}
-     * @param targetPortal
      */
     public void setTargetPortal(NetherPortal targetPortal) {
         this.targetPortal = targetPortal;
@@ -125,7 +117,6 @@ public class NetherPortalTeleportEvent implements Event, CancellableEvent, Entit
 
     /**
      * Should the teleportation create a new portal on the other side?
-     * @return
      */
     public boolean createsNewPortal() {
         return createsNewPortal;
@@ -133,7 +124,6 @@ public class NetherPortalTeleportEvent implements Event, CancellableEvent, Entit
 
     /**
      * @see #createsNewPortal
-     * @param createNewPortal
      */
     public void createsNewPortal(boolean createNewPortal) {
         this.createsNewPortal = createNewPortal;

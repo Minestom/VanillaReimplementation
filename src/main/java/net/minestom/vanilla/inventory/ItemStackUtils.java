@@ -10,8 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
-import java.util.Objects;
-
 public class ItemStackUtils {
     public static @Nullable ItemStack fromNBTCompound(@NotNull NBTCompound tag) {
         String id = tag.getString("id");

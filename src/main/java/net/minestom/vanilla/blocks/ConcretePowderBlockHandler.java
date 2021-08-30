@@ -3,6 +3,7 @@ package net.minestom.vanilla.blocks;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import org.jetbrains.annotations.NotNull;
 
 // TODO: When placing concrete powder in water, it turns to the solid block correctly, however it falls like a regular concrete powder block
 public class ConcretePowderBlockHandler extends GravityBlockHandler {
@@ -14,7 +15,7 @@ public class ConcretePowderBlockHandler extends GravityBlockHandler {
     }
 
     @Override
-    public void onPlace(Placement placement) {
+    public void onPlace(@NotNull Placement placement) {
         super.onPlace(placement);
         tryConvert(placement.getInstance(), placement.getBlockPosition());
     }

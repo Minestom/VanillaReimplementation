@@ -1,7 +1,6 @@
 package net.minestom.vanilla.blocks.update.info;
 
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.instance.block.Block;
 
 public interface BlockUpdateInfo {
 

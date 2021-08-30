@@ -22,9 +22,9 @@ import java.util.*;
  */
 public class BlockUpdateManager {
     // IDs
-    public static Tag<Long> ID = Tag.Long("minestom:blockupdatemanager_id");
+    public static final Tag<Long> ID = Tag.Long("minestom:blockupdatemanager_id");
     private static long nextID = 0;
-    private static Map<Long, BlockUpdateManager> blockUpdateManagerById = new HashMap<>();
+    private static final Map<Long, BlockUpdateManager> blockUpdateManagerById = new HashMap<>();
 
 
     private final Instance instance;
@@ -77,7 +77,6 @@ public class BlockUpdateManager {
 
     /**
      * Schedules this position's neighbors to be updated next tick.
-     * @param pos
      */
     public void scheduleNeighborsUpdate(Point pos, BlockUpdateInfo info) {
         updateNeighbors.put(pos, info);

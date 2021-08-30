@@ -31,6 +31,7 @@ vriTicketValue = 34 - vanillaTicketValue
 /**
  * A utility class used to manage instance's tickets
  */
+@SuppressWarnings("UnstableApiUsage")
 public class TicketManager {
     // Vanilla ticket values
     public static final Short PLAYER_TICKET = 34 - 31;
@@ -45,7 +46,7 @@ public class TicketManager {
 
 
     // IDs
-    public static Tag<Long> ID = Tag.Long("minestom:ticket_manager_id");
+    public static final Tag<Long> ID = Tag.Long("minestom:ticket_manager_id");
     private static long nextID = 0;
     private static final Map<Long, TicketManager> blockUpdateManagerById = new WeakHashMap<>();
 
@@ -159,7 +160,7 @@ public class TicketManager {
                     recalculateChunkValue(chunkIndex);
                 }
 
-                { // Down side
+                { // Downside
                     long chunkIndex = ChunkUtils.getChunkIndex(downX - offset, downZ);
                     externalTicketValues.put(chunkIndex, chunk, externalValue);
                     recalculateChunkValue(chunkIndex);
@@ -258,7 +259,7 @@ public class TicketManager {
                     recalculateChunkValue(chunkIndex);
                 }
 
-                { // Down side
+                { // Downside
                     long chunkIndex = ChunkUtils.getChunkIndex(downX - offset, downZ);
                     if (highestInternalValue <= 0) {
                         externalTicketValues.remove(chunkIndex, chunk);

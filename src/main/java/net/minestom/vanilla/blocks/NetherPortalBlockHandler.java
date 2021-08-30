@@ -320,7 +320,7 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler {
     }
 
     @Override
-    public Map<Tag<?>, ?> defaultTagValues() {
+    public @NotNull Map<Tag<?>, ?> defaultTagValues() {
         return ImmutableMap.of(
                 TICKS_SPENT_IN_PORTAL_KEY, 0L,
                 LAST_PORTAL_UPDATE_KEY, Long.MAX_VALUE,

@@ -127,7 +127,7 @@ public enum VanillaBlocks {
                     }
                 }
 
-                // Finally replace default block handler
+                // Finally, replace default block handler
                 if (newHandler != null) {
                     setFinalStatic(field, someBlock);
                 }

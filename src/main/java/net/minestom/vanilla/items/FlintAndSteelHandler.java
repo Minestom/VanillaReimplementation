@@ -1,7 +1,6 @@
 package net.minestom.vanilla.items;
 
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.instance.Instance;

@@ -12,9 +12,7 @@ public class ServerProperties {
     private final Properties properties;
 
     /**
-     * Creates a new property list from a given file. Will attempt create the file and fill with defaults if it does not exist
-     * @param source
-     * @throws IOException
+     * Creates a new property list from a given file. Will attempt to create the file and fill with defaults if it does not exist
      */
     public ServerProperties(File source) throws IOException {
         properties = new Properties();

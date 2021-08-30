@@ -1,10 +1,6 @@
 package net.minestom.vanilla.system;
 
-import net.minestom.server.data.SerializableData;
-import net.minestom.server.data.SerializableDataImpl;
 import net.minestom.server.entity.Player;
-import net.minestom.server.inventory.Inventory;
-import net.minestom.server.inventory.InventoryType;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTList;
@@ -18,7 +14,7 @@ public class EnderChestSystem {
 
     public static final EnderChestSystem INSTANCE = new EnderChestSystem();
 
-    private Map<UUID, NBTList<NBTCompound>> itemsMap = new HashMap<>();
+    private final Map<UUID, NBTList<NBTCompound>> itemsMap = new HashMap<>();
 
     private EnderChestSystem() {}
 

@@ -3,17 +3,13 @@ package net.minestom.vanilla.items;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.GlobalEventHandler;
-import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
-import net.minestom.server.event.trait.ItemEvent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class ItemManager {

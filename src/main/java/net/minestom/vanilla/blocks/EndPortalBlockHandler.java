@@ -40,7 +40,7 @@ public class EndPortalBlockHandler extends VanillaBlockHandler {
             final int obsidianPlatformY = 48;
             final int obsidianPlatformZ = 0;
 
-            if(targetDimension == VanillaDimensionTypes.OVERWORLD) { // teleport to spawn point
+            if (targetDimension == VanillaDimensionTypes.OVERWORLD) { // teleport to spawn point
                 if(touching instanceof Player) {
                     spawnPoint = ((Player) touching).getRespawnPoint();
                 } else { // TODO: world spawnpoint
@@ -52,7 +52,7 @@ public class EndPortalBlockHandler extends VanillaBlockHandler {
                 spawnPoint = new Pos(obsidianPlatformX, yLevel, obsidianPlatformZ);
             }
 
-            if(targetDimension == VanillaDimensionTypes.END) {
+            if (targetDimension == VanillaDimensionTypes.END) {
                 for (int x = -1; x <= 1; x++) {
                     for (int z = -1; z <= 1; z++) {
                         targetInstance.loadChunk(obsidianPlatformX/16+x, obsidianPlatformZ/16+z);

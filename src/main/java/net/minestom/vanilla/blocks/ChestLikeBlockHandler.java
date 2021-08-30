@@ -1,6 +1,5 @@
 package net.minestom.vanilla.blocks;
 
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.ItemEntity;
@@ -10,7 +9,6 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.*;
 import net.minestom.vanilla.inventory.ChestInventory;
@@ -20,7 +18,6 @@ import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTList;
 import org.jglrxavpok.hephaistos.nbt.NBTTypes;
 
-import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Random;
 
@@ -31,7 +28,7 @@ import java.util.Random;
  */
 public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
 
-    public static Tag<NBTList<NBTCompound>> TAG_ITEMS = Tag.NBT("ITEMS");
+    public static final Tag<NBTList<NBTCompound>> TAG_ITEMS = Tag.NBT("ITEMS");
     protected static final Random rng = new Random();
 
     public ChestLikeBlockHandler(Block baseBlock) {

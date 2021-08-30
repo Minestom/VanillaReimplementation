@@ -30,7 +30,6 @@ public class NetherPortalUpdateEvent implements Event, EntityEvent, InstanceEven
 
     /**
      * Amount of time spent inside this portal
-     * @return
      */
     public long getTickSpentInPortal() {
         return tickSpentInPortal;
@@ -38,7 +37,6 @@ public class NetherPortalUpdateEvent implements Event, EntityEvent, InstanceEven
 
     /**
      * Position of the portal block which triggered the update
-     * @return
      */
     public Point getPosition() {
         return position;
@@ -46,7 +44,6 @@ public class NetherPortalUpdateEvent implements Event, EntityEvent, InstanceEven
 
     /**
      * The nether portal the entity is in. Can be null if the portal was added with /setblock
-     * @return
      */
     public NetherPortal getPortal() {
         return portal;
