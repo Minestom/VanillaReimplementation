@@ -8,18 +8,27 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.vanilla.blocks.redstone.LeverBlockHandler;
+import net.minestom.vanilla.blocks.redstone.RedstoneBlockBlockHandler;
+import net.minestom.vanilla.blocks.redstone.RedstoneWireBlockHandler;
 import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
  * All blocks available in the vanilla reimplementation
  */
 public enum VanillaBlocks {
+
+    // Start of redstone
+    LEVER(Block.LEVER, LeverBlockHandler::new),
+    REDSTONE_BLOCK(Block.REDSTONE_BLOCK, RedstoneBlockBlockHandler::new),
+    REDSTONE_WIRE(Block.REDSTONE_WIRE, RedstoneWireBlockHandler::new),
 
     SAND(Block.SAND, () -> new GravityBlockHandler(Block.SAND)),
     RED_SAND(Block.RED_SAND, () -> new GravityBlockHandler(Block.RED_SAND)),
@@ -45,27 +54,27 @@ public enum VanillaBlocks {
     // End of concrete powders
 
     // Start of beds
-    WHITE_BED(Block.WHITE_BED, () -> new BedBlockHandler(Block.WHITE_BED)),
-    BLACK_BED(Block.BLACK_BED, () -> new BedBlockHandler(Block.BLACK_BED)),
-    LIGHT_BLUE_BED(Block.LIGHT_BLUE_BED, () -> new BedBlockHandler(Block.LIGHT_BLUE_BED)),
-    BLUE_BED(Block.BLUE_BED, () -> new BedBlockHandler(Block.BLUE_BED)),
-    RED_BED(Block.RED_BED, () -> new BedBlockHandler(Block.RED_BED)),
-    GREEN_BED(Block.GREEN_BED, () -> new BedBlockHandler(Block.GREEN_BED)),
-    YELLOW_BED(Block.YELLOW_BED, () -> new BedBlockHandler(Block.YELLOW_BED)),
-    PURPLE_BED(Block.PURPLE_BED, () -> new BedBlockHandler(Block.PURPLE_BED)),
-    MAGENTA_BED(Block.MAGENTA_BED, () -> new BedBlockHandler(Block.MAGENTA_BED)),
-    CYAN_BED(Block.CYAN_BED, () -> new BedBlockHandler(Block.CYAN_BED)),
-    PINK_BED(Block.PINK_BED, () -> new BedBlockHandler(Block.PINK_BED)),
-    GRAY_BED(Block.GRAY_BED, () -> new BedBlockHandler(Block.GRAY_BED)),
-    LIGHT_GRAY_BED(Block.LIGHT_GRAY_BED, () -> new BedBlockHandler(Block.LIGHT_GRAY_BED)),
-    ORANGE_BED(Block.ORANGE_BED, () -> new BedBlockHandler(Block.ORANGE_BED)),
-    BROWN_BED(Block.BROWN_BED, () -> new BedBlockHandler(Block.BROWN_BED)),
-    LIME_BED(Block.LIME_BED, () -> new BedBlockHandler(Block.LIME_BED)),
+    WHITE_BED(Block.WHITE_BED,              BedBlockHandler::new),
+    BLACK_BED(Block.BLACK_BED,              BedBlockHandler::new),
+    LIGHT_BLUE_BED(Block.LIGHT_BLUE_BED,    BedBlockHandler::new),
+    BLUE_BED(Block.BLUE_BED,                BedBlockHandler::new),
+    RED_BED(Block.RED_BED,                  BedBlockHandler::new),
+    GREEN_BED(Block.GREEN_BED,              BedBlockHandler::new),
+    YELLOW_BED(Block.YELLOW_BED,            BedBlockHandler::new),
+    PURPLE_BED(Block.PURPLE_BED,            BedBlockHandler::new),
+    MAGENTA_BED(Block.MAGENTA_BED,          BedBlockHandler::new),
+    CYAN_BED(Block.CYAN_BED,                BedBlockHandler::new),
+    PINK_BED(Block.PINK_BED,                BedBlockHandler::new),
+    GRAY_BED(Block.GRAY_BED,                BedBlockHandler::new),
+    LIGHT_GRAY_BED(Block.LIGHT_GRAY_BED,    BedBlockHandler::new),
+    ORANGE_BED(Block.ORANGE_BED,            BedBlockHandler::new),
+    BROWN_BED(Block.BROWN_BED,              BedBlockHandler::new),
+    LIME_BED(Block.LIME_BED,                BedBlockHandler::new),
     // End of beds
 
-    FIRE(Block.FIRE, FireBlockHandler::new),
-    NETHER_PORTAL(Block.NETHER_PORTAL, NetherPortalBlockHandler::new),
-    END_PORTAL(Block.END_PORTAL, EndPortalBlockHandler::new),
+    FIRE(Block.FIRE,                    FireBlockHandler::new),
+    NETHER_PORTAL(Block.NETHER_PORTAL,  NetherPortalBlockHandler::new),
+    END_PORTAL(Block.END_PORTAL,        EndPortalBlockHandler::new),
 
     TNT(Block.TNT, TNTBlockHandler::new),
 
@@ -86,6 +95,11 @@ public enum VanillaBlocks {
     VanillaBlocks(@NotNull Block block, @NotNull Supplier<BlockHandler> blockHandlerSupplier) {
         this.namespace = block.namespace();
         this.blockHandler = blockHandlerSupplier.get();
+    }
+
+    VanillaBlocks(@NotNull Block block, @NotNull Function<Block, BlockHandler> blockHandlerFunction) {
+        this.namespace = block.namespace();
+        this.blockHandler = blockHandlerFunction.apply(block);
     }
 
     /**

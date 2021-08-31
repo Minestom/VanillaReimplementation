@@ -8,11 +8,16 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.item.Material;
+import net.minestom.vanilla.blocks.redstone.RedstoneContainerBlockHandler;
+import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignalTarget;
+import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignal;
 import net.minestom.vanilla.entity.PrimedTNT;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Random;
 
-public class TNTBlockHandler extends VanillaBlockHandler {
+public class TNTBlockHandler extends RedstoneContainerBlockHandler {
 
     public static final Random TNT_RANDOM = new Random();
 
@@ -37,18 +42,23 @@ public class TNTBlockHandler extends VanillaBlockHandler {
         }
 
         player.getInstance().setBlock(blockPosition, Block.AIR);
-
         spawnPrimedTNT(player.getInstance(), blockPosition, 80);
 
         return true;
     }
 
-//    @Override
-//    public boolean onExplode(Instance instance, Point position, Data lootTableArguments) {
-//        int fuseTime = tntRNG.nextInt(21) + 10;
-//        spawnPrimedTNT(instance, position, fuseTime);
-//        return false; // don't cancel
-//    }
+    @Override
+    public void newRedstoneSignal(
+            @NotNull RedstoneSignalTarget redstoneSignalTarget,
+            @NotNull RedstoneSignal newRedstoneSignal,
+            @Nullable RedstoneSignal oldRedstoneSignal
+    ) {
+        Instance instance = redstoneSignalTarget.instance();
+        Point blockPosition = redstoneSignalTarget.blockPosition();
+
+        instance.setBlock(blockPosition, Block.AIR);
+        spawnPrimedTNT(instance, blockPosition, 80);
+    }
 
     private void spawnPrimedTNT(Instance instance, Point blockPosition, int fuseTime) {
         Pos initialPosition = new Pos(blockPosition.blockX() + 0.5f, blockPosition.blockY() + 0f, blockPosition.blockZ() + 0.5f);
