@@ -6,21 +6,19 @@ import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.entity.Entity;
 
 public class RayFastManager {
+
+    @SuppressWarnings("UnstableApiUsage")
     public static void init() {
-        Area3d.CONVERTER.register(BoundingBox.class, box ->
+        Area3d.CONVERTER.register(Entity.class, box ->
                 Area3dRectangularPrism.wrapper(
                         box,
-                        BoundingBox::getMinX,
-                        BoundingBox::getMinY,
-                        BoundingBox::getMinZ,
-                        BoundingBox::getMaxX,
-                        BoundingBox::getMaxY,
-                        BoundingBox::getMaxZ
+                        entity -> entity.getBoundingBox().minX(),
+                        entity -> entity.getBoundingBox().minY(),
+                        entity -> entity.getBoundingBox().minZ(),
+                        entity -> entity.getBoundingBox().maxX(),
+                        entity -> entity.getBoundingBox().maxY(),
+                        entity -> entity.getBoundingBox().maxZ()
                 )
-        );
-
-        Area3d.CONVERTER.register(Entity.class, entity ->
-                Area3d.CONVERTER.from(entity.getBoundingBox())
         );
     }
 }

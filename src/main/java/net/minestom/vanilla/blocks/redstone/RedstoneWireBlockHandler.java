@@ -4,10 +4,10 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.blocks.redstone.signal.RedstoneSignalManager;
-import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignalTarget;
 import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignal;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignalTarget;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class RedstoneWireBlockHandler extends RedstoneContainerBlockHandler {
     public RedstoneWireBlockHandler() {
@@ -21,7 +21,7 @@ public class RedstoneWireBlockHandler extends RedstoneContainerBlockHandler {
             @Nullable RedstoneSignal oldRedstoneSignal
     ) {
         Instance instance = redstoneSignalTarget.instance();
-        Point pos = redstoneSignalTarget.blockPosition();
+        Point pos = redstoneSignalTarget.target();
 
         RedstoneSignalManager redstoneSignalManager = RedstoneSignalManager.of(instance);
         redstoneSignalManager.handleRedstoneSignal(

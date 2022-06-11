@@ -20,7 +20,7 @@ public class FlintAndSteelHandler implements VanillaItemHandler {
         Instance instance = player.getInstance();
         ItemStack itemStack = event.getItemStack();
         Player.Hand hand = event.getHand();
-        Direction blockDir = event.getBlockFace();
+        Direction blockDir = event.getBlockFace().toDirection();
 
         // Find block in direction
         Point firePosition = pos.add(

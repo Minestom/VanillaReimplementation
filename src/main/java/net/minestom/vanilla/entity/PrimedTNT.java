@@ -21,9 +21,6 @@ public class PrimedTNT extends Entity {
     }
 
     private void explode() {
-        if (shouldRemove()) {
-            return;
-        }
 
         remove();
 

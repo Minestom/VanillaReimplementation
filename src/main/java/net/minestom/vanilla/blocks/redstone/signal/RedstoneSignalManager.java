@@ -7,8 +7,8 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.Tag;
 import net.minestom.vanilla.blocks.VanillaBlockHandler;
 import net.minestom.vanilla.blocks.redstone.RedstoneContainerBlockHandler;
-import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignalTarget;
 import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignal;
+import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignalTarget;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -105,7 +105,7 @@ public class RedstoneSignalManager {
     }
 
     private void addRedstoneSignal(@NotNull RedstoneSignalTarget redstoneSignalTarget, @NotNull RedstoneSignal signalInfo) {
-        Pos pos = Pos.fromPoint(redstoneSignalTarget.blockPosition());
+        Pos pos = Pos.fromPoint(redstoneSignalTarget.target());
         Instance instance = redstoneSignalTarget.instance();
         PriorityQueue<RedstoneSignal> cachedRedstoneSignals = redstoneSignalMap.get(pos);
 
@@ -134,7 +134,7 @@ public class RedstoneSignalManager {
     }
 
     public void removeRedstoneSignal(RedstoneSignalTarget redstoneSignalTarget, @NotNull RedstoneSignal signalInfo) {
-        Pos pos = Pos.fromPoint(redstoneSignalTarget.blockPosition());
+        Pos pos = Pos.fromPoint(redstoneSignalTarget.target());
         Instance instance = redstoneSignalTarget.instance();
         PriorityQueue<RedstoneSignal> cachedRedstoneSignals = redstoneSignalMap.get(pos);
 

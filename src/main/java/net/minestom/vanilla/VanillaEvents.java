@@ -22,7 +22,6 @@ import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.ConnectionManager;
-import net.minestom.server.storage.StorageManager;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.blocks.NetherPortalBlockHandler;
@@ -32,6 +31,7 @@ import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.generation.VanillaTestGenerator;
 import net.minestom.vanilla.instance.VanillaExplosion;
 import net.minestom.vanilla.system.ServerProperties;
+import org.jglrxavpok.hephaistos.nbt.NBT;
 
 public class VanillaEvents {
 
@@ -44,8 +44,8 @@ public class VanillaEvents {
 
         ExplosionSupplier explosionGenerator = (centerX, centerY, centerZ, strength, additionalData) -> {
 
-            boolean isTNT = additionalData != null && Boolean.TRUE.equals(additionalData.getOrDefault(VanillaExplosion.DROP_EVERYTHING_KEY, false));
-            boolean noBlockDamage = additionalData != null && Boolean.TRUE.equals(additionalData.getOrDefault(VanillaExplosion.DONT_DESTROY_BLOCKS_KEY, false));
+            boolean isTNT = additionalData != null && Boolean.TRUE.equals(additionalData.get(VanillaExplosion.DROP_EVERYTHING_KEY));
+            boolean noBlockDamage = additionalData != null && Boolean.TRUE.equals(additionalData.get(VanillaExplosion.DONT_DESTROY_BLOCKS_KEY));
 
             return VanillaExplosion.builder(new Pos(centerX, centerY, centerZ), strength)
                     .destroyBlocks(!noBlockDamage)
@@ -56,25 +56,24 @@ public class VanillaEvents {
 
         // TODO: World storage
 
-        StorageManager storageManager = MinecraftServer.getStorageManager();
         VanillaTestGenerator noiseTestGenerator = new VanillaTestGenerator();
         overworld = MinecraftServer.getInstanceManager().createInstanceContainer(DimensionType.OVERWORLD);
         overworld.enableAutoChunkLoad(true);
-        overworld.setChunkGenerator(noiseTestGenerator);
+        overworld.setGenerator(noiseTestGenerator);
         overworld.setExplosionSupplier(explosionGenerator);
         BlockUpdateManager.of(overworld);
 //        overworld.setChunkLoader(new AnvilChunkLoader(storageManager.getLocation(worldName + "/region")));
 
         nether = MinecraftServer.getInstanceManager().createInstanceContainer(VanillaDimensionTypes.NETHER);
         nether.enableAutoChunkLoad(true);
-        nether.setChunkGenerator(noiseTestGenerator);
+        nether.setGenerator(noiseTestGenerator);
         nether.setExplosionSupplier(explosionGenerator);
         BlockUpdateManager.of(nether);
 //        nether.setChunkLoader(new AnvilChunkLoader(storageManager.getLocation(worldName + "/DIM-1/region")));
 
         end = MinecraftServer.getInstanceManager().createInstanceContainer(VanillaDimensionTypes.END);
         end.enableAutoChunkLoad(true);
-        end.setChunkGenerator(noiseTestGenerator);
+        end.setGenerator(noiseTestGenerator);
         end.setExplosionSupplier(explosionGenerator);
         BlockUpdateManager.of(end);
 //        end.setChunkLoader(new AnvilChunkLoader(storageManager.getLocation(worldName + "/DIM1/region")));
@@ -148,38 +147,40 @@ public class VanillaEvents {
         });
 
         eventNode.addListener(
-                EventListener.builder(PlayerSpawnEvent.class)
-                        .filter(PlayerSpawnEvent::isFirstSpawn)
-                        .handler(event -> {
-                            Player player = event.getPlayer();
+            EventListener.builder(PlayerSpawnEvent.class)
+                .filter(PlayerSpawnEvent::isFirstSpawn)
+                .handler(event -> {
+                    Player player = event.getPlayer();
 
-                            player.setPermissionLevel(4);
-                            player.setGameMode(GameMode.CREATIVE);
+                    player.setPermissionLevel(4);
+                    player.setGameMode(GameMode.CREATIVE);
 
-                            int y = 0;
-                            while (!player.getInstance().getBlock(1, y, 1).isAir()) {
-                                y++;
-                            }
+                    player.getInstance().loadChunk(player.getPosition()).join();
 
-                            player.teleport(new Pos(1, y, 1));
-                            PlayerInventory inventory = player.getInventory();
+                    int y = 0;
+                    while (!player.getInstance().getBlock(1, y, 1).isAir()) {
+                        y++;
+                    }
 
-                            inventory.addItemStack(ItemStack.of(Material.OBSIDIAN, 1));
-                            inventory.addItemStack(ItemStack.of(Material.FLINT_AND_STEEL, 1));
-                            inventory.addItemStack(ItemStack.of(Material.RED_BED, 1));
-                        })
-                        .build()
+                    player.teleport(new Pos(1, y, 1));
+                    PlayerInventory inventory = player.getInventory();
+
+                    inventory.addItemStack(ItemStack.of(Material.OBSIDIAN, 1));
+                    inventory.addItemStack(ItemStack.of(Material.FLINT_AND_STEEL, 1));
+                    inventory.addItemStack(ItemStack.of(Material.RED_BED, 1));
+                })
+                .build()
         );
 
         eventNode.addListener(
-                EventListener.builder(PickupItemEvent.class)
-                        .filter(event -> event.getEntity() instanceof Player)
-                        .handler(event -> {
-                            Player player = (Player) event.getEntity();
-                            boolean couldAdd = player.getInventory().addItemStack(event.getItemStack());
-                            event.setCancelled(!couldAdd); // Cancel event if player does not have enough inventory space
-                        })
-                        .build()
+            EventListener.builder(PickupItemEvent.class)
+                .filter(event -> event.getEntity() instanceof Player)
+                .handler(event -> {
+                    Player player = (Player) event.getEntity();
+                    boolean couldAdd = player.getInventory().addItemStack(event.getItemStack());
+                    event.setCancelled(!couldAdd); // Cancel event if player does not have enough inventory space
+                })
+                .build()
         );
 
         eventNode.addListener(ItemDropEvent.class, event -> {

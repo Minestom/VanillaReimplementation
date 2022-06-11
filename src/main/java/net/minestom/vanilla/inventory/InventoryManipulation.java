@@ -6,15 +6,11 @@ import net.minestom.server.item.StackingRule;
 
 public class InventoryManipulation {
     public static void consumeItemIfNotCreative(Player player, ItemStack itemStack, Player.Hand hand) {
-        if(player.isCreative()) {
+        if (player.isCreative()) {
             return;
         }
 
-        StackingRule stackingRule = itemStack.getStackingRule();
-        ItemStack newUsedItem = stackingRule.apply(itemStack, stackingRule.getAmount(itemStack) - 1);
-
-
-        player.getInventory().setItemInHand(hand, newUsedItem);
+        player.getInventory().setItemInHand(hand, itemStack);
     }
 
     public static void damageItemIfNotCreative(Player player, ItemStack itemStack, Player.Hand hand) {

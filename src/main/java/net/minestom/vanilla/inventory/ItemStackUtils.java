@@ -9,6 +9,7 @@ import net.minestom.server.tag.TagWritable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
 
 public class ItemStackUtils {
     public static @Nullable ItemStack fromNBTCompound(@NotNull NBTCompound tag) {
@@ -40,13 +41,13 @@ public class ItemStackUtils {
     }
 
     public static @NotNull NBTCompound toNBTCompound(@NotNull ItemStack itemStack) {
-        NBTCompound compound = new NBTCompound();
+        MutableNBTCompound compound = new MutableNBTCompound();
 
         compound.setString("id", itemStack.getMaterial().namespace().namespace());
         compound.setByte("Count", (byte) itemStack.getAmount());
         compound.set("tag", itemStack.getMeta().toNBT());
 
-        return compound;
+        return compound.toCompound();
     }
 
     public static Tag<ItemStack> itemStackTag(@NotNull String key) {
@@ -58,7 +59,7 @@ public class ItemStackUtils {
         private final Tag<NBTCompound> tag;
 
         public ItemStackSerializer(String key) {
-            this.tag = Tag.NBT(key);
+            this.tag = (Tag<NBTCompound>) (Object) Tag.NBT(key);
         }
 
         @Nullable

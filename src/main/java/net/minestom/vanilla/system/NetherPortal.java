@@ -1,9 +1,6 @@
 package net.minestom.vanilla.system;
 
-import java.util.*;
-import java.util.concurrent.LinkedBlockingDeque;
-
-import com.google.common.primitives.Longs;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -19,6 +16,10 @@ import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.vanilla.blocks.NetherPortalBlockHandler;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Every useful method linked to Nether portals goes here
@@ -111,10 +112,12 @@ public final class NetherPortal {
                     0.4f, 0.5f, 0.4f,
                     0.3f, 10, writer -> writer.writeVarInt(Block.NETHER_PORTAL.id()));
 
-            EffectPacket effectPacket = new EffectPacket();
-            effectPacket.effectId = Effects.BLOCK_BREAK.getId();
-            effectPacket.position = pos;
-            effectPacket.data = Block.NETHER_PORTAL.id();
+            EffectPacket effectPacket = new EffectPacket(
+                    Effects.BLOCK_BREAK.getId(),
+                    pos,
+                    Block.NETHER_PORTAL.id(),
+                    false
+            );
 
             Chunk chunk = instance.getChunkAt(pos);
             if (chunk != null) {
@@ -423,8 +426,8 @@ public final class NetherPortal {
         generating = true;
         NetherPortalBlockHandler portalBlock = (NetherPortalBlockHandler) Block.NETHER_PORTAL.handler();
 
-        loadAround(instance, frameTopLeftCorner);
-        loadAround(instance, frameBottomRightCorner);
+        loadAround(instance, frameTopLeftCorner).join();
+        loadAround(instance, frameBottomRightCorner).join();
 
         createFrame(instance);
 
@@ -439,19 +442,19 @@ public final class NetherPortal {
     /**
      * Ensure chunks around the portal corner are loaded (3x3 area centered on chunk containing frame corner)
      */
-    private void loadAround(Instance instance, Point corner) {
+    private CompletableFuture<Void> loadAround(Instance instance, Point corner) {
         int chunkX = corner.blockX() >> 4;
         int chunkZ = corner.blockZ() >> 4;
 
-        List<Long> chunkList = new ArrayList<>();
+        ObjectArrayList<CompletableFuture<Chunk>> futures = new ObjectArrayList<>();
 
         for (int x = -1; x <= 1; x++) {
             for (int z = -1; z <= 1; z++) {
-                instance.loadChunk(chunkX + x, chunkZ + z);
+                futures.add(instance.loadChunk(chunkX + x, chunkZ + z));
             }
         }
 
-        ChunkUtils.optionalLoadAll(instance, Longs.toArray(chunkList), null).complete(null);
+        return CompletableFuture.allOf(futures.elements());
     }
 
     private void createFrame(Instance instance) {

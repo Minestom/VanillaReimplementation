@@ -1,13 +1,13 @@
 package net.minestom.vanilla.instance;
 
+import dev.emortal.rayfast.area.Intersection;
 import dev.emortal.rayfast.area.area3d.Area3d;
-import dev.emortal.rayfast.grid.GridCast;
+import dev.emortal.rayfast.casting.grid.GridCast;
+import dev.emortal.rayfast.vector.Vector3d;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.data.Data;
-import net.minestom.server.data.DataImpl;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.entity.LivingEntity;
@@ -15,7 +15,6 @@ import net.minestom.server.instance.Explosion;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.batch.AbsoluteBlockBatch;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.thread.MinestomThread;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.vanilla.blocks.TNTBlockHandler;
 import net.minestom.vanilla.damage.DamageTypes;
@@ -37,7 +36,6 @@ public class VanillaExplosion extends Explosion {
 
     public static final String THREAD_POOL_NAME = "MSVanilla-Explosion";
     public static final int THREAD_POOL_COUNT = 2;
-    private static final MinestomThread threadPool = new MinestomThread(THREAD_POOL_COUNT, THREAD_POOL_NAME);
     private final Point center;
     private final boolean blockDamage;
 
@@ -68,7 +66,7 @@ public class VanillaExplosion extends Explosion {
 
                         Vec dir = new Vec(x - 8.5f, y - 8.5f, z - 8.5f).normalize();
 
-                        Iterator<double[]> gridIterator = GridCast.createGridIterator(
+                        Iterator<Vector3d> gridIterator = GridCast.createGridIterator(
                                 getCenterX(), getCenterY(), getCenterZ(),
                                 dir.x(), dir.y(), dir.z(),
                                 1.0,
@@ -78,8 +76,8 @@ public class VanillaExplosion extends Explosion {
                         double intensity = (0.7f + explosionRNG.nextFloat() * 0.6f) * getStrength();
 
                         while (gridIterator.hasNext()) {
-                            double[] arr = gridIterator.next();
-                            Pos pos = new Pos(arr[0], arr[1], arr[2]);
+                            Vector3d vec = gridIterator.next();
+                            Point pos = new Vec(vec.x(), vec.y(), vec.z());
 
                             intensity -= 0.225;
 
@@ -102,13 +100,8 @@ public class VanillaExplosion extends Explosion {
         final float damageRadius = maximumBlastRadius; // TODO: should be different from blast radius
         List<Entity> potentiallyDamagedEntities = getEntitiesAround(instance, damageRadius);
 
-        try {
-            threadPool.invokeAll(potentiallyDamagedEntities.stream().map(ent -> (Callable<Void>) () -> {
-                affect(ent, damageRadius);
-                return null;
-            }).collect(Collectors.toList()));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        for (Entity entity : potentiallyDamagedEntities) {
+            affect(entity, damageRadius);
         }
 
         if (blockDamage) {
@@ -122,12 +115,6 @@ public class VanillaExplosion extends Explosion {
                 if (block.compare(Block.TNT)) {
                     spawnPrimedTNT(instance, position, new Pos(getCenterX(), getCenterY(), getCenterZ()));
                     continue;
-                }
-
-                Data lootTableArguments = new DataImpl();
-
-                if (!dropsEverything) {
-                    lootTableArguments.set("explosionPower", (double) getStrength(), Double.class);
                 }
 
 //                if (customBlock != null) {
@@ -235,9 +222,9 @@ public class VanillaExplosion extends Explosion {
     }
 
     private float calculateExposure(Entity e, final float damageRadius) {
-        int w = (int) (Math.floor(e.getBoundingBox().getWidth() * 2)) + 1;
-        int h = (int) (Math.floor(e.getBoundingBox().getHeight() * 2)) + 1;
-        int d = (int) (Math.floor(e.getBoundingBox().getDepth() * 2)) + 1;
+        int w = (int) (Math.floor(e.getBoundingBox().width() * 2)) + 1;
+        int h = (int) (Math.floor(e.getBoundingBox().height() * 2)) + 1;
+        int d = (int) (Math.floor(e.getBoundingBox().depth() * 2)) + 1;
 
         Instance instance = e.getInstance();
         Pos pos = e.getPosition();
@@ -259,9 +246,10 @@ public class VanillaExplosion extends Explosion {
                     double deltaZ = entZ + dz - getCenterZ();
 
                     // TODO: Check for distance
-                    double[] intersection = area3d.lineIntersection(
+                    Vector3d intersection = area3d.lineIntersection(
                             getCenterX(), getCenterY(), getCenterZ(),
-                            deltaX, deltaY, deltaZ
+                            deltaX, deltaY, deltaZ,
+                            Intersection.ANY_3D
                     );
 
                     if (intersection != null) {

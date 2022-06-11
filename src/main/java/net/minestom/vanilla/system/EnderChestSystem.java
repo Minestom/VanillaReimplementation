@@ -4,7 +4,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTList;
-import org.jglrxavpok.hephaistos.nbt.NBTTypes;
+import org.jglrxavpok.hephaistos.nbt.NBTType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +26,7 @@ public class EnderChestSystem {
         var items = itemsMap.get(uuid);
 
         if (items == null) {
-            items = new NBTList<>(NBTTypes.TAG_Compound);
+            items = new NBTList<>(NBTType.TAG_Compound);
             itemsMap.put(uuid, items);
         }
 

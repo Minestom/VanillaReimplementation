@@ -15,7 +15,9 @@ import net.minestom.vanilla.blocks.update.info.BlockUpdate;
 import net.minestom.vanilla.blocks.update.info.BlockUpdateInfo;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * A utility class used to facilitate block updates

@@ -1,12 +1,9 @@
 package net.minestom.vanilla.blocks;
 
-import com.google.common.collect.ImmutableMap;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignalTarget;
-import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignal;
 import net.minestom.vanilla.blocks.update.info.BlockUpdate;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,6 +31,6 @@ public abstract class VanillaBlockHandler implements BlockHandler {
     }
 
     public @NotNull Map<Tag<?>, ?> defaultTagValues() {
-        return ImmutableMap.of();
+        return Map.of();
     }
 }

@@ -7,21 +7,28 @@ import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 
 public class ItemManager {
 
+    public static @NotNull ItemManager accumulate(@NotNull Consumer<Accumulator> accumulator) {
+        Map<Material, VanillaItemHandler> itemHandlersByMaterial = new HashMap<>();
+        accumulator.accept(itemHandlersByMaterial::put);
+        return new ItemManager(itemHandlersByMaterial);
+    }
+
+    public interface Accumulator {
+        void accumulate(@NotNull Material material, @NotNull VanillaItemHandler itemHandler);
+    }
+
     private final Map<Material, VanillaItemHandler> itemHandlersByMaterial;
 
-    public ItemManager() {
-        this.itemHandlersByMaterial = Arrays.stream(VanillaItems.values())
-                .collect(Collectors.toUnmodifiableMap(
-                        VanillaItems::getMaterial,
-                        item -> item.getItemHandlerSupplier().get()
-                ));
+    private ItemManager(Map<Material, VanillaItemHandler> itemHandlersByMaterial) {
+        this.itemHandlersByMaterial = Map.copyOf(itemHandlersByMaterial);
     }
 
     private void handlePlayerUseItemEvent(PlayerUseItemEvent event) {

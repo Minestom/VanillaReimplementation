@@ -9,11 +9,12 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.item.Material;
 import net.minestom.vanilla.blocks.redstone.RedstoneContainerBlockHandler;
-import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignalTarget;
 import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignal;
+import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignalTarget;
 import net.minestom.vanilla.entity.PrimedTNT;
-import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
@@ -54,7 +55,7 @@ public class TNTBlockHandler extends RedstoneContainerBlockHandler {
             @Nullable RedstoneSignal oldRedstoneSignal
     ) {
         Instance instance = redstoneSignalTarget.instance();
-        Point blockPosition = redstoneSignalTarget.blockPosition();
+        Point blockPosition = redstoneSignalTarget.target();
 
         instance.setBlock(blockPosition, Block.AIR);
         spawnPrimedTNT(instance, blockPosition, 80);

@@ -5,10 +5,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Represents the properties of a redstone signal
  */
-public record RedstoneSignal(
-        @NotNull Type type,
-        int strength
-) implements Comparable<RedstoneSignal> {
+public record RedstoneSignal(@NotNull Type type, int strength) implements Comparable<RedstoneSignal> {
 
     @Override
     public int compareTo(@NotNull RedstoneSignal o) {

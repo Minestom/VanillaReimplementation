@@ -1,9 +1,5 @@
 package net.minestom.vanilla.blocks;
 
-import java.util.Map;
-import java.util.Optional;
-
-import com.google.common.collect.ImmutableMap;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -22,6 +18,9 @@ import net.minestom.vanilla.event.entity.NetherPortalUpdateEvent;
 import net.minestom.vanilla.system.NetherPortal;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
+import java.util.Optional;
 
 public class NetherPortalBlockHandler extends VanillaBlockHandler {
 
@@ -321,7 +320,7 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler {
 
     @Override
     public @NotNull Map<Tag<?>, ?> defaultTagValues() {
-        return ImmutableMap.of(
+        return Map.of(
                 TICKS_SPENT_IN_PORTAL_KEY, 0L,
                 LAST_PORTAL_UPDATE_KEY, Long.MAX_VALUE,
                 PORTAL_COOLDOWN_TIME_KEY, 0L

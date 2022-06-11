@@ -1,6 +1,5 @@
 package net.minestom.vanilla.inventory;
 
-import com.google.common.collect.Streams;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
@@ -9,16 +8,17 @@ import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTList;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public class ChestInventory extends Inventory {
 
-    protected final NBTList<NBTCompound> items;
+    protected final List<NBTCompound> items;
 
-    public ChestInventory(@NotNull NBTList<NBTCompound> items) {
+    public ChestInventory(@NotNull List<NBTCompound> items) {
         super(InventoryType.CHEST_3_ROW, Component.text("chest"));
-        this.items = items;
+        this.items = new ArrayList<>(items);
     }
 
     @Override

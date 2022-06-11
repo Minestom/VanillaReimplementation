@@ -5,8 +5,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.blocks.redstone.signal.RedstoneSignalManager;
 import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignal;
-import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignalTarget;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 public class RedstoneBlockBlockHandler extends RedstoneContainerBlockHandler {

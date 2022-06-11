@@ -11,6 +11,7 @@ import net.minestom.vanilla.commands.VanillaCommands;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.instance.tickets.TicketManager;
 import net.minestom.vanilla.items.ItemManager;
+import net.minestom.vanilla.items.VanillaItems;
 import net.minestom.vanilla.system.RayFastManager;
 import net.minestom.vanilla.system.ServerProperties;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +31,7 @@ class VanillaServer {
     }
 
     private final MinecraftServer minecraftServer;
-    private final ItemManager itemManager = new ItemManager();
+    private final @NotNull ItemManager itemManager;
     private final @NotNull ServerProperties serverProperties;
 
     public VanillaServer(@NotNull MinecraftServer minecraftServer, @Nullable String... args) {
@@ -62,7 +63,12 @@ class VanillaServer {
             // commands
             VanillaCommands.registerAll(commandManager);
 
-            // item events
+            // item handlers
+            itemManager = ItemManager.accumulate(accumulator -> {
+                for (VanillaItems item : VanillaItems.values()) {
+                    accumulator.accumulate(item.getMaterial(), item.getItemHandlerSupplier().get());
+                }
+            });
             itemManager.registerEvents(eventHandler);
 
             // blocks
@@ -159,7 +165,7 @@ class VanillaServer {
         minecraftServer.start(address, port);
     }
 
-    public ItemManager getItemManager() {
+    public @NotNull ItemManager getItemManager() {
         return itemManager;
     }
 }

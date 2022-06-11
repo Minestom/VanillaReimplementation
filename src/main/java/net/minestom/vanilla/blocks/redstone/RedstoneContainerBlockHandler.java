@@ -6,12 +6,12 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.blocks.VanillaBlockHandler;
 import net.minestom.vanilla.blocks.redstone.signal.RedstoneSignalManager;
-import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignalTarget;
 import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignal;
+import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignalTarget;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.PriorityQueue;
 
 /**
  * A block handler to make redstone signal use easier
