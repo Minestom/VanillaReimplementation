@@ -1,187 +1,217 @@
 package net.minestom.vanilla.blocks;
 
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.data.Data;
-import net.minestom.server.data.DataImpl;
-import net.minestom.server.entity.ItemEntity;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventListener;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
-import net.minestom.server.gamedata.loottables.LootTable;
-import net.minestom.server.gamedata.loottables.LootTableManager;
-import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.BlockManager;
-import net.minestom.server.instance.block.CustomBlock;
-import net.minestom.server.instance.block.rule.BlockPlacementRule;
-import net.minestom.server.item.ItemStack;
-import net.minestom.server.network.ConnectionManager;
-import net.minestom.server.utils.BlockPosition;
+import net.minestom.server.instance.block.BlockHandler;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.server.utils.Position;
-import net.minestom.server.utils.time.TimeUnit;
+import net.minestom.vanilla.blocks.redstone.LeverBlockHandler;
+import net.minestom.vanilla.blocks.redstone.RedstoneBlockBlockHandler;
+import net.minestom.vanilla.blocks.redstone.RedstoneWireBlockHandler;
+import org.jetbrains.annotations.NotNull;
+import sun.misc.Unsafe;
 
-import java.io.FileNotFoundException;
-import java.util.List;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * All blocks available in the vanilla reimplementation
  */
 public enum VanillaBlocks {
 
-    SAND(() -> new GravityBlock(Block.SAND)),
-    RED_SAND(() -> new GravityBlock(Block.RED_SAND)),
-    GRAVEL(() -> new GravityBlock(Block.GRAVEL)),
+    // Start of redstone
+    LEVER(Block.LEVER, LeverBlockHandler::new),
+    REDSTONE_BLOCK(Block.REDSTONE_BLOCK, RedstoneBlockBlockHandler::new),
+    REDSTONE_WIRE(Block.REDSTONE_WIRE, RedstoneWireBlockHandler::new),
+
+    SAND(Block.SAND, () -> new GravityBlockHandler(Block.SAND)),
+    RED_SAND(Block.RED_SAND, () -> new GravityBlockHandler(Block.RED_SAND)),
+    GRAVEL(Block.GRAVEL, () -> new GravityBlockHandler(Block.GRAVEL)),
 
     // Start of concrete powders
-    WHITE_CONCRETE_POWDER(() -> new ConcretePowderBlock(Block.WHITE_CONCRETE_POWDER, Block.WHITE_CONCRETE)),
-    BLACK_CONCRETE_POWDER(() -> new ConcretePowderBlock(Block.BLACK_CONCRETE_POWDER, Block.BLACK_CONCRETE)),
-    LIGHT_BLUE_CONCRETE_POWDER(() -> new ConcretePowderBlock(Block.LIGHT_BLUE_CONCRETE_POWDER, Block.LIGHT_BLUE_CONCRETE)),
-    BLUE_CONCRETE_POWDER(() -> new ConcretePowderBlock(Block.BLUE_CONCRETE_POWDER, Block.BLUE_CONCRETE)),
-    RED_CONCRETE_POWDER(() -> new ConcretePowderBlock(Block.RED_CONCRETE_POWDER, Block.RED_CONCRETE)),
-    GREEN_CONCRETE_POWDER(() -> new ConcretePowderBlock(Block.GREEN_CONCRETE_POWDER, Block.GREEN_CONCRETE)),
-    YELLOW_CONCRETE_POWDER(() -> new ConcretePowderBlock(Block.YELLOW_CONCRETE_POWDER, Block.YELLOW_CONCRETE)),
-    PURPLE_CONCRETE_POWDER(() -> new ConcretePowderBlock(Block.PURPLE_CONCRETE_POWDER, Block.PURPLE_CONCRETE)),
-    MAGENTA_CONCRETE_POWDER(() -> new ConcretePowderBlock(Block.MAGENTA_CONCRETE_POWDER, Block.MAGENTA_CONCRETE)),
-    CYAN_CONCRETE_POWDER(() -> new ConcretePowderBlock(Block.CYAN_CONCRETE_POWDER, Block.CYAN_CONCRETE)),
-    PINK_CONCRETE_POWDER(() -> new ConcretePowderBlock(Block.PINK_CONCRETE_POWDER, Block.PINK_CONCRETE)),
-    GRAY_CONCRETE_POWDER(() -> new ConcretePowderBlock(Block.GRAY_CONCRETE_POWDER, Block.GRAY_CONCRETE)),
-    LIGHT_GRAY_CONCRETE_POWDER(() -> new ConcretePowderBlock(Block.LIGHT_GRAY_CONCRETE_POWDER, Block.LIGHT_GRAY_CONCRETE)),
-    ORANGE_CONCRETE_POWDER(() -> new ConcretePowderBlock(Block.ORANGE_CONCRETE_POWDER, Block.ORANGE_CONCRETE)),
-    BROWN_CONCRETE_POWDER(() -> new ConcretePowderBlock(Block.BROWN_CONCRETE_POWDER, Block.BROWN_CONCRETE)),
-    LIME_CONCRETE_POWDER(() -> new ConcretePowderBlock(Block.LIME_CONCRETE_POWDER, Block.LIME_CONCRETE)),
+    WHITE_CONCRETE_POWDER(Block.WHITE_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.WHITE_CONCRETE_POWDER, Block.WHITE_CONCRETE)),
+    BLACK_CONCRETE_POWDER(Block.BLACK_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.BLACK_CONCRETE_POWDER, Block.BLACK_CONCRETE)),
+    LIGHT_BLUE_CONCRETE_POWDER(Block.LIGHT_BLUE_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.LIGHT_BLUE_CONCRETE_POWDER, Block.LIGHT_BLUE_CONCRETE)),
+    BLUE_CONCRETE_POWDER(Block.BLUE_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.BLUE_CONCRETE_POWDER, Block.BLUE_CONCRETE)),
+    RED_CONCRETE_POWDER(Block.RED_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.RED_CONCRETE_POWDER, Block.RED_CONCRETE)),
+    GREEN_CONCRETE_POWDER(Block.GREEN_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.GREEN_CONCRETE_POWDER, Block.GREEN_CONCRETE)),
+    YELLOW_CONCRETE_POWDER(Block.YELLOW_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.YELLOW_CONCRETE_POWDER, Block.YELLOW_CONCRETE)),
+    PURPLE_CONCRETE_POWDER(Block.PURPLE_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.PURPLE_CONCRETE_POWDER, Block.PURPLE_CONCRETE)),
+    MAGENTA_CONCRETE_POWDER(Block.MAGENTA_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.MAGENTA_CONCRETE_POWDER, Block.MAGENTA_CONCRETE)),
+    CYAN_CONCRETE_POWDER(Block.CYAN_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.CYAN_CONCRETE_POWDER, Block.CYAN_CONCRETE)),
+    PINK_CONCRETE_POWDER(Block.PINK_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.PINK_CONCRETE_POWDER, Block.PINK_CONCRETE)),
+    GRAY_CONCRETE_POWDER(Block.GRAY_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.GRAY_CONCRETE_POWDER, Block.GRAY_CONCRETE)),
+    LIGHT_GRAY_CONCRETE_POWDER(Block.LIGHT_GRAY_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.LIGHT_GRAY_CONCRETE_POWDER, Block.LIGHT_GRAY_CONCRETE)),
+    ORANGE_CONCRETE_POWDER(Block.ORANGE_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.ORANGE_CONCRETE_POWDER, Block.ORANGE_CONCRETE)),
+    BROWN_CONCRETE_POWDER(Block.BROWN_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.BROWN_CONCRETE_POWDER, Block.BROWN_CONCRETE)),
+    LIME_CONCRETE_POWDER(Block.LIME_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.LIME_CONCRETE_POWDER, Block.LIME_CONCRETE)),
     // End of concrete powders
 
     // Start of beds
-    WHITE_BED(() -> new BedBlock(Block.WHITE_BED)),
-    BLACK_BED(() -> new BedBlock(Block.BLACK_BED)),
-    LIGHT_BLUE_BED(() -> new BedBlock(Block.LIGHT_BLUE_BED)),
-    BLUE_BED(() -> new BedBlock(Block.BLUE_BED)),
-    RED_BED(() -> new BedBlock(Block.RED_BED)),
-    GREEN_BED(() -> new BedBlock(Block.GREEN_BED)),
-    YELLOW_BED(() -> new BedBlock(Block.YELLOW_BED)),
-    PURPLE_BED(() -> new BedBlock(Block.PURPLE_BED)),
-    MAGENTA_BED(() -> new BedBlock(Block.MAGENTA_BED)),
-    CYAN_BED(() -> new BedBlock(Block.CYAN_BED)),
-    PINK_BED(() -> new BedBlock(Block.PINK_BED)),
-    GRAY_BED(() -> new BedBlock(Block.GRAY_BED)),
-    LIGHT_GRAY_BED(() -> new BedBlock(Block.LIGHT_GRAY_BED)),
-    ORANGE_BED(() -> new BedBlock(Block.ORANGE_BED)),
-    BROWN_BED(() -> new BedBlock(Block.BROWN_BED)),
-    LIME_BED(() -> new BedBlock(Block.LIME_BED)),
+    WHITE_BED(Block.WHITE_BED,              BedBlockHandler::new),
+    BLACK_BED(Block.BLACK_BED,              BedBlockHandler::new),
+    LIGHT_BLUE_BED(Block.LIGHT_BLUE_BED,    BedBlockHandler::new),
+    BLUE_BED(Block.BLUE_BED,                BedBlockHandler::new),
+    RED_BED(Block.RED_BED,                  BedBlockHandler::new),
+    GREEN_BED(Block.GREEN_BED,              BedBlockHandler::new),
+    YELLOW_BED(Block.YELLOW_BED,            BedBlockHandler::new),
+    PURPLE_BED(Block.PURPLE_BED,            BedBlockHandler::new),
+    MAGENTA_BED(Block.MAGENTA_BED,          BedBlockHandler::new),
+    CYAN_BED(Block.CYAN_BED,                BedBlockHandler::new),
+    PINK_BED(Block.PINK_BED,                BedBlockHandler::new),
+    GRAY_BED(Block.GRAY_BED,                BedBlockHandler::new),
+    LIGHT_GRAY_BED(Block.LIGHT_GRAY_BED,    BedBlockHandler::new),
+    ORANGE_BED(Block.ORANGE_BED,            BedBlockHandler::new),
+    BROWN_BED(Block.BROWN_BED,              BedBlockHandler::new),
+    LIME_BED(Block.LIME_BED,                BedBlockHandler::new),
     // End of beds
 
-    FIRE(FireBlock::new),
-    NETHER_PORTAL(NetherPortalBlock::new),
-    END_PORTAL(EndPortalBlock::new),
+    FIRE(Block.FIRE,                    FireBlockHandler::new),
+    NETHER_PORTAL(Block.NETHER_PORTAL,  NetherPortalBlockHandler::new),
+    END_PORTAL(Block.END_PORTAL,        EndPortalBlockHandler::new),
 
-    TNT(TNTBlock::new),
+    TNT(Block.TNT, TNTBlockHandler::new),
 
-    CHEST(ChestBlock::new),
-    TRAPPED_CHEST(TrappedChestBlock::new),
-    ENDER_CHEST(EnderChestBlock::new),
-    JUKEBOX(JukeboxBlock::new);
+    CHEST(Block.CHEST, ChestBlockHandler::new),
+    TRAPPED_CHEST(Block.TRAPPED_CHEST, TrappedChestBlockHandler::new),
+    ENDER_CHEST(Block.ENDER_CHEST, EnderChestBlockHandler::new),
+    JUKEBOX(Block.JUKEBOX, JukeboxBlockHandler::new);
 
-    private final VanillaBlockSupplier blockSupplier;
-    private final BlockPlacementRule placementRule;
-    private boolean registered;
-    private VanillaBlock instance;
+    private static final Map<String, BlockHandler> blockHandlerByNamespace = new HashMap<>();
 
-    private VanillaBlocks(VanillaBlockSupplier blockSupplier) {
-        this(blockSupplier, null);
+    private final @NotNull NamespaceID namespace;
+    private final @NotNull BlockHandler blockHandler;
+
+    /**
+     * @param block the block to register the handler on
+     * @param blockHandlerSupplier the handler supplier to register
+     */
+    VanillaBlocks(@NotNull Block block, @NotNull Supplier<BlockHandler> blockHandlerSupplier) {
+        this.namespace = block.namespace();
+        this.blockHandler = blockHandlerSupplier.get();
     }
 
-    private VanillaBlocks(VanillaBlockSupplier blockSupplier, BlockPlacementRule placementRule) {
-        this.blockSupplier = blockSupplier;
-        this.placementRule = placementRule;
+    VanillaBlocks(@NotNull Block block, @NotNull Function<Block, BlockHandler> blockHandlerFunction) {
+        this.namespace = block.namespace();
+        this.blockHandler = blockHandlerFunction.apply(block);
     }
 
     /**
-     * Register this vanilla block to the given BlockManager, ConnectionManager is used to replace the basic block with its custom variant
-     *
-     * @param connectionManager
-     * @param blockManager
+     * @return the vanilla block handler of this block
      */
-    public void register(short customBlockID, ConnectionManager connectionManager, BlockManager blockManager) {
-        VanillaBlock block = this.blockSupplier.create();
-        connectionManager.addPlayerInitialization(player -> {
-            player.addEventCallback(PlayerBlockPlaceEvent.class, event -> {
-                if (event.getBlockStateId() == block.getBaseBlockId()) {
-                    short blockID = block.getVisualBlockForPlacement(event.getPlayer(), event.getHand(), event.getBlockPosition());
-                    event.setBlockStateId(blockID);
-                    event.setCustomBlockId(block.getCustomBlockId());
-                }
-            });
-        });
-        blockManager.registerCustomBlock(block);
-        if (placementRule != null) {
-            blockManager.registerBlockPlacementRule(placementRule);
-        }
-        instance = block;
-        registered = true;
+    public @NotNull BlockHandler getBlockHandler() {
+        return blockHandler;
     }
 
     /**
-     * Used to know if this block has been registered. Can be used to disable mechanics if this block is not registered (ie nether portals and nether portal blocks)
+     * Register all vanilla commands into the given blockManager. ConnectionManager will handle replacing the basic
+     * block with its custom variant.
      *
-     * @return
+     * @param eventHandler the event handler to register events on
      */
-    public boolean isRegistered() {
-        return registered;
-    }
+    public static void registerAll(EventNode<Event> eventHandler) {
 
-    /**
-     * Gets this block instance. 'null' if this block has not been registered
-     *
-     * @return
-     */
-    public VanillaBlock getInstance() {
-        return instance;
-    }
-
-    /**
-     * Register all vanilla commands into the given blockManager. ConnectionManager is used to replace the basic block with its custom counterpart
-     *
-     * @param blockManager
-     */
-    public static void registerAll(ConnectionManager connectionManager, BlockManager blockManager) {
         for (VanillaBlocks vanillaBlock : values()) {
-            vanillaBlock.register((short) vanillaBlock.ordinal(), connectionManager, blockManager);
+            blockHandlerByNamespace.put(vanillaBlock.namespace.asString(), vanillaBlock.blockHandler);
         }
-    }
 
-    @FunctionalInterface
-    private interface VanillaBlockSupplier {
+        // TODO: Update (& remove) once minestom has a general PlaceBlock event
 
-        VanillaBlock create();
-    }
-
-    public static void dropOnBreak(Instance instance, BlockPosition position) {
-        LootTable table = null;
-        LootTableManager lootTableManager = MinecraftServer.getLootTableManager();
-        CustomBlock customBlock = instance.getCustomBlock(position);
-        if (customBlock != null) {
-            table = customBlock.getLootTable(lootTableManager);
-        }
-        Block block = Block.fromStateId(instance.getBlockStateId(position));
-        Data lootTableArguments = new DataImpl();
-        // TODO: tool used, silk touch, etc.
         try {
-            if (table == null) {
-                table = lootTableManager.load(NamespaceID.from("blocks/" + block.name().toLowerCase()));
-            }
-            List<ItemStack> stacks = table.generate(lootTableArguments);
-            for (ItemStack item : stacks) {
-                Position spawnPosition = new Position((float) (position.getX() + 0.2f + Math.random() * 0.6f), (float) (position.getY() + 0.5f), (float) (position.getZ() + 0.2f + Math.random() * 0.6f));
-                ItemEntity itemEntity = new ItemEntity(item, spawnPosition);
+            // Temporarily use reflection
+            Class<Block> clazz = Block.class;
 
-                itemEntity.getVelocity().setX((float) (Math.random() * 2f - 1f));
-                itemEntity.getVelocity().setY((float) (Math.random() * 2f));
-                itemEntity.getVelocity().setZ((float) (Math.random() * 2f - 1f));
+            for (Field field : clazz.getFields()) {
+                field.setAccessible(true);
 
-                itemEntity.setPickupDelay(500, TimeUnit.MILLISECOND);
-                itemEntity.setInstance(instance);
+                Block someBlock = (Block) field.get(null);
+                BlockHandler newHandler = blockHandlerByNamespace.get(someBlock.namespace().asString());
+                someBlock = someBlock.withHandler(newHandler);
+
+                // Apply default tag values if applicable
+                if (newHandler instanceof VanillaBlockHandler) {
+                    for (Map.Entry<Tag<?>, ?> entry : ((VanillaBlockHandler) newHandler).defaultTagValues().entrySet()) {
+                        someBlock = someBlock.withTag((Tag) entry.getKey(), entry.getValue());
+                    }
+                }
+
+                // Finally, replace default block handler
+                if (newHandler != null) {
+                    setFinalStatic(field, someBlock);
+                }
             }
-        } catch (FileNotFoundException e) {
-            // ignore missing table
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        eventHandler.addListener(
+                EventListener.of(
+                        PlayerBlockPlaceEvent.class,
+                        VanillaBlocks::handlePlayerBlockPlaceEvent
+                )
+        );
+    }
+
+    private static void handlePlayerBlockPlaceEvent(PlayerBlockPlaceEvent event) {
+        Block oldBlock = event.getBlock();
+
+        BlockHandler handler = blockHandlerByNamespace.get(oldBlock.namespace().asString());
+
+        if (handler == null) {
+            return;
+        }
+
+        event.setBlock(oldBlock.withHandler(handler));
+    }
+
+    private static void setFinalStatic(final Field ourField, Object newValue) {
+        try {
+            final Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
+            unsafeField.setAccessible(true);
+            final Unsafe unsafe = (Unsafe) unsafeField.get(null);
+            final Object staticFieldBase = unsafe.staticFieldBase(ourField);
+            final long staticFieldOffset = unsafe.staticFieldOffset(ourField);
+            unsafe.putObject(staticFieldBase, staticFieldOffset, newValue);
+        } catch (Exception ex) {
+            System.out.println("Fail!");
+            ex.printStackTrace();
         }
     }
+
+//    public static void dropOnBreak(Instance instance, BlockPosition position) {
+//        LootTable table = null;
+//        LootTableManager lootTableManager = MinecraftServer.getLootTableManager();
+//        CustomBlock customBlock = instance.getCustomBlock(position);
+//        if (customBlock != null) {
+//            table = customBlock.getLootTable(lootTableManager);
+//        }
+//        Block block = Block.fromStateId(instance.getBlockStateId(position));
+//        Data lootTableArguments = new DataImpl();
+//        // TODO: tool used, silk touch, etc.
+//        try {
+//            if (table == null) {
+//                table = lootTableManager.load(NamespaceID.from("blocks/" + block.name().toLowerCase()));
+//            }
+//            List<ItemStack> stacks = table.generate(lootTableArguments);
+//            for (ItemStack item : stacks) {
+//                Position spawnPosition = new Position((float) (position.getX() + 0.2f + Math.random() * 0.6f), (float) (position.getY() + 0.5f), (float) (position.getZ() + 0.2f + Math.random() * 0.6f));
+//                ItemEntity itemEntity = new ItemEntity(item, spawnPosition);
+//
+//                itemEntity.getVelocity().setX((float) (Math.random() * 2f - 1f));
+//                itemEntity.getVelocity().setY((float) (Math.random() * 2f));
+//                itemEntity.getVelocity().setZ((float) (Math.random() * 2f - 1f));
+//
+//                itemEntity.setPickupDelay(500, TimeUnit.MILLISECOND);
+//                itemEntity.setInstance(instance);
+//            }
+//        } catch (FileNotFoundException e) {
+//            // ignore missing table
+//        }
+//    }
 }

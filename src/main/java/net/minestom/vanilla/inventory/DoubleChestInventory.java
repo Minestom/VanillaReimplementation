@@ -3,6 +3,7 @@ package net.minestom.vanilla.inventory;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 public class DoubleChestInventory extends Inventory {
     private final Inventory left;
@@ -15,7 +16,7 @@ public class DoubleChestInventory extends Inventory {
     }
 
     @Override
-    public ItemStack getItemStack(int slot) {
+    public @NotNull ItemStack getItemStack(int slot) {
         if(slot < left.getSize()) {
             return left.getItemStack(slot);
         }
@@ -23,8 +24,8 @@ public class DoubleChestInventory extends Inventory {
     }
 
     @Override
-    protected void setItemStackInternal(int slot, ItemStack itemStack) {
-        if(slot < left.getSize()) {
+    public void setItemStack(int slot, @NotNull ItemStack itemStack) {
+        if (slot < left.getSize()) {
             left.setItemStack(slot, itemStack);
         } else {
             right.setItemStack(slot-left.getSize(), itemStack);

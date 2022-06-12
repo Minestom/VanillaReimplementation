@@ -1,83 +1,100 @@
 package net.minestom.vanilla.generation;
 
 import de.articdive.jnoise.JNoise;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.ChunkGenerator;
 import net.minestom.server.instance.ChunkPopulator;
 import net.minestom.server.instance.batch.ChunkBatch;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.generator.GenerationUnit;
+import net.minestom.server.instance.generator.Generator;
 import net.minestom.server.world.biomes.Biome;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-public class VanillaTestGenerator implements ChunkGenerator  {
+public class VanillaTestGenerator implements Generator {
 
-    private Random random = new Random();
-    private JNoise noise = JNoise.newBuilder().openSimplex().build();
+    private final JNoise noise = JNoise.newBuilder().fastSimplex().setFrequency(1.0 / 32.0).build();
+    private final JNoise treeNoise = JNoise.newBuilder().white().setFrequency(999999.0).build();
+
+    private synchronized double noise(JNoise noise, double x, double z) {
+        return noise.getNoise(x, 0, z);
+    }
 
     @Override
-    public void generateChunkData(ChunkBatch batch, int chunkX, int chunkZ) {
-        for (byte x = 0; x < Chunk.CHUNK_SIZE_X; x++) {
-            for (byte z = 0; z < Chunk.CHUNK_SIZE_Z; z++) {
-                int posX = chunkX*16+x;
-                int posZ = chunkZ*16+z;
-                double heightDelta = noise.getNoise(posX/16.0, posZ/16.0);
+    public void generate(@NotNull GenerationUnit unit) {
+        var modifier = unit.modifier();
+        modifier.fillBiome(Biome.PLAINS);
+
+        Point start = unit.absoluteStart();
+        Point end = unit.absoluteEnd();
+
+        for (int x = start.blockX(); x < end.blockX(); x++) {
+            for (int z = start.blockZ(); z < end.blockZ(); z++) {
+
+                double heightDelta = noise(noise, x, z);
                 int height = (int) (64 - heightDelta*16);
+                int bottom = 0;
+                int stone = height;
+                int dirt = stone + 5;
+                int grass = dirt + 1;
 
-                batch.setBlock(posX, 0, posZ, Block.BEDROCK);
-                for (int level = 1; level < height; level++) {
-                    batch.setBlock(posX, level, posZ, Block.STONE);
-                }
-                for (int level = height; level < 64; level++) {
-                    batch.setBlock(posX, level, posZ, Block.WATER);
-                }
-                for (int level = 64; level < height; level++) {
-                    batch.setBlock(posX, level, posZ, Block.DIRT);
+                for (int y = bottom; y < stone; y++) {
+                    modifier.setBlock(x, y, z, Block.STONE);
                 }
 
-                if(height >= 64) {
-                    batch.setBlock(posX, height, posZ, Block.GRASS_BLOCK);
+                for (int y = stone; y < dirt; y++) {
+                    modifier.setBlock(x, y, z, Block.DIRT);
+                }
 
-                    if(x >= 2 && z >= 2 && x < Chunk.CHUNK_SIZE_X-2 && z < Chunk.CHUNK_SIZE_X-2) { // avoid chunk borders
-                        if(random.nextDouble() < 0.02) {
-                            spawnTree(batch, posX, height+1, posZ);
-                        }
+                for (int y = dirt; y < grass; y++) {
+                    modifier.setBlock(x, y, z, Block.GRASS_BLOCK);
+                }
+
+                if (height < 64) {
+                    // Too low for a tree
+                    // However we can put water here
+                    for (int y = height; y < 64; y++) {
+                        modifier.setBlock(x, y, z, Block.WATER);
                     }
+                    continue;
+                }
+
+                if (noise(treeNoise, x, z) > 0.9) {
+                    Point treePos = new Vec(x, grass, z);
+                    unit.fork(setter -> spawnTree(setter, treePos));
                 }
             }
         }
     }
 
-    @Override
-    public void fillBiomes(Biome[] biomes, int chunkX, int chunkZ) {
-        Arrays.fill(biomes, Biome.PLAINS);
-    }
+    private void spawnTree(Block.Setter setter, Point pos) {
+        int trunkX = pos.blockX();
+        int trunkBottomY = pos.blockY();
+        int trunkZ = pos.blockZ();
 
-    private void spawnTree(ChunkBatch batch, int trunkX, int trunkBottomY, int trunkZ) {
         for (int i = 0; i < 2; i++) {
-            batch.setBlock(trunkX+1, trunkBottomY+3+i, trunkZ, Block.OAK_LEAVES);
-            batch.setBlock(trunkX-1, trunkBottomY+3+i, trunkZ, Block.OAK_LEAVES);
-            batch.setBlock(trunkX, trunkBottomY+3+i, trunkZ+1, Block.OAK_LEAVES);
-            batch.setBlock(trunkX, trunkBottomY+3+i, trunkZ-1, Block.OAK_LEAVES);
+            setter.setBlock(trunkX+1, trunkBottomY+3+i, trunkZ, Block.OAK_LEAVES);
+            setter.setBlock(trunkX-1, trunkBottomY+3+i, trunkZ, Block.OAK_LEAVES);
+            setter.setBlock(trunkX, trunkBottomY+3+i, trunkZ+1, Block.OAK_LEAVES);
+            setter.setBlock(trunkX, trunkBottomY+3+i, trunkZ-1, Block.OAK_LEAVES);
 
             for (int x = -1; x <= 1; x++) {
                 for (int z = -1; z <= 1; z++) {
-                    batch.setBlock(trunkX+x, trunkBottomY+2+i, trunkZ-z, Block.OAK_LEAVES);
+                    setter.setBlock(trunkX+x, trunkBottomY+2+i, trunkZ-z, Block.OAK_LEAVES);
                 }
             }
         }
 
-        batch.setBlock(trunkX, trunkBottomY, trunkZ, Block.OAK_LOG);
-        batch.setBlock(trunkX, trunkBottomY+1, trunkZ, Block.OAK_LOG);
-        batch.setBlock(trunkX, trunkBottomY+2, trunkZ, Block.OAK_LOG);
-        batch.setBlock(trunkX, trunkBottomY+3, trunkZ, Block.OAK_LOG);
-        batch.setBlock(trunkX, trunkBottomY+4, trunkZ, Block.OAK_LEAVES);
-    }
-
-    @Override
-    public List<ChunkPopulator> getPopulators() {
-        return null;
+        setter.setBlock(trunkX, trunkBottomY, trunkZ, Block.OAK_LOG);
+        setter.setBlock(trunkX, trunkBottomY+1, trunkZ, Block.OAK_LOG);
+        setter.setBlock(trunkX, trunkBottomY+2, trunkZ, Block.OAK_LOG);
+        setter.setBlock(trunkX, trunkBottomY+3, trunkZ, Block.OAK_LOG);
+        setter.setBlock(trunkX, trunkBottomY+4, trunkZ, Block.OAK_LEAVES);
     }
 }

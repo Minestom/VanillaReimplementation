@@ -10,6 +10,7 @@ import java.util.function.Supplier;
  */
 public enum VanillaCommands {
 
+    FORCELOAD(ForceloadCommand::new),
     GAMEMODE(GamemodeCommand::new),
     DIFFICULTY(DifficultyCommand::new),
     ME(MeCommand::new),
@@ -20,16 +21,16 @@ public enum VanillaCommands {
 
     private final Supplier<Command> commandCreator;
 
-    private VanillaCommands(Supplier<Command> commandCreator) {
+    VanillaCommands(Supplier<Command> commandCreator) {
         this.commandCreator = commandCreator;
     }
 
     /**
      * Register all vanilla commands into the given manager
-     * @param manager
+     * @param manager the command manager to register commands on
      */
     public static void registerAll(CommandManager manager) {
-        for(VanillaCommands vanillaCommand : values()) {
+        for (VanillaCommands vanillaCommand : values()) {
             Command command = vanillaCommand.commandCreator.get();
             manager.register(command);
         }

@@ -1,8 +1,8 @@
 package net.minestom.vanilla.commands;
 
 import net.minestom.server.command.CommandSender;
-import net.minestom.server.command.builder.Arguments;
 import net.minestom.server.command.builder.Command;
+import net.minestom.server.command.builder.CommandContext;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,18 +18,18 @@ public class HelpCommand extends Command {
         setDefaultExecutor(this::execute);
     }
 
-    private void execute(CommandSender player, Arguments arguments) {
-        player.sendMessage("=== Help ===");
-        List<VanillaCommands> commands = new ArrayList<>();
-        for(VanillaCommands command : VanillaCommands.values()) {
-            commands.add(command);
-        }
-        Collections.sort(commands, this::compareCommands);
+    private void execute(CommandSender sender, CommandContext context) {
+        sender.sendMessage("=== Help ===");
 
-        commands.forEach(command -> {
-            player.sendMessage("/"+command.name().toLowerCase());
-        });
-        player.sendMessage("============");
+        List<VanillaCommands> commands = new ArrayList<>();
+
+        Collections.addAll(commands, VanillaCommands.values());
+
+        commands.sort(this::compareCommands);
+
+        commands.forEach(command -> sender.sendMessage("/"+command.name().toLowerCase()));
+
+        sender.sendMessage("============");
     }
 
     private int compareCommands(VanillaCommands a, VanillaCommands b) {

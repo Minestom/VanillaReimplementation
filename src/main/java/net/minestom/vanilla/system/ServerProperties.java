@@ -12,9 +12,7 @@ public class ServerProperties {
     private final Properties properties;
 
     /**
-     * Creates a new property list from a given file. Will attempt create the file and fill with defaults if it does not exist
-     * @param source
-     * @throws IOException
+     * Creates a new property list from a given file. Will attempt to create the file and fill with defaults if it does not exist
      */
     public ServerProperties(File source) throws IOException {
         properties = new Properties();
@@ -25,6 +23,13 @@ public class ServerProperties {
         } else {
             save(); // write defaults to file
         }
+    }
+
+    public ServerProperties(String source) throws IOException {
+        properties = new Properties();
+        properties.load(new StringReader(source));
+        this.source = null;
+
     }
 
     private void loadDefault() throws IOException {

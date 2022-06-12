@@ -1,77 +1,59 @@
 package net.minestom.vanilla.entity;
 
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.ItemEntity;
-import net.minestom.server.entity.ObjectEntity;
+import net.minestom.server.entity.metadata.other.FallingBlockMeta;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.CustomBlock;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.utils.binary.BinaryWriter;
-import net.minestom.server.utils.BlockPosition;
-import net.minestom.server.utils.Position;
 
 import java.util.Random;
-import java.util.function.Consumer;
 
-public class FallingBlockEntity extends ObjectEntity {
-    private final Block baseBlock;
-    private final CustomBlock toPlace;
+public class FallingBlockEntity extends Entity {
+    private static final Random rng = new Random();
+    private final Block toPlace;
 
-    public FallingBlockEntity(Block baseBlock, CustomBlock toPlace, Position initialPosition) {
-        super(EntityType.FALLING_BLOCK, initialPosition);
-        this.baseBlock = baseBlock;
+    public FallingBlockEntity(Block toPlace, Pos initialPosition) {
+        super(EntityType.FALLING_BLOCK);
         this.toPlace = toPlace;
-        setGravity(0.025f, getGravityAcceleration(), getGravityTerminalVelocity());
+
+        // setGravity(0.025f, getGravityAcceleration());
         setBoundingBox(0.98f, 0.98f, 0.98f);
-    }
 
-    @Override
-    public int getObjectData() {
-        return baseBlock.getBlockId();
-    }
-
-    @Override
-    public void spawn() {
-
+        FallingBlockMeta meta = (FallingBlockMeta) this.getEntityMeta();
+        meta.setBlock(toPlace);
+        meta.setSpawnPosition(initialPosition);
     }
 
     @Override
     public void update(long time) {
-        if(isOnGround()) {
-            BlockPosition position = getPosition().toBlockPosition().subtract(0, 1, 0);
-            if(instance.getBlockStateId(position) != Block.AIR.getBlockId()) {
-                // landed on non-full block, break into item
-                Material correspondingItem = Material.valueOf(baseBlock.name()); // TODO: ugly way of finding corresponding item, change
-                ItemStack stack = new ItemStack(correspondingItem, (byte) 1);
-                ItemEntity itemForm = new ItemEntity(stack, new Position(position.getX()+0.5f, position.getY(), position.getZ()+0.5f));
+        // TODO: Cleanup this method structure
 
-                Random rng = new Random();
-                itemForm.getVelocity().setX((float) rng.nextGaussian()*2f);
-                itemForm.getVelocity().setY(rng.nextFloat()*2.5f+2.5f);
-                itemForm.getVelocity().setZ((float) rng.nextGaussian()*2f);
-
-                itemForm.setInstance(instance);
-            } else {
-                if(toPlace != null) {
-                    instance.setSeparateBlocks(position.getX(), position.getY(), position.getZ(), baseBlock.getBlockId(), toPlace.getCustomBlockId());
-                } else {
-                    instance.setBlock(getPosition().toBlockPosition(), baseBlock);
-                }
-            }
-            remove();
+        if (!isOnGround()) {
+            return;
         }
-    }
 
-    @Override
-    public Consumer<BinaryWriter> getMetadataConsumer() {
-        return packet -> {
-            super.getMetadataConsumer().accept(packet);
-            packet.writeByte((byte)7); // data index
-            packet.writeByte((byte) 9);
-            // https://wiki.vg/Entity_metadata#FallingBlock
-            BlockPosition spawnPosition = getPosition().toBlockPosition();
-            packet.writeBlockPosition(spawnPosition);
-        };
+        if (getVelocity().y() < 0.0) {
+            return;
+        }
+
+        Block block = instance.getBlock(position);
+        Block belowBlock = instance.getBlock(position.add(0, -1, 0));
+
+        if ((!block.isAir() && !block.isLiquid()) || !belowBlock.isSolid()) {
+            // TODO: Better way to get block's loot
+            Material loot = Material.fromNamespaceId(toPlace.namespace());
+
+            ItemEntity entity = new ItemEntity(ItemStack.of(loot));
+            entity.setInstance(instance);
+            entity.teleport(position);
+            remove();
+            return;
+        }
+
+        instance.setBlock(position, toPlace);
+        remove();
     }
 }

@@ -1,34 +1,39 @@
 package net.minestom.vanilla.system;
 
-import net.minestom.server.data.SerializableData;
-import net.minestom.server.data.SerializableDataImpl;
 import net.minestom.server.entity.Player;
-import net.minestom.server.inventory.Inventory;
-import net.minestom.server.inventory.InventoryType;
+import org.jetbrains.annotations.NotNull;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+import org.jglrxavpok.hephaistos.nbt.NBTList;
+import org.jglrxavpok.hephaistos.nbt.NBTType;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class EnderChestSystem {
 
-    private static EnderChestSystem INSTANCE;
+    public static final EnderChestSystem INSTANCE = new EnderChestSystem();
 
-    private SerializableData inventories = new SerializableDataImpl();
+    private final Map<UUID, NBTList<NBTCompound>> itemsMap = new HashMap<>();
 
-    private EnderChestSystem() {
+    private EnderChestSystem() {}
+
+    public NBTList<NBTCompound> getItems(@NotNull Player player) {
+        return getItems(player.getUuid());
     }
 
-    public Inventory get(Player player) {
-        // TODO: use UUID in future?
-        Inventory inv = inventories.get(player.getUsername());
-        if (inv == null) {
-            inv = new Inventory(InventoryType.CHEST_3_ROW, "EnderChest of " + player.getUsername());
-            inventories.set(player.getUsername(), inv, Inventory.class);
+    public @NotNull NBTList<NBTCompound> getItems(@NotNull UUID uuid) {
+        var items = itemsMap.get(uuid);
+
+        if (items == null) {
+            items = new NBTList<>(NBTType.TAG_Compound);
+            itemsMap.put(uuid, items);
         }
-        return inv;
+
+        return items;
     }
 
     public static EnderChestSystem getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new EnderChestSystem();
-        }
         return INSTANCE;
     }
 }
