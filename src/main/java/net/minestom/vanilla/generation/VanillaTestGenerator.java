@@ -19,7 +19,7 @@ import java.util.Random;
 
 public class VanillaTestGenerator implements Generator {
 
-    private final JNoise noise = JNoise.newBuilder().fastSimplex().setFrequency(1.0 / 16.0).build();
+    private final JNoise noise = JNoise.newBuilder().fastSimplex().setFrequency(1.0 / 32.0).build();
     private final JNoise treeNoise = JNoise.newBuilder().white().setFrequency(999999.0).build();
 
     private synchronized double noise(JNoise noise, double x, double z) {
@@ -35,26 +35,39 @@ public class VanillaTestGenerator implements Generator {
         Point end = unit.absoluteEnd();
 
         for (int x = start.blockX(); x < end.blockX(); x++) {
-            for (int z = start.blockZ(); z < end.blockX(); z++) {
+            for (int z = start.blockZ(); z < end.blockZ(); z++) {
 
                 double heightDelta = noise(noise, x, z);
                 int height = (int) (64 - heightDelta*16);
-                Point bottom = new Vec(x, 0, z);
-                Point stoneBoundary = new Vec(x, height, z);
-                Point dirtBoundary = stoneBoundary.withY(y -> y + 5);
-                Point grassLayer = dirtBoundary.withY(y -> y + 1);
+                int bottom = 0;
+                int stone = height;
+                int dirt = stone + 5;
+                int grass = dirt + 1;
 
-                modifier.fill(bottom, stoneBoundary, Block.STONE);
-                modifier.fill(stoneBoundary, dirtBoundary, Block.DIRT);
-                modifier.fill(dirtBoundary, grassLayer, Block.GRASS_BLOCK);
+                for (int y = bottom; y < stone; y++) {
+                    modifier.setBlock(x, y, z, Block.STONE);
+                }
+
+                for (int y = stone; y < dirt; y++) {
+                    modifier.setBlock(x, y, z, Block.DIRT);
+                }
+
+                for (int y = dirt; y < grass; y++) {
+                    modifier.setBlock(x, y, z, Block.GRASS_BLOCK);
+                }
 
                 if (height < 64) {
                     // Too low for a tree
+                    // However we can put water here
+                    for (int y = height; y < 64; y++) {
+                        modifier.setBlock(x, y, z, Block.WATER);
+                    }
                     continue;
                 }
 
                 if (noise(treeNoise, x, z) > 0.9) {
-                    unit.fork(setter -> spawnTree(setter, grassLayer.withY(y -> y + 1)));
+                    Point treePos = new Vec(x, grass, z);
+                    unit.fork(setter -> spawnTree(setter, treePos));
                 }
             }
         }
