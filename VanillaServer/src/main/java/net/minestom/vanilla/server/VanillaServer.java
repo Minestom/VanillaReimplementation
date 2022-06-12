@@ -1,4 +1,4 @@
-package net.minestom.vanilla;
+package net.minestom.vanilla.server;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
@@ -26,7 +26,6 @@ class VanillaServer {
      */
     public static void main(String[] args) {
         VanillaServer vanillaServer = new VanillaServer(MinecraftServer.init(), args);
-
         vanillaServer.start("0.0.0.0", 25565);
     }
 

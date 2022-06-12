@@ -1,2 +1,5 @@
 rootProject.name = 'MinestomVanillaReimplementation'
-include "Minestom"
+include 'Core'
+include 'WorldGeneration'
+include 'VanillaServer'
+

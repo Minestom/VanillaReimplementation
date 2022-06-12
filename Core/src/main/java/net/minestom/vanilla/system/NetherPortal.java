@@ -12,7 +12,6 @@ import net.minestom.server.network.packet.server.play.EffectPacket;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.particle.ParticleCreator;
-import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.vanilla.blocks.NetherPortalBlockHandler;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import org.jetbrains.annotations.Nullable;

@@ -1,4 +1,4 @@
-package net.minestom.vanilla;
+package net.minestom.vanilla.server;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
@@ -31,7 +31,6 @@ import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.generation.VanillaTestGenerator;
 import net.minestom.vanilla.instance.VanillaExplosion;
 import net.minestom.vanilla.system.ServerProperties;
-import org.jglrxavpok.hephaistos.nbt.NBT;
 
 public class VanillaEvents {
 

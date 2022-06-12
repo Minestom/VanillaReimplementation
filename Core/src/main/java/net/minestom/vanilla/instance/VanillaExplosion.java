@@ -21,8 +21,6 @@ import net.minestom.vanilla.damage.DamageTypes;
 import net.minestom.vanilla.entity.PrimedTNT;
 
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 public class VanillaExplosion extends Explosion {
 
