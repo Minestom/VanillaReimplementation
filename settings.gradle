@@ -1,5 +1,5 @@
 rootProject.name = 'MinestomVanillaReimplementation'
 include 'Core'
 include 'WorldGeneration'
-include 'VanillaServer'
+include 'Server'
 
