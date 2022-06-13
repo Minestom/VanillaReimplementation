@@ -9,6 +9,7 @@ subprojects {
 
     plugins.apply("java")
     plugins.apply("java-library")
+    plugins.apply("maven-publish")
     plugins.apply("com.github.harbby.gradle.serviceloader")
 
     group = "net.minestom.vanilla"
