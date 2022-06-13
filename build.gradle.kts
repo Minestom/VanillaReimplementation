@@ -15,6 +15,16 @@ subprojects {
     group = "net.minestom.vanilla"
     version = "indev"
 
+
+    // Specify java version
+    java.sourceCompatibility = JavaVersion.VERSION_17
+    java.targetCompatibility = JavaVersion.VERSION_17
+
+    java {
+        withJavadocJar()
+        withSourcesJar()
+    }
+
     repositories {
         mavenCentral()
         maven(url = "https://jitpack.io")
