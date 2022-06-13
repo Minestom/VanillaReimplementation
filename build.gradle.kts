@@ -5,6 +5,9 @@ plugins {
 group = "net.minestom.vanilla"
 version = "1.0"
 
+java.sourceCompatibility = JavaVersion.VERSION_17
+java.targetCompatibility = JavaVersion.VERSION_17
+
 subprojects {
 
     plugins.apply("java")
