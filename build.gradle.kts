@@ -1,9 +1,7 @@
 plugins {
+    java
     id ("com.github.harbby.gradle.serviceloader") version ("1.1.8")
 }
-
-group = "net.minestom.vanilla"
-version = "1.0"
 
 java.sourceCompatibility = JavaVersion.VERSION_17
 java.targetCompatibility = JavaVersion.VERSION_17
@@ -32,7 +30,6 @@ subprojects {
         mavenCentral()
         maven(url = "https://jitpack.io")
     }
-
 
     serviceLoader.serviceInterfaces.add("net.minestom.vanilla.VanillaReimplementation\$Feature")
 }
