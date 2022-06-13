@@ -12,12 +12,12 @@ public class RayFastManager {
         Area3d.CONVERTER.register(Entity.class, box ->
                 Area3dRectangularPrism.wrapper(
                         box,
-                        entity -> entity.getBoundingBox().minX(),
-                        entity -> entity.getBoundingBox().minY(),
-                        entity -> entity.getBoundingBox().minZ(),
-                        entity -> entity.getBoundingBox().maxX(),
-                        entity -> entity.getBoundingBox().maxY(),
-                        entity -> entity.getBoundingBox().maxZ()
+                        entity -> entity.getBoundingBox().minX() + entity.getPosition().x(),
+                        entity -> entity.getBoundingBox().minY() + entity.getPosition().y(),
+                        entity -> entity.getBoundingBox().minZ() + entity.getPosition().z(),
+                        entity -> entity.getBoundingBox().maxX() + entity.getPosition().x(),
+                        entity -> entity.getBoundingBox().maxY() + entity.getPosition().y(),
+                        entity -> entity.getBoundingBox().maxZ() + entity.getPosition().z()
                 )
         );
     }

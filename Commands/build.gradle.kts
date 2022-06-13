@@ -11,11 +11,15 @@ repositories {
 
 dependencies {
     implementation(project(":Core"))
-    implementation(project(":WorldGeneration"))
     implementation(project(":InstanceMeta"))
-    implementation(project(":Commands"))
 }
 
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
 }
+//
+//tasks.getByName<Jar>("jar") {
+//    from("./src/main/java") {
+//        include("META-INF/services/net.minestom.vanilla.commands.VanillaCommandsFeature")
+//    }
+//}

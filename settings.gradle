@@ -1,5 +1,7 @@
-rootProject.name = 'MinestomVanillaReimplementation'
+rootProject.name = 'Base'
 include 'Core'
 include 'WorldGeneration'
 include 'Server'
+include 'Commands'
+include 'InstanceMeta'
 

@@ -2,14 +2,19 @@ package net.minestom.vanilla.server;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.network.ConnectionManager;
+import net.minestom.server.world.DimensionType;
+import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.blocks.update.BlockUpdateManager;
 import net.minestom.vanilla.commands.VanillaCommands;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
-import net.minestom.vanilla.instance.tickets.TicketManager;
 import net.minestom.vanilla.items.ItemManager;
 import net.minestom.vanilla.items.VanillaItems;
 import net.minestom.vanilla.system.RayFastManager;
@@ -25,8 +30,18 @@ class VanillaServer {
      * @param args arguments passed from console
      */
     public static void main(String[] args) {
-        VanillaServer vanillaServer = new VanillaServer(MinecraftServer.init(), args);
-        vanillaServer.start("0.0.0.0", 25565);
+        // Use the static server process
+        MinecraftServer server = MinecraftServer.init();
+        VanillaReimplementation vri = VanillaReimplementation.hook(MinecraftServer.process());
+
+        Instance overworld = vri.createInstance("world", DimensionType.OVERWORLD);
+
+        vri.process().eventHandler()
+                .addListener(PlayerLoginEvent.class, event -> event.setSpawningInstance(overworld))
+                .addListener(PlayerSpawnEvent.class, event -> event.getPlayer().setRespawnPoint(new Pos(0, 0, 0)));
+
+        // Start the server
+        server.start("0.0.0.0", 25565);
     }
 
     private final MinecraftServer minecraftServer;
@@ -39,10 +54,8 @@ class VanillaServer {
 
         // Try to get server properties
 
-
         // Set up raycasting lib
         RayFastManager.init();
-
 
         EventNode<Event> eventHandler = MinecraftServer.getGlobalEventHandler();
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
@@ -72,9 +85,6 @@ class VanillaServer {
 
             // blocks
             VanillaBlocks.registerAll(eventHandler);
-
-            // chunk tickets
-            TicketManager.init(eventHandler);
         }
 //        CommandManager commandManager = MinecraftServer.getCommandManager();
 //        VanillaWorldgen.prepareFiles();

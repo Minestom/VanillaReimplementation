@@ -1,4 +1,4 @@
-package net.minestom.vanilla.instance.tickets;
+package net.minestom.vanilla.instancemeta.tickets;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -8,17 +8,15 @@ import it.unimi.dsi.fastutil.objects.Object2ShortMap;
 import it.unimi.dsi.fastutil.objects.Object2ShortOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.Short2IntMap;
 import it.unimi.dsi.fastutil.shorts.Short2IntOpenHashMap;
-import net.minestom.server.event.Event;
-import net.minestom.server.event.EventListener;
-import net.minestom.server.event.EventNode;
-import net.minestom.server.event.instance.InstanceChunkLoadEvent;
-import net.minestom.server.instance.Chunk;
-import net.minestom.server.instance.Instance;
+import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagReadable;
+import net.minestom.server.tag.TagSerializer;
+import net.minestom.server.tag.TagWritable;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /*
@@ -41,7 +39,13 @@ vriTicketValue = 34 - vanillaTicketValue
 @SuppressWarnings("UnstableApiUsage")
 public class TicketManager {
 
-    // TODO: Make tickets objects (trackable interfaces perhaps?)
+    public static final Tag<List<Ticket>> WAITING_TICKETS_TAG =
+            Tag.Structure("vri:instancemeta:waiting_tickets", TicketManager.Ticket.SERIALIZER)
+                    .list();
+
+    public static final Tag<List<Ticket>> REMOVING_TICKETS_TAG =
+            Tag.Structure("vri:instancemeta:removing_tickets", TicketManager.Ticket.SERIALIZER)
+                    .list();
 
     // Vanilla ticket values
     public static final short PLAYER_TICKET = 34 - 31;
@@ -54,54 +58,65 @@ public class TicketManager {
     public static final short END_PORTAL_TICKET = 34 - 33;
     public static final short TEMPORARY_TICKET = 34 - 33;
 
-    private static final Map<Instance, TicketManager> instance2TicketManager = new WeakHashMap<>();
-
     /**
      * The first Long is the target chunk
      * The second Long is the source chunk
      * The resulting Short is the value for this chunk
      */
-    public final Object2ShortMap<Source2Target> externalTicketValues = new Object2ShortOpenHashMap<>();
-    public final Long2ObjectMap<Short2IntMap> internalTicketValues = new Long2ObjectOpenHashMap<>();
-    public final Long2ShortMap currentTicketValue = new Long2ShortOpenHashMap();
+    private final Object2ShortMap<Source2Target> externalTicketValues = new Object2ShortOpenHashMap<>();
+    private final Long2ObjectMap<Short2IntMap> internalTicketValues = new Long2ObjectOpenHashMap<>();
+    private final Long2ShortMap currentTicketValue = new Long2ShortOpenHashMap();
+
+
+    public interface Ticket {
+        short value();
+        long chunk();
+
+        static @NotNull Ticket from(short value, long chunk) {
+            return new TicketImpl(value, chunk);
+        }
+
+        Tag<Short> VALUE_TAG = Tag.Short("vri:instancemeta:ticket_value");
+        Tag<Long> CHUNK_TAG = Tag.Long("vri:instancemeta:ticket_chunk");
+
+        TagSerializer<Ticket> SERIALIZER = new TagSerializer<>() {
+            @Override
+            public @Nullable Ticket read(@NotNull TagReadable reader) {
+                Short value = reader.getTag(VALUE_TAG);
+                Long chunk = reader.getTag(CHUNK_TAG);
+                if (value == null || chunk == null) {
+                    return null;
+                }
+                return new TicketImpl(value, chunk);
+            }
+
+            @Override
+            public void write(@NotNull TagWritable writer, @NotNull Ticket value) {
+                writer.setTag(VALUE_TAG, value.value());
+                writer.setTag(CHUNK_TAG, value.chunk());
+            }
+        };
+    }
+
+    private record TicketImpl(short value, long chunk) implements Ticket {
+    }
 
     private record Source2Target(long source, long target) {
     }
 
-
-    public static void init(EventNode<Event> eventNode) {
-        eventNode.addListener(
-            EventListener.of(
-                InstanceChunkLoadEvent.class, TicketManager::handleInstanceChunkLoadEvent
-            )
-        );
-    }
-
-    private TicketManager() {
-    }
-
-    public static @NotNull TicketManager of(Instance instance) {
-        TicketManager manager = instance2TicketManager.get(instance);
-
-        if (manager != null) {
-            return manager;
-        }
-
-        manager = new TicketManager();
-
-        for (Chunk chunk : instance.getChunks()) {
-            manager.prepareChunk(ChunkUtils.getChunkIndex(chunk));
-        }
-
-        instance2TicketManager.put(instance, manager);
-        return manager;
-    }
-
-    public static boolean remove(Instance instance) {
-        return instance2TicketManager.remove(instance) != null;
+    public TicketManager() {
     }
 
     // Ticket methods
+
+    /**
+     * Adds a ticket and updates surrounding chunks.
+     *
+     * @param ticket the ticket to add
+     */
+    public void addTicket(@NotNull Ticket ticket) {
+        addTicket(ticket.value(), ticket.chunk());
+    }
 
     /**
      * Adds a ticket to the specified chunk and updates surrounding chunks.
@@ -109,7 +124,7 @@ public class TicketManager {
      * @param chunk the chunk index of the chunk to add the ticket to
      * @param value the value of the ticket
      */
-    public void addTicket(long chunk, short value) {
+    public void addTicket(short value, long chunk) {
 
         // Add value to internal
         Short2IntMap internalValues = internalTicketValues.get(chunk);
@@ -315,23 +330,9 @@ public class TicketManager {
                 .collect(Collectors.joining(", ")) + " )";
     }
 
-    private static void handleInstanceChunkLoadEvent(InstanceChunkLoadEvent event) {
-        Instance instance = event.getInstance();
-        int chunkX = event.getChunkX();
-        int chunkZ = event.getChunkZ();
-        long chunkIndex = ChunkUtils.getChunkIndex(chunkX, chunkZ);
-        TicketManager ticketManager = TicketManager.of(instance);
-
-        Chunk chunk = instance.getChunk(chunkX, chunkZ);
-
-        if (chunk == null) {
-            throw new IllegalStateException("Chunk coords passed to InstanceChunkLoadEvent did not have a loaded chunk.");
-        }
-
-        // Ensure chunk has ticket value set & tickets cache initialised
-        //noinspection SynchronizationOnLocalVariableOrMethodParameter
-        synchronized (ticketManager) {
-            ticketManager.prepareChunk(chunkIndex);
+    private void handleInstanceChunkLoad(long chunkIndex) {
+        synchronized (this) {
+            prepareChunk(chunkIndex);
         }
     }
 

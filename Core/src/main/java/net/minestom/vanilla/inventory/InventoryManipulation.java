@@ -18,7 +18,7 @@ public class InventoryManipulation {
             return;
         }
 
-        int damage = itemStack.getMeta().getDamage();
+        int damage = itemStack.meta().getDamage();
         ItemStack newItem = itemStack.withMeta(meta -> meta.damage(damage + 1));
 
         player.getInventory().setItemInHand(hand, newItem);
