@@ -1,16 +1,3 @@
-plugins {
-    java
-    `java-library`
-}
-
-group = "net.minestom.vanilla"
-version = "1.0"
-
-repositories {
-    mavenCentral()
-    maven(url = "https://jitpack.io")
-}
-
 dependencies {
 
     // Minestom
@@ -24,8 +11,4 @@ dependencies {
 
     // Annotations
     api("org.jetbrains:annotations:${project.property("annotations_version")}")
-}
-
-tasks.getByName<Test>("test") {
-    useJUnitPlatform()
 }
