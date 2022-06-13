@@ -38,7 +38,19 @@ class VanillaServer {
 
         vri.process().eventHandler()
                 .addListener(PlayerLoginEvent.class, event -> event.setSpawningInstance(overworld))
-                .addListener(PlayerSpawnEvent.class, event -> event.getPlayer().setRespawnPoint(new Pos(0, 0, 0)));
+                .addListener(PlayerSpawnEvent.class, event -> {
+                    Instance instance = event.getSpawnInstance();
+                    // Find the first block that is not air
+                    int y = instance.getDimensionType().getMaxY();
+                    while (instance.getBlock(0, y, -0).isAir()) {
+                        y--;
+                        if (y < instance.getDimensionType().getMinY()) {
+                            y = 0;
+                            break;
+                        }
+                    }
+                    event.getPlayer().teleport(new Pos(0, y, 0));
+                });
 
         // Start the server
         server.start("0.0.0.0", 25565);
