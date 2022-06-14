@@ -1,10 +1,6 @@
 plugins {
-    java
     id ("com.github.harbby.gradle.serviceloader") version ("1.1.8")
 }
-
-java.sourceCompatibility = JavaVersion.VERSION_17
-java.targetCompatibility = JavaVersion.VERSION_17
 
 subprojects {
 
