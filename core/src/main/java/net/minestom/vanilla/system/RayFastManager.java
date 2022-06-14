@@ -2,7 +2,6 @@ package net.minestom.vanilla.system;
 
 import dev.emortal.rayfast.area.area3d.Area3d;
 import dev.emortal.rayfast.area.area3d.Area3dRectangularPrism;
-import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.entity.Entity;
 
 public class RayFastManager {

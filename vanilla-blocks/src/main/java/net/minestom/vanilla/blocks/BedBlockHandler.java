@@ -91,15 +91,15 @@ public class BedBlockHandler extends VanillaBlockHandler {
 
             // Schedule player getting out of bed
             MinecraftServer.getSchedulerManager().buildTask(() -> {
-                    if (!player.getPlayerConnection().isOnline()) {
-                        return;
-                    }
+                        if (!player.getPlayerConnection().isOnline()) {
+                            return;
+                        }
 
-                    meta.setBedInWhichSleepingPosition(null);
-                    meta.setPose(Entity.Pose.STANDING);
-                })
-                .delay(101, TimeUnit.SERVER_TICK)
-                .schedule();
+                        meta.setBedInWhichSleepingPosition(null);
+                        meta.setPose(Entity.Pose.STANDING);
+                    })
+                    .delay(101, TimeUnit.SERVER_TICK)
+                    .schedule();
             return true;
         }
 

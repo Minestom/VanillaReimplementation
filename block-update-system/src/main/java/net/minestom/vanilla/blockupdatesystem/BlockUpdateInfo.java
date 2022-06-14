@@ -16,9 +16,12 @@ public interface BlockUpdateInfo {
         return new MoveBlock(movedBlock);
     }
 
-    record DestroyBlock(Point destroyedBlock) implements BlockUpdateInfo {}
+    record DestroyBlock(Point destroyedBlock) implements BlockUpdateInfo {
+    }
 
-    record PlaceBlock(Point placedBlock) implements BlockUpdateInfo {}
+    record PlaceBlock(Point placedBlock) implements BlockUpdateInfo {
+    }
 
-    record MoveBlock(Point movingBlock) implements BlockUpdateInfo {}
+    record MoveBlock(Point movingBlock) implements BlockUpdateInfo {
+    }
 }

@@ -1,5 +1,29 @@
 plugins {
-    id ("com.github.harbby.gradle.serviceloader") version ("1.1.8")
+    java
+    `java-library`
+    id("com.github.harbby.gradle.serviceloader") version ("1.1.8")
+}
+
+repositories {
+    mavenCentral()
+    maven(url = "https://jitpack.io")
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+
+    withJavadocJar()
+    withSourcesJar()
+}
+
+dependencies {
+    implementation(project(":core"))
+    implementation(project(":world-generation"))
+    implementation(project(":instance-meta"))
+    implementation(project(":commands"))
+    implementation(project(":block-update-system"))
+    implementation(project(":vanilla-blocks"))
 }
 
 subprojects {
@@ -12,12 +36,10 @@ subprojects {
     group = "net.minestom.vanilla"
     version = "indev"
 
-
-    // Specify java version
-    java.sourceCompatibility = JavaVersion.VERSION_17
-    java.targetCompatibility = JavaVersion.VERSION_17
-
     java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+
         withJavadocJar()
         withSourcesJar()
     }

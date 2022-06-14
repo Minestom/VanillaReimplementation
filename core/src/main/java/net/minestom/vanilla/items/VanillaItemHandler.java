@@ -10,7 +10,8 @@ public interface VanillaItemHandler {
      *
      * @param event the event object
      */
-    default void onUseInAir(PlayerUseItemEvent event) {}
+    default void onUseInAir(PlayerUseItemEvent event) {
+    }
 
     /**
      * Called when the player right clicks with this item on a block

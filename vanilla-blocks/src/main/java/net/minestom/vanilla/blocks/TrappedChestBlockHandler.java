@@ -20,5 +20,4 @@ public class TrappedChestBlockHandler extends ChestLikeBlockHandler {
     }
 
 
-
 }

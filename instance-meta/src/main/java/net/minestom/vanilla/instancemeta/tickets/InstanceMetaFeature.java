@@ -1,6 +1,5 @@
 package net.minestom.vanilla.instancemeta.tickets;
 
-import net.minestom.server.ServerProcess;
 import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.utils.NamespaceID;

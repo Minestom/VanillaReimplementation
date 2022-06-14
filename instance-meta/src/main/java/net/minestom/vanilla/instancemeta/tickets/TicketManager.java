@@ -70,6 +70,7 @@ public class TicketManager {
 
     public interface Ticket {
         short value();
+
         long chunk();
 
         static @NotNull Ticket from(short value, long chunk) {
@@ -194,6 +195,7 @@ public class TicketManager {
 
     /**
      * Removes a ticket from this chunk and updates the surrounding chunks
+     *
      * @param chunk the chunk index of the chunk to remove the ticket from
      * @param value the value of the ticket being removed
      */
@@ -322,8 +324,8 @@ public class TicketManager {
     public String getChunkInfo(long chunkIndex) {
 
         return "Current Value: " + currentTicketValue.get(chunkIndex) + "\n"
-             + "Internal Tickets: " + internalTicketValues.get(chunkIndex) + "\n"
-             + "External Tickets: " + " (" + externalTicketValues.object2ShortEntrySet()
+                + "Internal Tickets: " + internalTicketValues.get(chunkIndex) + "\n"
+                + "External Tickets: " + " (" + externalTicketValues.object2ShortEntrySet()
                 .stream()
                 .filter(entry -> entry.getKey().target() == chunkIndex)
                 .map(String::valueOf)

@@ -16,7 +16,8 @@ public class EnderChestSystem {
 
     private final Map<UUID, NBTList<NBTCompound>> itemsMap = new HashMap<>();
 
-    private EnderChestSystem() {}
+    private EnderChestSystem() {
+    }
 
     public NBTList<NBTCompound> getItems(@NotNull Player player) {
         return getItems(player.getUuid());

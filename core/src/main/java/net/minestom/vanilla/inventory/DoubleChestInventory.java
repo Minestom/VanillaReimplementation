@@ -17,10 +17,10 @@ public class DoubleChestInventory extends Inventory {
 
     @Override
     public @NotNull ItemStack getItemStack(int slot) {
-        if(slot < left.getSize()) {
+        if (slot < left.getSize()) {
             return left.getItemStack(slot);
         }
-        return right.getItemStack(slot-left.getSize());
+        return right.getItemStack(slot - left.getSize());
     }
 
     @Override
@@ -28,7 +28,7 @@ public class DoubleChestInventory extends Inventory {
         if (slot < left.getSize()) {
             left.setItemStack(slot, itemStack);
         } else {
-            right.setItemStack(slot-left.getSize(), itemStack);
+            right.setItemStack(slot - left.getSize(), itemStack);
         }
     }
 

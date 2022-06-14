@@ -19,6 +19,8 @@ import net.minestom.vanilla.system.ServerProperties;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+
 class VanillaServer {
 
     /**
@@ -48,6 +50,12 @@ class VanillaServer {
                     }
                     event.getPlayer().teleport(new Pos(0, y, 0));
                 });
+
+        try {
+            VanillaEvents.register(new ServerProperties("server.properties"), vri.process().eventHandler());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         // Start the server
         server.start("0.0.0.0", 25565);

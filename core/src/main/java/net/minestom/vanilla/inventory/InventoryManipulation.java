@@ -2,7 +2,6 @@ package net.minestom.vanilla.inventory;
 
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.StackingRule;
 
 public class InventoryManipulation {
     public static void consumeItemIfNotCreative(Player player, ItemStack itemStack, Player.Hand hand) {

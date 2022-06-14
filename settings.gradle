@@ -1,7 +1,6 @@
-rootProject.name = 'Base'
+rootProject.name = 'Server'
 include 'core'
 include 'world-generation'
-include 'server'
 include 'commands'
 include 'instance-meta'
 include 'block-update-system'

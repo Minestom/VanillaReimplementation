@@ -28,6 +28,7 @@ public enum VanillaCommands {
 
     /**
      * Register all vanilla commands into the given manager
+     *
      * @param manager the command manager to register commands on
      */
     public static void registerAll(@NotNull CommandManager manager) {

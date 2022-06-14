@@ -1,6 +1,5 @@
 package net.minestom.vanilla.commands;
 
-import net.minestom.server.ServerProcess;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaReimplementation;
 import org.jetbrains.annotations.NotNull;

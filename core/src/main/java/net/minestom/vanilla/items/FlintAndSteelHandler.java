@@ -10,7 +10,8 @@ import net.minestom.server.utils.Direction;
 import net.minestom.vanilla.inventory.InventoryManipulation;
 
 public class FlintAndSteelHandler implements VanillaItemHandler {
-    public FlintAndSteelHandler() {}
+    public FlintAndSteelHandler() {
+    }
 
     @Override
     public boolean onUseOnBlock(PlayerUseItemOnBlockEvent event) {

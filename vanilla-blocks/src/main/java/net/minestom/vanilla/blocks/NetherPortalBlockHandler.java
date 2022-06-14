@@ -115,7 +115,7 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler implements Blo
         newBlock = newBlock.withTag(LAST_PORTAL_KEY, portal.id()); // data.set(, portal, NetherPortal.class);
 
         if (ticksSpentInPortal == 0) {
-            Event event = new  EntityEnterNetherPortalEvent(touching, position, portal);
+            Event event = new EntityEnterNetherPortalEvent(touching, position, portal);
 
             MinecraftServer.getGlobalEventHandler().call(event);
         }
@@ -261,8 +261,8 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler implements Blo
 
             if (
                     event.getPortal() != null &&
-                    event.getPortal().getAxis()
-                    != event.getTargetPortal().getAxis()
+                            event.getPortal().getAxis()
+                                    != event.getTargetPortal().getAxis()
             ) {
                 double swapTmp = velocity.x();
 

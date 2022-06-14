@@ -87,7 +87,8 @@ public class GamemodeCommand extends Command {
     private void executeOthers(CommandSender sender, GameMode mode, List<Entity> entities) {
         if (entities.size() == 0) {
             //If there are no players that could be modified, display an error message
-            if (sender.isPlayer()) sender.sendMessage(Component.translatable("argument.entity.notfound.player", NamedTextColor.RED), MessageType.SYSTEM);
+            if (sender.isPlayer())
+                sender.sendMessage(Component.translatable("argument.entity.notfound.player", NamedTextColor.RED), MessageType.SYSTEM);
             else sender.sendMessage(Component.text("No player was found", NamedTextColor.RED), MessageType.SYSTEM);
         } else for (Entity entity : entities) {
             if (entity instanceof Player p) {

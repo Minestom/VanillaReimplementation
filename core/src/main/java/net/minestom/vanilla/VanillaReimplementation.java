@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.ServiceLoader;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -29,6 +28,7 @@ public class VanillaReimplementation {
 
     /**
      * Creates a new instance of {@link VanillaReimplementation} and hooks into the server process.
+     *
      * @param process the server process
      * @return the new instance
      */
@@ -90,6 +90,7 @@ public class VanillaReimplementation {
 
         /**
          * Hooks into this server process.
+         *
          * @param vri the vanilla reimplementation object
          */
         void hook(@NotNull VanillaReimplementation vri);

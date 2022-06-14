@@ -12,7 +12,6 @@ import net.minestom.vanilla.blocks.redstone.RedstoneContainerBlockHandler;
 import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignal;
 import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignalTarget;
 import net.minestom.vanilla.entity.PrimedTNT;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

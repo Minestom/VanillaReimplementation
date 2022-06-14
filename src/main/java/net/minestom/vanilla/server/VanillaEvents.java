@@ -14,7 +14,9 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.AddEntityToInstanceEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.item.PickupItemEvent;
-import net.minestom.server.event.player.*;
+import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.PlayerMoveEvent;
+import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.instance.ExplosionSupplier;
 import net.minestom.server.instance.InstanceContainer;
@@ -140,40 +142,40 @@ public class VanillaEvents {
         });
 
         eventNode.addListener(
-            EventListener.builder(PlayerSpawnEvent.class)
-                .filter(PlayerSpawnEvent::isFirstSpawn)
-                .handler(event -> {
-                    Player player = event.getPlayer();
+                EventListener.builder(PlayerSpawnEvent.class)
+                        .filter(PlayerSpawnEvent::isFirstSpawn)
+                        .handler(event -> {
+                            Player player = event.getPlayer();
 
-                    player.setPermissionLevel(4);
-                    player.setGameMode(GameMode.CREATIVE);
+                            player.setPermissionLevel(4);
+                            player.setGameMode(GameMode.CREATIVE);
 
-                    player.getInstance().loadChunk(player.getPosition()).join();
+                            player.getInstance().loadChunk(player.getPosition()).join();
 
-                    int y = 0;
-                    while (!player.getInstance().getBlock(1, y, 1).isAir()) {
-                        y++;
-                    }
+                            int y = 0;
+                            while (!player.getInstance().getBlock(1, y, 1).isAir()) {
+                                y++;
+                            }
 
-                    player.teleport(new Pos(1, y, 1));
-                    PlayerInventory inventory = player.getInventory();
+                            player.teleport(new Pos(1, y, 1));
+                            PlayerInventory inventory = player.getInventory();
 
-                    inventory.addItemStack(ItemStack.of(Material.OBSIDIAN, 1));
-                    inventory.addItemStack(ItemStack.of(Material.FLINT_AND_STEEL, 1));
-                    inventory.addItemStack(ItemStack.of(Material.RED_BED, 1));
-                })
-                .build()
+                            inventory.addItemStack(ItemStack.of(Material.OBSIDIAN, 1));
+                            inventory.addItemStack(ItemStack.of(Material.FLINT_AND_STEEL, 1));
+                            inventory.addItemStack(ItemStack.of(Material.RED_BED, 1));
+                        })
+                        .build()
         );
 
         eventNode.addListener(
-            EventListener.builder(PickupItemEvent.class)
-                .filter(event -> event.getEntity() instanceof Player)
-                .handler(event -> {
-                    Player player = (Player) event.getEntity();
-                    boolean couldAdd = player.getInventory().addItemStack(event.getItemStack());
-                    event.setCancelled(!couldAdd); // Cancel event if player does not have enough inventory space
-                })
-                .build()
+                EventListener.builder(PickupItemEvent.class)
+                        .filter(event -> event.getEntity() instanceof Player)
+                        .handler(event -> {
+                            Player player = (Player) event.getEntity();
+                            boolean couldAdd = player.getInventory().addItemStack(event.getItemStack());
+                            event.setCancelled(!couldAdd); // Cancel event if player does not have enough inventory space
+                        })
+                        .build()
         );
 
         eventNode.addListener(ItemDropEvent.class, event -> {

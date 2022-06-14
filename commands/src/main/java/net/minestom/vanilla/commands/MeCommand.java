@@ -46,7 +46,7 @@ public class MeCommand extends Command {
     }
 
     @SuppressWarnings("unused")
-	private boolean isAllowed(CommandSender player) {
+    private boolean isAllowed(CommandSender player) {
         return player.isPlayer(); // TODO: permissions
     }
 }

@@ -41,8 +41,9 @@ public abstract class RedstoneContainerBlockHandler extends VanillaBlockHandler 
 
     /**
      * Gets the redstone signal at this position if applicable
+     *
      * @param instance the instance to get the redstone signal from
-     * @param point the position to get the redstone signal from
+     * @param point    the position to get the redstone signal from
      * @return the redstone signal, null if none
      */
     public @Nullable RedstoneSignal getRedstoneSignal(Instance instance, Point point) {
@@ -58,9 +59,10 @@ public abstract class RedstoneContainerBlockHandler extends VanillaBlockHandler 
 
     /**
      * This gets ran when a new redstone signal overrides an old one, or fills the absence with one.
+     *
      * @param redstoneSignalTarget the redstone signal block
-     * @param newRedstoneSignal the new redstone signal info
-     * @param oldRedstoneSignal the old redstone signal info, null if not any
+     * @param newRedstoneSignal    the new redstone signal info
+     * @param oldRedstoneSignal    the old redstone signal info, null if not any
      */
     public void newRedstoneSignal(
             @NotNull RedstoneSignalTarget redstoneSignalTarget,
@@ -71,8 +73,9 @@ public abstract class RedstoneContainerBlockHandler extends VanillaBlockHandler 
 
     /**
      * This gets ran when all redstone signals are removed
+     *
      * @param redstoneSignalTarget the last redstone signal to be removed
-     * @param redstoneSignal the info of the last redstone signal
+     * @param redstoneSignal       the info of the last redstone signal
      */
     public void noRedstoneSignal(@NotNull RedstoneSignalTarget redstoneSignalTarget, RedstoneSignal redstoneSignal) {
     }

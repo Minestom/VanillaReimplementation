@@ -17,7 +17,6 @@ import net.minestom.server.instance.batch.AbsoluteBlockBatch;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.vanilla.damage.DamageTypes;
-import net.minestom.vanilla.entity.PrimedTNT;
 
 import java.util.*;
 

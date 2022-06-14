@@ -57,6 +57,7 @@ public class RedstoneSignalManager {
 
     /**
      * Gets the signal table of this instance.
+     *
      * @return the redstone signal table
      */
     public Map<Pos, PriorityQueue<RedstoneSignal>> getSignalMap() {
@@ -67,7 +68,7 @@ public class RedstoneSignalManager {
      * Handles this redstone signal's propagation
      *
      * @param redstoneSignal the signal information
-     * @param targets the targets to propagate the signal to
+     * @param targets        the targets to propagate the signal to
      */
     public void handleRedstoneSignal(RedstoneSignal redstoneSignal, @NotNull Point... targets) {
         if (redstoneSignal.strength() == 0) {

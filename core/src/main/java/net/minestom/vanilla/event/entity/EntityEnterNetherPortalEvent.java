@@ -31,6 +31,7 @@ public class EntityEnterNetherPortalEvent implements Event, InstanceEvent, Entit
 
     /**
      * Position of the portal block which triggered the update
+     *
      * @return
      */
     public Point getPosition() {
@@ -39,6 +40,7 @@ public class EntityEnterNetherPortalEvent implements Event, InstanceEvent, Entit
 
     /**
      * The nether portal the entity is in. Can be null if the portal was added with /setblock
+     *
      * @return
      */
     public NetherPortal getPortal() {

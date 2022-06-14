@@ -27,7 +27,7 @@ public class HelpCommand extends Command {
 
         commands.sort(this::compareCommands);
 
-        commands.forEach(command -> sender.sendMessage("/"+command.name().toLowerCase()));
+        commands.forEach(command -> sender.sendMessage("/" + command.name().toLowerCase()));
 
         sender.sendMessage("============");
     }

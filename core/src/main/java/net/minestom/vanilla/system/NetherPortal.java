@@ -137,11 +137,10 @@ public final class NetherPortal {
     }
 
     /**
-     *
-     * @param instance the instance to build the frame
+     * @param instance            the instance to build the frame
      * @param checkPreviousBlocks should check if frame is full of air/portal/fire
-     * @param block the block to place
-     * @param blockPositions the set to fill with block positions
+     * @param block               the block to place
+     * @param blockPositions      the set to fill with block positions
      */
     private boolean replaceFrameContents(Instance instance, boolean checkPreviousBlocks, Block block, @Nullable Set<Point> blockPositions) {
         int minX = Math.min(frameTopLeftCorner.blockX(), frameBottomRightCorner.blockX());
@@ -155,7 +154,7 @@ public final class NetherPortal {
         int width = computeWidth() - 1; // encompasses frame blocks
 
         if (checkPreviousBlocks) {
-            if(!checkInsideFrameForAir(instance, minX, maxX, minY, maxY, minZ, maxZ, axis)) {
+            if (!checkInsideFrameForAir(instance, minX, maxX, minY, maxY, minZ, maxZ, axis)) {
                 return false;
             }
         }
@@ -181,13 +180,14 @@ public final class NetherPortal {
 
     /**
      * Gets a {@link NetherPortal} frame description from a block that would be contained inside the frame.
+     *
      * @param instance the instance to draw blocks from
-     * @param pos the position of the potential future frame block
+     * @param pos      the position of the potential future frame block
      * @return null if no valid frame was found, a new {@link NetherPortal} instance with detailed info otherwise
      */
     public static NetherPortal findPortalFrameFromFrameBlock(Instance instance, Point pos) {
         NetherPortal alongAxisX = findPortalFrameFromFrameBlock(instance, pos, Axis.X);
-        if(alongAxisX != null)
+        if (alongAxisX != null)
             return alongAxisX;
         return findPortalFrameFromFrameBlock(instance, pos, Axis.Z);
     }
@@ -199,7 +199,7 @@ public final class NetherPortal {
         Queue<Point> neighbors = new LinkedBlockingDeque<>();
         neighbors.add(frameBlock);
 
-        while(!neighbors.isEmpty()) {
+        while (!neighbors.isEmpty()) {
             Point position = neighbors.poll();
             considered.add(position);
 
@@ -218,9 +218,9 @@ public final class NetherPortal {
 
             Block block = instance.getBlock(position);
 
-            if(!block.isAir() &&
-                block != Block.FIRE &&
-                block != Block.NETHER_PORTAL
+            if (!block.isAir() &&
+                    block != Block.FIRE &&
+                    block != Block.NETHER_PORTAL
             ) {
                 continue;
             }
@@ -232,19 +232,19 @@ public final class NetherPortal {
             Point left = position.add(-1 * axis.xMultiplier, 0, -1 * axis.zMultiplier);
             Point right = position.add(axis.xMultiplier, 0, axis.zMultiplier);
 
-            if(!considered.contains(above) && !neighbors.contains(above)) {
+            if (!considered.contains(above) && !neighbors.contains(above)) {
                 neighbors.add(above);
             }
 
-            if(!considered.contains(below) && !neighbors.contains(below)) {
+            if (!considered.contains(below) && !neighbors.contains(below)) {
                 neighbors.add(below);
             }
 
-            if(!considered.contains(left) && !neighbors.contains(left)) {
+            if (!considered.contains(left) && !neighbors.contains(left)) {
                 neighbors.add(left);
             }
 
-            if(!considered.contains(right) && !neighbors.contains(right)) {
+            if (!considered.contains(right) && !neighbors.contains(right)) {
                 neighbors.add(right);
             }
         }
@@ -300,7 +300,7 @@ public final class NetherPortal {
         }
 
         // TODO: check that frame is obsidian
-        if(!checkFrameIsObsidian(instance, axis, bottomRight, topLeft)) {
+        if (!checkFrameIsObsidian(instance, axis, bottomRight, topLeft)) {
             return null;
         }
 
@@ -316,8 +316,8 @@ public final class NetherPortal {
         int maxY = topLeftCorner.blockY();
         int maxZ = Math.max(topLeftCorner.blockZ(), bottomRightCorner.blockZ());
 
-        int width = (maxX-minX)*axis.xMultiplier + (maxZ-minZ)*axis.zMultiplier +1; // encompasses frame blocks
-        int height = maxY - minY +1;
+        int width = (maxX - minX) * axis.xMultiplier + (maxZ - minZ) * axis.zMultiplier + 1; // encompasses frame blocks
+        int height = maxY - minY + 1;
 
         // offsets by one are used to ignore portal corners
 
@@ -350,19 +350,19 @@ public final class NetherPortal {
             int z = minZ;
 
             // left
-            Block frameBlock = instance.getBlock(x, minY+j, z);
+            Block frameBlock = instance.getBlock(x, minY + j, z);
             if (!frameBlock.compare(Block.OBSIDIAN)) {
                 return false;
             }
 
             if (axis == Axis.X) {
-                x += width-1;
+                x += width - 1;
             } else {
-                z += width-1;
+                z += width - 1;
             }
 
             // right
-            frameBlock = instance.getBlock(x, minY+j, z);
+            frameBlock = instance.getBlock(x, minY + j, z);
             if (!frameBlock.compare(Block.OBSIDIAN)) {
                 return false;
             }
@@ -491,9 +491,9 @@ public final class NetherPortal {
             instance.setBlock(x, minY + j, z, Block.OBSIDIAN);
 
             if (axis == Axis.X) {
-                x += width-1;
+                x += width - 1;
             } else {
-                z += width-1;
+                z += width - 1;
             }
 
             // right
@@ -521,8 +521,8 @@ public final class NetherPortal {
     }
 
     public enum Axis {
-        X(1,0),
-        Z(0,1);
+        X(1, 0),
+        Z(0, 1);
 
         public final int xMultiplier;
         public final int zMultiplier;

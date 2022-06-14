@@ -26,7 +26,7 @@ import java.util.Random;
 
 /**
  * Base class for Ender Chest, Chest and Trapped Chest
- *
+ * <p>
  * This class needs onPlace to be able to change the block being placed
  */
 public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
@@ -121,6 +121,7 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
 
     /**
      * Gets the items in this block only
+     *
      * @param block the block
      * @return the items
      */
@@ -130,8 +131,9 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
 
     /**
      * Gets all items represented by this position in this instance
+     *
      * @param instance the instance
-     * @param pos the position
+     * @param pos      the position
      * @return all items in the position in the instance
      */
     protected NBTList<NBTCompound> getAllItems(Instance instance, Point pos, Player player) {

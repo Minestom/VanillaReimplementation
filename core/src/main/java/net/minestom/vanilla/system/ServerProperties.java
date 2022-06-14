@@ -18,7 +18,7 @@ public class ServerProperties {
         properties = new Properties();
         loadDefault();
         this.source = source;
-        if(source.exists()) {
+        if (source.exists()) {
             load();
         } else {
             save(); // write defaults to file
@@ -33,13 +33,13 @@ public class ServerProperties {
     }
 
     private void loadDefault() throws IOException {
-        try(var defaultInput = new InputStreamReader(ServerProperties.class.getResourceAsStream("/server.properties.default"))) {
+        try (var defaultInput = new InputStreamReader(ServerProperties.class.getResourceAsStream("/server.properties.default"))) {
             properties.load(defaultInput);
         }
     }
 
     public void load() throws IOException {
-        try(var reader = new FileReader(source)) {
+        try (var reader = new FileReader(source)) {
             properties.load(reader);
         }
     }
@@ -53,7 +53,7 @@ public class ServerProperties {
     }
 
     public void save() throws IOException {
-        try(var writer = new FileWriter(source)) {
+        try (var writer = new FileWriter(source)) {
             properties.store(writer, "Minestom server properties");
         }
     }

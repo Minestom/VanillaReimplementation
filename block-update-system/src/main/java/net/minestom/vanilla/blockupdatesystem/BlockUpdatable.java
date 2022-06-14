@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 public interface BlockUpdatable {
     /**
      * Called when a block is updated.
+     *
      * @param info The block update info.
      */
     void blockUpdate(@NotNull Instance instance, @NotNull Point pos, @NotNull BlockUpdateInfo info);

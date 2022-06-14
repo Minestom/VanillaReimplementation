@@ -21,7 +21,7 @@ import java.util.Random;
 
 /**
  * Reimplementation of the jukebox block
- *
+ * <p>
  * Requires onPlace enhancements
  */
 public class JukeboxBlockHandler extends VanillaBlockHandler {
@@ -90,12 +90,12 @@ public class JukeboxBlockHandler extends VanillaBlockHandler {
                 .filter(player1 -> player1.getDistance(pos) < 64)
                 .forEach(player1 ->
                         player1.playEffect(
-                            Effects.PLAY_RECORD,
-                            pos.blockX(),
-                            pos.blockY(),
-                            pos.blockZ(),
-                            heldItem.getMaterial().id(),
-                            false
+                                Effects.PLAY_RECORD,
+                                pos.blockX(),
+                                pos.blockY(),
+                                pos.blockZ(),
+                                heldItem.getMaterial().id(),
+                                false
                         )
                 );
 

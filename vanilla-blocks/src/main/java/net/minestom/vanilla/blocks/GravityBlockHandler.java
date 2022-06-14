@@ -33,6 +33,7 @@ public class GravityBlockHandler extends VanillaBlockHandler implements BlockUpd
 
     /**
      * Checks if a block should fall
+     *
      * @param instance the instance the block is in
      * @param position the position of the block
      */

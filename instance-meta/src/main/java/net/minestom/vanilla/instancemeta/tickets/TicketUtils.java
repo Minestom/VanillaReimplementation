@@ -17,7 +17,7 @@ public class TicketUtils {
         List<TicketManager.Ticket> newWaitingTickets = Stream.concat(
                 waitingTickets(instance).stream(),
                 ticketsToAdd.stream()
-            ).toList();
+        ).toList();
         instance.setTag(TicketManager.WAITING_TICKETS_TAG, newWaitingTickets);
     }
 
@@ -29,7 +29,7 @@ public class TicketUtils {
         List<TicketManager.Ticket> newRemovingTickets = Stream.concat(
                 removingTickets(instance).stream(),
                 from.stream()
-            ).toList();
+        ).toList();
         instance.setTag(TicketManager.REMOVING_TICKETS_TAG, newRemovingTickets);
     }
 }

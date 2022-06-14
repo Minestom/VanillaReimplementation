@@ -54,27 +54,27 @@ public enum VanillaBlocks {
     // End of concrete powders
 
     // Start of beds
-    WHITE_BED(Block.WHITE_BED,              BedBlockHandler::new),
-    BLACK_BED(Block.BLACK_BED,              BedBlockHandler::new),
-    LIGHT_BLUE_BED(Block.LIGHT_BLUE_BED,    BedBlockHandler::new),
-    BLUE_BED(Block.BLUE_BED,                BedBlockHandler::new),
-    RED_BED(Block.RED_BED,                  BedBlockHandler::new),
-    GREEN_BED(Block.GREEN_BED,              BedBlockHandler::new),
-    YELLOW_BED(Block.YELLOW_BED,            BedBlockHandler::new),
-    PURPLE_BED(Block.PURPLE_BED,            BedBlockHandler::new),
-    MAGENTA_BED(Block.MAGENTA_BED,          BedBlockHandler::new),
-    CYAN_BED(Block.CYAN_BED,                BedBlockHandler::new),
-    PINK_BED(Block.PINK_BED,                BedBlockHandler::new),
-    GRAY_BED(Block.GRAY_BED,                BedBlockHandler::new),
-    LIGHT_GRAY_BED(Block.LIGHT_GRAY_BED,    BedBlockHandler::new),
-    ORANGE_BED(Block.ORANGE_BED,            BedBlockHandler::new),
-    BROWN_BED(Block.BROWN_BED,              BedBlockHandler::new),
-    LIME_BED(Block.LIME_BED,                BedBlockHandler::new),
+    WHITE_BED(Block.WHITE_BED, BedBlockHandler::new),
+    BLACK_BED(Block.BLACK_BED, BedBlockHandler::new),
+    LIGHT_BLUE_BED(Block.LIGHT_BLUE_BED, BedBlockHandler::new),
+    BLUE_BED(Block.BLUE_BED, BedBlockHandler::new),
+    RED_BED(Block.RED_BED, BedBlockHandler::new),
+    GREEN_BED(Block.GREEN_BED, BedBlockHandler::new),
+    YELLOW_BED(Block.YELLOW_BED, BedBlockHandler::new),
+    PURPLE_BED(Block.PURPLE_BED, BedBlockHandler::new),
+    MAGENTA_BED(Block.MAGENTA_BED, BedBlockHandler::new),
+    CYAN_BED(Block.CYAN_BED, BedBlockHandler::new),
+    PINK_BED(Block.PINK_BED, BedBlockHandler::new),
+    GRAY_BED(Block.GRAY_BED, BedBlockHandler::new),
+    LIGHT_GRAY_BED(Block.LIGHT_GRAY_BED, BedBlockHandler::new),
+    ORANGE_BED(Block.ORANGE_BED, BedBlockHandler::new),
+    BROWN_BED(Block.BROWN_BED, BedBlockHandler::new),
+    LIME_BED(Block.LIME_BED, BedBlockHandler::new),
     // End of beds
 
-    FIRE(Block.FIRE,                    FireBlockHandler::new),
-    NETHER_PORTAL(Block.NETHER_PORTAL,  NetherPortalBlockHandler::new),
-    END_PORTAL(Block.END_PORTAL,        EndPortalBlockHandler::new),
+    FIRE(Block.FIRE, FireBlockHandler::new),
+    NETHER_PORTAL(Block.NETHER_PORTAL, NetherPortalBlockHandler::new),
+    END_PORTAL(Block.END_PORTAL, EndPortalBlockHandler::new),
 
     TNT(Block.TNT, TNTBlockHandler::new),
 
@@ -89,7 +89,7 @@ public enum VanillaBlocks {
     private final @NotNull BlockHandler blockHandler;
 
     /**
-     * @param block the block to register the handler on
+     * @param block                the block to register the handler on
      * @param blockHandlerSupplier the handler supplier to register
      */
     VanillaBlocks(@NotNull Block block, @NotNull Supplier<BlockHandler> blockHandlerSupplier) {

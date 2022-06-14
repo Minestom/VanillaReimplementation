@@ -41,7 +41,7 @@ public class EndPortalBlockHandler extends VanillaBlockHandler {
             final int obsidianPlatformZ = 0;
 
             if (targetDimension == VanillaDimensionTypes.OVERWORLD) { // teleport to spawn point
-                if(touching instanceof Player) {
+                if (touching instanceof Player) {
                     spawnPoint = ((Player) touching).getRespawnPoint();
                 } else { // TODO: world spawnpoint
                     spawnPoint = new Pos(0, 80, 0);
@@ -55,7 +55,7 @@ public class EndPortalBlockHandler extends VanillaBlockHandler {
             if (targetDimension == VanillaDimensionTypes.END) {
                 for (int x = -1; x <= 1; x++) {
                     for (int z = -1; z <= 1; z++) {
-                        targetInstance.loadChunk(obsidianPlatformX/16+x, obsidianPlatformZ/16+z);
+                        targetInstance.loadChunk(obsidianPlatformX / 16 + x, obsidianPlatformZ / 16 + z);
                     }
                 }
 
@@ -63,7 +63,7 @@ public class EndPortalBlockHandler extends VanillaBlockHandler {
                 for (int x = 0; x < 5; x++) {
                     for (int z = 0; z < 5; z++) {
                         for (int y = 0; y < 3; y++) {
-                            targetInstance.setBlock(obsidianPlatformX+x, obsidianPlatformY+y+1, obsidianPlatformZ+z, Block.AIR);
+                            targetInstance.setBlock(obsidianPlatformX + x, obsidianPlatformY + y + 1, obsidianPlatformZ + z, Block.AIR);
                         }
                     }
                 }

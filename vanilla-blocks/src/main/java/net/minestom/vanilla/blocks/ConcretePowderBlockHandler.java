@@ -35,10 +35,10 @@ public class ConcretePowderBlockHandler extends GravityBlockHandler {
 
         if (
                 instance.getBlock(x, y + 1, z).compare(Block.WATER) || // above
-                instance.getBlock(x - 1, y, z).compare(Block.WATER) || // west
-                instance.getBlock(x + 1, y, z).compare(Block.WATER) || // east
-                instance.getBlock(x, y, z - 1).compare(Block.WATER) || // north
-                instance.getBlock(x, y, z + 1).compare(Block.WATER)    // south
+                        instance.getBlock(x - 1, y, z).compare(Block.WATER) || // west
+                        instance.getBlock(x + 1, y, z).compare(Block.WATER) || // east
+                        instance.getBlock(x, y, z - 1).compare(Block.WATER) || // north
+                        instance.getBlock(x, y, z + 1).compare(Block.WATER)    // south
         ) {
             instance.setBlock(blockPosition, solidifiedBlock);
         }
