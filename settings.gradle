@@ -5,4 +5,6 @@ include 'commands'
 include 'instance-meta'
 include 'block-update-system'
 include 'vanilla-blocks'
+include 'entities'
+include 'entity-meta'
 

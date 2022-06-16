@@ -1,4 +1,4 @@
-package net.minestom.vanilla.entity;
+package net.minestom.vanilla.entities;
 
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;

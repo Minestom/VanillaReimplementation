@@ -13,11 +13,13 @@ import java.util.Map;
  */
 public abstract class VanillaBlockHandler implements BlockHandler {
 
+    protected final @NotNull VanillaBlocks.BlockContext context;
     protected final @NotNull Block baseBlock;
     protected final @NotNull NamespaceID namespaceID;
 
-    protected VanillaBlockHandler(@NotNull Block baseBlock) {
-        this.baseBlock = baseBlock;
+    protected VanillaBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+        this.context = context;
+        this.baseBlock = context.block();
         this.namespaceID = baseBlock.namespace();
     }
 

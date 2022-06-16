@@ -2,18 +2,20 @@ package net.minestom.vanilla.blocks;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
+import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdatable;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdateInfo;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdateManager;
-import net.minestom.vanilla.entity.FallingBlockEntity;
 import org.jetbrains.annotations.NotNull;
 
 public class GravityBlockHandler extends VanillaBlockHandler implements BlockUpdatable {
-    public GravityBlockHandler(Block baseBlock) {
-        super(baseBlock);
+    public GravityBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+        super(context);
     }
 
     @Override
@@ -51,10 +53,14 @@ public class GravityBlockHandler extends VanillaBlockHandler implements BlockUpd
 
         instance.setBlock(position, Block.AIR);
 
+        // Create the context
         Pos initialPosition = new Pos(position.x() + 0.5f, Math.round(position.y()), position.z() + 0.5f);
-        FallingBlockEntity fallingBlockEntity = new FallingBlockEntity(block, initialPosition);
-        fallingBlockEntity.setInstance(instance);
-        fallingBlockEntity.teleport(initialPosition);
+        VanillaRegistry.EntityContext entityContext = context.vri()
+                .entityContext(EntityType.FALLING_BLOCK, initialPosition);
+        Entity entity = context.vri().createEntityOrDummy(entityContext);
+
+        // Spawn the entity
+        entity.setInstance(instance, initialPosition);
     }
 
     @Override

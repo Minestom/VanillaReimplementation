@@ -7,6 +7,7 @@ import org.jglrxavpok.hephaistos.nbt.NBTList;
 import org.jglrxavpok.hephaistos.nbt.NBTType;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -14,24 +15,17 @@ public class EnderChestSystem {
 
     public static final EnderChestSystem INSTANCE = new EnderChestSystem();
 
-    private final Map<UUID, NBTList<NBTCompound>> itemsMap = new HashMap<>();
+    private final Map<UUID, List<NBTCompound>> itemsMap = new HashMap<>();
 
     private EnderChestSystem() {
     }
 
-    public NBTList<NBTCompound> getItems(@NotNull Player player) {
+    public List<NBTCompound> getItems(@NotNull Player player) {
         return getItems(player.getUuid());
     }
 
-    public @NotNull NBTList<NBTCompound> getItems(@NotNull UUID uuid) {
-        var items = itemsMap.get(uuid);
-
-        if (items == null) {
-            items = new NBTList<>(NBTType.TAG_Compound);
-            itemsMap.put(uuid, items);
-        }
-
-        return items;
+    public @NotNull List<NBTCompound> getItems(@NotNull UUID uuid) {
+        return itemsMap.computeIfAbsent(uuid, k -> List.of());
     }
 
     public static EnderChestSystem getInstance() {

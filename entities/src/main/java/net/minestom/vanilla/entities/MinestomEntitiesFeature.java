@@ -1,18 +1,20 @@
-package net.minestom.vanilla.blockupdatesystem;
+package net.minestom.vanilla.entities;
 
+import net.minestom.server.entity.EntityType;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
 import org.jetbrains.annotations.NotNull;
 
-public class BlockUpdateSystemFeature implements VanillaReimplementation.Feature {
+public class MinestomEntitiesFeature implements VanillaReimplementation.Feature {
     @Override
     public void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry) {
-        BlockUpdateManager.init(vri.process().eventHandler());
+
+        registry.register(EntityType.FALLING_BLOCK, FallingBlockEntity::new);
     }
 
     @Override
     public @NotNull NamespaceID namespaceID() {
-        return NamespaceID.from("vri:blockupdatesystem");
+        return NamespaceID.from("vri:entities");
     }
 }

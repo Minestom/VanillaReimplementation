@@ -52,8 +52,8 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler implements Blo
      */
     public static final Tag<Long> RELATED_PORTAL_KEY = Tag.Long("minestom:related_portal");
 
-    public NetherPortalBlockHandler() {
-        super(Block.NETHER_PORTAL);
+    public NetherPortalBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+        super(context);
     }
 
     @Override

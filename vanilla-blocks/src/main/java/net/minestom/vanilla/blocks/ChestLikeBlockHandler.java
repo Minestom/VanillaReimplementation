@@ -14,7 +14,8 @@ import net.minestom.server.utils.Direction;
 import net.minestom.vanilla.inventory.ChestInventory;
 import net.minestom.vanilla.inventory.ItemStackUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jglrxavpok.hephaistos.nbt.NBT;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTList;
 import org.jglrxavpok.hephaistos.nbt.NBTType;
@@ -31,18 +32,20 @@ import java.util.Random;
  */
 public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
 
-    public static final Tag<NBT> TAG_ITEMS = Tag.NBT("ITEMS");
+    public static final Tag<List<NBTCompound>> TAG_ITEMS = Tag.NBT("ITEMS")
+            .map(nbt -> nbt == null ? null : (NBTCompound) nbt, NBTCompound::toCompound)
+            .list();
     protected static final Random rng = new Random();
 
-    public ChestLikeBlockHandler(Block baseBlock) {
-        super(baseBlock);
+    public ChestLikeBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+        super(context);
     }
 
     @Override
     public void onPlace(BlockHandler.Placement placement) {
         Block block = placement.getBlock();
 
-        NBTList<NBTCompound> items = (NBTList<NBTCompound>) block.getTag(TAG_ITEMS);
+        @Nullable List<NBTCompound> items = block.getTag(TAG_ITEMS);
 
         if (items != null) {
             return;
@@ -50,9 +53,8 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
 
         Instance instance = placement.getInstance();
         Point pos = placement.getBlockPosition();
-        NBTList<NBTCompound> nbtCompoundNBTList = new NBTList<>(NBTType.TAG_Compound);
 
-        Block blockToSet = block.withTag(TAG_ITEMS, nbtCompoundNBTList);
+        Block blockToSet = block.withTag(TAG_ITEMS, List.of());
         // TODO: Override blockToSet
     }
 
@@ -65,7 +67,7 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
             return;
         }
 
-        NBTList<NBTCompound> items = getItems(block);
+        List<NBTCompound> items = getItems(block);
 
         for (NBTCompound item : items) {
             ItemStack itemStack = ItemStackUtils.fromNBTCompound(item);
@@ -77,13 +79,7 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
             ItemEntity entity = new ItemEntity(itemStack);
 
             entity.setInstance(destroy.getInstance());
-            entity.teleport(
-                    new Pos(
-                            (pos.x() + rng.nextDouble()),
-                            pos.y() + .5f,
-                            (pos.z() + rng.nextDouble())
-                    )
-            );
+            entity.teleport(new Pos(pos.x() + rng.nextDouble(), pos.y() + .5f, pos.z() + rng.nextDouble()));
         }
     }
 
@@ -112,7 +108,7 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
             return false;
         }
 
-        Inventory chestInventory = new ChestInventory(getItems(block).asListView());
+        Inventory chestInventory = new ChestInventory(getItems(block));
         player.openInventory(chestInventory);
         return true;
     }
@@ -125,8 +121,8 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
      * @param block the block
      * @return the items
      */
-    protected @NotNull NBTList<NBTCompound> getItems(Block block) {
-        return Objects.requireNonNull((NBTList<NBTCompound>) block.getTag(TAG_ITEMS));
+    protected @NotNull List<NBTCompound> getItems(Block block) {
+        return Objects.requireNonNull(block.getTag(TAG_ITEMS), "Block has no items");
     }
 
     /**
@@ -136,37 +132,31 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
      * @param pos      the position
      * @return all items in the position in the instance
      */
-    protected NBTList<NBTCompound> getAllItems(Instance instance, Point pos, Player player) {
+    protected List<NBTCompound> getAllItems(Instance instance, Point pos, Player player) {
         Block block = instance.getBlock(pos);
-        List<NBTCompound> items = new ArrayList<>(getItems(block).asListView());
+        List<NBTCompound> items = new ArrayList<>(getItems(block));
 
         Point positionOfOtherChest = pos;
         Direction facing = Direction.valueOf(block.getProperty("facing").toUpperCase());
         String type = block.getProperty("type");
 
         switch (type) {
-            case "single":
-                return new NBTList<>(NBTType.TAG_Compound, items);
-            case "left":
-                positionOfOtherChest = positionOfOtherChest.add(-facing.normalZ(), 0, facing.normalX());
-                break;
-            case "right":
-                positionOfOtherChest = positionOfOtherChest.add(facing.normalZ(), 0, -facing.normalX());
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid chest type: " + type);
+            case "single" -> {
+                return List.copyOf(items);
+            }
+            case "left" -> positionOfOtherChest = positionOfOtherChest.add(-facing.normalZ(), 0, facing.normalX());
+            case "right" -> positionOfOtherChest = positionOfOtherChest.add(facing.normalZ(), 0, -facing.normalX());
+            default -> throw new IllegalArgumentException("Invalid chest type: " + type);
         }
 
         Block otherBlock = instance.getBlock(positionOfOtherChest);
         BlockHandler handler = otherBlock.handler();
 
         if (handler instanceof ChestLikeBlockHandler chestLike) {
-            for (NBTCompound item : chestLike.getItems(otherBlock)) {
-                items.add(item);
-            }
+            items.addAll(chestLike.getItems(otherBlock));
         }
 
-        return new NBTList<>(NBTType.TAG_Compound, items);
+        return List.copyOf(items);
     }
 
 //    @Override

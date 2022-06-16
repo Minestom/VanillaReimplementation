@@ -1,7 +1,8 @@
 plugins {
     java
     `java-library`
-    id("com.github.harbby.gradle.serviceloader") version ("1.1.8")
+    `maven-publish`
+    id("com.github.harbby.gradle.serviceloader") version("1.1.8")
 }
 
 repositories {
@@ -42,6 +43,12 @@ subprojects {
 
         withJavadocJar()
         withSourcesJar()
+
+        sourceSets {
+            main {
+                java.srcDir("src/main/java")
+            }
+        }
     }
 
     repositories {

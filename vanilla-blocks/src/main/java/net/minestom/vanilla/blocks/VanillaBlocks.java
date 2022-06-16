@@ -8,6 +8,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.blocks.redstone.LeverBlockHandler;
 import net.minestom.vanilla.blocks.redstone.RedstoneBlockBlockHandler;
 import net.minestom.vanilla.blocks.redstone.RedstoneWireBlockHandler;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -30,27 +32,27 @@ public enum VanillaBlocks {
     REDSTONE_BLOCK(Block.REDSTONE_BLOCK, RedstoneBlockBlockHandler::new),
     REDSTONE_WIRE(Block.REDSTONE_WIRE, RedstoneWireBlockHandler::new),
 
-    SAND(Block.SAND, () -> new GravityBlockHandler(Block.SAND)),
-    RED_SAND(Block.RED_SAND, () -> new GravityBlockHandler(Block.RED_SAND)),
-    GRAVEL(Block.GRAVEL, () -> new GravityBlockHandler(Block.GRAVEL)),
+    SAND(Block.SAND, GravityBlockHandler::new),
+    RED_SAND(Block.RED_SAND, GravityBlockHandler::new),
+    GRAVEL(Block.GRAVEL, GravityBlockHandler::new),
 
     // Start of concrete powders
-    WHITE_CONCRETE_POWDER(Block.WHITE_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.WHITE_CONCRETE_POWDER, Block.WHITE_CONCRETE)),
-    BLACK_CONCRETE_POWDER(Block.BLACK_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.BLACK_CONCRETE_POWDER, Block.BLACK_CONCRETE)),
-    LIGHT_BLUE_CONCRETE_POWDER(Block.LIGHT_BLUE_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.LIGHT_BLUE_CONCRETE_POWDER, Block.LIGHT_BLUE_CONCRETE)),
-    BLUE_CONCRETE_POWDER(Block.BLUE_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.BLUE_CONCRETE_POWDER, Block.BLUE_CONCRETE)),
-    RED_CONCRETE_POWDER(Block.RED_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.RED_CONCRETE_POWDER, Block.RED_CONCRETE)),
-    GREEN_CONCRETE_POWDER(Block.GREEN_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.GREEN_CONCRETE_POWDER, Block.GREEN_CONCRETE)),
-    YELLOW_CONCRETE_POWDER(Block.YELLOW_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.YELLOW_CONCRETE_POWDER, Block.YELLOW_CONCRETE)),
-    PURPLE_CONCRETE_POWDER(Block.PURPLE_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.PURPLE_CONCRETE_POWDER, Block.PURPLE_CONCRETE)),
-    MAGENTA_CONCRETE_POWDER(Block.MAGENTA_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.MAGENTA_CONCRETE_POWDER, Block.MAGENTA_CONCRETE)),
-    CYAN_CONCRETE_POWDER(Block.CYAN_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.CYAN_CONCRETE_POWDER, Block.CYAN_CONCRETE)),
-    PINK_CONCRETE_POWDER(Block.PINK_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.PINK_CONCRETE_POWDER, Block.PINK_CONCRETE)),
-    GRAY_CONCRETE_POWDER(Block.GRAY_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.GRAY_CONCRETE_POWDER, Block.GRAY_CONCRETE)),
-    LIGHT_GRAY_CONCRETE_POWDER(Block.LIGHT_GRAY_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.LIGHT_GRAY_CONCRETE_POWDER, Block.LIGHT_GRAY_CONCRETE)),
-    ORANGE_CONCRETE_POWDER(Block.ORANGE_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.ORANGE_CONCRETE_POWDER, Block.ORANGE_CONCRETE)),
-    BROWN_CONCRETE_POWDER(Block.BROWN_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.BROWN_CONCRETE_POWDER, Block.BROWN_CONCRETE)),
-    LIME_CONCRETE_POWDER(Block.LIME_CONCRETE_POWDER, () -> new ConcretePowderBlockHandler(Block.LIME_CONCRETE_POWDER, Block.LIME_CONCRETE)),
+    WHITE_CONCRETE_POWDER(Block.WHITE_CONCRETE_POWDER, (context) -> new ConcretePowderBlockHandler(context, Block.WHITE_CONCRETE)),
+    BLACK_CONCRETE_POWDER(Block.BLACK_CONCRETE_POWDER, (context) -> new ConcretePowderBlockHandler(context, Block.BLACK_CONCRETE)),
+    LIGHT_BLUE_CONCRETE_POWDER(Block.LIGHT_BLUE_CONCRETE_POWDER, (context) -> new ConcretePowderBlockHandler(context, Block.LIGHT_BLUE_CONCRETE)),
+    BLUE_CONCRETE_POWDER(Block.BLUE_CONCRETE_POWDER, (context) -> new ConcretePowderBlockHandler(context, Block.BLUE_CONCRETE)),
+    RED_CONCRETE_POWDER(Block.RED_CONCRETE_POWDER, (context) -> new ConcretePowderBlockHandler(context, Block.RED_CONCRETE)),
+    GREEN_CONCRETE_POWDER(Block.GREEN_CONCRETE_POWDER, (context) -> new ConcretePowderBlockHandler(context, Block.GREEN_CONCRETE)),
+    YELLOW_CONCRETE_POWDER(Block.YELLOW_CONCRETE_POWDER, (context) -> new ConcretePowderBlockHandler(context, Block.YELLOW_CONCRETE)),
+    PURPLE_CONCRETE_POWDER(Block.PURPLE_CONCRETE_POWDER, (context) -> new ConcretePowderBlockHandler(context, Block.PURPLE_CONCRETE)),
+    MAGENTA_CONCRETE_POWDER(Block.MAGENTA_CONCRETE_POWDER, (context) -> new ConcretePowderBlockHandler(context, Block.MAGENTA_CONCRETE)),
+    CYAN_CONCRETE_POWDER(Block.CYAN_CONCRETE_POWDER, (context) -> new ConcretePowderBlockHandler(context, Block.CYAN_CONCRETE)),
+    PINK_CONCRETE_POWDER(Block.PINK_CONCRETE_POWDER, (context) -> new ConcretePowderBlockHandler(context, Block.PINK_CONCRETE)),
+    GRAY_CONCRETE_POWDER(Block.GRAY_CONCRETE_POWDER, (context) -> new ConcretePowderBlockHandler(context, Block.GRAY_CONCRETE)),
+    LIGHT_GRAY_CONCRETE_POWDER(Block.LIGHT_GRAY_CONCRETE_POWDER, (context) -> new ConcretePowderBlockHandler(context, Block.LIGHT_GRAY_CONCRETE)),
+    ORANGE_CONCRETE_POWDER(Block.ORANGE_CONCRETE_POWDER, (context) -> new ConcretePowderBlockHandler(context, Block.ORANGE_CONCRETE)),
+    BROWN_CONCRETE_POWDER(Block.BROWN_CONCRETE_POWDER, (context) -> new ConcretePowderBlockHandler(context, Block.BROWN_CONCRETE)),
+    LIME_CONCRETE_POWDER(Block.LIME_CONCRETE_POWDER, (context) -> new ConcretePowderBlockHandler(context, Block.LIME_CONCRETE)),
     // End of concrete powders
 
     // Start of beds
@@ -83,48 +85,80 @@ public enum VanillaBlocks {
     ENDER_CHEST(Block.ENDER_CHEST, EnderChestBlockHandler::new),
     JUKEBOX(Block.JUKEBOX, JukeboxBlockHandler::new);
 
-    private static final Map<String, BlockHandler> blockHandlerByNamespace = new HashMap<>();
+    private final @NotNull Block block;
+    private final @NotNull Context2Handler context2handler;
 
-    private final @NotNull NamespaceID namespace;
-    private final @NotNull BlockHandler blockHandler;
-
-    /**
-     * @param block                the block to register the handler on
-     * @param blockHandlerSupplier the handler supplier to register
-     */
-    VanillaBlocks(@NotNull Block block, @NotNull Supplier<BlockHandler> blockHandlerSupplier) {
-        this.namespace = block.namespace();
-        this.blockHandler = blockHandlerSupplier.get();
+    VanillaBlocks(@NotNull Block block, @NotNull Context2Handler context2handler) {
+        this.block = block;
+        this.context2handler = context -> {
+            if (!context.block().compare(block)) {
+                throw new IllegalStateException("Block registry mismatch. Registered block: " + block +
+                        " !=  Given block:" + context.block());
+            }
+            return context2handler.apply(context);
+        };
     }
 
-    VanillaBlocks(@NotNull Block block, @NotNull Function<Block, BlockHandler> blockHandlerFunction) {
-        this.namespace = block.namespace();
-        this.blockHandler = blockHandlerFunction.apply(block);
+    interface Context2Handler {
+        @NotNull BlockHandler apply(@NotNull BlockContext context);
     }
 
     /**
-     * @return the vanilla block handler of this block
+     * Used to provide context for creating block handlers
      */
-    public @NotNull BlockHandler getBlockHandler() {
-        return blockHandler;
+    public interface BlockContext {
+        @NotNull Block block();
+        @NotNull VanillaReimplementation vri();
+    }
+
+    /**
+     * Creates a block handler from the context
+     * @param context the context
+     * @return the block handler
+     */
+    public @NotNull BlockHandler create(@NotNull BlockContext context) {
+        return context2handler.apply(context);
     }
 
     /**
      * Register all vanilla commands into the given blockManager. ConnectionManager will handle replacing the basic
      * block with its custom variant.
      *
-     * @param eventHandler the event handler to register events on
+     * @param vri the vanilla reimplementation object
      */
-    public static void registerAll(EventNode<Event> eventHandler) {
+    public static void registerAll(@NotNull VanillaReimplementation vri) {
+
+        Map<String, BlockHandler> blockHandlers = new HashMap<>();
 
         for (VanillaBlocks vanillaBlock : values()) {
-            blockHandlerByNamespace.put(vanillaBlock.namespace.asString(), vanillaBlock.blockHandler);
+            BlockContext context = new BlockContext() {
+                @Override
+                public @NotNull Block block() {
+                    return vanillaBlock.block;
+                }
+
+                @Override
+                public @NotNull VanillaReimplementation vri() {
+                    return vri;
+                }
+            };
+            BlockHandler handler = vanillaBlock.context2handler.apply(context);
+            blockHandlers.put(vanillaBlock.block.namespace().toString(), handler);
         }
+
+        Map<String, BlockHandler> blockHandler2Namespace = Collections.unmodifiableMap(blockHandlers);
 
         // TODO: Update (& remove) once minestom has a general PlaceBlock event
 
+
+        // Use reflection to inject the handlers
+        injectHandlers(blockHandler2Namespace);
+        vri.process().eventHandler().addListener(PlayerBlockPlaceEvent.class,
+                event -> handlePlayerBlockPlaceEvent(event, blockHandler2Namespace));
+    }
+
+    private static void injectHandlers(Map<String, BlockHandler> blockHandlerByNamespace) {
         try {
-            // Temporarily use reflection
             Class<Block> clazz = Block.class;
 
             for (Field field : clazz.getFields()) {
@@ -147,18 +181,12 @@ public enum VanillaBlocks {
                 }
             }
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("Failed to inject block handlers", e);
         }
-
-        eventHandler.addListener(
-                EventListener.of(
-                        PlayerBlockPlaceEvent.class,
-                        VanillaBlocks::handlePlayerBlockPlaceEvent
-                )
-        );
     }
 
-    private static void handlePlayerBlockPlaceEvent(PlayerBlockPlaceEvent event) {
+    private static void handlePlayerBlockPlaceEvent(PlayerBlockPlaceEvent event,
+                                                    Map<String, BlockHandler> blockHandlerByNamespace) {
         Block oldBlock = event.getBlock();
 
         BlockHandler handler = blockHandlerByNamespace.get(oldBlock.namespace().asString());

@@ -1,4 +1,4 @@
-package net.minestom.vanilla.entity;
+package net.minestom.vanilla.entities;
 
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
@@ -8,15 +8,26 @@ import net.minestom.server.entity.metadata.other.FallingBlockMeta;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.tag.Tag;
+import net.minestom.vanilla.VanillaRegistry;
+import net.minestom.vanilla.entitymeta.EntityTags;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
 public class FallingBlockEntity extends Entity {
     private static final Random rng = new Random();
-    private final Block toPlace;
+    private final @NotNull Block toPlace;
 
-    public FallingBlockEntity(Block toPlace, Pos initialPosition) {
+    public FallingBlockEntity(@Nullable Block toPlace, Pos initialPosition) {
         super(EntityType.FALLING_BLOCK);
+
+        // Default to air block is toPlace is absent
+        if (toPlace == null) {
+            toPlace = Block.AIR;
+        }
+        assert toPlace != null;
         this.toPlace = toPlace;
 
         // setGravity(0.025f, getGravityAcceleration());
@@ -25,6 +36,10 @@ public class FallingBlockEntity extends Entity {
         FallingBlockMeta meta = (FallingBlockMeta) this.getEntityMeta();
         meta.setBlock(toPlace);
         meta.setSpawnPosition(initialPosition);
+    }
+
+    public FallingBlockEntity(@NotNull VanillaRegistry.EntityContext context) {
+        this(context.getTag(EntityTags.FallingBlock.BLOCK), context.position());
     }
 
     @Override

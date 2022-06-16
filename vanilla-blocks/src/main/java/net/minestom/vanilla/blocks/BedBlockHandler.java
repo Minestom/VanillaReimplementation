@@ -21,8 +21,8 @@ import org.jetbrains.annotations.NotNull;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class BedBlockHandler extends VanillaBlockHandler {
-    public BedBlockHandler(Block bedBlock) {
-        super(bedBlock);
+    public BedBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+        super(context);
     }
 
 //    @Override

@@ -8,12 +8,13 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
 public class EndPortalBlockHandler extends VanillaBlockHandler {
-    public EndPortalBlockHandler() {
-        super(Block.END_PORTAL);
+    public EndPortalBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+        super(context);
     }
 
 //    @Override

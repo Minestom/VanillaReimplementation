@@ -28,8 +28,8 @@ public class JukeboxBlockHandler extends VanillaBlockHandler {
 
     public static final Tag<ItemStack> DISC_KEY = ItemStackUtils.itemStackTag("minestom:jokebox_disc");
 
-    public JukeboxBlockHandler() {
-        super(Block.JUKEBOX);
+    public JukeboxBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+        super(context);
     }
 
     @Override

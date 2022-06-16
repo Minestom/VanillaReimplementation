@@ -3,6 +3,7 @@ package net.minestom.vanilla.instancemeta.tickets;
 import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +14,7 @@ import java.util.WeakHashMap;
 
 public class InstanceMetaFeature implements VanillaReimplementation.Feature {
 
-    public void hook(@NotNull VanillaReimplementation vri) {
+    public void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry) {
         new Logic().hook(vri);
     }
 

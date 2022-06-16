@@ -9,8 +9,8 @@ import org.jetbrains.annotations.NotNull;
 public class ConcretePowderBlockHandler extends GravityBlockHandler {
     private final Block solidifiedBlock;
 
-    public ConcretePowderBlockHandler(Block powderBlock, Block solidifiedBlock) {
-        super(powderBlock);
+    public ConcretePowderBlockHandler(@NotNull VanillaBlocks.BlockContext context, Block solidifiedBlock) {
+        super(context);
         this.solidifiedBlock = solidifiedBlock;
     }
 

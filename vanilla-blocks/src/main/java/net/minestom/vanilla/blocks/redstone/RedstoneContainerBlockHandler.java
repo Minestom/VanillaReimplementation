@@ -5,6 +5,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.blocks.VanillaBlockHandler;
+import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.blocks.redstone.signal.RedstoneSignalManager;
 import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignal;
 import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignalTarget;
@@ -17,10 +18,9 @@ import java.util.PriorityQueue;
  * A block handler to make redstone signal use easier
  */
 public abstract class RedstoneContainerBlockHandler extends VanillaBlockHandler {
-    protected RedstoneContainerBlockHandler(@NotNull Block baseBlock) {
-        super(baseBlock);
+    protected RedstoneContainerBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+        super(context);
     }
-
 
     @Override
     // TODO: Remove this debug log:
