@@ -37,8 +37,10 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
     }
 
     @Override
-    public void onPlace(BlockHandler.Placement placement) {
-        Block block = placement.getBlock();
+    public void onPlace(@NotNull VanillaPlacement placement) {
+        Block block = placement.blockToPlace();
+        Instance instance = placement.instance();
+        Point pos = placement.position();
 
         @UnknownNullability List<ItemStack> items = block.getTag(TAG_ITEMS);
 
@@ -46,14 +48,13 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
             return;
         }
 
-        Instance instance = placement.getInstance();
-        Point pos = placement.getBlockPosition();
 
         ItemStack[] itemsArray = new ItemStack[size];
         Arrays.fill(itemsArray, ItemStack.AIR);
 
+        // Override the block to set
         Block blockToSet = block.withTag(TAG_ITEMS, List.of(itemsArray));
-        setBlock(blockToSet, instance, pos);
+        placement.blockToPlace(blockToSet);
     }
 
     @Override

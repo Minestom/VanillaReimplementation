@@ -49,8 +49,8 @@ public class FireBlockHandler extends VanillaBlockHandler {
     }
 
     @Override
-    public void onPlace(@NotNull Placement placement) {
-        // check for Nether portal immediately next tick
-        placement.getInstance().scheduleNextTick(instance -> checkForPortal(placement.getInstance(), placement.getBlockPosition(), placement.getBlock()));
+    public void onPlace(@NotNull VanillaPlacement placement) {
+        // check for Nether portal immediately
+        checkForPortal(placement.instance(), placement.position(), placement.blockToPlace());
     }
 }

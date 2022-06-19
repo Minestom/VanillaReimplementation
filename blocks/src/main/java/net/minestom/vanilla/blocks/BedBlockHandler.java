@@ -30,14 +30,16 @@ public class BedBlockHandler extends VanillaBlockHandler {
 //        return new BlockPropertyList().facingProperty("facing").booleanProperty("occupied").property("part", "foot", "head");
 //    }
 
-    public void onPlace(@NotNull BlockHandler.Placement placement) {
-        if (!(placement instanceof BlockHandler.PlayerPlacement playerPlacement)) {
+
+    @Override
+    public void onPlace(@NotNull VanillaPlacement placement) {
+        if (!(placement instanceof VanillaPlacement.HasPlayer hasPlayer)) {
             return;
         }
 
-        Instance instance = placement.getInstance();
-        Point pos = placement.getBlockPosition();
-        Player player = playerPlacement.getPlayer();
+        Instance instance = placement.instance();
+        Point pos = placement.position();
+        Player player = hasPlayer.player();
 
         ItemStack itemStack = player.getItemInMainHand(); // TODO: Hand determination
 

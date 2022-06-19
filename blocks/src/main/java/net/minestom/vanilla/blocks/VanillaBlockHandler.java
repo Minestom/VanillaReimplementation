@@ -1,6 +1,7 @@
 package net.minestom.vanilla.blocks;
 
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
@@ -34,7 +35,44 @@ public abstract class VanillaBlockHandler implements BlockHandler {
         return Map.of();
     }
 
-    protected void setBlock(@NotNull Block block, Instance instance, @NotNull Point pos) {
-        instance.setBlock(pos, block);
+    /**
+     * Deprecated, use {@link #onPlace(VanillaPlacement)} instead.
+     * @param placement the placement object
+     */
+    @Override
+    @Deprecated
+    public void onPlace(@NotNull Placement placement) {
+    }
+
+    public void onPlace(@NotNull VanillaPlacement placement) {
+    }
+
+    public interface VanillaPlacement {
+
+        /**
+         * @return the block that will be placed
+         */
+        @NotNull Block blockToPlace();
+
+        /**
+         * @return the instance that will be modified
+         */
+        @NotNull Instance instance();
+
+        /**
+         * @return the position of the block that will be placed
+         */
+        @NotNull Point position();
+
+        /**
+         * Overrides the current block to be placed.
+         * @param newBlock the new block to be placed
+         * @return the old block that will no longer be used
+         */
+        @NotNull Block blockToPlace(@NotNull Block newBlock);
+
+        interface HasPlayer {
+            @NotNull Player player();
+        }
     }
 }

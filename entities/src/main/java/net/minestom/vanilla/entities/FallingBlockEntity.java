@@ -26,17 +26,9 @@ public class FallingBlockEntity extends Entity {
     private static final Random rng = new Random();
     private final @NotNull Block toPlace;
 
-    Short2ObjectMap<Material> block2Mat = Short2ObjectMaps.unmodifiable(new Short2ObjectOpenHashMap<>(
-            Material.values().stream()
-            .filter(material -> material.block() != null)
-            .map(material -> Map.entry(material.block().stateId(), material))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
-    );
-
     public FallingBlockEntity(@NotNull Block toPlace, @NotNull Pos initialPosition) {
         super(EntityType.FALLING_BLOCK);
         this.toPlace = toPlace;
-
 
         // setGravity(0.025f, getGravityAcceleration());
         setBoundingBox(0.98f, 0.98f, 0.98f);
@@ -54,17 +46,16 @@ public class FallingBlockEntity extends Entity {
     public void update(long time) {
         // TODO: Cleanup this method structure
 
+        // TODO: This isOnGround method seems to snap the entity to the ground earlier than expected
         if (!isOnGround()) {
             return;
         }
-
-
 
         Block block = instance.getBlock(position);
 
         if (block.registry().isSolid()) {
             // TODO: Better way to get block's loot
-            Material loot = block2Mat.get(block.stateId());
+            Material loot = block.registry().material();
             if (loot != null) {
                 ItemEntity itemEntity = new ItemEntity(ItemStack.of(loot));
                 itemEntity.setInstance(instance, position);

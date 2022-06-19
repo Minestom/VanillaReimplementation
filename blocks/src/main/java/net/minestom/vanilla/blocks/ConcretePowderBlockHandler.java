@@ -15,9 +15,9 @@ public class ConcretePowderBlockHandler extends GravityBlockHandler {
     }
 
     @Override
-    public void onPlace(@NotNull Placement placement) {
+    public void onPlace(@NotNull VanillaPlacement placement) {
         super.onPlace(placement);
-        tryConvert(placement.getInstance(), placement.getBlockPosition());
+        tryConvert(placement.instance(), placement.position());
     }
 
     @Override
