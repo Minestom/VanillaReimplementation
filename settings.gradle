@@ -1,4 +1,4 @@
-rootProject.name = 'Server'
+rootProject.name = 'VanillaReimplementation'
 include 'core'
 include 'world-generation'
 include 'commands'
@@ -7,4 +7,5 @@ include 'block-update-system'
 include 'vanilla-blocks'
 include 'entities'
 include 'entity-meta'
+include 'server'
 
