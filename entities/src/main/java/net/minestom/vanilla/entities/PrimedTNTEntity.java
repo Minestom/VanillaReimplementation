@@ -4,13 +4,22 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.other.PrimedTntMeta;
 import net.minestom.server.instance.block.Block;
+import net.minestom.vanilla.VanillaRegistry;
+import net.minestom.vanilla.entitymeta.EntityTags;
 import net.minestom.vanilla.instance.VanillaExplosion;
+import org.jetbrains.annotations.NotNull;
 
-public class PrimedTNT extends Entity {
+import java.util.Objects;
+
+public class PrimedTNTEntity extends Entity {
 
     private int fuseTime;
 
-    public PrimedTNT(int fuseTime) {
+    public PrimedTNTEntity(@NotNull VanillaRegistry.EntityContext context) {
+        this(Objects.requireNonNullElse(context.getTag(EntityTags.PrimedTnt.FUSE_TIME), 80));
+    }
+
+    public PrimedTNTEntity(int fuseTime) {
         super(EntityType.TNT);
         setGravity(0.025f, getGravityAcceleration());
         setBoundingBox(0.98f, 0.98f, 0.98f);
@@ -21,7 +30,6 @@ public class PrimedTNT extends Entity {
     }
 
     private void explode() {
-
         remove();
 
         Block block = instance.getBlock(this.getPosition());
@@ -36,7 +44,7 @@ public class PrimedTNT extends Entity {
     @Override
     public void update(long time) {
         super.update(time);
-        if (fuseTime-- <= 0) {
+        if (fuseTime-- <= 20) {
             explode();
         }
     }

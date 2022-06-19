@@ -11,7 +11,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.VanillaReimplementation;
-import net.minestom.vanilla.commands.VanillaCommands;
 import net.minestom.vanilla.items.ItemManager;
 import net.minestom.vanilla.items.VanillaItems;
 import net.minestom.vanilla.system.RayFastManager;
@@ -19,7 +18,7 @@ import net.minestom.vanilla.system.ServerProperties;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
+import java.util.Arrays;
 
 class VanillaServer {
 
@@ -33,41 +32,25 @@ class VanillaServer {
         MinecraftServer server = MinecraftServer.init();
         VanillaReimplementation vri = VanillaReimplementation.hook(MinecraftServer.process());
 
-        Instance overworld = vri.createInstance("world", DimensionType.OVERWORLD);
-
-        vri.process().eventHandler()
-                .addListener(PlayerLoginEvent.class, event -> event.setSpawningInstance(overworld))
-                .addListener(PlayerSpawnEvent.class, event -> {
-                    Instance instance = event.getSpawnInstance();
-                    // Find the first block that is not air
-                    int y = instance.getDimensionType().getMaxY();
-                    while (instance.getBlock(0, y, -0).isAir()) {
-                        y--;
-                        if (y < instance.getDimensionType().getMinY()) {
-                            y = 0;
-                            break;
-                        }
-                    }
-                    event.getPlayer().teleport(new Pos(0, y, 0));
-                });
-
-        try {
-            VanillaEvents.register(new ServerProperties("server.properties"), vri.process().eventHandler());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        // Start the server
-        server.start("0.0.0.0", 25565);
+        VanillaServer vanillaServer = new VanillaServer(server, vri, args);
+        vanillaServer.start("0.0.0.0", 25565);
     }
 
     private final MinecraftServer minecraftServer;
     private final @NotNull ItemManager itemManager;
     private final @NotNull ServerProperties serverProperties;
 
-    public VanillaServer(@NotNull MinecraftServer minecraftServer, @Nullable String... args) {
+    private final @NotNull VanillaReimplementation vri;
+
+    // Instances
+    private final @NotNull Instance overworld;
+
+    public VanillaServer(@NotNull MinecraftServer minecraftServer, @NotNull VanillaReimplementation vri,
+                         @Nullable String... args) {
         this.minecraftServer = minecraftServer;
         this.serverProperties = getOrGenerateServerProperties();
+        this.vri = vri;
+        this.overworld = vri.createInstance("world", DimensionType.OVERWORLD);
 
         // Try to get server properties
 
@@ -78,15 +61,29 @@ class VanillaServer {
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
         CommandManager commandManager = MinecraftServer.getCommandManager();
 
+
+        vri.process().eventHandler()
+            .addListener(PlayerLoginEvent.class, event -> event.setSpawningInstance(overworld))
+            .addListener(PlayerSpawnEvent.class, event -> {
+                Instance instance = event.getSpawnInstance();
+                // Find the first block that is not air
+                int y = instance.getDimensionType().getMaxY();
+                while (instance.getBlock(0, y, -0).isAir()) {
+                    y--;
+                    if (y < instance.getDimensionType().getMinY()) {
+                        y = 0;
+                        break;
+                    }
+                }
+                event.getPlayer().teleport(new Pos(0, y, 0));
+            });
+
         // Register systems
         {
             // dimension types
 
             // Events
-            VanillaEvents.register(serverProperties, eventHandler);
-
-            // commands
-            VanillaCommands.registerAll(commandManager);
+            VanillaEvents.register(this, serverProperties, eventHandler);
 
             // item handlers
             itemManager = ItemManager.accumulate(accumulator -> {
@@ -116,6 +113,13 @@ class VanillaServer {
             player.kick("Server is closing.");
             connectionManager.removePlayer(player.getPlayerConnection());
         }));
+
+        // Debug
+        if (Arrays.asList(args).contains("-debug")) {
+            System.out.println("Debug mode enabled.");
+            System.out.println("To disable it, remove the -debug argument");
+            VanillaDebug.hook(this);
+        }
     }
 
     private ServerProperties getOrGenerateServerProperties() {
@@ -186,5 +190,13 @@ class VanillaServer {
 
     public @NotNull ItemManager getItemManager() {
         return itemManager;
+    }
+
+    public VanillaReimplementation vri() {
+        return vri;
+    }
+
+    public Instance overworld() {
+        return overworld;
     }
 }

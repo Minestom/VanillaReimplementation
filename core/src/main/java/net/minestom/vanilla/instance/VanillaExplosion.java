@@ -62,12 +62,8 @@ public class VanillaExplosion extends Explosion {
 
                         Vec dir = new Vec(x - 8.5f, y - 8.5f, z - 8.5f).normalize();
 
-                        Iterator<Vector3d> gridIterator = GridCast.createGridIterator(
-                                getCenterX(), getCenterY(), getCenterZ(),
-                                dir.x(), dir.y(), dir.z(),
-                                1.0,
-                                maximumBlastRadius
-                        );
+                        Iterator<Vector3d> gridIterator = GridCast.createGridIterator(getCenterX(), getCenterY(),
+                                getCenterZ(), dir.x(), dir.y(), dir.z(), 1.0, maximumBlastRadius);
 
                         double intensity = (0.7f + explosionRNG.nextFloat() * 0.6f) * getStrength();
 
@@ -77,7 +73,7 @@ public class VanillaExplosion extends Explosion {
 
                             intensity -= 0.225;
 
-                            Block block = instance.getBlock(pos);
+                            Block block = instance.loadOptionalChunk(pos).join().getBlock(pos);
 
                             double explosionResistance = block.registry().explosionResistance();
                             intensity -= (explosionResistance / 5.0);
@@ -234,19 +230,19 @@ public class VanillaExplosion extends Explosion {
         int hits = 0;
         int rays = w * h * d;
 
-        for (int dx = (int) -Math.ceil(w / 2); dx < Math.floor(w / 2); dx++) {
+        int wd2 = w / 2;
+        int dd2 = d / 2;
+
+        for (int dx = (int) -Math.ceil(wd2); dx < Math.floor(wd2); dx++) {
             for (int dy = 0; dy < h; dy++) {
-                for (int dz = (int) -Math.ceil(d / 2); dz < Math.floor(d / 2); dz++) {
+                for (int dz = (int) -Math.ceil(dd2); dz < Math.floor(dd2); dz++) {
                     double deltaX = entX + dx - getCenterX();
                     double deltaY = entY + dy - getCenterY();
                     double deltaZ = entZ + dz - getCenterZ();
 
                     // TODO: Check for distance
-                    Vector3d intersection = area3d.lineIntersection(
-                            getCenterX(), getCenterY(), getCenterZ(),
-                            deltaX, deltaY, deltaZ,
-                            Intersection.ANY_3D
-                    );
+                    Vector3d intersection = area3d.lineIntersection(getCenterX(), getCenterY(), getCenterZ(),
+                            deltaX, deltaY, deltaZ, Intersection.ANY_3D);
 
                     if (intersection != null) {
                         hits++;

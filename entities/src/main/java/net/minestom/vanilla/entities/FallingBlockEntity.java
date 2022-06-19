@@ -1,5 +1,8 @@
 package net.minestom.vanilla.entities;
 
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
@@ -14,21 +17,26 @@ import net.minestom.vanilla.entitymeta.EntityTags;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class FallingBlockEntity extends Entity {
     private static final Random rng = new Random();
     private final @NotNull Block toPlace;
 
-    public FallingBlockEntity(@Nullable Block toPlace, Pos initialPosition) {
-        super(EntityType.FALLING_BLOCK);
+    Short2ObjectMap<Material> block2Mat = Short2ObjectMaps.unmodifiable(new Short2ObjectOpenHashMap<>(
+            Material.values().stream()
+            .filter(material -> material.block() != null)
+            .map(material -> Map.entry(material.block().stateId(), material))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
+    );
 
-        // Default to air block is toPlace is absent
-        if (toPlace == null) {
-            toPlace = Block.AIR;
-        }
-        assert toPlace != null;
+    public FallingBlockEntity(@NotNull Block toPlace, @NotNull Pos initialPosition) {
+        super(EntityType.FALLING_BLOCK);
         this.toPlace = toPlace;
+
 
         // setGravity(0.025f, getGravityAcceleration());
         setBoundingBox(0.98f, 0.98f, 0.98f);
@@ -39,7 +47,7 @@ public class FallingBlockEntity extends Entity {
     }
 
     public FallingBlockEntity(@NotNull VanillaRegistry.EntityContext context) {
-        this(context.getTag(EntityTags.FallingBlock.BLOCK), context.position());
+        this(Objects.requireNonNullElse(context.getTag(EntityTags.FallingBlock.BLOCK), Block.AIR), context.position());
     }
 
     @Override
@@ -50,20 +58,17 @@ public class FallingBlockEntity extends Entity {
             return;
         }
 
-        if (getVelocity().y() < 0.0) {
-            return;
-        }
+
 
         Block block = instance.getBlock(position);
-        Block belowBlock = instance.getBlock(position.add(0, -1, 0));
 
-        if ((!block.isAir() && !block.isLiquid()) || !belowBlock.isSolid()) {
+        if (block.registry().isSolid()) {
             // TODO: Better way to get block's loot
-            Material loot = Material.fromNamespaceId(toPlace.namespace());
-
-            ItemEntity entity = new ItemEntity(ItemStack.of(loot));
-            entity.setInstance(instance);
-            entity.teleport(position);
+            Material loot = block2Mat.get(block.stateId());
+            if (loot != null) {
+                ItemEntity itemEntity = new ItemEntity(ItemStack.of(loot));
+                itemEntity.setInstance(instance, position);
+            }
             remove();
             return;
         }

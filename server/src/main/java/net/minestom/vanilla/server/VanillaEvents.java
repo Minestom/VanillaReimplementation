@@ -19,6 +19,7 @@ import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.instance.ExplosionSupplier;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.item.ItemStack;
@@ -33,11 +34,7 @@ import net.minestom.vanilla.system.ServerProperties;
 
 public class VanillaEvents {
 
-    private static volatile InstanceContainer overworld;
-    private static volatile InstanceContainer nether;
-    private static volatile InstanceContainer end;
-
-    public static void register(ServerProperties properties, EventNode<Event> eventNode) {
+    public static void register(VanillaServer server, ServerProperties properties, EventNode<Event> eventNode) {
         String worldName = properties.get("level-name");
 
         ExplosionSupplier explosionGenerator = (centerX, centerY, centerZ, strength, additionalData) -> {
@@ -55,22 +52,22 @@ public class VanillaEvents {
         // TODO: World storage
 
         VanillaTestGenerator noiseTestGenerator = new VanillaTestGenerator();
-        overworld = MinecraftServer.getInstanceManager().createInstanceContainer(DimensionType.OVERWORLD);
-        overworld.enableAutoChunkLoad(true);
-        overworld.setGenerator(noiseTestGenerator);
-        overworld.setExplosionSupplier(explosionGenerator);
+        Instance overworld = server.overworld();
+//        overworld.enableAutoChunkLoad(true);
+//        overworld.setGenerator(noiseTestGenerator);
+//        overworld.setExplosionSupplier(explosionGenerator);
 //        overworld.setChunkLoader(new AnvilChunkLoader(storageManager.getLocation(worldName + "/region")));
-
-        nether = MinecraftServer.getInstanceManager().createInstanceContainer(VanillaDimensionTypes.NETHER);
-        nether.enableAutoChunkLoad(true);
-        nether.setGenerator(noiseTestGenerator);
-        nether.setExplosionSupplier(explosionGenerator);
+//
+//        nether = MinecraftServer.getInstanceManager().createInstanceContainer(VanillaDimensionTypes.NETHER);
+//        nether.enableAutoChunkLoad(true);
+//        nether.setGenerator(noiseTestGenerator);
+//        nether.setExplosionSupplier(explosionGenerator);
 //        nether.setChunkLoader(new AnvilChunkLoader(storageManager.getLocation(worldName + "/DIM-1/region")));
-
-        end = MinecraftServer.getInstanceManager().createInstanceContainer(VanillaDimensionTypes.END);
-        end.enableAutoChunkLoad(true);
-        end.setGenerator(noiseTestGenerator);
-        end.setExplosionSupplier(explosionGenerator);
+//
+//        end = MinecraftServer.getInstanceManager().createInstanceContainer(VanillaDimensionTypes.END);
+//        end.enableAutoChunkLoad(true);
+//        end.setGenerator(noiseTestGenerator);
+//        end.setExplosionSupplier(explosionGenerator);
 //        end.setChunkLoader(new AnvilChunkLoader(storageManager.getLocation(worldName + "/DIM1/region")));
 
         // Load some chunks beforehand
@@ -79,8 +76,6 @@ public class VanillaEvents {
         for (int x = loopStart; x < loopEnd; x++)
             for (int z = loopStart; z < loopEnd; z++) {
                 overworld.loadChunk(x, z);
-                nether.loadChunk(x, z);
-                end.loadChunk(x, z);
             }
 
         eventNode.addListener(AddEntityToInstanceEvent.class, event -> {
@@ -94,8 +89,6 @@ public class VanillaEvents {
         MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
             try {
                 overworld.saveInstance();
-                nether.saveInstance();
-                end.saveInstance();
             } catch (Throwable e) {
                 e.printStackTrace();
             }
