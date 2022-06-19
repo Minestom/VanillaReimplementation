@@ -33,6 +33,10 @@ dependencies {
     implementation(project(":world-generation"))
 }
 
+tasks.withType<Jar> {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 subprojects {
 
     plugins.apply("java")
@@ -53,6 +57,10 @@ subprojects {
         sourceSets.main {
             java.srcDir("src/main/java")
         }
+    }
+
+    tasks.withType<Jar> {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 
     repositories {
