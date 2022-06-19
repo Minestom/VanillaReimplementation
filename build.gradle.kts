@@ -16,15 +16,21 @@ java {
 
     withJavadocJar()
     withSourcesJar()
+
+    sourceSets.main {
+        java.srcDir("src/main/java")
+    }
 }
 
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":world-generation"))
-    implementation(project(":instance-meta"))
-    implementation(project(":commands"))
     implementation(project(":block-update-system"))
+    implementation(project(":commands"))
+    implementation(project(":core"))
+    implementation(project(":entities"))
+    implementation(project(":entity-meta"))
+    implementation(project(":instance-meta"))
     implementation(project(":vanilla-blocks"))
+    implementation(project(":world-generation"))
 }
 
 subprojects {
@@ -44,10 +50,8 @@ subprojects {
         withJavadocJar()
         withSourcesJar()
 
-        sourceSets {
-            main {
-                java.srcDir("src/main/java")
-            }
+        sourceSets.main {
+            java.srcDir("src/main/java")
         }
     }
 
