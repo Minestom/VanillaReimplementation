@@ -5,6 +5,6 @@ dependencies {
     implementation(project(":entities"))
     implementation(project(":entity-meta"))
     implementation(project(":instance-meta"))
-    implementation(project(":vanilla-blocks"))
+    implementation(project(":blocks"))
     implementation(project(":world-generation"))
 }

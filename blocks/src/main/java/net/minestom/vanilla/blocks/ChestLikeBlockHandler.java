@@ -11,18 +11,13 @@ import net.minestom.server.inventory.Inventory;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.Direction;
-import net.minestom.vanilla.inventory.ChestInventory;
-import net.minestom.vanilla.inventory.ItemStackUtils;
+import net.minestom.vanilla.blocks.chestlike.ChestInventory;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.jglrxavpok.hephaistos.nbt.NBTList;
-import org.jglrxavpok.hephaistos.nbt.NBTType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -32,20 +27,20 @@ import java.util.Random;
  */
 public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
 
-    public static final Tag<List<NBTCompound>> TAG_ITEMS = Tag.NBT("ITEMS")
-            .map(nbt -> nbt == null ? null : (NBTCompound) nbt, NBTCompound::toCompound)
-            .list();
+    public static final Tag<List<ItemStack>> TAG_ITEMS = Tag.ItemStack("vri:chest_items").list();
     protected static final Random rng = new Random();
+    protected final int size;
 
-    public ChestLikeBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+    public ChestLikeBlockHandler(@NotNull VanillaBlocks.BlockContext context, int size) {
         super(context);
+        this.size = size;
     }
 
     @Override
     public void onPlace(BlockHandler.Placement placement) {
         Block block = placement.getBlock();
 
-        @Nullable List<NBTCompound> items = block.getTag(TAG_ITEMS);
+        @UnknownNullability List<ItemStack> items = block.getTag(TAG_ITEMS);
 
         if (items != null) {
             return;
@@ -54,8 +49,11 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
         Instance instance = placement.getInstance();
         Point pos = placement.getBlockPosition();
 
-        Block blockToSet = block.withTag(TAG_ITEMS, List.of());
-        // TODO: Override blockToSet
+        ItemStack[] itemsArray = new ItemStack[size];
+        Arrays.fill(itemsArray, ItemStack.AIR);
+
+        Block blockToSet = block.withTag(TAG_ITEMS, List.of(itemsArray));
+        setBlock(blockToSet, instance, pos);
     }
 
     @Override
@@ -67,16 +65,19 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
             return;
         }
 
-        List<NBTCompound> items = getItems(block);
+        if (block.getTag(TAG_ITEMS) == null) {
+            return;
+        }
 
-        for (NBTCompound item : items) {
-            ItemStack itemStack = ItemStackUtils.fromNBTCompound(item);
+        List<ItemStack> items = getItems(block);
 
-            if (itemStack == null) {
+        for (ItemStack item : items) {
+
+            if (item == null) {
                 continue;
             }
 
-            ItemEntity entity = new ItemEntity(itemStack);
+            ItemEntity entity = new ItemEntity(item);
 
             entity.setInstance(destroy.getInstance());
             entity.teleport(new Pos(pos.x() + rng.nextDouble(), pos.y() + .5f, pos.z() + rng.nextDouble()));
@@ -108,7 +109,7 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
             return false;
         }
 
-        Inventory chestInventory = new ChestInventory(getItems(block));
+        Inventory chestInventory = ChestInventory.from(instance, pos);
         player.openInventory(chestInventory);
         return true;
     }
@@ -121,8 +122,15 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
      * @param block the block
      * @return the items
      */
-    protected @NotNull List<NBTCompound> getItems(Block block) {
-        return Objects.requireNonNull(block.getTag(TAG_ITEMS), "Block has no items");
+    protected @NotNull List<ItemStack> getItems(Block block) {
+        List<ItemStack> items = block.getTag(TAG_ITEMS);
+        if (items == null) {
+            throw new IllegalStateException("Chest block has no items");
+        }
+        if (items.size() != this.size) {
+            throw new IllegalStateException("Invalid items size");
+        }
+        return items;
     }
 
     /**
@@ -132,9 +140,9 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
      * @param pos      the position
      * @return all items in the position in the instance
      */
-    protected List<NBTCompound> getAllItems(Instance instance, Point pos, Player player) {
+    protected List<ItemStack> getAllItems(Instance instance, Point pos, Player player) {
         Block block = instance.getBlock(pos);
-        List<NBTCompound> items = new ArrayList<>(getItems(block));
+        List<ItemStack> items = new ArrayList<>(getItems(block));
 
         Point positionOfOtherChest = pos;
         Direction facing = Direction.valueOf(block.getProperty("facing").toUpperCase());

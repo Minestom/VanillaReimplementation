@@ -1,4 +1,4 @@
-package net.minestom.vanilla.inventory;
+package net.minestom.vanilla.blocks.chestlike;
 
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;

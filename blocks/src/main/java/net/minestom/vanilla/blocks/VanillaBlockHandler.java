@@ -1,5 +1,7 @@
 package net.minestom.vanilla.blocks;
 
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.tag.Tag;
@@ -30,5 +32,9 @@ public abstract class VanillaBlockHandler implements BlockHandler {
 
     public @NotNull Map<Tag<?>, ?> defaultTagValues() {
         return Map.of();
+    }
+
+    protected void setBlock(@NotNull Block block, Instance instance, @NotNull Point pos) {
+        instance.setBlock(pos, block);
     }
 }

@@ -4,6 +4,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.ItemStack;
 import net.minestom.vanilla.system.EnderChestSystem;
 import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
@@ -13,7 +14,7 @@ import java.util.List;
 
 public class EnderChestBlockHandler extends ChestLikeBlockHandler {
     public EnderChestBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
-        super(context);
+        super(context, 3 * 9);
     }
 
     @Override
@@ -22,7 +23,7 @@ public class EnderChestBlockHandler extends ChestLikeBlockHandler {
     }
 
     @Override
-    protected List<NBTCompound> getAllItems(Instance instance, Point pos, Player player) {
+    protected List<ItemStack> getAllItems(Instance instance, Point pos, Player player) {
         return EnderChestSystem.getInstance().getItems(player);
     }
 }

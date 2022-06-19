@@ -49,7 +49,7 @@ public class GravityBlockHandler extends VanillaBlockHandler implements BlockUpd
         }
 
         // Schedule block update
-        BlockUpdateManager.from(instance).scheduleNeighborsUpdate(position, BlockUpdateInfo.MOVE_BLOCK(position));
+        BlockUpdateManager.from(instance).scheduleNeighborsUpdate(position, BlockUpdateInfo.MOVE_BLOCK());
 
         instance.setBlock(position, Block.AIR);
 

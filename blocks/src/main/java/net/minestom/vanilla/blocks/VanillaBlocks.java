@@ -171,6 +171,7 @@ public enum VanillaBlocks {
                 // Apply default tag values if applicable
                 if (newHandler instanceof VanillaBlockHandler) {
                     for (Map.Entry<Tag<?>, ?> entry : ((VanillaBlockHandler) newHandler).defaultTagValues().entrySet()) {
+                        //noinspection unchecked, rawtypes
                         someBlock = someBlock.withTag((Tag) entry.getKey(), entry.getValue());
                     }
                 }

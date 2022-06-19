@@ -1,27 +1,31 @@
 package net.minestom.vanilla.blockupdatesystem;
 
-import net.minestom.server.coordinate.Point;
-
 public interface BlockUpdateInfo {
 
-    static DestroyBlock DESTROY_BLOCK(Point destroyedBlock) {
-        return new DestroyBlock(destroyedBlock);
+    static DestroyBlock DESTROY_BLOCK() {
+        return new DestroyBlock();
     }
 
-    static PlaceBlock PLACE_BLOCK(Point placedBlock) {
-        return new PlaceBlock(placedBlock);
+    static PlaceBlock PLACE_BLOCK() {
+        return new PlaceBlock();
+    }
+    static ChunkLoad CHUNK_LOAD() {
+        return new ChunkLoad();
     }
 
-    static MoveBlock MOVE_BLOCK(Point movedBlock) {
-        return new MoveBlock(movedBlock);
+    static MoveBlock MOVE_BLOCK() {
+        return new MoveBlock();
     }
 
-    record DestroyBlock(Point destroyedBlock) implements BlockUpdateInfo {
+    record DestroyBlock() implements BlockUpdateInfo {
     }
 
-    record PlaceBlock(Point placedBlock) implements BlockUpdateInfo {
+    record PlaceBlock() implements BlockUpdateInfo {
     }
 
-    record MoveBlock(Point movingBlock) implements BlockUpdateInfo {
+    record ChunkLoad() implements BlockUpdateInfo {
+    }
+
+    record MoveBlock() implements BlockUpdateInfo {
     }
 }

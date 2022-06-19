@@ -2,12 +2,16 @@ package net.minestom.vanilla.blockupdatesystem;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.instance.InstanceChunkLoadEvent;
 import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
+import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -28,13 +32,34 @@ public class BlockUpdateManager {
         eventNode.addListener(PlayerBlockBreakEvent.class, event ->
                 BlockUpdateManager.from(event.getPlayer().getInstance())
                         .scheduleNeighborsUpdate(event.getBlockPosition(),
-                                BlockUpdateInfo.DESTROY_BLOCK(event.getBlockPosition()))
+                                BlockUpdateInfo.DESTROY_BLOCK())
         );
         eventNode.addListener(PlayerBlockPlaceEvent.class, event ->
                 BlockUpdateManager.from(event.getPlayer().getInstance())
                         .scheduleNeighborsUpdate(event.getBlockPosition(),
-                                BlockUpdateInfo.PLACE_BLOCK(event.getBlockPosition()))
+                                BlockUpdateInfo.PLACE_BLOCK())
         );
+        eventNode.addListener(InstanceChunkLoadEvent.class, event -> {
+            Chunk chunk = event.getChunk();
+            int minY = chunk.getMinSection() * Chunk.CHUNK_SECTION_SIZE;
+            int maxY = chunk.getMaxSection() * Chunk.CHUNK_SECTION_SIZE;
+            int minX = chunk.getChunkX() * Chunk.CHUNK_SIZE_X;
+            int minZ = chunk.getChunkZ() * Chunk.CHUNK_SIZE_Z;
+
+            BlockUpdateManager blockUpdateManager = BlockUpdateManager.from(event.getInstance());
+            Instance instance = event.getInstance();
+
+            for (int x = minX; x < minX + Chunk.CHUNK_SIZE_X; x++) {
+                for (int z = minZ; z < minZ + Chunk.CHUNK_SIZE_Z; z++) {
+                    for (int y = minY; y < maxY; y++) {
+                        Block block = chunk.getBlock(x, y, z);
+                        if (block.handler() instanceof BlockUpdatable updatable) {
+                            updatable.blockUpdate(instance, new Vec(x, y, z), BlockUpdateInfo.CHUNK_LOAD());
+                        }
+                    }
+                }
+            }
+        });
     }
 
     private static void instanceTick(InstanceTickEvent event) {

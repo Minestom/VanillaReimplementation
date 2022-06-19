@@ -7,7 +7,7 @@ public class TrappedChestBlockHandler extends ChestLikeBlockHandler {
     // TODO: redstone signal
 
     public TrappedChestBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
-        super(context);
+        super(context, 3 * 9);
     }
 
 //    @Override

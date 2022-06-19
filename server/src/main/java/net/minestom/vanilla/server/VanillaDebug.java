@@ -24,11 +24,12 @@ public class VanillaDebug {
         VanillaReimplementation vri = server.vri();
         vri.process().eventHandler()
             .addListener(PlayerChatEvent.class, event -> handleMessage(server, event.getPlayer(), event.getMessage()))
-            .addListener(PlayerTickEvent.class, event -> {
-                if (event.getPlayer().getInstance().getWorldAge() % 10 == 0) {
-                    handleMessage(server, event.getPlayer(), "fallingblock");
-                }
-            });
+//            .addListener(PlayerTickEvent.class, event -> {
+//                if (event.getPlayer().getInstance().getWorldAge() % 10 == 0) {
+//                    handleMessage(server, event.getPlayer(), "fallingblock");
+//                }
+//            })
+        ;
     }
 
     private static void handleMessage(VanillaServer server, Player player, String message) {
