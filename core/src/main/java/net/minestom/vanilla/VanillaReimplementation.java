@@ -123,8 +123,8 @@ public class VanillaReimplementation {
      * @return the new entity
      */
     public @NotNull Entity createEntityOrDummy(@NotNull VanillaRegistry.EntityContext context) {
-        createEntity(context);
-        return new DummyEntity(context.type());
+        Entity entity = createEntity(context);
+        return entity != null ? entity : new DummyEntity(context.type());
     }
 
     private static class DummyEntity extends Entity {
