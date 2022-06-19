@@ -58,30 +58,36 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
 
     @Override
     public void onDestroy(@NotNull BlockHandler.Destroy destroy) {
-        Block block = destroy.getBlock();
+        Instance instance = destroy.getInstance();
         Point pos = destroy.getBlockPosition();
+        Block block = destroy.getBlock();
 
-        if (!dropContentsOnDestroy()) {
-            return;
-        }
-
-        if (block.getTag(TAG_ITEMS) == null) {
-            return;
-        }
-
-        List<ItemStack> items = getItems(block);
-
-        for (ItemStack item : items) {
-
-            if (item == null) {
-                continue;
+        // TODO: Introduce a way to get the block this is getting replaced with, enabling us to remove the tick delay.
+        destroy.getInstance().scheduleNextTick(ignored -> {
+            if (instance.getBlock(pos).compare(block)) {
+                // Same block, don't remove chest inventory
+                return;
             }
 
-            ItemEntity entity = new ItemEntity(item);
+            // Different block, remove chest inventory
+            ItemStack[] items = ChestInventory.remove(instance, pos);
 
-            entity.setInstance(destroy.getInstance());
-            entity.teleport(new Pos(pos.x() + rng.nextDouble(), pos.y() + .5f, pos.z() + rng.nextDouble()));
-        }
+            if (!dropContentsOnDestroy()) {
+                return;
+            }
+
+            for (ItemStack item : items) {
+
+                if (item == null) {
+                    continue;
+                }
+
+                ItemEntity entity = new ItemEntity(item);
+
+                entity.setInstance(destroy.getInstance());
+                entity.teleport(new Pos(pos.x() + rng.nextDouble(), pos.y() + .5f, pos.z() + rng.nextDouble()));
+            }
+        });
     }
 
 //    @Override

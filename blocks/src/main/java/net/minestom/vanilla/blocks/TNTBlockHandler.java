@@ -11,9 +11,6 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.item.Material;
 import net.minestom.vanilla.VanillaRegistry;
-import net.minestom.vanilla.blocks.redstone.RedstoneContainerBlockHandler;
-import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignal;
-import net.minestom.vanilla.blocks.redstone.signal.info.RedstoneSignalTarget;
 import net.minestom.vanilla.entitymeta.EntityTags;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.naming.Context;
 import java.util.Random;
 
-public class TNTBlockHandler extends RedstoneContainerBlockHandler {
+public class TNTBlockHandler extends VanillaBlockHandler {
 
     public static final Random TNT_RANDOM = new Random();
 
@@ -49,19 +46,6 @@ public class TNTBlockHandler extends RedstoneContainerBlockHandler {
         spawnPrimedTNT(player.getInstance(), blockPosition, 80);
 
         return true;
-    }
-
-    @Override
-    public void newRedstoneSignal(
-            @NotNull RedstoneSignalTarget redstoneSignalTarget,
-            @NotNull RedstoneSignal newRedstoneSignal,
-            @Nullable RedstoneSignal oldRedstoneSignal
-    ) {
-        Instance instance = redstoneSignalTarget.instance();
-        Point blockPosition = redstoneSignalTarget.target();
-
-        instance.setBlock(blockPosition, Block.AIR);
-        spawnPrimedTNT(instance, blockPosition, 80);
     }
 
     private void spawnPrimedTNT(Instance instance, Point blockPosition, int fuseTime) {

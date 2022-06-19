@@ -9,9 +9,6 @@ import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaReimplementation;
-import net.minestom.vanilla.blocks.redstone.LeverBlockHandler;
-import net.minestom.vanilla.blocks.redstone.RedstoneBlockBlockHandler;
-import net.minestom.vanilla.blocks.redstone.RedstoneWireBlockHandler;
 import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
 
@@ -26,11 +23,6 @@ import java.util.function.Supplier;
  * All blocks available in the vanilla reimplementation
  */
 public enum VanillaBlocks {
-
-    // Start of redstone
-    LEVER(Block.LEVER, LeverBlockHandler::new),
-    REDSTONE_BLOCK(Block.REDSTONE_BLOCK, RedstoneBlockBlockHandler::new),
-    REDSTONE_WIRE(Block.REDSTONE_WIRE, RedstoneWireBlockHandler::new),
 
     SAND(Block.SAND, GravityBlockHandler::new),
     RED_SAND(Block.RED_SAND, GravityBlockHandler::new),

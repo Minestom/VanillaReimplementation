@@ -9,6 +9,7 @@ import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.vanilla.blocks.ChestLikeBlockHandler;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,6 +44,12 @@ public class ChestInventory extends Inventory {
                 .computeIfAbsent(pos, k -> new ChestInventory(instance, pos));
     }
 
+    public static @Nullable ItemStack[] remove(Instance instance, Point pos) {
+        return INSTANCE2CHESTS.computeIfAbsent(instance, k -> new WeakHashMap<>())
+                .remove(pos)
+                .getItemStacks();
+    }
+
     @Override
     public @NotNull ItemStack getItemStack(int slot) {
         ItemStack item = items[slot];
@@ -62,14 +69,6 @@ public class ChestInventory extends Inventory {
 
     @Override
     public @NotNull ItemStack[] getItemStacks() {
-        List<ItemStack> list = new LinkedList<>();
-
-        for (ItemStack item : items) {
-            if (item != null) {
-                list.add(item);
-            }
-        }
-
-        return list.toArray(ItemStack[]::new);
+        return items;
     }
 }

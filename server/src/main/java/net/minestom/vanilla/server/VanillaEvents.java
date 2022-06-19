@@ -156,6 +156,7 @@ public class VanillaEvents {
                             inventory.addItemStack(ItemStack.of(Material.OBSIDIAN, 1));
                             inventory.addItemStack(ItemStack.of(Material.FLINT_AND_STEEL, 1));
                             inventory.addItemStack(ItemStack.of(Material.RED_BED, 1));
+                            inventory.addItemStack(ItemStack.of(Material.CHEST, 1));
                         })
                         .build()
         );
