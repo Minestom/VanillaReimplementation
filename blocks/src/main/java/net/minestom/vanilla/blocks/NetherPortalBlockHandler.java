@@ -13,11 +13,11 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdatable;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdateInfo;
-import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
-import net.minestom.vanilla.event.entity.EntityEnterNetherPortalEvent;
-import net.minestom.vanilla.event.entity.NetherPortalTeleportEvent;
-import net.minestom.vanilla.event.entity.NetherPortalUpdateEvent;
-import net.minestom.vanilla.system.NetherPortal;
+import net.minestom.vanilla.go_away.dimensions.VanillaDimensionTypes;
+import net.minestom.vanilla.go_away.entity.EntityEnterNetherPortalEvent;
+import net.minestom.vanilla.go_away.entity.NetherPortalTeleportEvent;
+import net.minestom.vanilla.go_away.entity.NetherPortalUpdateEvent;
+import net.minestom.vanilla.go_away.system.NetherPortal;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

@@ -12,7 +12,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.MathUtils;
 import net.minestom.server.utils.time.TimeUnit;
-import net.minestom.vanilla.instance.VanillaExplosion;
+import net.minestom.vanilla.go_away.instance.VanillaExplosion;
 import org.jetbrains.annotations.NotNull;
 
 /**

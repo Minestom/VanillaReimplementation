@@ -4,9 +4,9 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.other.PrimedTntMeta;
 import net.minestom.server.instance.block.Block;
-import net.minestom.vanilla.VanillaRegistry;
+import net.minestom.vanilla.go_away.VanillaRegistry;
 import net.minestom.vanilla.entitymeta.EntityTags;
-import net.minestom.vanilla.instance.VanillaExplosion;
+import net.minestom.vanilla.go_away.instance.VanillaExplosion;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

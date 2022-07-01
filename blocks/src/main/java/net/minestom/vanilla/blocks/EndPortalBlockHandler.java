@@ -7,7 +7,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.world.DimensionType;
-import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
+import net.minestom.vanilla.go_away.dimensions.VanillaDimensionTypes;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;

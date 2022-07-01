@@ -27,10 +27,10 @@ import net.minestom.server.item.Material;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.server.world.DimensionType;
-import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
+import net.minestom.vanilla.go_away.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.generation.VanillaTestGenerator;
-import net.minestom.vanilla.instance.VanillaExplosion;
-import net.minestom.vanilla.system.ServerProperties;
+import net.minestom.vanilla.go_away.instance.VanillaExplosion;
+import net.minestom.vanilla.go_away.system.ServerProperties;
 
 public class VanillaEvents {
 

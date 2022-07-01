@@ -11,10 +11,10 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.VanillaReimplementation;
-import net.minestom.vanilla.items.ItemManager;
-import net.minestom.vanilla.items.VanillaItems;
-import net.minestom.vanilla.system.RayFastManager;
-import net.minestom.vanilla.system.ServerProperties;
+import net.minestom.vanilla.go_away.items.ItemManager;
+import net.minestom.vanilla.go_away.items.VanillaItems;
+import net.minestom.vanilla.go_away.system.RayFastManager;
+import net.minestom.vanilla.go_away.system.ServerProperties;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

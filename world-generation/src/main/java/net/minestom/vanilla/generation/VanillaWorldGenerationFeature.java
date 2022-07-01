@@ -3,7 +3,7 @@ package net.minestom.vanilla.generation;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
-import net.minestom.vanilla.instance.SetupVanillaInstanceEvent;
+import net.minestom.vanilla.go_away.instance.SetupVanillaInstanceEvent;
 import org.jetbrains.annotations.NotNull;
 
 public class VanillaWorldGenerationFeature implements VanillaReimplementation.Feature {

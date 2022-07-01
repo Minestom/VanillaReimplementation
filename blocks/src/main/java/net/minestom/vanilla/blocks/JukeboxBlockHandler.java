@@ -12,8 +12,8 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
-import net.minestom.vanilla.inventory.InventoryManipulation;
-import net.minestom.vanilla.inventory.ItemStackUtils;
+import net.minestom.vanilla.go_away.inventory.InventoryManipulation;
+import net.minestom.vanilla.go_away.inventory.ItemStackUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

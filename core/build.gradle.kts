@@ -11,4 +11,6 @@ dependencies {
 
     // Annotations
     api("org.jetbrains:annotations:${project.property("annotations_version")}")
+
+    api("com.google.auto.service:auto-service:1.0-rc5")
 }
