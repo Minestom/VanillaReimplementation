@@ -15,6 +15,8 @@ subprojects {
     group = "net.minestom.vanilla"
     version = "indev"
 
+
+
     java {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -29,6 +31,10 @@ subprojects {
 
     tasks.withType<Jar> {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+
+    tasks.withType<Wrapper> {
+        gradleVersion = rootProject.gradle.gradleVersion
     }
 
     repositories {
