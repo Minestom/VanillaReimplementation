@@ -115,13 +115,11 @@ public enum VanillaBlocks {
      */
     public interface BlockContext {
         @NotNull Block block();
-
         @NotNull VanillaReimplementation vri();
     }
 
     /**
      * Creates a block handler from the context
-     *
      * @param context the context
      * @return the block handler
      */
