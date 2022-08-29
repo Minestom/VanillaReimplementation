@@ -62,12 +62,7 @@ public class CakeBlockHandler extends VanillaBlockHandler {
 
         // Player is eating cake
         if (food < 20) {
-            // Try drop candle from candle cake
-            if (block != Block.CAKE) {
-                instance.setBlock(point, Block.CAKE.withProperty("bites", "1"));
-                ItemStack candle = ItemStack.of(candleCakes.get(block));
-                new ItemEntity(candle).setInstance(instance);
-            }
+            tryDropCandle(block, instance, point);
 
             // Update hunger values
             int newFood = Math.max(20, food + 2);
@@ -77,4 +72,23 @@ public class CakeBlockHandler extends VanillaBlockHandler {
         }
         return true;
     }
+
+    @Override
+    public void onDestroy(@NotNull Destroy destroy) {
+        Block block = destroy.getBlock();
+        Instance instance = destroy.getInstance();
+        Point point = destroy.getBlockPosition();
+
+        tryDropCandle(block, instance, point);
+    }
+
+    private void tryDropCandle(Block block, Instance instance, Point point) {
+        if (block != Block.CAKE) {
+            instance.setBlock(point, Block.CAKE.withProperty("bites", "1"));
+            ItemStack candle = ItemStack.of(candleCakes.get(block));
+            new ItemEntity(candle).setInstance(instance);
+        }
+    }
+
+
 }
