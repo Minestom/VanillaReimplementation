@@ -89,6 +89,4 @@ public class CakeBlockHandler extends VanillaBlockHandler {
             new ItemEntity(candle).setInstance(instance);
         }
     }
-
-
 }
