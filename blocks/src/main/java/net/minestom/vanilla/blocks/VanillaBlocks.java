@@ -1,13 +1,9 @@
 package net.minestom.vanilla.blocks;
 
-import net.minestom.server.event.Event;
-import net.minestom.server.event.EventListener;
-import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaReimplementation;
 import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
@@ -16,8 +12,6 @@ import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * All blocks available in the vanilla reimplementation
@@ -75,8 +69,29 @@ public enum VanillaBlocks {
     CHEST(Block.CHEST, ChestBlockHandler::new),
     TRAPPED_CHEST(Block.TRAPPED_CHEST, TrappedChestBlockHandler::new),
     ENDER_CHEST(Block.ENDER_CHEST, EnderChestBlockHandler::new),
-    JUKEBOX(Block.JUKEBOX, JukeboxBlockHandler::new);
+    JUKEBOX(Block.JUKEBOX, JukeboxBlockHandler::new),
 
+    // Start of cakes
+    CAKE(Block.CAKE, CakeBlockHandler::new),
+    CANDLE_CAKE(Block.CANDLE_CAKE, CakeBlockHandler::new),
+    WHITE_CANDLE_CAKE(Block.WHITE_CANDLE_CAKE, CakeBlockHandler::new),
+    ORANGE_CANDLE_CAKE(Block.ORANGE_CANDLE_CAKE, CakeBlockHandler::new),
+    MAGENTA_CANDLE_CAKE(Block.MAGENTA_CANDLE_CAKE, CakeBlockHandler::new),
+    LIGHT_BLUE_CANDLE_CAKE(Block.LIGHT_BLUE_CANDLE_CAKE, CakeBlockHandler::new),
+    YELLOW_CANDLE_CAKE(Block.YELLOW_CANDLE_CAKE, CakeBlockHandler::new),
+    LIME_CANDLE_CAKE(Block.LIME_CANDLE_CAKE, CakeBlockHandler::new),
+    PINK_CANDLE_CAKE(Block.PINK_CANDLE_CAKE, CakeBlockHandler::new),
+    GRAY_CANDLE_CAKE(Block.GRAY_CANDLE_CAKE, CakeBlockHandler::new),
+    LIGHT_GRAY_CANDLE_CAKE(Block.LIGHT_GRAY_CANDLE_CAKE, CakeBlockHandler::new),
+    CYAN_CANDLE_CAKE(Block.CYAN_CANDLE_CAKE, CakeBlockHandler::new),
+    PURPLE_CANDLE_CAKE(Block.PURPLE_CANDLE_CAKE, CakeBlockHandler::new),
+    BLUE_CANDLE_CAKE(Block.BLUE_CANDLE_CAKE, CakeBlockHandler::new),
+    BROWN_CANDLE_CAKE(Block.BROWN_CANDLE_CAKE, CakeBlockHandler::new),
+    GREEN_CANDLE_CAKE(Block.GREEN_CANDLE_CAKE, CakeBlockHandler::new),
+    BLACK_CANDLE_CAKE(Block.BLACK_CANDLE_CAKE, CakeBlockHandler::new)
+    // End of cakes
+
+    ;
     private final @NotNull Block block;
     private final @NotNull Context2Handler context2handler;
 
@@ -100,11 +115,13 @@ public enum VanillaBlocks {
      */
     public interface BlockContext {
         @NotNull Block block();
+
         @NotNull VanillaReimplementation vri();
     }
 
     /**
      * Creates a block handler from the context
+     *
      * @param context the context
      * @return the block handler
      */
