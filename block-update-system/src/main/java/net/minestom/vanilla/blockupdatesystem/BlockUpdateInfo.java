@@ -9,6 +9,7 @@ public interface BlockUpdateInfo {
     static PlaceBlock PLACE_BLOCK() {
         return new PlaceBlock();
     }
+
     static ChunkLoad CHUNK_LOAD() {
         return new ChunkLoad();
     }

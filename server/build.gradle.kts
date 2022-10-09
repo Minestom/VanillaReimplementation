@@ -10,3 +10,15 @@ dependencies {
     implementation(project(":blocks"))
     implementation(project(":world-generation"))
 }
+
+tasks {
+    named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
+        manifest {
+            attributes(
+                "Main-Class" to "net.minestom.vanilla.server.VanillaServer",
+                "Multi-Release" to true
+            )
+        }
+        mergeServiceFiles()
+    }
+}

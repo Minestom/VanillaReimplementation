@@ -1,4 +1,4 @@
-package net.minestom.vanilla.dimensions.damage;
+package net.minestom.vanilla.damage;
 
 import net.minestom.server.entity.damage.DamageType;
 

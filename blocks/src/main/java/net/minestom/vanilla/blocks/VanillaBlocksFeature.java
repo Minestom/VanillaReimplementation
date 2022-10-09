@@ -25,16 +25,23 @@ public class VanillaBlocksFeature implements VanillaReimplementation.Feature {
             if (block.handler() instanceof VanillaBlockHandler vanillaHandler) {
                 // Create the new placement object
                 VanillaBlockHandler.VanillaPlacement placement = new VanillaBlockHandler.VanillaPlacement() {
-                    @Override public @NotNull Block blockToPlace() {
+                    @Override
+                    public @NotNull Block blockToPlace() {
                         return blockToPlace.get();
                     }
-                    @Override public @NotNull Instance instance() {
+
+                    @Override
+                    public @NotNull Instance instance() {
                         return instance;
                     }
-                    @Override public @NotNull Point position() {
+
+                    @Override
+                    public @NotNull Point position() {
                         return position;
                     }
-                    @Override public @NotNull Block blockToPlace(@NotNull Block newBlock) {
+
+                    @Override
+                    public @NotNull Block blockToPlace(@NotNull Block newBlock) {
                         return blockToPlace.getAndSet(newBlock);
                     }
                 };

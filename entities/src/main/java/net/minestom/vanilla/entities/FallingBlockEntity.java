@@ -1,8 +1,5 @@
 package net.minestom.vanilla.entities;
 
-import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
@@ -11,16 +8,12 @@ import net.minestom.server.entity.metadata.other.FallingBlockMeta;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.tag.Tag;
 import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.entitymeta.EntityTags;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public class FallingBlockEntity extends Entity {
     private static final Random rng = new Random();

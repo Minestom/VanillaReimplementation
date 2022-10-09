@@ -3,9 +3,6 @@ package net.minestom.vanilla.system;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.jglrxavpok.hephaistos.nbt.NBTList;
-import org.jglrxavpok.hephaistos.nbt.NBTType;
 
 import java.util.HashMap;
 import java.util.List;

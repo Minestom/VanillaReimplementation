@@ -5,7 +5,6 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerChatEvent;
-import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
@@ -16,14 +15,14 @@ import java.util.Random;
 /**
  * This debug server can be edited and committed to master without any consequences.
  * Make sure to keep anything cool you make! A quick comment is always a good idea.
- *
+ * <p>
  * And try not to remove anyone else's additions, just comment them out.
  */
 public class VanillaDebug {
     public static void hook(VanillaServer server) {
         VanillaReimplementation vri = server.vri();
         vri.process().eventHandler()
-            .addListener(PlayerChatEvent.class, event -> handleMessage(server, event.getPlayer(), event.getMessage()))
+                .addListener(PlayerChatEvent.class, event -> handleMessage(server, event.getPlayer(), event.getMessage()))
 //            .addListener(PlayerTickEvent.class, event -> {
 //                if (event.getPlayer().getInstance().getWorldAge() % 10 == 0) {
 //                    handleMessage(server, event.getPlayer(), "fallingblock");

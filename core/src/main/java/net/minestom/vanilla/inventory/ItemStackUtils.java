@@ -43,9 +43,9 @@ public class ItemStackUtils {
     public static @NotNull NBTCompound toNBTCompound(@NotNull ItemStack itemStack) {
         MutableNBTCompound compound = new MutableNBTCompound();
 
-        compound.setString("id", itemStack.getMaterial().namespace().namespace());
-        compound.setByte("Count", (byte) itemStack.getAmount());
-        compound.set("tag", itemStack.getMeta().toNBT());
+        compound.setString("id", itemStack.material().namespace().namespace());
+        compound.setByte("Count", (byte) itemStack.amount());
+        compound.set("tag", itemStack.meta().toNBT());
 
         return compound.toCompound();
     }
@@ -59,6 +59,7 @@ public class ItemStackUtils {
         private final Tag<NBTCompound> tag;
 
         public ItemStackSerializer(String key) {
+            //noinspection unchecked
             this.tag = (Tag<NBTCompound>) (Object) Tag.NBT(key);
         }
 

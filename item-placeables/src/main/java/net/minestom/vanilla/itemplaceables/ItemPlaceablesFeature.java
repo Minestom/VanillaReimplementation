@@ -1,11 +1,8 @@
 package net.minestom.vanilla.itemplaceables;
 
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.NamespaceID;

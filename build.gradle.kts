@@ -2,7 +2,8 @@ plugins {
     java
     `java-library`
     `maven-publish`
-    id("com.github.harbby.gradle.serviceloader") version("1.1.8")
+    id("com.github.harbby.gradle.serviceloader") version ("1.1.8")
+    id("com.github.johnrengelman.shadow") version ("7.0.0")
 }
 
 subprojects {
@@ -11,6 +12,7 @@ subprojects {
     plugins.apply("java-library")
     plugins.apply("maven-publish")
     plugins.apply("com.github.harbby.gradle.serviceloader")
+    plugins.apply("com.github.johnrengelman.shadow")
 
     group = "net.minestom.vanilla"
     version = "indev"
@@ -51,4 +53,6 @@ subprojects {
     }
 
     serviceLoader.serviceInterfaces.add("net.minestom.vanilla.VanillaReimplementation\$Feature")
+
+    tasks.getByName("build").dependsOn("shadowJar")
 }

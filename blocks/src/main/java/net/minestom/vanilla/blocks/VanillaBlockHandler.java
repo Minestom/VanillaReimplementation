@@ -37,6 +37,7 @@ public abstract class VanillaBlockHandler implements BlockHandler {
 
     /**
      * Deprecated, use {@link #onPlace(VanillaPlacement)} instead.
+     *
      * @param placement the placement object
      */
     @Override
@@ -66,6 +67,7 @@ public abstract class VanillaBlockHandler implements BlockHandler {
 
         /**
          * Overrides the current block to be placed.
+         *
          * @param newBlock the new block to be placed
          * @return the old block that will no longer be used
          */

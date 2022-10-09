@@ -13,9 +13,7 @@ import net.minestom.server.item.Material;
 import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.entitymeta.EntityTags;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import javax.naming.Context;
 import java.util.Random;
 
 public class TNTBlockHandler extends VanillaBlockHandler {

@@ -6,7 +6,7 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.time.TimeUnit;
-import net.minestom.vanilla.dimensions.damage.DamageTypes;
+import net.minestom.vanilla.damage.DamageTypes;
 import net.minestom.vanilla.system.NetherPortal;
 import org.jetbrains.annotations.NotNull;
 

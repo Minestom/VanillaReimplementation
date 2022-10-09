@@ -55,7 +55,7 @@ public class CakeBlockHandler extends VanillaBlockHandler {
         if (item.isSimilar(flint_and_steel) && candleCakes.containsKey(block) &&
                 !Boolean.parseBoolean(block.getProperty("lit"))) {
             instance.setBlock(point, block.withProperty("lit", "true"));
-            
+
             // TODO: Handle tool durability
             return true;
         }

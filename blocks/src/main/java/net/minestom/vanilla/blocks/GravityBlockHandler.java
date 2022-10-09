@@ -1,14 +1,11 @@
 package net.minestom.vanilla.blocks;
 
-import net.kyori.adventure.text.Component;
-import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdatable;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdateInfo;

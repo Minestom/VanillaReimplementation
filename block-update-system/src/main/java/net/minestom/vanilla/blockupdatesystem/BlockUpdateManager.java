@@ -46,8 +46,8 @@ public class BlockUpdateManager {
             int minX = chunk.getChunkX() * Chunk.CHUNK_SIZE_X;
             int minZ = chunk.getChunkZ() * Chunk.CHUNK_SIZE_Z;
 
-            BlockUpdateManager blockUpdateManager = BlockUpdateManager.from(event.getInstance());
             Instance instance = event.getInstance();
+            BlockUpdateManager blockUpdateManager = BlockUpdateManager.from(instance);
 
             for (int x = minX; x < minX + Chunk.CHUNK_SIZE_X; x++) {
                 for (int z = minZ; z < minZ + Chunk.CHUNK_SIZE_Z; z++) {

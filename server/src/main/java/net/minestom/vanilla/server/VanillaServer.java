@@ -11,8 +11,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.VanillaReimplementation;
-import net.minestom.vanilla.items.ItemManager;
-import net.minestom.vanilla.items.VanillaItems;
 import net.minestom.vanilla.system.RayFastManager;
 import net.minestom.vanilla.system.ServerProperties;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +35,6 @@ class VanillaServer {
     }
 
     private final MinecraftServer minecraftServer;
-    private final @NotNull ItemManager itemManager;
     private final @NotNull ServerProperties serverProperties;
 
     private final @NotNull VanillaReimplementation vri;
@@ -50,7 +47,13 @@ class VanillaServer {
         this.minecraftServer = minecraftServer;
         this.serverProperties = getOrGenerateServerProperties();
         this.vri = vri;
-        this.overworld = vri.createInstance("world", DimensionType.OVERWORLD);
+
+        // Register all dimension types before making the worlds:
+        for (DimensionType dimension : VanillaDimensionTypes.values()) {
+            vri.process().dimension().addDimension(dimension);
+        }
+
+        this.overworld = vri.createInstance("world", VanillaDimensionTypes.OVERWORLD);
 
         // Try to get server properties
 
@@ -63,20 +66,20 @@ class VanillaServer {
 
 
         vri.process().eventHandler()
-            .addListener(PlayerLoginEvent.class, event -> event.setSpawningInstance(overworld))
-            .addListener(PlayerSpawnEvent.class, event -> {
-                Instance instance = event.getSpawnInstance();
-                // Find the first block that is not air
-                int y = instance.getDimensionType().getMaxY();
-                while (instance.getBlock(0, y, -0).isAir()) {
-                    y--;
-                    if (y < instance.getDimensionType().getMinY()) {
-                        y = 0;
-                        break;
+                .addListener(PlayerLoginEvent.class, event -> event.setSpawningInstance(overworld))
+                .addListener(PlayerSpawnEvent.class, event -> {
+                    Instance instance = event.getSpawnInstance();
+                    // Find the first block that is not air
+                    int y = instance.getDimensionType().getMaxY();
+                    while (instance.getBlock(0, y, -0).isAir()) {
+                        y--;
+                        if (y < instance.getDimensionType().getMinY()) {
+                            y = 0;
+                            break;
+                        }
                     }
-                }
-                event.getPlayer().teleport(new Pos(0, y, 0));
-            });
+                    event.getPlayer().teleport(new Pos(0, y, 0));
+                });
 
         // Register systems
         {
@@ -84,29 +87,7 @@ class VanillaServer {
 
             // Events
             VanillaEvents.register(this, serverProperties, eventHandler);
-
-            // item handlers
-            itemManager = ItemManager.accumulate(accumulator -> {
-                for (VanillaItems item : VanillaItems.values()) {
-                    accumulator.accumulate(item.getMaterial(), item.getItemHandlerSupplier().get());
-                }
-            });
-            itemManager.registerEvents(eventHandler);
         }
-//        CommandManager commandManager = MinecraftServer.getCommandManager();
-//        VanillaWorldgen.prepareFiles();
-//        VanillaWorldgen.registerAllBiomes(MinecraftServer.getBiomeManager());
-//        VanillaCommands.registerAll(commandManager);
-//        VanillaItems.registerAll(MinecraftServer.getConnectionManager());
-//        NetherPortal.registerData(MinecraftServer.getDataManager());
-        // LootTableManager lootTableManager = MinecraftServer.getLootTableManager();
-        // VanillaLootTables.register(lootTableManager);
-
-//        MinecraftServer.getStorageManager().defineDefaultStorageSystem(FileSystemStorage::new);
-
-//        ServerProperties properties = new ServerProperties(new File(".", "server.properties"));
-//        PlayerInit.init(properties);
-
 
         MinecraftServer.getSchedulerManager().buildShutdownTask(() -> connectionManager.getOnlinePlayers().forEach(player -> {
             // TODO: Saving
@@ -186,10 +167,6 @@ class VanillaServer {
 
     public void start(String address, int port) {
         minecraftServer.start(address, port);
-    }
-
-    public @NotNull ItemManager getItemManager() {
-        return itemManager;
     }
 
     public VanillaReimplementation vri() {
