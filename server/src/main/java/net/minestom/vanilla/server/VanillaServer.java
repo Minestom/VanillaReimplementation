@@ -62,8 +62,6 @@ class VanillaServer {
 
         EventNode<Event> eventHandler = MinecraftServer.getGlobalEventHandler();
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
-        CommandManager commandManager = MinecraftServer.getCommandManager();
-
 
         vri.process().eventHandler()
                 .addListener(PlayerLoginEvent.class, event -> event.setSpawningInstance(overworld))

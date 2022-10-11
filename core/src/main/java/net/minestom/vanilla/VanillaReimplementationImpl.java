@@ -12,6 +12,7 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import net.minestom.server.tag.TagWritable;
 import net.minestom.server.world.DimensionType;
+import net.minestom.vanilla.crafting.VanillaRecipe;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.instance.SetupVanillaInstanceEvent;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +30,7 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
     private final ServerProcess process;
     private final Map<String, Instance> worlds = new ConcurrentHashMap<>();
     private final Map<EntityType, VanillaRegistry.EntitySpawner> entity2Spawner = new ConcurrentHashMap<>();
+    private final Map<String, VanillaRecipe> id2Recipe = new ConcurrentHashMap<>();
 
     private VanillaReimplementationImpl(@NotNull ServerProcess process) {
         this.process = process;
@@ -152,10 +154,14 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
     }
 
     final class VanillaRegistryImpl implements VanillaRegistry {
-
         @Override
         public void register(@NotNull EntityType type, @NotNull EntitySpawner supplier) {
             entity2Spawner.put(type, supplier);
+        }
+
+        @Override
+        public void register(@NotNull String recipeId, @NotNull VanillaRecipe recipe) {
+            id2Recipe.put(recipeId, recipe);
         }
     }
 

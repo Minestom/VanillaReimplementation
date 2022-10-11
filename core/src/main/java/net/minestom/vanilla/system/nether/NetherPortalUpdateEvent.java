@@ -1,4 +1,4 @@
-package net.minestom.vanilla.event.entity;
+package net.minestom.vanilla.system.nether;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;

@@ -32,7 +32,6 @@ public interface VanillaReimplementation {
      */
     @NotNull ServerProcess process();
 
-
     /**
      * Creates an {@link net.minestom.vanilla.VanillaRegistry.EntityContext} for the given type and position
      *
@@ -41,8 +40,7 @@ public interface VanillaReimplementation {
      * @return the context
      */
     default @NotNull VanillaRegistry.EntityContext entityContext(EntityType type, Point position) {
-        return entityContext(type, position, writer -> {
-        });
+        return entityContext(type, position, writer -> {});
     }
 
     /**
