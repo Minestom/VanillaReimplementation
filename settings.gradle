@@ -11,5 +11,5 @@ include 'entities'
 include 'entity-meta'
 include 'server'
 include 'items'
-include 'crafting'
+include 'crafting-data'
 

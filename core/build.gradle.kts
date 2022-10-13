@@ -13,7 +13,7 @@ dependencies {
     api("org.jetbrains:annotations:${project.property("annotations_version")}")
 
     // Tinylog for colored logging
-    implementation("org.tinylog:tinylog-api:2.5.0")
+    api("org.tinylog:tinylog-api:2.5.0")
     implementation("org.tinylog:tinylog-impl:2.5.0")
 
     // jansi for colored console

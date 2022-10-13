@@ -1,16 +1,20 @@
 package net.minestom.vanilla.crafting;
 
 import net.minestom.server.utils.NamespaceID;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public sealed interface VanillaRecipe {
 
-    Type type();
-    String group();
+    @NotNull Type type();
+    @Nullable String group();
 
     /**
      * Represents a recipe in a blast furnace.
@@ -19,8 +23,15 @@ public sealed interface VanillaRecipe {
     record Blasting(Ingredient ingredient, Result result, double experience,
                     int cookingTime, String group) implements CookingRecipe {
 
+        public static final int DEFAULT_COOKING_TIME = 100;
+
         public Blasting(Ingredient ingredient, Result result, double experience, String group) {
-            this(ingredient, result, experience, 100, group);
+            this(ingredient, result, experience, DEFAULT_COOKING_TIME, group);
+        }
+
+        @Override
+        public int defaultCookingTime() {
+            return DEFAULT_COOKING_TIME;
         }
 
         @Override
@@ -36,8 +47,15 @@ public sealed interface VanillaRecipe {
      */
     record CampfireCooking(Ingredient ingredient, Result result, double experience, int cookingTime, String group) implements CookingRecipe {
 
+        public static final int DEFAULT_COOKING_TIME = 100;
+
         public CampfireCooking(Ingredient ingredient, Result result, double experience, String group) {
-            this(ingredient, result, experience, 100, group);
+            this(ingredient, result, experience, DEFAULT_COOKING_TIME, group);
+        }
+
+        @Override
+        public int defaultCookingTime() {
+            return DEFAULT_COOKING_TIME;
         }
 
         @Override
@@ -51,13 +69,19 @@ public sealed interface VanillaRecipe {
      * The key used in the pattern may be any single character except the space character, which is reserved for empty
      * slots in a recipe.
      */
-    record CraftingShaped(Map<Slot, Set<Ingredient>> pattern, Result result, String group) implements VanillaRecipe {
-        public CraftingShaped(Map<Slot, Character> pattern, Map<Character, Set<Ingredient>> palette, Result result,
+    record CraftingShaped(Map<Slot, Ingredient> pattern, Result result, String group) implements VanillaRecipe {
+        public CraftingShaped(Map<Slot, Character> pattern, Map<Character, Ingredient> palette, Result result,
                               String group) {
             this(pattern.entrySet().stream()
+                    .filter(entry -> entry.getValue() != ' ') // ignore spaces
                     .map(entry -> Map.entry(entry.getKey(), palette.get(entry.getValue())))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)), result, group);
         }
+
+        public CraftingShaped {
+            pattern = Map.copyOf(pattern);
+        }
+
         @Override
         public Type type() {
             return Type.CRAFTING_SHAPED;
@@ -68,7 +92,7 @@ public sealed interface VanillaRecipe {
      * Represents a shapeless crafting recipe in a crafting table.
      * The ingredients list must have at least one and at most nine entries.
      */
-    record CraftingShapeless(Map<Set<Ingredient>, Integer> ingredients, Result result, String group) implements VanillaRecipe {
+    record CraftingShapeless(Map<Ingredient, Integer> ingredients, Result result, String group) implements VanillaRecipe {
         @Override
         public Type type() {
             return Type.CRAFTING_SHAPELESS;
@@ -81,6 +105,17 @@ public sealed interface VanillaRecipe {
      */
     record Smelting(Ingredient ingredient, Result result, double experience, int cookingTime,
                     String group) implements CookingRecipe {
+
+        public static final int DEFAULT_COOKING_TIME = 200;
+
+        public Smelting(Ingredient ingredient, Result result, double experience, String group) {
+            this(ingredient, result, experience, DEFAULT_COOKING_TIME, group);
+        }
+
+        @Override
+        public int defaultCookingTime() {
+            return DEFAULT_COOKING_TIME;
+        }
 
         @Override
         public Type type() {
@@ -107,6 +142,17 @@ public sealed interface VanillaRecipe {
     record Smoking(Ingredient ingredient, Result result, double experience, int cookingTime,
                    String group) implements CookingRecipe {
 
+        public static final int DEFAULT_COOKING_TIME = 100;
+
+        public Smoking(Ingredient ingredient, Result result, double experience, String group) {
+            this(ingredient, result, experience, DEFAULT_COOKING_TIME, group);
+        }
+
+        @Override
+        public int defaultCookingTime() {
+            return DEFAULT_COOKING_TIME;
+        }
+
         @Override
         public Type type() {
             return Type.SMOKING;
@@ -117,10 +163,21 @@ public sealed interface VanillaRecipe {
      * Represents a recipe in a stonecutter.
      * Unlike the  count field in shaped and shapeless crafting recipes, this count field here is required.
      */
-    record Stonecutting(Set<Ingredient> ingredients, Result result, String group) implements VanillaRecipe {
+    record Stonecutting(Ingredient ingredients, Result result, String group) implements VanillaRecipe {
         @Override
         public Type type() {
             return Type.STONECUTTING;
+        }
+    }
+
+    /**
+     * Represents a native recipe.
+     * Native recipes are not defined in the vanilla data pack, but are instead defined in the server code.
+     */
+    record Native(NamespaceID id, String group) implements VanillaRecipe {
+        @Override
+        public Type type() {
+            return Type.NATIVE;
         }
     }
 
@@ -133,6 +190,7 @@ public sealed interface VanillaRecipe {
         SMITHING("minecraft:smithing"),
         SMOKING("minecraft:smoking"),
         STONECUTTING("minecraft:stonecutting"),
+        NATIVE("minecraft:native"),
         ;
 
         private final NamespaceID namespace;
@@ -141,19 +199,51 @@ public sealed interface VanillaRecipe {
             this.namespace = NamespaceID.from(namespace);
         }
 
+        public static @Nullable Type from(NamespaceID namespace) {
+            return Arrays.stream(values())
+                    .filter(type -> type.namespace.equals(namespace))
+                    .findAny()
+                    .orElse(null);
+        }
+
         public NamespaceID namespace() {
             return namespace;
         }
     }
 
     sealed interface Ingredient {
+        static Ingredient anyOf(Collection<Ingredient> multi) {
+            if (multi.isEmpty()) {
+                throw new IllegalArgumentException("multi must not be empty");
+            }
+            if (multi.size() == 1) {
+                return multi.iterator().next();
+            }
+            return new AnyOf(multi);
+        }
+
         record Item(String item, Map<String, NBTCompound> extraData) implements Ingredient {
+            public Item(String item) {
+                this(item, Map.of());
+            }
             public Item {
                 extraData = Map.copyOf(extraData);
             }
         }
 
         record Tag(String tag) implements Ingredient {
+        }
+
+        record AnyOf(Set<Ingredient> ingredients) implements Ingredient {
+            public AnyOf(Ingredient... ingredients) {
+                this(Set.of(ingredients));
+            }
+            public AnyOf(Collection<Ingredient> ingredients) {
+                this(Set.copyOf(ingredients));
+            }
+            public AnyOf {
+                ingredients = Set.copyOf(ingredients);
+            }
         }
     }
 
@@ -172,6 +262,13 @@ public sealed interface VanillaRecipe {
         Slot(int row, int column) {
             this.row = row;
             this.column = column;
+        }
+
+        public static @NotNull Slot from(int row, int column) {
+            return Arrays.stream(values())
+                    .filter(slot -> slot.row == row && slot.column == column)
+                    .findAny()
+                    .orElseThrow();
         }
 
         public int row() {
@@ -196,5 +293,7 @@ public sealed interface VanillaRecipe {
          * @return cooking time in ticks
          */
         int cookingTime();
+
+        int defaultCookingTime();
     }
 }

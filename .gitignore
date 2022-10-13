@@ -38,3 +38,5 @@ out/
 # Vanilla-like server
 server.properties
 world/
+mojang-data/
+
