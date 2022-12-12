@@ -5,12 +5,15 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.TagWritable;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.Random;
 import java.util.function.Consumer;
 
 public interface VanillaReimplementation {
@@ -72,9 +75,41 @@ public interface VanillaReimplementation {
     @NotNull Entity createEntityOrDummy(@NotNull VanillaRegistry.EntityContext context);
 
     /**
-     * Creates a vanilla instance.
+     * Creates and registers a vanilla instance.
      */
-    @NotNull Instance createInstance(@NotNull String name, @NotNull DimensionType dimension);
+    @NotNull Instance createInstance(@NotNull NamespaceID namespace, @NotNull DimensionType dimension);
+
+    /**
+     * Gets a registered vanilla instance.
+     * @param namespace the namespace of the instance
+     * @return the instance, or null if not found
+     */
+    @Nullable Instance getInstance(NamespaceID namespace);
+
+    /**
+     * Retrieves or generates a random object unique to the given object.
+     * @param key the key
+     * @return the random
+     */
+    @NotNull Random random(@NotNull Object key);
+
+    /**
+     * Gets the vanilla block from the given state id.
+     * @param stateId the state id
+     * @return the block
+     */
+    @NotNull Block block(short stateId);
+
+    /**
+     * Gets the vanilla block from it's vanilla namespace id.
+     * @param namespace the namespace id
+     * @return the block
+     */
+    @NotNull Block block(@NotNull NamespaceID namespace);
+
+    default @NotNull Block block(Block minestomBlock) {
+        return block(minestomBlock.stateId());
+    }
 
     /**
      * A feature is a collection of logic that can be hooked into a server process.
@@ -88,6 +123,8 @@ public interface VanillaReimplementation {
          * @param registry the registry object
          */
         void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry);
+
+//        @NotNull Collection<Class<? extends Feature>> dependencies();
 
         /**
          * @return a unique {@link NamespaceID} for this feature

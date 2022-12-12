@@ -1,5 +1,9 @@
 package net.minestom.vanilla;
 
+import it.unimi.dsi.fastutil.shorts.Short2IntMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenCustomHashMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -8,9 +12,11 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import net.minestom.server.tag.TagWritable;
+import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.crafting.VanillaRecipe;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
@@ -20,17 +26,19 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import org.tinylog.Logger;
 
-import java.util.Map;
-import java.util.ServiceLoader;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 class VanillaReimplementationImpl implements VanillaReimplementation {
 
     private final ServerProcess process;
-    private final Map<String, Instance> worlds = new ConcurrentHashMap<>();
+    private final Map<NamespaceID, Instance> worlds = new ConcurrentHashMap<>();
     private final Map<EntityType, VanillaRegistry.EntitySpawner> entity2Spawner = new ConcurrentHashMap<>();
     private final Map<String, VanillaRecipe> id2Recipe = new ConcurrentHashMap<>();
+    private final Map<Object, Random> randoms = Collections.synchronizedMap(new WeakHashMap<>());
+    private final Map<String, Block> id2Block = new ConcurrentHashMap<>();
+    private final Short2ObjectMap<Block> stateId2Block = new Short2ObjectOpenHashMap<>();
 
     private VanillaReimplementationImpl(@NotNull ServerProcess process) {
         this.process = process;
@@ -138,12 +146,12 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
     /**
      * Creates a vanilla instance.
      */
-    public @NotNull Instance createInstance(@NotNull String name, @NotNull DimensionType dimension) {
+    public @NotNull Instance createInstance(@NotNull NamespaceID name, @NotNull DimensionType dimension) {
         InstanceContainer instance = process().instance().createInstanceContainer(dimension);
         worlds.put(name, instance);
 
         // Anvil directory
-        AnvilLoader loader = new AnvilLoader(name);
+        AnvilLoader loader = new AnvilLoader(name.value());
         instance.setChunkLoader(loader);
 
         // Setup event
@@ -151,6 +159,32 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
         process().eventHandler().call(event);
 
         return instance;
+    }
+
+    @Override
+    public @NotNull Instance getInstance(NamespaceID dimensionId) {
+        return worlds.get(dimensionId);
+    }
+
+    @Override
+    public @NotNull Random random(@NotNull Object key) {
+        return randoms.computeIfAbsent(key, k -> new Random(key.hashCode()));
+    }
+
+    @Override
+    public @NotNull Block block(short stateId) {
+        Block block = stateId2Block.get(stateId);
+        if (block == null) block = Block.fromStateId(stateId);
+        Objects.requireNonNull(block, "Block with state id " + stateId + " is not registered!");
+        return block;
+    }
+
+    @Override
+    public @NotNull Block block(@NotNull NamespaceID namespace) {
+        Block block = id2Block.get(namespace.value());
+        if (block == null) block = Block.fromNamespaceId(namespace);
+        Objects.requireNonNull(block, "Block with namespace " + namespace + " is not registered!");
+        return block;
     }
 
     final class VanillaRegistryImpl implements VanillaRegistry {
@@ -162,6 +196,12 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
         @Override
         public void register(@NotNull String recipeId, @NotNull VanillaRecipe recipe) {
             id2Recipe.put(recipeId, recipe);
+        }
+
+        @Override
+        public void register(@NotNull Block block) {
+            id2Block.put(block.namespace().toString(), block);
+            stateId2Block.put(block.stateId(), block);
         }
     }
 

@@ -9,6 +9,7 @@ import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.ConnectionManager;
+import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.system.RayFastManager;
@@ -53,7 +54,7 @@ class VanillaServer {
             vri.process().dimension().addDimension(dimension);
         }
 
-        this.overworld = vri.createInstance("world", VanillaDimensionTypes.OVERWORLD);
+        this.overworld = vri.createInstance(NamespaceID.from("world"), VanillaDimensionTypes.OVERWORLD);
 
         // Try to get server properties
 

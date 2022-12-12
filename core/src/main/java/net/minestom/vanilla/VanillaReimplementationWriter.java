@@ -16,7 +16,7 @@ import static org.fusesource.jansi.Ansi.ansi;
 public class VanillaReimplementationWriter implements Writer {
 
     @Override
-    public Collection<LogEntryValue> getRequiredLogEntryValues() {
+    public Set<LogEntryValue> getRequiredLogEntryValues() {
         return Set.of(
                 LogEntryValue.LEVEL, LogEntryValue.MESSAGE,
                 LogEntryValue.CLASS, LogEntryValue.METHOD,

@@ -1,18 +1,19 @@
-package net.minestom.vanilla.blockupdatesystem;
+package net.minestom.vanilla;
 
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.vanilla.VanillaRegistry;
-import net.minestom.vanilla.VanillaReimplementation;
+import net.minestom.vanilla.blockupdatesystem.BlockUpdateManager;
+import net.minestom.vanilla.randomticksystem.RandomTickManager;
 import org.jetbrains.annotations.NotNull;
 
-public class BlockUpdateSystemFeature implements VanillaReimplementation.Feature {
+public class BlockUpdateFeature implements VanillaReimplementation.Feature {
     @Override
     public void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry) {
         BlockUpdateManager.init(vri.process().eventHandler());
+        RandomTickManager.init(vri);
     }
 
     @Override
     public @NotNull NamespaceID namespaceID() {
-        return NamespaceID.from("vri:blockupdatesystem");
+        return NamespaceID.from("vri:blockupdate");
     }
 }

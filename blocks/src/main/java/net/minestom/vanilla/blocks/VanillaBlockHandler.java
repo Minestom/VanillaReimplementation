@@ -17,13 +17,13 @@ import java.util.Map;
 public abstract class VanillaBlockHandler implements BlockHandler {
 
     protected final @NotNull VanillaBlocks.BlockContext context;
-    protected final @NotNull Block baseBlock;
+    protected final short baseBlock;
     protected final @NotNull NamespaceID namespaceID;
 
     protected VanillaBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
         this.context = context;
-        this.baseBlock = context.block();
-        this.namespaceID = baseBlock.namespace();
+        this.baseBlock = context.stateId();
+        this.namespaceID = context.vri().block(baseBlock).namespace();
     }
 
     @Override
@@ -69,9 +69,8 @@ public abstract class VanillaBlockHandler implements BlockHandler {
          * Overrides the current block to be placed.
          *
          * @param newBlock the new block to be placed
-         * @return the old block that will no longer be used
          */
-        @NotNull Block blockToPlace(@NotNull Block newBlock);
+        void blockToPlace(@NotNull Block newBlock);
 
         interface HasPlayer {
             @NotNull Player player();

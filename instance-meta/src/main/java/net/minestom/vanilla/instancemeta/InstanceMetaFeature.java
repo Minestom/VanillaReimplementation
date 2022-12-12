@@ -1,10 +1,11 @@
-package net.minestom.vanilla.instancemeta.tickets;
+package net.minestom.vanilla.instancemeta;
 
 import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
+import net.minestom.vanilla.instancemeta.tickets.TicketManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;

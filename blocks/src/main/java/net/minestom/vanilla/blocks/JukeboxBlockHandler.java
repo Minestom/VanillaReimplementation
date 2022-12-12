@@ -13,7 +13,6 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
 import net.minestom.vanilla.inventory.InventoryManipulation;
-import net.minestom.vanilla.inventory.ItemStackUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,7 +25,7 @@ import java.util.Random;
  */
 public class JukeboxBlockHandler extends VanillaBlockHandler {
 
-    public static final Tag<ItemStack> DISC_KEY = ItemStackUtils.itemStackTag("minestom:jokebox_disc");
+    public static final Tag<ItemStack> DISC_KEY = Tag.ItemStack("minestom:jokebox_disc");
 
     public JukeboxBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
         super(context);
@@ -42,14 +41,14 @@ public class JukeboxBlockHandler extends VanillaBlockHandler {
     }
 
     public @NotNull Block withDisc(Block block, @NotNull ItemStack disc) {
-        if (isNotMusicDisc(disc.getMaterial())) {
+        if (isNotMusicDisc(disc.material())) {
             throw new IllegalArgumentException("disc passed to JukeboxBlockHandle#withDisc was not a music disc.");
         }
         return block.withTag(DISC_KEY, disc);
     }
 
     private boolean isNotMusicDisc(ItemStack itemStack) {
-        return isNotMusicDisc(itemStack.getMaterial());
+        return isNotMusicDisc(itemStack.material());
     }
 
     private boolean isNotMusicDisc(Material material) {

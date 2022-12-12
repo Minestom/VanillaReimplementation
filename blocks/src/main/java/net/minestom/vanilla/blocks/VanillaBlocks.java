@@ -4,12 +4,15 @@ import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.tag.Tag;
+import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
+import net.minestom.vanilla.blocks.oxidisable.OxidatableHandler;
+import net.minestom.vanilla.blocks.oxidisable.OxidatedHandler;
+import net.minestom.vanilla.blocks.oxidisable.WaxedHandler;
 import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,6 +43,52 @@ public enum VanillaBlocks {
     BROWN_CONCRETE_POWDER(Block.BROWN_CONCRETE_POWDER, (context) -> new ConcretePowderBlockHandler(context, Block.BROWN_CONCRETE)),
     LIME_CONCRETE_POWDER(Block.LIME_CONCRETE_POWDER, (context) -> new ConcretePowderBlockHandler(context, Block.LIME_CONCRETE)),
     // End of concrete powders
+
+    // Start of oxidisable copper
+    // Blocks
+    COPPER_BLOCK(Block.COPPER_BLOCK, (context) ->           new OxidatableHandler(context, Block.COPPER_BLOCK, Block.EXPOSED_COPPER, Block.WAXED_COPPER_BLOCK, 0)),
+    EXPOSED_COPPER(Block.EXPOSED_COPPER, (context) ->       new OxidatableHandler(context, Block.COPPER_BLOCK, Block.WEATHERED_COPPER, Block.WAXED_EXPOSED_COPPER, 1)),
+    WEATHERED_COPPER(Block.WEATHERED_COPPER, (context) ->   new OxidatableHandler(context, Block.EXPOSED_COPPER, Block.OXIDIZED_COPPER, Block.WAXED_WEATHERED_COPPER, 2)),
+    OXIDIZED_COPPER(Block.OXIDIZED_COPPER, (context) ->     new OxidatableHandler(context, Block.WEATHERED_COPPER, Block.OXIDIZED_COPPER, Block.WAXED_OXIDIZED_COPPER, 3)),
+    // Cut Blocks
+    CUT_COPPER(Block.CUT_COPPER, (context) ->                     new OxidatableHandler(context, Block.CUT_COPPER, Block.EXPOSED_CUT_COPPER, Block.WAXED_CUT_COPPER, 0)),
+    EXPOSED_CUT_COPPER(Block.EXPOSED_CUT_COPPER, (context) ->     new OxidatableHandler(context, Block.CUT_COPPER, Block.WEATHERED_CUT_COPPER, Block.WAXED_EXPOSED_CUT_COPPER, 1)),
+    WEATHERED_CUT_COPPER(Block.WEATHERED_CUT_COPPER, (context) -> new OxidatableHandler(context, Block.EXPOSED_CUT_COPPER, Block.OXIDIZED_CUT_COPPER, Block.WAXED_WEATHERED_CUT_COPPER, 2)),
+    OXIDIZED_CUT_COPPER(Block.OXIDIZED_CUT_COPPER, (context) ->   new OxidatableHandler(context, Block.WEATHERED_CUT_COPPER, Block.OXIDIZED_CUT_COPPER, Block.WAXED_OXIDIZED_CUT_COPPER, 3)),
+    // Stairs
+    CUT_COPPER_STAIRS(Block.CUT_COPPER_STAIRS, (context) ->                     new OxidatableHandler(context, Block.CUT_COPPER_STAIRS, Block.EXPOSED_CUT_COPPER_STAIRS, Block.WAXED_CUT_COPPER_STAIRS, 0)),
+    EXPOSED_CUT_COPPER_STAIRS(Block.EXPOSED_CUT_COPPER_STAIRS, (context) ->     new OxidatableHandler(context, Block.CUT_COPPER_STAIRS, Block.WEATHERED_CUT_COPPER_STAIRS, Block.WAXED_EXPOSED_CUT_COPPER_STAIRS, 1)),
+    WEATHERED_CUT_COPPER_STAIRS(Block.WEATHERED_CUT_COPPER_STAIRS, (context) -> new OxidatableHandler(context, Block.EXPOSED_CUT_COPPER_STAIRS, Block.OXIDIZED_CUT_COPPER_STAIRS, Block.WAXED_WEATHERED_CUT_COPPER_STAIRS, 2)),
+    OXIDIZED_CUT_COPPER_STAIRS(Block.OXIDIZED_CUT_COPPER_STAIRS, (context) ->   new OxidatableHandler(context, Block.WEATHERED_CUT_COPPER_STAIRS, Block.OXIDIZED_CUT_COPPER_STAIRS, Block.WAXED_OXIDIZED_CUT_COPPER_STAIRS, 3)),
+    // Slabs
+    CUT_COPPER_SLAB(Block.CUT_COPPER_SLAB, (context) ->                     new OxidatableHandler(context, Block.CUT_COPPER_SLAB, Block.EXPOSED_CUT_COPPER_SLAB, Block.WAXED_CUT_COPPER_SLAB, 0)),
+    EXPOSED_CUT_COPPER_SLAB(Block.EXPOSED_CUT_COPPER_SLAB, (context) ->     new OxidatableHandler(context, Block.CUT_COPPER_SLAB, Block.WEATHERED_CUT_COPPER_SLAB, Block.WAXED_EXPOSED_CUT_COPPER_SLAB, 1)),
+    WEATHERED_CUT_COPPER_SLAB(Block.WEATHERED_CUT_COPPER_SLAB, (context) -> new OxidatableHandler(context, Block.EXPOSED_CUT_COPPER_SLAB, Block.OXIDIZED_CUT_COPPER_SLAB, Block.WAXED_WEATHERED_CUT_COPPER_SLAB, 2)),
+    OXIDIZED_CUT_COPPER_SLAB(Block.OXIDIZED_CUT_COPPER_SLAB, (context) ->   new OxidatableHandler(context, Block.WEATHERED_CUT_COPPER_SLAB, Block.OXIDIZED_CUT_COPPER_SLAB, Block.WAXED_OXIDIZED_CUT_COPPER_SLAB, 3)),
+    // End of copper
+
+    // Start of waxed copper
+    // Blocks
+    WAXED_COPPER_BLOCK(Block.WAXED_COPPER_BLOCK, (context) ->         new WaxedHandler(context, Block.COPPER_BLOCK, 0)),
+    WAXED_EXPOSED_COPPER(Block.WAXED_EXPOSED_COPPER, (context) ->     new WaxedHandler(context, Block.EXPOSED_COPPER, 1)),
+    WAXED_WEATHERED_COPPER(Block.WAXED_WEATHERED_COPPER, (context) -> new WaxedHandler(context, Block.WEATHERED_COPPER, 2)),
+    WAXED_OXIDIZED_COPPER(Block.WAXED_OXIDIZED_COPPER, (context) ->   new WaxedHandler(context, Block.OXIDIZED_COPPER, 3)),
+    // Cut Blocks
+    WAXED_CUT_COPPER(Block.WAXED_CUT_COPPER, (context) ->                     new WaxedHandler(context, Block.CUT_COPPER, 0)),
+    WAXED_EXPOSED_CUT_COPPER(Block.WAXED_EXPOSED_CUT_COPPER, (context) ->     new WaxedHandler(context, Block.EXPOSED_CUT_COPPER, 1)),
+    WAXED_WEATHERED_CUT_COPPER(Block.WAXED_WEATHERED_CUT_COPPER, (context) -> new WaxedHandler(context, Block.WEATHERED_CUT_COPPER, 2)),
+    WAXED_OXIDIZED_CUT_COPPER(Block.WAXED_OXIDIZED_CUT_COPPER, (context) ->   new WaxedHandler(context, Block.OXIDIZED_CUT_COPPER, 3)),
+    // Stairs
+    WAXED_CUT_COPPER_STAIRS(Block.WAXED_CUT_COPPER_STAIRS, (context) ->                     new WaxedHandler(context, Block.CUT_COPPER_STAIRS, 0)),
+    WAXED_EXPOSED_CUT_COPPER_STAIRS(Block.WAXED_EXPOSED_CUT_COPPER_STAIRS, (context) ->     new WaxedHandler(context, Block.EXPOSED_CUT_COPPER_STAIRS, 1)),
+    WAXED_WEATHERED_CUT_COPPER_STAIRS(Block.WAXED_WEATHERED_CUT_COPPER_STAIRS, (context) -> new WaxedHandler(context, Block.WEATHERED_CUT_COPPER_STAIRS, 2)),
+    WAXED_OXIDIZED_CUT_COPPER_STAIRS(Block.WAXED_OXIDIZED_CUT_COPPER_STAIRS, (context) ->   new WaxedHandler(context, Block.OXIDIZED_CUT_COPPER_STAIRS, 3)),
+    // Slabs
+    WAXED_CUT_COPPER_SLAB(Block.WAXED_CUT_COPPER_SLAB, (context) ->                     new WaxedHandler(context, Block.CUT_COPPER_SLAB, 0)),
+    WAXED_EXPOSED_CUT_COPPER_SLAB(Block.WAXED_EXPOSED_CUT_COPPER_SLAB, (context) ->     new WaxedHandler(context, Block.EXPOSED_CUT_COPPER_SLAB, 1)),
+    WAXED_WEATHERED_CUT_COPPER_SLAB(Block.WAXED_WEATHERED_CUT_COPPER_SLAB, (context) -> new WaxedHandler(context, Block.WEATHERED_CUT_COPPER_SLAB, 2)),
+    WAXED_OXIDIZED_CUT_COPPER_SLAB(Block.WAXED_OXIDIZED_CUT_COPPER_SLAB, (context) ->   new WaxedHandler(context, Block.OXIDIZED_CUT_COPPER_SLAB, 3)),
+    // End of waxed copper
 
     // Start of beds
     WHITE_BED(Block.WHITE_BED, BedBlockHandler::new),
@@ -92,15 +141,15 @@ public enum VanillaBlocks {
     // End of cakes
 
     ;
-    private final @NotNull Block block;
+    private final @NotNull Block minestomBlock;
     private final @NotNull Context2Handler context2handler;
 
-    VanillaBlocks(@NotNull Block block, @NotNull Context2Handler context2handler) {
-        this.block = block;
+    VanillaBlocks(@NotNull Block minestomBlock, @NotNull Context2Handler context2handler) {
+        this.minestomBlock = minestomBlock;
         this.context2handler = context -> {
-            if (!context.block().compare(block)) {
-                throw new IllegalStateException("Block registry mismatch. Registered block: " + block +
-                        " !=  Given block:" + context.block());
+            if (context.stateId() != minestomBlock.stateId()) {
+                throw new IllegalStateException("Block registry mismatch. Registered block: " + minestomBlock.stateId() +
+                        " !=  Given block:" + context.stateId());
             }
             return context2handler.apply(context);
         };
@@ -114,7 +163,7 @@ public enum VanillaBlocks {
      * Used to provide context for creating block handlers
      */
     public interface BlockContext {
-        @NotNull Block block();
+        short stateId();
 
         @NotNull VanillaReimplementation vri();
     }
@@ -133,17 +182,18 @@ public enum VanillaBlocks {
      * Register all vanilla commands into the given blockManager. ConnectionManager will handle replacing the basic
      * block with its custom variant.
      *
-     * @param vri the vanilla reimplementation object
+     * @param vri      the vanilla reimplementation object
+     * @param registry the block registry
      */
-    public static void registerAll(@NotNull VanillaReimplementation vri) {
+    public static void registerAll(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry) {
 
-        Map<String, BlockHandler> blockHandlers = new HashMap<>();
-
-        for (VanillaBlocks vanillaBlock : values()) {
+        Map<String, Block> newBlocks = new HashMap<>();
+        for (VanillaBlocks vb : values()) {
+            Block minestomBlock = vb.minestomBlock;
             BlockContext context = new BlockContext() {
                 @Override
-                public @NotNull Block block() {
-                    return vanillaBlock.block;
+                public short stateId() {
+                    return minestomBlock.stateId();
                 }
 
                 @Override
@@ -151,22 +201,22 @@ public enum VanillaBlocks {
                     return vri;
                 }
             };
-            BlockHandler handler = vanillaBlock.context2handler.apply(context);
-            blockHandlers.put(vanillaBlock.block.namespace().toString(), handler);
+            BlockHandler handler = vb.context2handler.apply(context);
+            newBlocks.put(minestomBlock.namespace().toString(), minestomBlock.withHandler(handler));
         }
 
-        Map<String, BlockHandler> blockHandler2Namespace = Collections.unmodifiableMap(blockHandlers);
+        // Use reflection to inject the handlers
+        injectHandlers(newBlocks);
+
+        Map<String, Block> newBlocksCopy = Map.copyOf(newBlocks);
+        newBlocksCopy.values().forEach(registry::register);
 
         // TODO: Update (& remove) once minestom has a general PlaceBlock event
-
-
-        // Use reflection to inject the handlers
-        injectHandlers(blockHandler2Namespace);
         vri.process().eventHandler().addListener(PlayerBlockPlaceEvent.class,
-                event -> handlePlayerBlockPlaceEvent(event, blockHandler2Namespace));
+                event -> handlePlayerBlockPlaceEvent(event, newBlocksCopy));
     }
 
-    private static void injectHandlers(Map<String, BlockHandler> blockHandlerByNamespace) {
+    private static void injectHandlers(Map<String, Block> blockByNamespace) {
         try {
             Class<Block> clazz = Block.class;
 
@@ -174,21 +224,17 @@ public enum VanillaBlocks {
                 field.setAccessible(true);
 
                 Block someBlock = (Block) field.get(null);
-                BlockHandler newHandler = blockHandlerByNamespace.get(someBlock.namespace().asString());
-                someBlock = someBlock.withHandler(newHandler);
+                someBlock = blockByNamespace.get(someBlock.namespace().asString());
+                if (someBlock == null) continue;
 
                 // Apply default tag values if applicable
-                if (newHandler instanceof VanillaBlockHandler) {
-                    for (Map.Entry<Tag<?>, ?> entry : ((VanillaBlockHandler) newHandler).defaultTagValues().entrySet()) {
+                if (someBlock.handler() instanceof VanillaBlockHandler) {
+                    for (Map.Entry<Tag<?>, ?> entry : ((VanillaBlockHandler) someBlock.handler()).defaultTagValues().entrySet()) {
                         //noinspection unchecked, rawtypes
                         someBlock = someBlock.withTag((Tag) entry.getKey(), entry.getValue());
                     }
                 }
-
-                // Finally, replace default block handler
-                if (newHandler != null) {
-                    setFinalStatic(field, someBlock);
-                }
+                blockByNamespace.put(someBlock.namespace().asString(), someBlock);
             }
         } catch (IllegalAccessException e) {
             throw new IllegalStateException("Failed to inject block handlers", e);
@@ -196,10 +242,10 @@ public enum VanillaBlocks {
     }
 
     private static void handlePlayerBlockPlaceEvent(PlayerBlockPlaceEvent event,
-                                                    Map<String, BlockHandler> blockHandlerByNamespace) {
+                                                    Map<String, Block> blockByNamespace) {
         Block oldBlock = event.getBlock();
 
-        BlockHandler handler = blockHandlerByNamespace.get(oldBlock.namespace().asString());
+        BlockHandler handler = blockByNamespace.get(oldBlock.namespace().asString()).handler();
 
         if (handler == null) {
             return;
@@ -217,7 +263,6 @@ public enum VanillaBlocks {
             final long staticFieldOffset = unsafe.staticFieldOffset(ourField);
             unsafe.putObject(staticFieldBase, staticFieldOffset, newValue);
         } catch (Exception ex) {
-            System.out.println("Fail!");
             ex.printStackTrace();
         }
     }

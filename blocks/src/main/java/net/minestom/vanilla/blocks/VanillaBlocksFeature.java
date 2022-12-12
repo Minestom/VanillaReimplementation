@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class VanillaBlocksFeature implements VanillaReimplementation.Feature {
     @Override
     public void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry) {
-        VanillaBlocks.registerAll(vri);
+        VanillaBlocks.registerAll(vri, registry);
 
         vri.process().eventHandler().addListener(PlayerBlockPlaceEvent.class, event -> {
             Block block = event.getBlock();
@@ -41,8 +41,9 @@ public class VanillaBlocksFeature implements VanillaReimplementation.Feature {
                     }
 
                     @Override
-                    public @NotNull Block blockToPlace(@NotNull Block newBlock) {
-                        return blockToPlace.getAndSet(newBlock);
+                    public void blockToPlace(@NotNull Block newBlock) {
+                        blockToPlace.getAndSet(newBlock);
+                        // TODO: Run vanillaHandler.onPlace again on the new block if it's a vanilla block
                     }
                 };
 

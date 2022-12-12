@@ -33,7 +33,7 @@ public class FlintAndSteelHandler implements VanillaItemHandler {
         Block atFirePosition = instance.getBlock(firePosition);
 
         if (atFirePosition.isAir()) {
-            InventoryManipulation.damageItemIfNotCreative(player, itemStack, hand);
+            InventoryManipulation.damageItemIfNotCreative(player, hand, 1);
             instance.setBlock(firePosition, Block.FIRE);
             return true;
         }

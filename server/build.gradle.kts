@@ -1,15 +1,10 @@
 dependencies {
-    implementation(project(":block-update-system"))
-    implementation(project(":blocks"))
-    implementation(project(":commands"))
-    implementation(project(":core"))
-    implementation(project(":crafting-data"))
-    implementation(project(":entities"))
-    implementation(project(":entity-meta"))
-    implementation(project(":instance-meta"))
-    implementation(project(":fluid-simulation"))
-    implementation(project(":item-placeables"))
-    implementation(project(":world-generation"))
+    // Add all projects except for the root project and this project.
+    val disallowed = setOf(project.name, project.parent!!.name)
+    project.parent?.allprojects?.forEach {
+        if (disallowed.contains(it.name)) return@forEach
+        api(project(":" + it.name))
+    }
 }
 
 tasks {

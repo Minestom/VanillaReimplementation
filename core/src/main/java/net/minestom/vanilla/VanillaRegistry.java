@@ -3,6 +3,7 @@ package net.minestom.vanilla;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.vanilla.crafting.VanillaRecipe;
 import org.jetbrains.annotations.NotNull;
@@ -26,6 +27,12 @@ public sealed interface VanillaRegistry permits VanillaReimplementationImpl.Vani
      * @param recipe the recipe
      */
     void register(@NotNull String recipeId, @NotNull VanillaRecipe recipe);
+
+    /**
+     * Registers this block as it's vanilla block.
+     * @param block the block
+     */
+    void register(@NotNull Block block);
 
     interface EntitySpawner {
         @NotNull Entity spawn(@NotNull VanillaRegistry.EntityContext context);
