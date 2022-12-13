@@ -28,7 +28,6 @@ public abstract class WaxableBlockHandler extends VanillaBlockHandler {
         if (Material.HONEYCOMB.equals(material)) {
             Block block = context.vri().block(waxedBlock);
             interaction.getInstance().setBlock(interaction.getBlockPosition(), block);
-            System.out.format("Waxed: (pos=%s, old=%s, new=%s)%n", interaction.getBlockPosition(), interaction.getBlock().stateId(), waxedBlock);
             InventoryManipulation.consumeItemIfNotCreative(player, hand, 1);
             return false;
         }

@@ -26,7 +26,6 @@ public class WaxedHandler extends OxidatedHandler {
         Material material = item.material();
 
         if (material.namespace().value().toLowerCase().contains("_axe")) { // TODO: Better way to check if it's an axe
-            System.out.format("Axeing (pos=%s, old=%s, new=%s)%n", interaction.getBlockPosition(), interactionBlock.stateId(), unWaxed);
             Block previousBlock = context.vri().block(unWaxed);
             interaction.getInstance().setBlock(interaction.getBlockPosition(), previousBlock);
             InventoryManipulation.damageItemIfNotCreative(player, hand, 1);

@@ -62,9 +62,9 @@ public class OxidatableHandler extends WaxableBlockHandler implements RandomTick
         Random random = context.vri().random(randomTick.instance());
         // In Java Edition, when a random tick is given, a copper block has a 64/1125 chance to enter a state called pre-oxidation.
         // This means a copper block enters pre-oxidation after approximately 20 minutes.
-//        if (random.nextInt(1125) >= 64) {
-//            return;
-//        }
+        if (random.nextInt(1125) >= 64) {
+            return;
+        }
 
         // In pre-oxidation, the copper block searches its nearby non-waxed copper blocks for a distance of 4 blocks
         // taxicab distance. If there is any copper block that has a lower oxidation level, then the pre-oxidation ends,
@@ -128,7 +128,6 @@ public class OxidatableHandler extends WaxableBlockHandler implements RandomTick
 
         if (interactionBlock.stateId() != previous
                 && material.namespace().value().toLowerCase().contains("_axe")) { // TODO: Better way to check if it's an axe
-            System.out.format("Axeing (pos=%s, old=%s, new=%s)%n", interaction.getBlockPosition(), interactionBlock.stateId(), oxidised);
             Block previousBlock = context.vri().block(previous);
             interaction.getInstance().setBlock(interaction.getBlockPosition(), previousBlock);
             InventoryManipulation.damageItemIfNotCreative(player, hand, 1);
