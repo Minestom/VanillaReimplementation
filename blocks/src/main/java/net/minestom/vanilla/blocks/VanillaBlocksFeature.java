@@ -22,9 +22,9 @@ public class VanillaBlocksFeature implements VanillaReimplementation.Feature {
             Point position = event.getBlockPosition();
             AtomicReference<Block> blockToPlace = new AtomicReference<>(block);
 
-            if (block.handler() instanceof VanillaBlockHandler vanillaHandler) {
+            if (block.handler() instanceof VanillaBlockBehaviour vanillaHandler) {
                 // Create the new placement object
-                VanillaBlockHandler.VanillaPlacement placement = new VanillaBlockHandler.VanillaPlacement() {
+                VanillaBlockBehaviour.VanillaPlacement placement = new VanillaBlockBehaviour.VanillaPlacement() {
                     @Override
                     public @NotNull Block blockToPlace() {
                         return blockToPlace.get();

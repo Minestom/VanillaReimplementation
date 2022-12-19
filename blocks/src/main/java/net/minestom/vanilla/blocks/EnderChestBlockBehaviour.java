@@ -9,8 +9,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class EnderChestBlockHandler extends ChestLikeBlockHandler {
-    public EnderChestBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+public class EnderChestBlockBehaviour extends ChestLikeBlockBehaviour {
+    public EnderChestBlockBehaviour(@NotNull VanillaBlocks.BlockContext context) {
         super(context, 3 * 9);
     }
 

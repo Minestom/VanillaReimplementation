@@ -6,9 +6,8 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
-import net.minestom.vanilla.blocks.ChestLikeBlockHandler;
+import net.minestom.vanilla.blocks.ChestLikeBlockBehaviour;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,7 +30,7 @@ public class ChestInventory extends Inventory {
         this.pos = pos;
 
         // Set items
-        List<ItemStack> itemsList = instance.getBlock(pos).getTag(ChestLikeBlockHandler.TAG_ITEMS);
+        List<ItemStack> itemsList = instance.getBlock(pos).getTag(ChestLikeBlockBehaviour.TAG_ITEMS);
         if (itemsList == null) {
             ItemStack[] newItems = new ItemStack[3 * 9];
             Arrays.fill(newItems, ItemStack.AIR);
@@ -46,10 +45,10 @@ public class ChestInventory extends Inventory {
                 .computeIfAbsent(pos, k -> new ChestInventory(instance, pos));
     }
 
-    public static @Nullable ItemStack[] remove(Instance instance, Point pos) {
+    public static @NotNull List<ItemStack> remove(Instance instance, Point pos) {
         return INSTANCE2CHESTS.computeIfAbsent(instance, k -> new WeakHashMap<>())
                 .remove(pos)
-                .getItemStacks();
+                .itemStacks();
     }
 
     @Override
@@ -66,11 +65,16 @@ public class ChestInventory extends Inventory {
     @Override
     public void setItemStack(int slot, @NotNull ItemStack itemStack) {
         items[slot] = itemStack;
-        instance.setBlock(pos, instance.getBlock(pos).withTag(ChestLikeBlockHandler.TAG_ITEMS, List.of(items)));
+        instance.setBlock(pos, instance.getBlock(pos).withTag(ChestLikeBlockBehaviour.TAG_ITEMS, List.of(items)));
     }
 
     @Override
-    public @NotNull ItemStack[] getItemStacks() {
-        return items;
+    @Deprecated
+    public ItemStack @NotNull [] getItemStacks() {
+        return itemStacks().toArray(ItemStack[]::new);
+    }
+
+    public @NotNull List<ItemStack> itemStacks() {
+        return List.of(items);
     }
 }

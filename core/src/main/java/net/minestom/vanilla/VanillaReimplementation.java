@@ -88,28 +88,13 @@ public interface VanillaReimplementation {
 
     /**
      * Retrieves or generates a random object unique to the given object.
+     * <br>
+     * Note that this method does not keep the given key in memory, however it does always return the same random for
+     * any given (equal) key object.
      * @param key the key
      * @return the random
      */
     @NotNull Random random(@NotNull Object key);
-
-    /**
-     * Gets the vanilla block from the given state id.
-     * @param stateId the state id
-     * @return the block
-     */
-    @NotNull Block block(short stateId);
-
-    /**
-     * Gets the vanilla block from it's vanilla namespace id.
-     * @param namespace the namespace id
-     * @return the block
-     */
-    @NotNull Block block(@NotNull NamespaceID namespace);
-
-    default @NotNull Block block(Block minestomBlock) {
-        return block(minestomBlock.stateId());
-    }
 
     /**
      * A feature is a collection of logic that can be hooked into a server process.

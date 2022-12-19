@@ -37,8 +37,6 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
     private final Map<EntityType, VanillaRegistry.EntitySpawner> entity2Spawner = new ConcurrentHashMap<>();
     private final Map<String, VanillaRecipe> id2Recipe = new ConcurrentHashMap<>();
     private final Map<Object, Random> randoms = Collections.synchronizedMap(new WeakHashMap<>());
-    private final Map<String, Block> id2Block = new ConcurrentHashMap<>();
-    private final Short2ObjectMap<Block> stateId2Block = new Short2ObjectOpenHashMap<>();
 
     private VanillaReimplementationImpl(@NotNull ServerProcess process) {
         this.process = process;
@@ -171,22 +169,6 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
         return randoms.computeIfAbsent(key, k -> new Random(key.hashCode()));
     }
 
-    @Override
-    public @NotNull Block block(short stateId) {
-        Block block = stateId2Block.get(stateId);
-        if (block == null) block = Block.fromStateId(stateId);
-        Objects.requireNonNull(block, "Block with state id " + stateId + " is not registered!");
-        return block;
-    }
-
-    @Override
-    public @NotNull Block block(@NotNull NamespaceID namespace) {
-        Block block = id2Block.get(namespace.value());
-        if (block == null) block = Block.fromNamespaceId(namespace);
-        Objects.requireNonNull(block, "Block with namespace " + namespace + " is not registered!");
-        return block;
-    }
-
     final class VanillaRegistryImpl implements VanillaRegistry {
         @Override
         public void register(@NotNull EntityType type, @NotNull EntitySpawner supplier) {
@@ -196,12 +178,6 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
         @Override
         public void register(@NotNull String recipeId, @NotNull VanillaRecipe recipe) {
             id2Recipe.put(recipeId, recipe);
-        }
-
-        @Override
-        public void register(@NotNull Block block) {
-            id2Block.put(block.namespace().toString(), block);
-            stateId2Block.put(block.stateId(), block);
         }
     }
 

@@ -12,8 +12,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public class EndPortalBlockHandler extends VanillaBlockHandler {
-    public EndPortalBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+public class EndPortalBlockBehaviour extends VanillaBlockBehaviour {
+    public EndPortalBlockBehaviour(@NotNull VanillaBlocks.BlockContext context) {
         super(context);
     }
 
@@ -23,9 +23,9 @@ public class EndPortalBlockHandler extends VanillaBlockHandler {
 //    }
 
     @Override
-    public void onTouch(Touch touch) {
-        Instance instance = touch.getInstance();
-        Entity touching = touch.getTouching();
+    public void onTouch(@NotNull VanillaTouch touch) {
+        Instance instance = touch.instance();
+        Entity touching = touch.touching();
 
 
         DimensionType targetDimension = instance.getDimensionType() == VanillaDimensionTypes.END ? VanillaDimensionTypes.OVERWORLD : VanillaDimensionTypes.END;

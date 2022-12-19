@@ -3,11 +3,13 @@ package net.minestom.vanilla.server;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
@@ -65,19 +67,19 @@ class VanillaServer {
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
 
         vri.process().eventHandler()
-                .addListener(PlayerLoginEvent.class, event -> event.setSpawningInstance(overworld))
-                .addListener(PlayerSpawnEvent.class, event -> {
-                    Instance instance = event.getSpawnInstance();
-                    // Find the first block that is not air
-                    int y = instance.getDimensionType().getMaxY();
-                    while (instance.getBlock(0, y, -0).isAir()) {
+                .addListener(PlayerLoginEvent.class, event -> {
+                    event.setSpawningInstance(overworld);
+                    event.getPlayer().setGameMode(GameMode.SPECTATOR);
+                    overworld.loadChunk(0, 0).join();
+                    // TODO: Find the first block that is not air
+                    int y = overworld.getDimensionType().getMaxY();
+                    while (Block.AIR.compare(overworld.getBlock(0, y, 0))) {
                         y--;
-                        if (y < instance.getDimensionType().getMinY()) {
-                            y = 0;
+                        if (y == overworld.getDimensionType().getMinY()) {
                             break;
                         }
                     }
-                    event.getPlayer().teleport(new Pos(0, y, 0));
+                    event.getPlayer().setRespawnPoint(new Pos(0, y, 0));
                 });
 
         // Register systems

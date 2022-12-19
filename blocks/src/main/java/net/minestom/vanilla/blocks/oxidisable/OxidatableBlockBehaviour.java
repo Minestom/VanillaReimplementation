@@ -11,6 +11,7 @@ import net.minestom.vanilla.utils.MathUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -41,13 +42,14 @@ import java.util.Random;
  *     (ccp) lattice.
  * <p/>
  */
-public class OxidatableHandler extends WaxableBlockHandler implements RandomTickable, OxygenSensitive {
+public class OxidatableBlockBehaviour extends WaxableBlockBehaviour implements RandomTickable, OxygenSensitive {
 
     private final short previous;
     private final short oxidised;
     private final int oxidisedLevel;
 
-    public OxidatableHandler(VanillaBlocks.@NotNull BlockContext context, Block previous, Block oxidised, Block waxed, int oxidisedLevel) {
+
+    public OxidatableBlockBehaviour(VanillaBlocks.@NotNull BlockContext context, Block previous, Block oxidised, Block waxed, int oxidisedLevel) {
         super(context, waxed);
         this.previous = previous.stateId();
         this.oxidised = oxidised.stateId();
@@ -97,7 +99,7 @@ public class OxidatableHandler extends WaxableBlockHandler implements RandomTick
                         && os.oxidisedLevel() == oxidisedLevel()) // Filter out unrelated blocks
                 .count();
         double b = (int) nearbyBlocks.stream()
-                .filter(block -> !(block.handler() instanceof WaxedHandler))
+                .filter(block -> !(block.handler() instanceof WaxedBlockBehaviour))
                 .filter(block -> block.handler() instanceof OxygenSensitive os
                         && os.oxidisedLevel() > oxidisedLevel()) // Filter out unrelated blocks
                 .map(block -> (OxygenSensitive) block.handler())
@@ -108,7 +110,9 @@ public class OxidatableHandler extends WaxableBlockHandler implements RandomTick
         double probability = m * c * c;
 
         if (random.nextDouble() < probability) {
-            randomTick.instance().setBlock(randomTick.position(), context.vri().block(oxidised));
+            Block block = Block.fromStateId(oxidised);
+            Objects.requireNonNull(block, "Block with state id " + oxidised + " was not found");
+            randomTick.instance().setBlock(randomTick.position(), block);
         }
     }
 
@@ -118,18 +122,19 @@ public class OxidatableHandler extends WaxableBlockHandler implements RandomTick
     }
 
     @Override
-    public boolean onInteract(@NotNull Interaction interaction) {
-        Player.Hand hand = interaction.getHand();
-        Player player = interaction.getPlayer();
-        Block interactionBlock = interaction.getBlock();
+    public boolean onInteract(@NotNull VanillaInteraction interaction) {
+        Player.Hand hand = interaction.hand();
+        Player player = interaction.player();
+        Block interactionBlock = interaction.block();
 
         ItemStack item = player.getInventory().getItemInHand(hand);
         Material material = item.material();
 
         if (interactionBlock.stateId() != previous
                 && material.namespace().value().toLowerCase().contains("_axe")) { // TODO: Better way to check if it's an axe
-            Block previousBlock = context.vri().block(previous);
-            interaction.getInstance().setBlock(interaction.getBlockPosition(), previousBlock);
+            Block previousBlock = Block.fromStateId(previous);
+            Objects.requireNonNull(previousBlock, "Block with state id " + previous + " was not found");
+            interaction.instance().setBlock(interaction.blockPosition(), previousBlock);
             InventoryManipulation.damageItemIfNotCreative(player, hand, 1);
             return false;
         }

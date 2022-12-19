@@ -10,8 +10,8 @@ import net.minestom.vanilla.damage.DamageTypes;
 import net.minestom.vanilla.system.NetherPortal;
 import org.jetbrains.annotations.NotNull;
 
-public class FireBlockHandler extends VanillaBlockHandler {
-    public FireBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+public class FireBlockBehaviour extends VanillaBlockBehaviour {
+    public FireBlockBehaviour(@NotNull VanillaBlocks.BlockContext context) {
         super(context);
     }
 
@@ -21,8 +21,8 @@ public class FireBlockHandler extends VanillaBlockHandler {
 //    }
 
     @Override
-    public void onTouch(Touch touch) {
-        Entity touching = touch.getTouching();
+    public void onTouch(@NotNull VanillaTouch touch) {
+        Entity touching = touch.touching();
 
         if (!(touching instanceof LivingEntity livingEntity)) {
             return;

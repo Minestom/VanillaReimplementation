@@ -13,7 +13,7 @@ import java.util.Map;
 
 import static java.util.Map.entry;
 
-public class CakeBlockHandler extends VanillaBlockHandler {
+public class CakeBlockBehaviour extends VanillaBlockBehaviour {
 
     private static final Map<Block, Material> candleCakes = Map.ofEntries(
             entry(Block.CANDLE_CAKE, Material.CANDLE),
@@ -36,16 +36,16 @@ public class CakeBlockHandler extends VanillaBlockHandler {
 
     private static final ItemStack flint_and_steel = ItemStack.of(Material.FLINT_AND_STEEL);
 
-    protected CakeBlockHandler(VanillaBlocks.@NotNull BlockContext context) {
+    protected CakeBlockBehaviour(VanillaBlocks.@NotNull BlockContext context) {
         super(context);
     }
 
     @Override
-    public boolean onInteract(@NotNull Interaction interaction) {
-        Player player = interaction.getPlayer();
-        Block block = interaction.getBlock();
-        Point point = interaction.getBlockPosition();
-        Instance instance = interaction.getInstance();
+    public boolean onInteract(@NotNull VanillaInteraction interaction) {
+        Player player = interaction.player();
+        Block block = interaction.block();
+        Point point = interaction.blockPosition();
+        Instance instance = interaction.instance();
 
         int food = player.getFood();
         float saturation = player.getFoodSaturation();
@@ -74,10 +74,10 @@ public class CakeBlockHandler extends VanillaBlockHandler {
     }
 
     @Override
-    public void onDestroy(@NotNull Destroy destroy) {
-        Block block = destroy.getBlock();
-        Instance instance = destroy.getInstance();
-        Point point = destroy.getBlockPosition();
+    public void onDestroy(@NotNull VanillaDestroy destroy) {
+        Block block = destroy.block();
+        Instance instance = destroy.instance();
+        Point point = destroy.blockPosition();
 
         tryDropCandle(block, instance, point);
     }

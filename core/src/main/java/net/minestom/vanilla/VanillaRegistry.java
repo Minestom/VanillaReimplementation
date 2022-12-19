@@ -28,12 +28,6 @@ public sealed interface VanillaRegistry permits VanillaReimplementationImpl.Vani
      */
     void register(@NotNull String recipeId, @NotNull VanillaRecipe recipe);
 
-    /**
-     * Registers this block as it's vanilla block.
-     * @param block the block
-     */
-    void register(@NotNull Block block);
-
     interface EntitySpawner {
         @NotNull Entity spawn(@NotNull VanillaRegistry.EntityContext context);
 

@@ -2,10 +2,10 @@ package net.minestom.vanilla.blocks;
 
 import org.jetbrains.annotations.NotNull;
 
-public class TrappedChestBlockHandler extends ChestLikeBlockHandler {
+public class TrappedChestBlockBehaviour extends ChestLikeBlockBehaviour {
     // TODO: redstone signal
 
-    public TrappedChestBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+    public TrappedChestBlockBehaviour(@NotNull VanillaBlocks.BlockContext context) {
         super(context, 3 * 9);
     }
 
