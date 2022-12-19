@@ -9,20 +9,11 @@ public class VanillaCommandsFeature implements VanillaReimplementation.Feature {
 
     @Override
     public void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry) {
-        new Logic().hook(vri);
+        VanillaCommands.registerAll(vri.process().command(), vri);
     }
 
     @Override
     public @NotNull NamespaceID namespaceID() {
         return NamespaceID.from("vri:commands");
-    }
-
-    private static class Logic {
-        private Logic() {
-        }
-
-        private void hook(@NotNull VanillaReimplementation vri) {
-            VanillaCommands.registerAll(vri.process().command());
-        }
     }
 }
