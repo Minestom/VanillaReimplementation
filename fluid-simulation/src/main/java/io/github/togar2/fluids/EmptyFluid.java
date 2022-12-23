@@ -18,7 +18,7 @@ public class EmptyFluid extends Fluid {
     }
 
     @Override
-    public int getNextTickDelay(Instance instance, Point point, Block block) {
+    public int nextTickDelay(Instance instance, Point point, Block block) {
         return -1;
     }
 
@@ -28,17 +28,17 @@ public class EmptyFluid extends Fluid {
     }
 
     @Override
-    protected double getBlastResistance() {
+    protected double blastResistance() {
         return 0;
     }
 
     @Override
-    public double getHeight(Block block, Instance instance, Point point) {
+    public double height(Block block, Instance instance, Point point) {
         return 0;
     }
 
     @Override
-    public double getHeight(Block block) {
+    public double height(Block block) {
         return 0;
     }
 }

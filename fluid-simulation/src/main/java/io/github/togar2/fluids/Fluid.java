@@ -16,18 +16,18 @@ public abstract class Fluid {
         this.bucket = ItemStack.of(bucket);
     }
 
-    public Block getDefaultBlock() {
+    public Block defaultBlock() {
         return defaultBlock;
     }
 
-    public ItemStack getBucket() {
+    public ItemStack bucket() {
         return bucket;
     }
 
     protected abstract boolean canBeReplacedWith(Instance instance, Point point,
                                                  Fluid other, Direction direction);
 
-    public abstract int getNextTickDelay(Instance instance, Point point, Block block);
+    public abstract int nextTickDelay(Instance instance, Point point, Block block);
 
     public void onTick(Instance instance, Point point, Block block) {
     }
@@ -36,11 +36,11 @@ public abstract class Fluid {
         return false;
     }
 
-    protected abstract double getBlastResistance();
+    protected abstract double blastResistance();
 
-    public abstract double getHeight(Block block, Instance instance, Point point);
+    public abstract double height(Block block, Instance instance, Point point);
 
-    public abstract double getHeight(Block block);
+    public abstract double height(Block block);
 
     public static boolean isSource(Block block) {
         String levelStr = block.getProperty("level");

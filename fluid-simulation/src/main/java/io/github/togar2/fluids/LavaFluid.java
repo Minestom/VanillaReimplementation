@@ -24,17 +24,17 @@ public class LavaFluid extends FlowableFluid {
     }
 
     @Override
-    protected int getHoleRadius(Instance instance) {
+    protected int holeRadius(Instance instance) {
         return instance.getDimensionType().isUltrawarm() ? 4 : 2;
     }
 
     @Override
-    public int getLevelDecreasePerBlock(Instance instance) {
+    public int levelDecreasePerBlock(Instance instance) {
         return instance.getDimensionType().isUltrawarm() ? 1 : 2;
     }
 
     @Override
-    public int getTickRate(Instance instance) {
+    public int tickRate(Instance instance) {
         return instance.getDimensionType().isUltrawarm() ? 10 : 30;
     }
 
@@ -44,7 +44,7 @@ public class LavaFluid extends FlowableFluid {
     }
 
     @Override
-    protected double getBlastResistance() {
+    protected double blastResistance() {
         return 100;
     }
 }

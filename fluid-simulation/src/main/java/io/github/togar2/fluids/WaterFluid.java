@@ -24,17 +24,17 @@ public class WaterFluid extends FlowableFluid {
     }
 
     @Override
-    protected int getHoleRadius(Instance instance) {
+    protected int holeRadius(Instance instance) {
         return 4;
     }
 
     @Override
-    public int getLevelDecreasePerBlock(Instance instance) {
+    public int levelDecreasePerBlock(Instance instance) {
         return 1;
     }
 
     @Override
-    public int getTickRate(Instance instance) {
+    public int tickRate(Instance instance) {
         return 5;
     }
 
@@ -44,7 +44,7 @@ public class WaterFluid extends FlowableFluid {
     }
 
     @Override
-    protected double getBlastResistance() {
+    protected double blastResistance() {
         return 100;
     }
 }

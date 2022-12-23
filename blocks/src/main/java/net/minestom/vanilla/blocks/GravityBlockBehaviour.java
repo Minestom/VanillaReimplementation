@@ -45,7 +45,7 @@ public class GravityBlockBehaviour extends VanillaBlockBehaviour implements Bloc
         }
 
         // Schedule block update
-        BlockUpdateManager.from(instance).scheduleNeighborsUpdate(position, BlockUpdateInfo.MOVE_BLOCK());
+        BlockUpdateManager.from(instance).scheduleNeighborsUpdate(position, BlockUpdateInfo.MOVE_BLOCK(), 1);
 
         // Create the context
         Pos initialPosition = new Pos(position.x() + 0.5f, Math.round(position.y()), position.z() + 0.5f);

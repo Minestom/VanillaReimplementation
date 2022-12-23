@@ -18,6 +18,10 @@ public interface BlockUpdateInfo {
         return new MoveBlock();
     }
 
+    static LiquidFlow LIQUID_FLOW() {
+        return new LiquidFlow();
+    }
+
     record DestroyBlock() implements BlockUpdateInfo {
     }
 
@@ -28,5 +32,8 @@ public interface BlockUpdateInfo {
     }
 
     record MoveBlock() implements BlockUpdateInfo {
+    }
+
+    record LiquidFlow() implements BlockUpdateInfo {
     }
 }

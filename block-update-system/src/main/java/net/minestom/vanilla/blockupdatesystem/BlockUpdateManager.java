@@ -1,5 +1,12 @@
 package net.minestom.vanilla.blockupdatesystem;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2BooleanMaps;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minestom.server.coordinate.Point;
@@ -18,10 +25,9 @@ import net.minestom.vanilla.randomticksystem.RandomTickManager;
 import net.minestom.vanilla.randomticksystem.RandomTickable;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * A utility class used to facilitate block updates
@@ -45,12 +51,12 @@ public class BlockUpdateManager {
         eventNode.addListener(PlayerBlockBreakEvent.class, event ->
                 BlockUpdateManager.from(event.getPlayer().getInstance())
                         .scheduleNeighborsUpdate(event.getBlockPosition(),
-                                BlockUpdateInfo.DESTROY_BLOCK())
+                                BlockUpdateInfo.DESTROY_BLOCK(), 1)
         );
         eventNode.addListener(PlayerBlockPlaceEvent.class, event ->
                 BlockUpdateManager.from(event.getPlayer().getInstance())
                         .scheduleNeighborsUpdate(event.getBlockPosition(),
-                                BlockUpdateInfo.PLACE_BLOCK())
+                                BlockUpdateInfo.PLACE_BLOCK(), 1)
         );
         eventNode.addListener(InstanceChunkLoadEvent.class, event -> {
             Chunk chunk = event.getChunk();
@@ -88,19 +94,21 @@ public class BlockUpdateManager {
         return instance2BlockUpdateManager.computeIfAbsent(instance, BlockUpdateManager::new);
     }
 
-    private final Map<Point, BlockUpdateInfo> updateNeighbors = Collections.synchronizedMap(new LinkedHashMap<>());
+    private final Long2ObjectMap<Updates> updates = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>());
     private final BlockUpdateManager.UpdateHandler updateHandler;
+    private final Instance instance;
 
-    public BlockUpdateManager(@NotNull BlockUpdateManager.UpdateHandler updateHandler) {
+    public BlockUpdateManager(@NotNull Instance instance, @NotNull BlockUpdateManager.UpdateHandler updateHandler) {
         this.updateHandler = updateHandler;
+        this.instance = instance;
     }
 
     private BlockUpdateManager(@NotNull Instance instance) {
-        this.updateHandler = (pos, info) -> {
-            if (instance.getBlock(pos).handler() instanceof BlockUpdatable updatable) {
-                updatable.blockUpdate(instance, pos, info);
-            }
-        };
+        this(instance, (pos, info) -> {
+            BlockUpdatable updateable = blockUpdatables.get(instance.getBlock(pos).stateId());
+            if (updateable == null) return;
+            updateable.blockUpdate(instance, pos, info);
+        });
     }
 
     public static void registerRandomTickable(short stateId, RandomTickable randomTickable) {
@@ -116,26 +124,41 @@ public class BlockUpdateManager {
     /**
      * Schedules this position's neighbors to be updated next tick.
      */
-    public void scheduleNeighborsUpdate(Point pos, BlockUpdateInfo info) {
-        updateNeighbors.put(pos, info);
+    public void scheduleNeighborsUpdate(Point pos, BlockUpdateInfo info, int delayTicks) {
+        long tickTime = instance.getWorldAge() + delayTicks;
+        updates.computeIfAbsent(tickTime, ignored -> new Updates()).addNeighbors(pos, info);
+    }
+
+    public void scheduleUpdate(Point pos, BlockUpdateInfo info, int delayTicks) {
+        long tickTime = instance.getWorldAge() + delayTicks;
+        updates.computeIfAbsent(tickTime, ignored -> new Updates()).add(pos, info);
     }
 
     // Public api methods end
 
     private void tick(int duration) {
-        updateNeighbors(duration);
+        if (updates.size() == 0) return;
+        long worldAge = instance.getWorldAge();
+        updates.forEach((tickTime, updates) -> {
+            if (tickTime > worldAge) return;
+            updates.forEach(updateHandler::update);
+            updates.clear();
+        });
+        updates.keySet().removeIf(tickTime -> tickTime <= worldAge);
     }
 
-    private void updateNeighbors(int duration) {
-        if (updateNeighbors.size() == 0) {
-            return;
+    private static class Updates {
+        private final List<Map.Entry<Point, BlockUpdateInfo>> updates = new ArrayList<>();
+
+        public synchronized void forEach(BiConsumer<Point, BlockUpdateInfo> consumer) {
+            updates.forEach(entry -> consumer.accept(entry.getKey(), entry.getValue()));
         }
 
-        // Update all the neighbors
-        for (Map.Entry<Point, BlockUpdateInfo> entry : updateNeighbors.entrySet()) {
-            Point pos = entry.getKey();
-            BlockUpdateInfo info = entry.getValue();
+        public synchronized void add(Point pos, BlockUpdateInfo info) {
+            updates.add(Map.entry(pos, info));
+        }
 
+        public synchronized void addNeighbors(Point pos, BlockUpdateInfo info) {
             int x = pos.blockX();
             int y = pos.blockY();
             int z = pos.blockZ();
@@ -152,12 +175,18 @@ public class BlockUpdateManager {
 
                         // Get the block handler at the position
                         Point blockPos = new Pos(x + offsetX, y + offsetY, z + offsetZ);
-                        updateHandler.update(blockPos, info);
+                        add(blockPos, info);
                     }
                 }
             }
         }
 
-        updateNeighbors.clear();
+        public synchronized void clear() {
+            updates.clear();
+        }
+
+        public synchronized boolean isEmpty() {
+            return updates.isEmpty();
+        }
     }
 }
