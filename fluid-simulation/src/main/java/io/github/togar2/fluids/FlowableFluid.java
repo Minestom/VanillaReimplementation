@@ -24,7 +24,7 @@ public abstract class FlowableFluid extends Fluid {
     public void onTick(Instance instance, Point point, Block block) {
         if (!isSource(block)) {
             Block updated = updatedState(instance, point, block);
-            if (MinestomFluids.get(updated).isEmpty()) {
+            if (MinestomFluids.fluidByBlock(updated).isEmpty()) {
                 block = updated;
                 instance.setBlock(point, Block.AIR);
             } else if (updated != block) {
@@ -41,7 +41,7 @@ public abstract class FlowableFluid extends Fluid {
     }
 
     protected void tryFlow(Instance instance, Point point, Block block) {
-        Fluid fluid = MinestomFluids.get(block);
+        Fluid fluid = MinestomFluids.fluidByBlock(block);
         if (fluid.isEmpty()) return;
 
         Point down = point.add(0, -1, 0);
@@ -85,7 +85,7 @@ public abstract class FlowableFluid extends Fluid {
         for (Direction direction : Direction.HORIZONTAL) {
             Point directionPos = point.add(direction.normalX(), direction.normalY(), direction.normalZ());
             Block directionBlock = instance.getBlock(directionPos);
-            Fluid directionFluid = MinestomFluids.get(directionBlock);
+            Fluid directionFluid = MinestomFluids.fluidByBlock(directionBlock);
             if (directionFluid != this || !receivesFlow(direction, instance, point, block, directionPos, directionBlock))
                 continue;
 
@@ -106,7 +106,7 @@ public abstract class FlowableFluid extends Fluid {
 
         Point above = point.add(0, 1, 0);
         Block aboveBlock = instance.getBlock(above);
-        Fluid aboveFluid = MinestomFluids.get(aboveBlock);
+        Fluid aboveFluid = MinestomFluids.fluidByBlock(aboveBlock);
         if (!aboveFluid.isEmpty() && aboveFluid == this
                 && receivesFlow(Direction.UP, instance, point, block, above, aboveBlock)) {
             return flowing(8, true);
@@ -264,7 +264,7 @@ public abstract class FlowableFluid extends Fluid {
     private boolean canFlowDown(Instance instance, Block flowing, Point point,
                                 Block block, Point fromPoint, Block fromBlock) {
         if (!this.receivesFlow(Direction.DOWN, instance, point, block, fromPoint, fromBlock)) return false;
-        if (MinestomFluids.get(fromBlock) == this) return true;
+        if (MinestomFluids.fluidByBlock(fromBlock) == this) return true;
         return this.canFill(instance, fromPoint, fromBlock, flowing);
     }
 
@@ -277,7 +277,7 @@ public abstract class FlowableFluid extends Fluid {
 
     protected boolean canFlow(Instance instance, Point fluidPoint, Block flowingBlock,
                               Direction flowDirection, Point flowTo, Block flowToBlock, Block newFlowing) {
-        return MinestomFluids.get(flowToBlock).canBeReplacedWith(instance, flowTo, MinestomFluids.get(newFlowing), flowDirection)
+        return MinestomFluids.fluidByBlock(flowToBlock).canBeReplacedWith(instance, flowTo, MinestomFluids.fluidByBlock(newFlowing), flowDirection)
                 && receivesFlow(flowDirection, instance, fluidPoint, flowingBlock, flowTo, flowToBlock)
                 && canFill(instance, flowTo, flowToBlock, newFlowing);
     }
@@ -297,7 +297,7 @@ public abstract class FlowableFluid extends Fluid {
     }
 
     private boolean isMatchingAndStill(Block block) {
-        return MinestomFluids.get(block) == this && isSource(block);
+        return MinestomFluids.fluidByBlock(block) == this && isSource(block);
     }
 
     public Block flowing(int level, boolean falling) {
@@ -322,7 +322,7 @@ public abstract class FlowableFluid extends Fluid {
     public abstract int tickRate(Instance instance);
 
     private static boolean isFluidAboveEqual(Block block, Instance instance, Point point) {
-        return MinestomFluids.get(block) == MinestomFluids.get(instance.getBlock(point.add(0, 1, 0)));
+        return MinestomFluids.fluidByBlock(block) == MinestomFluids.fluidByBlock(instance.getBlock(point.add(0, 1, 0)));
     }
 
     @Override

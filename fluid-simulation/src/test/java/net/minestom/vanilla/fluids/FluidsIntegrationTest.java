@@ -39,7 +39,8 @@ public class FluidsIntegrationTest {
         for (int x = -distance; x <= distance; x++) {
             for (int z = -distance; z <= distance; z++) {
                 if (Math.abs(x) + Math.abs(z) != distance) continue;
-                assertFalse(Block.WATER.compare(instance.getBlock(x, 16, z)), "Water flowed too quickly from (0, 16, 0) to (" + x + ", 16, " + z + ")");
+                assertFalse(Block.WATER.compare(instance.getBlock(x, 16, z)),
+                        "Water flowed too quickly from (0, 16, 0) to (" + x + ", 16, " + z + ")");
             }
         }
 
@@ -50,7 +51,8 @@ public class FluidsIntegrationTest {
         for (int x = -distance; x <= distance; x++) {
             for (int z = -distance; z <= distance; z++) {
                 if (Math.abs(x) + Math.abs(z) > distance) continue;
-                assertTrue(Block.WATER.compare(instance.getBlock(x, 16, z)), "Water did not flow out 7 blocks in all directions from (0, 16, 0) to (" + x + ", 16, " + z + ")");
+                assertTrue(Block.WATER.compare(instance.getBlock(x, 16, z)),
+                        "Water did not flow out 7 blocks in all directions from (0, 16, 0) to (" + x + ", 16, " + z + ")");
             }
         }
     }
@@ -90,11 +92,8 @@ public class FluidsIntegrationTest {
         for (int x = -distance; x <= distance; x++) {
             for (int z = -distance; z <= distance; z++) {
                 if (Math.abs(x) + Math.abs(z) > distance) continue;
-                int finalX = x;
-                int finalZ = z;
-                Block block = instance.getBlock(x, 16, z);
-                System.out.println();
-//                assertTrue(Block.LAVA.compare(instance.getBlock(x, 16, z)), "Water did not flow out " + distance + " blocks in all directions from (0, 16, 0) to (" + x + ", 16, " + z + ")");
+                assertTrue(Block.LAVA.compare(instance.getBlock(x, 16, z)),
+                        "Water did not flow out " + distance + " blocks in all directions from (0, 16, 0) to (" + x + ", 16, " + z + ")");
             }
         }
     }
