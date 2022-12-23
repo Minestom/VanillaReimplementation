@@ -29,14 +29,19 @@ public class MinestomFluids {
         }
     }
 
+    private static Map<Long, Set<Point>> updates(Instance instance) {
+        return UPDATES.computeIfAbsent(instance, i -> new ConcurrentHashMap<>());
+    }
+
     public static void tick(InstanceTickEvent event) {
-        Set<Point> currentUpdate = UPDATES.computeIfAbsent(event.getInstance(), i -> new ConcurrentHashMap<>())
+        Set<Point> currentUpdate = updates(event.getInstance())
                 .get(event.getInstance().getWorldAge());
         if (currentUpdate == null) return;
         for (Point point : currentUpdate) {
+            // TODO: Check for section boundaries.
             tick(event.getInstance(), point);
         }
-        UPDATES.get(event.getInstance()).remove(event.getInstance().getWorldAge());
+        updates(event.getInstance()).remove(event.getInstance().getWorldAge());
     }
 
     public static void tick(Instance instance, Point point) {
@@ -47,13 +52,14 @@ public class MinestomFluids {
         int tickDelay = MinestomFluids.get(block).getNextTickDelay(instance, point, block);
         if (tickDelay == -1) return;
 
-        //TODO figure out a way to remove instance from map if unregistered?
+        // TODO figure out a way to remove instance from map if unregistered?
         long newAge = instance.getWorldAge() + tickDelay;
-        UPDATES.get(instance).computeIfAbsent(newAge, l -> new HashSet<>()).add(point);
+        updates(instance).computeIfAbsent(newAge, l -> new HashSet<>()).add(point);
     }
 
     public static void init(ServerProcess process) {
         process.block().registerBlockPlacementRule(new FluidPlacementRule(Block.WATER));
+        process.block().registerBlockPlacementRule(new FluidPlacementRule(Block.LAVA));
         process.eventHandler().addChild(events());
     }
 

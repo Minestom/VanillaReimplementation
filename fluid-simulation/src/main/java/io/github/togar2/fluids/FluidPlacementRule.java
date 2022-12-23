@@ -27,7 +27,6 @@ public class FluidPlacementRule extends BlockPlacementRule {
                                      @NotNull Player pl) {
         Point point = blockPosition.relative(blockFace);
         MinestomFluids.scheduleTick(instance, point, block);
-
         return block;
     }
 }

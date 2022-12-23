@@ -15,6 +15,6 @@ public class FluidSimulationFeature implements VanillaReimplementation.Feature {
 
     @Override
     public @NotNull NamespaceID namespaceID() {
-        return NamespaceID.from("io.github.togar2:fluids");
+        return NamespaceID.from("io-github-togar2:fluids");
     }
 }
