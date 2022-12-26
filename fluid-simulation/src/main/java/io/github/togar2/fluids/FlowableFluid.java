@@ -287,13 +287,15 @@ public abstract class FlowableFluid extends Fluid {
      */
     protected void flow(Instance instance, Point point, Block block, Direction direction, Block newBlock) {
         //TODO waterloggable check
-        boolean cancel = false;
-        if (!block.isAir()) {
-            if (!onBreakingBlock(instance, point, block))
-                cancel = true;
+        if (block.isAir()) {
+            return;
         }
 
-        if (!cancel) instance.setBlock(point, newBlock);
+        if (onBreakingBlock(instance, point, block)) {
+            return;
+        }
+
+        instance.setBlock(point, newBlock);
     }
 
     private boolean isMatchingAndStill(Block block) {

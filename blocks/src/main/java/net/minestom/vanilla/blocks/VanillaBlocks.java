@@ -214,7 +214,7 @@ public enum VanillaBlocks {
             registerEvents(events, vb.stateId, behaviour);
 
             if (behaviour instanceof BlockUpdatable updatable)
-                BlockUpdateManager.registerUpdatable(vb.stateId, updatable);
+                BlockUpdateManager.registerUpdatable(Objects.requireNonNull(Block.fromStateId(vb.stateId)), updatable);
 
             if (behaviour instanceof RandomTickable randomTickable)
                 BlockUpdateManager.registerRandomTickable(vb.stateId, randomTickable);

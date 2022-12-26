@@ -19,46 +19,15 @@ public class FluidsIntegrationTest {
 
     @Test
     public void testWaterFlow(Env env) {
-        VanillaReimplementation vri = VanillaReimplementation.hook(env.process());
-
-        // Setup instance
-        Instance instance = vri.createInstance(NamespaceID.from("kry:world"), VanillaDimensionTypes.OVERWORLD);
-        instance.setGenerator(unit -> unit.modifier().fillHeight(0, 16, Block.STONE));
-        ChunkUtils.forChunksInRange(0, 0, 2, (x, z) -> instance.loadChunk(x, z).join());
-
-        // Place water and wait for flow
-        instance.setBlock(0, 16, 0, Block.WATER);
-
-        // Tick for 5 * distance - 1 ticks
-        int distance = 7;
-        for (int i = 0; i < (5 * distance) - 1; i++) {
-            env.tick();
-        }
-
-        // Check that the water has not flowed all the way
-        for (int x = -distance; x <= distance; x++) {
-            for (int z = -distance; z <= distance; z++) {
-                if (Math.abs(x) + Math.abs(z) != distance) continue;
-                assertFalse(Block.WATER.compare(instance.getBlock(x, 16, z)),
-                        "Water flowed too quickly from (0, 16, 0) to (" + x + ", 16, " + z + ")");
-            }
-        }
-
-        // Do the last tick
-        env.tick();
-
-        // Check that the water flowed out 7 blocks (manhattan) in all directions
-        for (int x = -distance; x <= distance; x++) {
-            for (int z = -distance; z <= distance; z++) {
-                if (Math.abs(x) + Math.abs(z) > distance) continue;
-                assertTrue(Block.WATER.compare(instance.getBlock(x, 16, z)),
-                        "Water did not flow out 7 blocks in all directions from (0, 16, 0) to (" + x + ", 16, " + z + ")");
-            }
-        }
+        testFluid(env, Block.WATER, 5, 7);
     }
 
     @Test
     public void testLavaFlow(Env env) {
+        testFluid(env, Block.LAVA, 30, 3);
+    }
+
+    private void testFluid(Env env, Block fluid, int flowrate, int distance) {
         VanillaReimplementation vri = VanillaReimplementation.hook(env.process());
 
         // Setup instance
@@ -66,12 +35,10 @@ public class FluidsIntegrationTest {
         instance.setGenerator(unit -> unit.modifier().fillHeight(0, 16, Block.STONE));
         ChunkUtils.forChunksInRange(0, 0, 2, (x, z) -> instance.loadChunk(x, z).join());
 
-        // Place water and wait for flow
-        instance.setBlock(0, 16, 0, Block.LAVA);
+        // Place fluid and wait for flow
+        instance.setBlock(0, 16, 0, fluid);
 
         // Tick for flowrate * distance - 1 ticks
-        int flowrate = 30;
-        int distance = 3;
         for (int i = 0; i < (flowrate * distance) - 1; i++) {
             env.tick();
         }
@@ -80,8 +47,8 @@ public class FluidsIntegrationTest {
         for (int x = -distance; x <= distance; x++) {
             for (int z = -distance; z <= distance; z++) {
                 if (Math.abs(x) + Math.abs(z) != distance) continue;
-                assertFalse(Block.LAVA.compare(instance.getBlock(x, 16, z)),
-                        "Water flowed too quickly from (0, 16, 0) to (" + x + ", 16, " + z + ")");
+                assertFalse(fluid.compare(instance.getBlock(x, 16, z)),
+                        "Fluid flowed too quickly from (0, 16, 0) to (" + x + ", 16, " + z + ")");
             }
         }
 
@@ -92,8 +59,8 @@ public class FluidsIntegrationTest {
         for (int x = -distance; x <= distance; x++) {
             for (int z = -distance; z <= distance; z++) {
                 if (Math.abs(x) + Math.abs(z) > distance) continue;
-                assertTrue(Block.LAVA.compare(instance.getBlock(x, 16, z)),
-                        "Water did not flow out " + distance + " blocks in all directions from (0, 16, 0) to (" + x + ", 16, " + z + ")");
+                assertTrue(fluid.compare(instance.getBlock(x, 16, z)),
+                        "Fluid did not flow out " + distance + " blocks in all directions from (0, 16, 0) to (" + x + ", 16, " + z + ")");
             }
         }
     }

@@ -21,11 +21,13 @@ import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.randomticksystem.RandomTickManager;
 import net.minestom.vanilla.randomticksystem.RandomTickable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -38,11 +40,11 @@ public class BlockUpdateManager {
             Collections.synchronizedMap(new WeakHashMap<>());
 
     // Block updatables
-    private static final Short2ObjectMap<BlockUpdatable> blockUpdatables = new Short2ObjectOpenHashMap<>();
+    private static final Map<NamespaceID, BlockUpdatable> blockUpdatables = new ConcurrentHashMap<>();
 
-    public static void registerUpdatable(short stateId, @NotNull BlockUpdatable updatable) {
+    public static void registerUpdatable(Block block, @NotNull BlockUpdatable updatable) {
         synchronized (blockUpdatables) {
-            blockUpdatables.put(stateId, updatable);
+            blockUpdatables.put(block.namespace(), updatable);
         }
     }
 
@@ -74,7 +76,7 @@ public class BlockUpdateManager {
                         for (int z = minZ; z < minZ + Chunk.CHUNK_SIZE_Z; z++) {
                             for (int y = minY; y < maxY; y++) {
                                 Block block = chunk.getBlock(x, y, z);
-                                BlockUpdatable updatable = blockUpdatables.get(block.stateId());
+                                BlockUpdatable updatable = blockUpdatables.get(block.namespace());
                                 if (updatable == null) continue;
                                 updatable.blockUpdate(instance, new Vec(x, y, z), BlockUpdateInfo.CHUNK_LOAD());
                             }
@@ -105,7 +107,7 @@ public class BlockUpdateManager {
 
     private BlockUpdateManager(@NotNull Instance instance) {
         this(instance, (pos, info) -> {
-            BlockUpdatable updateable = blockUpdatables.get(instance.getBlock(pos).stateId());
+            BlockUpdatable updateable = blockUpdatables.get(instance.getBlock(pos).namespace());
             if (updateable == null) return;
             updateable.blockUpdate(instance, pos, info);
         });
