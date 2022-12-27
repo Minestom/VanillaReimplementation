@@ -3,6 +3,7 @@ package net.minestom.vanilla.generation.noise;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
+import net.minestom.vanilla.generation.math.Util;
 import net.minestom.vanilla.generation.random.WorldGenRandom;
 
 public class NormalNoise implements Noise {
@@ -18,17 +19,9 @@ public class NormalNoise implements Noise {
         }
 
         public static NoiseParameters fromJson(Object json) {
-            if (json instanceof String str) {
-                return fromJson(str);
-            }
-            throw new IllegalStateException("Cannot parse noise parameters from " + json.getClass());
-        }
-
-        public static NoiseParameters fromJson(String json) {
-            Gson gson = new Gson();
-            JsonObject root = gson.fromJson(json, JsonObject.class);
+            JsonObject root = Util.jsonObject(json);
             double firstOctave = root.get("firstOctave").isJsonNull() ? 0 : root.get("firstOctave").getAsDouble();
-            double[] amplitudes = root.get("amplitudes").isJsonNull() ? new double[0] : gson.fromJson(root.get("amplitudes"), double[].class);
+            double[] amplitudes = root.get("amplitudes").isJsonNull() ? new double[0] : new Gson().fromJson(root.get("amplitudes"), double[].class);
             return new NoiseParameters(firstOctave, DoubleList.of(amplitudes));
         }
     }

@@ -1,4 +1,4 @@
-package net.minestom.vanilla.generation.noise;
+package net.minestom.vanilla.generation;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -10,9 +10,11 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.world.DimensionType;
-import net.minestom.vanilla.generation.Aquifer;
-import net.minestom.vanilla.generation.RandomState;
 import net.minestom.vanilla.generation.biome.BiomeSource;
+import net.minestom.vanilla.generation.noise.NoiseChunk;
+import net.minestom.vanilla.generation.noise.NoiseGeneratorSettings;
+import net.minestom.vanilla.generation.noise.NoiseSettings;
+import net.minestom.vanilla.generation.noise.VerticalAnchor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -20,7 +22,6 @@ import org.jetbrains.annotations.UnknownNullability;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class NoiseChunkGenerator implements ChunkGenerator {
     private final Map<Long, NoiseChunk> noiseChunkCache = new HashMap<>();
@@ -132,7 +133,6 @@ public class NoiseChunkGenerator implements ChunkGenerator {
                         int blockY = (minCellY + cellY) * cellHeight + offY;
                         int sectionY = blockY / Chunk.CHUNK_SECTION_SIZE;
 
-
                         for (int offX = 0; offX < cellWidth; offX += 1) {
                             int blockX = chunk.minX() + cellX * cellWidth + offX;
                             int sectionX = blockX & 0xF;
@@ -154,7 +154,7 @@ public class NoiseChunkGenerator implements ChunkGenerator {
         }
     }
 
-//    public buildSurface(randomState: RandomState, chunk: Chunk, /** @deprecated */ biome: string = 'minecraft:plains') {
+    //    public buildSurface(randomState: RandomState, chunk: Chunk, /** @deprecated */ biome: string = 'minecraft:plains') {
 //        const noiseChunk = this.getOrCreateNoiseChunk(randomState, chunk)
 //        const context = WorldgenContext.create(this.settings.noise.minY, this.settings.noise.height)
 //        randomState.surfaceSystem.buildSurface(chunk, noiseChunk, context, () => biome)
@@ -165,7 +165,7 @@ public class NoiseChunkGenerator implements ChunkGenerator {
         randomState.surfaceSystem.buildSurface(chunk, noiseChunk, context, point -> biome);
     }
 
-//    public computeBiome(randomState: RandomState, quartX: number, quartY: number, quartZ: number) {
+    //    public computeBiome(randomState: RandomState, quartX: number, quartY: number, quartZ: number) {
 //        return this.biomeSource.getBiome(quartX, quartY, quartZ, randomState.sampler)
 //    }
     public NamespaceID computeBiome(RandomState randomState, int quartX, int quartY, int quartZ) {
@@ -266,23 +266,27 @@ public class NoiseChunkGenerator implements ChunkGenerator {
             }
             int index = ChunkUtils.getBlockIndex(x, y, z);
             this.blocks.put(index, block);
-            batch.setBlock(x - minX(), y - minY(), z - minZ(), block);
+            batch.setBlock(x - minX(), y, z - minZ(), block);
         }
     }
 
     public interface TargetChunk extends Block.Getter, Block.Setter {
         int chunkX();
+
         int chunkZ();
 
         default int minX() {
             return chunkX() * Chunk.CHUNK_SIZE_X;
         }
+
         default int maxX() {
             return minX() + Chunk.CHUNK_SIZE_X;
         }
+
         default int minZ() {
             return chunkZ() * Chunk.CHUNK_SIZE_Z;
         }
+
         default int maxZ() {
             return minZ() + Chunk.CHUNK_SIZE_Z;
         }
@@ -292,11 +296,13 @@ public class NoiseChunkGenerator implements ChunkGenerator {
         }
 
         int minSection();
+
         int maxSection();
 
         default int minY() {
             return minSection() * Chunk.CHUNK_SECTION_SIZE;
         }
+
         default int maxY() {
             return (maxSection() + 1) * Chunk.CHUNK_SECTION_SIZE;
         }

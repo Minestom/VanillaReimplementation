@@ -71,7 +71,7 @@ public record NoiseGeneratorSettings(
         JsonObject root = Util.jsonObject(obj);
         return new NoiseGeneratorSettings(
                 Util.jsonRequire(root, "noise", NoiseSettings::fromJson),
-                Util.jsonRequire(root, "surfaceRule", SurfaceSystem.SurfaceRule::fromJson),
+                Util.jsonRequire(root, "surface_rule", SurfaceSystem.SurfaceRule::fromJson),
                 Util.jsonRequire(root, "default_block", Util.jsonVanillaBlock()),
                 Util.jsonRequire(root, "default_fluid", Util.jsonVanillaBlock()),
                 Util.jsonRequire(root, "noise_router", NoiseRouter::fromJson),

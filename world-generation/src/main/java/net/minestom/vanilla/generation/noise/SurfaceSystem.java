@@ -6,6 +6,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.block.Block;
+import net.minestom.vanilla.generation.NoiseChunkGenerator;
 import net.minestom.vanilla.generation.WorldgenRegistries;
 import net.minestom.vanilla.generation.math.Util;
 import net.minestom.vanilla.generation.random.WorldGenRandom;

@@ -1,9 +1,11 @@
 package net.minestom.vanilla.generation.densityfunctions;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
-import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
+import com.google.gson.JsonPrimitive;
+import it.unimi.dsi.fastutil.longs.Long2DoubleMap;
+import it.unimi.dsi.fastutil.longs.Long2DoubleOpenHashMap;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.generation.Holder;
 import net.minestom.vanilla.generation.WorldgenRegistries;
@@ -78,33 +80,55 @@ public interface DensityFunctions {
         return DensityFunctions.fromJson(obj, null);
     }
 
-    static DensityFunction fromJson(Object obj, Function<Object, DensityFunction> inputParser) { //  = DensityFunction.fromJson
+    static DensityFunction fromJson(Object obj, Function<Object, DensityFunction> inputParser) {
+        if (inputParser == null) {
+            inputParser = DensityFunctions::fromJson;
+        }
         if (obj instanceof String str) {
-            return new HolderHolder(Holder.reference(WorldgenRegistries.DENSITY_FUNCTION, NamespaceID.from(str)));
+            Double strDouble = Util.parseDouble(str);
+            if (strDouble != null) {
+                return new Constant(strDouble);
+            }
+            if (WorldgenRegistries.DENSITY_FUNCTION.get(NamespaceID.from(str)) != null) {
+                return WorldgenRegistries.DENSITY_FUNCTION.get(NamespaceID.from(str));
+            }
+            return fromJson(Util.jsonObject(str));
         }
         if (obj instanceof Number number) {
             return new Constant(number.doubleValue());
         }
 
-        // converting typescript to java
-
 //		const root = Json.readObject(obj) ?? {}
         JsonObject root;
-        try {
-            root = new Gson().fromJson(obj.toString(), JsonObject.class);
-        } catch (Exception e) {
-            root = new JsonObject();
+        {
+            JsonElement element = new Gson().fromJson(obj.toString(), JsonElement.class);
+            if (element instanceof JsonObject json) {
+                root = json;
+            } else if (Util.jsonIsString(element)) {
+                return new DensityFunctions.HolderHolder(Holder.reference(WorldgenRegistries.DENSITY_FUNCTION,
+                        NamespaceID.from(Util.jsonToString(element))));
+            } else if (element.isJsonPrimitive()) {
+                JsonPrimitive primitive = element.getAsJsonPrimitive();
+                if (primitive.isNumber()) {
+                    return new Constant(primitive.getAsDouble());
+                }
+                throw new RuntimeException("Unknown density function: " + obj);
+            } else {
+                throw new RuntimeException("Unknown density function: " + obj);
+            }
         }
+
+
 //		const type = Json.readString(root.type)?.replace(/^minecraft:/, '')
         String type;
         {
             var value = root.get("type");
             if (value == null) {
-                type = null;
-            } else {
-                type = value.getAsString().replaceFirst("^minecraft:", "");
+                return Constant.ZERO;
             }
+            type = value.getAsString().replaceFirst("minecraft:", "");
         }
+
 //        switch (type) {
         return switch (type) {
 //            case 'blend_alpha': return new ConstantMinMax(1, 0, 1)
@@ -195,7 +219,6 @@ public interface DensityFunctions {
 //            case 'shift_b': return new ShiftB(NoiseParser(root.argument))
             case "shift_b" -> new ShiftB(NoiseParser.apply(root.get("argument")));
 //            case 'shift': return new Shift(NoiseParser(root.argument))
-            case "shift" -> new Shift(NoiseParser.apply(root.get("argument")));
 //            case 'blend_density': return new BlendDensity(inputParser(root.argument))
             case "blend_density" -> new BlendDensity(inputParser.apply(root.get("argument")));
 //            case 'clamp': return new Clamp(
@@ -665,7 +688,7 @@ public interface DensityFunctions {
 //    }
 
     class Interpolated extends Wrapper {
-        private final Object2DoubleMap<String> values;
+        private final Long2DoubleMap values;
 
         private final int cellWidth;
         private final int cellHeight;
@@ -676,7 +699,7 @@ public interface DensityFunctions {
 
         public Interpolated(DensityFunction wrapped, int cellWidth, int cellHeight) {
             super(wrapped);
-            this.values = new Object2DoubleOpenHashMap<>();
+            this.values = new Long2DoubleOpenHashMap();
             this.cellWidth = cellWidth;
             this.cellHeight = cellHeight;
         }
@@ -706,7 +729,8 @@ public interface DensityFunctions {
         }
 
         private double computeCorner(int x, int y, int z) {
-            return this.values.computeIfAbsent(x + " " + y + " " + z, key ->
+            long key = Util.hash(x, y, z);
+            return this.values.computeIfAbsent(key, ignored ->
                     this.wrapped.compute(DensityFunctions.context(x, y, z)));
         }
 
@@ -1094,6 +1118,11 @@ public interface DensityFunctions {
 
         RangeChoice(DensityFunction input, double minInclusive, double maxExclusive, DensityFunction whenInRange,
                     DensityFunction whenOutOfRange) {
+            this.input = input;
+            this.minInclusive = minInclusive;
+            this.maxExclusive = maxExclusive;
+            this.whenInRange = whenInRange;
+            this.whenOutOfRange = whenOutOfRange;
         }
 //        public compute(context: Context) {
 //			const x = this.input.compute(context)

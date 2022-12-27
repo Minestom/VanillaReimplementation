@@ -2,7 +2,7 @@ package net.minestom.vanilla.generation.noise;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.instance.Chunk;
+import net.minestom.vanilla.generation.NoiseChunkGenerator;
 import net.minestom.vanilla.generation.math.Util;
 
 import java.util.function.Function;

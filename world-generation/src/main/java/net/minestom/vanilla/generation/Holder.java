@@ -1,6 +1,7 @@
 package net.minestom.vanilla.generation;
 
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.vanilla.generation.math.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
@@ -13,8 +14,8 @@ public interface Holder<T> {
 
     static <T> Function<Object, Holder<T>> parser(Registry<T> registry, Function<Object, T> directParser) {
         return obj -> {
-            if (obj instanceof String str) {
-                return reference(registry, NamespaceID.from(str));
+            if (Util.jsonIsString(obj)) {
+                return reference(registry, NamespaceID.from(Util.jsonToString(obj)));
             } else {
                 return direct(directParser.apply(obj), null);
             }
@@ -36,6 +37,8 @@ public interface Holder<T> {
     }
 
     static <T> Holder<T> reference(Registry<T> registry, NamespaceID id) {
+        if (id.toString().length() > 200)
+            System.out.println();
         return new Holder<>() {
             @Override
             public T value() {

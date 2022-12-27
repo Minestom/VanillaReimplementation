@@ -1,21 +1,26 @@
 package net.minestom.vanilla.generation.math;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class Util {
@@ -142,6 +147,13 @@ public class Util {
         return mapper.apply(element);
     }
 
+    public static JsonArray jsonArray(JsonElement element) {
+        if (element.isJsonArray()) {
+            return element.getAsJsonArray();
+        }
+        throw new IllegalArgumentException("Expected array, got " + element);
+    }
+
     public static <T> @NotNull T jsonElse(JsonObject root, String key, T defaultValue, Function<JsonElement, T> mapper) {
         JsonElement element = root.get(key);
         if (element == null) {
@@ -194,7 +206,7 @@ public class Util {
 
     public static JsonObject jsonObject(Object obj) {
         if (obj instanceof String str)
-            return new Gson().fromJson(str, JsonObject.class);
+            return jsonObject(new Gson().fromJson(str, JsonElement.class));
         if (!(obj instanceof JsonObject object))
             throw new IllegalArgumentException("Expected a JsonObject, got " + obj.getClass().getName());
         return object;
@@ -247,7 +259,7 @@ public class Util {
             }
 
             JsonObject object = element.getAsJsonObject();
-            String name = object.get("name").getAsString();
+            String name = object.get("Name").getAsString();
             Block block = Block.fromNamespaceId(name);
             if (block == null) {
                 throw new IllegalArgumentException("Unknown block " + name);
@@ -270,5 +282,73 @@ public class Util {
 
     public static int chunkMaxY(Chunk chunk) {
         return chunk.getInstance().getDimensionType().getMaxY();
+    }
+
+    public static boolean jsonIsString(Object obj) {
+        if (obj instanceof String)
+            return true;
+        if (obj instanceof JsonPrimitive primitive)
+            return primitive.isString();
+        return false;
+    }
+
+    public static String jsonToString(Object obj) {
+        if (obj instanceof String str)
+            return str;
+        if (obj instanceof JsonPrimitive primitive)
+            return primitive.getAsString();
+        throw new IllegalArgumentException("Expected a string, got " + obj.getClass().getName());
+    }
+
+    public static @NotNull Map<String, String> noiseParametersJsons() {
+        return allFilesWithin(Paths.get("vanilla_worldgen/worldgen/noise"));
+    }
+
+    public static @NotNull Map<String, String> densityFunctionJsons() {
+        return allFilesWithin(Paths.get("vanilla_worldgen/worldgen/density_function"));
+    }
+
+    public static @NotNull Map<String, String> noiseSettingsJsons() {
+        return allFilesWithin(Paths.get("vanilla_worldgen/worldgen/noise_settings"));
+    }
+
+    private static @NotNull Map<String, String> allFilesWithin(Path path) {
+        try (Stream<Path> stream = Files.walk(path)) {
+            return stream
+                    .filter(Files::isRegularFile)
+                    .filter(p -> p.getFileName().toString().endsWith(".json"))
+                    .collect(Collectors.toMap(
+                            p -> p.toString()
+                                    .substring(path.toString().length() + 1)
+                                    // remove .json
+                                    .replace(".json", "")
+                                    .replace("\\", "/"),
+                            p -> {
+                                try {
+                                    return Files.readString(p);
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    ));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static @Nullable Double parseDouble(String str) {
+        try {
+            return Double.parseDouble(str);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private static long cantor(long a, long b) {
+        return (a + b) * (a + b + 1L) / 2L + b;
+    }
+
+    public static long hash(int x, int y, int z) {
+        return cantor(x, cantor(y, z));
     }
 }

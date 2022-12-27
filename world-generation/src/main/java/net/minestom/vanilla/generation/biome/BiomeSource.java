@@ -30,12 +30,10 @@ public interface BiomeSource {
         JsonObject root = Util.jsonObject(obj);
 
         String type = Util.jsonRequire(root, "type", JsonElement::getAsString).replace("^minecraft:", "");
-        return switch (type) {
-//            case "fixed" -> FixedBiomeSource.fromJson(obj);
-//            case "checkerboard" -> CheckerboardBiomeSource.fromJson(obj);
-//            case "multi_noise" -> MultiNoiseBiomeSource.fromJson(obj);
-//            case "the_end" -> TheEndBiomeSource.fromJson(obj);
-            default -> (x, y, z, climateSampler) -> NamespaceID.from("plains");
-        };
+        return //            case "fixed" -> FixedBiomeSource.fromJson(obj);
+                //            case "checkerboard" -> CheckerboardBiomeSource.fromJson(obj);
+                //            case "multi_noise" -> MultiNoiseBiomeSource.fromJson(obj);
+                //            case "the_end" -> TheEndBiomeSource.fromJson(obj);
+                (x, y, z, climateSampler) -> NamespaceID.from("plains");
     }
 }

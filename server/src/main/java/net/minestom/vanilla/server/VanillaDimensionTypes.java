@@ -19,7 +19,7 @@ public class VanillaDimensionTypes {
             .ceilingEnabled(false)
             .fixedTime(null)
             .ambientLight(2.0f) // TODO: Use 0.0f instead (It is currently 2.0f until we get a lighting engine)
-            .logicalHeight(256)
+            .logicalHeight(384)
             .infiniburn(NamespaceID.from("minecraft:infiniburn_overworld"))
             .build();
 

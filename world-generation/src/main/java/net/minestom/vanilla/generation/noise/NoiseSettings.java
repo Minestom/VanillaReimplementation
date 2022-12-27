@@ -22,7 +22,6 @@ public interface NoiseSettings {
     int ySize();
 
 
-
     //    export namespace NoiseSettings {
 //        export function fromJson(obj: any): NoiseSettings {
 //		const root = Json.readObject(obj) ?? {}

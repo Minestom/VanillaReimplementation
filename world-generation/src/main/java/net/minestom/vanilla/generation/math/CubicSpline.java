@@ -1,5 +1,6 @@
 package net.minestom.vanilla.generation.math;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
@@ -7,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.StreamSupport;
 
 public interface CubicSpline<C> extends NumberFunction<C> {
 
@@ -33,13 +35,24 @@ public interface CubicSpline<C> extends NumberFunction<C> {
         NumberFunction<C> visit(NumberFunction<C> function);
     }
 
-    record SplinePoint(double location, double value, double derivative) {
-        public SplinePoint(JsonElement json) {
-            this(json.getAsJsonObject());
-        }
+    record SplinePoint(double location, CubicSpline<?> value, double derivative) {
 
-        public SplinePoint(JsonObject json) {
-            this(json.get("location").getAsDouble(), json.get("value").getAsDouble(), json.get("derivative").getAsDouble());
+        public static <C> List<SplinePoint> fromJsonArray(JsonElement element, Function<Object, NumberFunction<C>> extractor) {
+            JsonArray array = Util.jsonArray(element);
+            return StreamSupport.stream(array.spliterator(), false)
+                    .map(Util::jsonObject)
+                    .map(json -> {
+                        double location = json.get("location").getAsDouble();
+                        double derivative = json.get("derivative").getAsDouble();
+                        JsonElement value = json.get("value");
+
+                        if (value.isJsonObject()) {
+                            return new SplinePoint(location, CubicSpline.fromJson(value, extractor), derivative);
+                        }
+
+                        return new SplinePoint(location, new CubicSpline.Constant<>(value.getAsDouble()), derivative);
+                    })
+                    .toList();
         }
     }
 
@@ -49,8 +62,9 @@ public interface CubicSpline<C> extends NumberFunction<C> {
         }
         JsonObject root = Util.jsonObject(obj);
 
-        MultiPoint<C> spline = new MultiPoint<>(extractor.apply(Util.<Double>jsonRequire(root, "coordinate", JsonElement::getAsDouble)));
-        @NotNull List<SplinePoint> points = Util.jsonRequire(root, "points", Util.jsonReadArray(SplinePoint::new));
+        MultiPoint<C> spline = new MultiPoint<>(extractor.apply(Util.jsonRequire(root, "coordinate", Function.identity())));
+        @NotNull List<SplinePoint> points = Util.jsonRequire(root, "points",
+                element -> SplinePoint.fromJsonArray(element, extractor));
         if (points.size() == 0) {
             return new Constant<>(0);
         }
@@ -231,17 +245,18 @@ public interface CubicSpline<C> extends NumberFunction<C> {
         //            return this
         //        }
 
-        public void addPoint(double location, double value, double derivative) {
+        public void addPoint(double location, CubicSpline<C> value, double derivative) {
             this.locations = Arrays.copyOf(this.locations, this.locations.length + 1);
             this.locations[this.locations.length - 1] = location;
             this.values = Arrays.copyOf(this.values, this.values.length + 1);
-            this.values[this.values.length - 1] = new CubicSpline.Constant<>(value);
+            this.values[this.values.length - 1] = value;
             this.derivatives = Arrays.copyOf(this.derivatives, this.derivatives.length + 1);
             this.derivatives[this.derivatives.length - 1] = derivative;
         }
 
         public void addPoint(SplinePoint point) {
-            this.addPoint(point.location, point.value, point.derivative);
+            //noinspection unchecked
+            this.addPoint(point.location, (CubicSpline<C>) point.value, point.derivative);
         }
         //
         //        public calculateMinMax() {
