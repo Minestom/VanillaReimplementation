@@ -3,7 +3,6 @@ package net.minestom.vanilla.generation;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,12 +10,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Registry<T> {
-    public static Registry<Registry<?>> REGISTRY = new Registry<>(NamespaceID.from("root"));
+    public static final Registry<Registry<?>> REGISTRY = new Registry<>(NamespaceID.from("root"));
 
     private final Map<NamespaceID, T> storage = new HashMap<>();
     private final Map<NamespaceID, T> builtin = new HashMap<>();
 
-    public NamespaceID key;
+    public final NamespaceID key;
     public @Nullable Function<Object, T> parser = null;
 
     Registry(NamespaceID key, @Nullable Function<Object, T> parser) {
@@ -41,7 +40,7 @@ public class Registry<T> {
     }
 
     public @Nullable T delete(NamespaceID id) {
-		T deleted = this.storage.remove(id);
+        T deleted = this.storage.remove(id);
         this.builtin.remove(id);
         return deleted;
     }
@@ -115,11 +114,13 @@ public class Registry<T> {
 
     interface Entry<T> {
         NamespaceID key();
+
         T value();
+
         Registry<T> registry();
     }
 
-	public <U> List<U> map(Function<Entry<T>, U> fn) {
+    public <U> List<U> map(Function<Entry<T>, U> fn) {
         return this.storage.entrySet().stream().map(entry -> fn.apply(new Entry<>() {
             @Override
             public NamespaceID key() {

@@ -33,25 +33,25 @@ public class SurfaceSystem {
     }
 
     public void buildSurface(Chunk chunk, NoiseChunk noiseChunk, VerticalAnchor.WorldgenContext worldgenContext, Function<Point, String> getBiome) {
-		int minX = chunk.getChunkX() * Chunk.CHUNK_SIZE_X;
+        int minX = chunk.getChunkX() * Chunk.CHUNK_SIZE_X;
         int minZ = chunk.getChunkZ() * Chunk.CHUNK_SIZE_Z;
         int minY = chunk.getInstance().getDimensionType().getMinY();
         int maxY = chunk.getInstance().getDimensionType().getMaxY();
         SurfaceContext surfaceContext = new SurfaceContext(this, chunk, noiseChunk, worldgenContext, getBiome);
-		var ruleWithContext = this.rule.apply(surfaceContext);
+        var ruleWithContext = this.rule.apply(surfaceContext);
 
         for (int x = 0; x < Chunk.CHUNK_SIZE_X; x += 1) {
-			int worldX = minX + x;
+            int worldX = minX + x;
             for (int z = 0; z < Chunk.CHUNK_SIZE_Z; z += 1) {
-				int worldZ = minZ + z;
+                int worldZ = minZ + z;
                 surfaceContext.updateXZ(worldX, worldZ);
                 int stoneDepthAbove = 0;
                 int waterHeight = Integer.MIN_VALUE;
                 int stoneDepthOffset = Integer.MAX_VALUE;
 
                 for (int y = minY; y >= maxY; y -= 1) {
-					var worldPos = new Vec(worldX, y, worldZ);
-					var oldState = chunk.getBlock(worldPos);
+                    var worldPos = new Vec(worldX, y, worldZ);
+                    var oldState = chunk.getBlock(worldPos);
                     if (oldState.compare(Block.AIR)) {
                         stoneDepthAbove = 0;
                         waterHeight = Integer.MIN_VALUE;
@@ -66,7 +66,7 @@ public class SurfaceSystem {
                     if (stoneDepthOffset >= y) {
                         stoneDepthOffset = Integer.MIN_VALUE;
                         for (int i = y - 1; i >= minY; i -= 1) {
-							Block state = chunk.getBlock(new Vec(worldX, i, worldZ));
+                            Block state = chunk.getBlock(new Vec(worldX, i, worldZ));
                             if (state.compare(Block.AIR) || state.registry().isLiquid()) {
                                 stoneDepthOffset = i + 1;
                                 break;
@@ -74,13 +74,13 @@ public class SurfaceSystem {
                         }
                     }
                     stoneDepthAbove += 1;
-					int stoneDepthBelow = y - stoneDepthOffset + 1;
+                    int stoneDepthBelow = y - stoneDepthOffset + 1;
 
                     if (!oldState.equals(this.defaultBlock)) {
                         continue;
                     }
                     surfaceContext.updateY(stoneDepthAbove, stoneDepthBelow, waterHeight, y);
-					var newState = ruleWithContext.apply(worldX, y, worldZ);
+                    var newState = ruleWithContext.apply(worldX, y, worldZ);
                     if (newState != null) {
                         chunk.setBlock(worldPos, newState);
                     }
@@ -90,7 +90,7 @@ public class SurfaceSystem {
     }
 
     public int getSurfaceDepth(double x, double z) {
-		double noise = this.surfaceNoise.sample(x, 0, z);
+        double noise = this.surfaceNoise.sample(x, 0, z);
         double offset = this.random.at((int) x, 0, (int) z).nextDouble() * 0.25;
         return (int) (noise * 2.75 + 3 + offset);
     }
@@ -100,17 +100,18 @@ public class SurfaceSystem {
     }
 
     public WorldGenRandom getRandom(String name) {
-        return positionalRandoms.computeIfAbsent(name, (n) -> this.random.fromHashOf(n));
+        return positionalRandoms.computeIfAbsent(name, this.random::fromHashOf);
     }
 
-//    public interface SurfaceRule = (context: SurfaceContext) => (x: number, y: number, z: number) => BlockState | undefined
+    //    public interface SurfaceRule = (context: SurfaceContext) => (x: number, y: number, z: number) => BlockState | undefined
     public interface SurfaceRule {
         Pos2Block apply(SurfaceContext context);
+
         interface Pos2Block {
             Block apply(int x, int y, int z);
         }
 
-        final SurfaceRule NOOP = context -> (x, y, z) -> null;
+        SurfaceRule NOOP = context -> (x, y, z) -> null;
 
 //        export function fromJson(obj: unknown): SurfaceRule {
 //            const root = Json.readObject(obj) ?? {}
@@ -128,9 +129,11 @@ public class SurfaceSystem {
             String type = Util.jsonElse(root, "type", "", JsonElement::getAsString).replace("minecraft:", "");
             return switch (type) {
                 case "block" -> block(Util.jsonRequire(root, "result_state", Util.jsonVanillaBlock()));
-                case "sequence" -> sequence(Util.jsonRequire(root, "sequence", Util.jsonReadArray(SurfaceRule::fromJson)));
-                case "condition" -> condition(SurfaceCondition.fromJson(Util.jsonRequire(root, "if_true", JsonElement::getAsJsonObject)),
-                        fromJson(Util.jsonRequire(root, "then_run", JsonElement::getAsJsonObject)));
+                case "sequence" ->
+                        sequence(Util.jsonRequire(root, "sequence", Util.jsonReadArray(SurfaceRule::fromJson)));
+                case "condition" ->
+                        condition(SurfaceCondition.fromJson(Util.jsonRequire(root, "if_true", JsonElement::getAsJsonObject)),
+                                fromJson(Util.jsonRequire(root, "then_run", JsonElement::getAsJsonObject)));
                 default -> NOOP;
             };
         }
@@ -156,20 +159,20 @@ public class SurfaceSystem {
 //            }
 //        }
 
-            static SurfaceRule sequence(List<SurfaceRule> rules) {
-                return context -> {
-                    List<SurfaceRule.Pos2Block> rulesWithContext = rules.stream()
-                            .map(rule -> rule.apply(context))
-                            .toList();
-                    return (x, y, z) -> {
-                        for (SurfaceRule.Pos2Block rule : rulesWithContext) {
-                            Block result = rule.apply(x, y, z);
-                            if (result != null) return result;
-                        }
-                        return null;
-                    };
+        static SurfaceRule sequence(List<SurfaceRule> rules) {
+            return context -> {
+                List<SurfaceRule.Pos2Block> rulesWithContext = rules.stream()
+                        .map(rule -> rule.apply(context))
+                        .toList();
+                return (x, y, z) -> {
+                    for (SurfaceRule.Pos2Block rule : rulesWithContext) {
+                        Block result = rule.apply(x, y, z);
+                        if (result != null) return result;
+                    }
+                    return null;
                 };
-            }
+            };
+        }
 //        export function condition(ifTrue: SurfaceCondition, thenRun: SurfaceRule): SurfaceRule {
 //            return context => (x, y, z) => {
 //                if (ifTrue(context)) {
@@ -193,10 +196,10 @@ public class SurfaceSystem {
 
         boolean test(SurfaceContext context);
 
-//        export const FALSE = () => false
-        static SurfaceCondition FALSE = context -> false;
-//        export const TRUE = () => true
-        static SurfaceCondition TRUE = context -> true;
+        //        export const FALSE = () => false
+        SurfaceCondition FALSE = context -> false;
+        //        export const TRUE = () => true
+        SurfaceCondition TRUE = context -> true;
 
 //        export function fromJson(obj: unknown): SurfaceCondition {
 //        const root = Json.readObject(obj) ?? {}
@@ -238,7 +241,8 @@ public class SurfaceSystem {
             return switch (type) {
                 case "above_preliminary_surface" -> abovePreliminarySurface();
                 case "biome" -> biome(Util.jsonRequire(root, "biome_is", Util.jsonReadArray(JsonElement::getAsString)));
-                case "not" -> SurfaceCondition.not(fromJson(Util.jsonRequire(root, "invert", JsonElement::getAsJsonObject)));
+                case "not" ->
+                        SurfaceCondition.not(fromJson(Util.jsonRequire(root, "invert", JsonElement::getAsJsonObject)));
                 case "stone_depth" -> stoneDepth(
                         Util.jsonElse(root, "offset", 0, JsonElement::getAsInt),
                         Util.jsonElse(root, "add_surface_depth", false, JsonElement::getAsBoolean),

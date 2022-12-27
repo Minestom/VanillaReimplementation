@@ -8,22 +8,28 @@ public interface DensityFunction extends DensityFunctions, NumberFunction<Densit
     default double minValue() {
         return -maxValue();
     }
+
     double maxValue();
 
-    default DensityFunction mapAll(DensityFunction.Visitor visitor)  {
+    default DensityFunction mapAll(DensityFunction.Visitor visitor) {
         return visitor.map().apply(this);
     }
 
     interface Context {
         double x();
+
         default int blockX() {
             return (int) Math.floor(x());
         }
+
         double y();
+
         default int blockY() {
             return (int) Math.floor(y());
         }
+
         double z();
+
         default int blockZ() {
             return (int) Math.floor(z());
         }

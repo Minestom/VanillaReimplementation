@@ -5,10 +5,10 @@ import net.minestom.vanilla.generation.math.Util;
 
 public interface VerticalAnchor {
 
-//    export type VerticalAnchor = (context: WorldgenContext) => number
+    //    export type VerticalAnchor = (context: WorldgenContext) => number
     int apply(WorldgenContext context);
 
-//    export function fromJson(obj: unknown): VerticalAnchor {
+    //    export function fromJson(obj: unknown): VerticalAnchor {
 //		const root = Json.readObject(obj) ?? {}
 //        if (root.absolute !== undefined) {
 //            return absolute(Json.readNumber(root.absolute) ?? 0)
@@ -19,7 +19,7 @@ public interface VerticalAnchor {
 //        }
 //        return () => 0
 //    }
-    public static VerticalAnchor fromJson(Object obj) {
+    static VerticalAnchor fromJson(Object obj) {
         JsonObject json = Util.jsonObject(obj);
         if (json.has("absolute")) {
             return absolute(json.get("absolute").getAsInt());
@@ -31,39 +31,41 @@ public interface VerticalAnchor {
         return context -> 0;
     }
 
-//    function absolute(value: number): VerticalAnchor {
+    //    function absolute(value: number): VerticalAnchor {
 //        return () => value
 //    }
     static VerticalAnchor absolute(int value) {
         return context -> value;
     }
 
-//    function aboveBottom(value: number): VerticalAnchor {
+    //    function aboveBottom(value: number): VerticalAnchor {
 //        return context => context.minY + value
 //    }
     static VerticalAnchor aboveBottom(int value) {
         return context -> context.minY() + value;
     }
 
-//    function belowTop(value: number): VerticalAnchor {
+    //    function belowTop(value: number): VerticalAnchor {
 //        return context => context.maxY - value
 //    }
     static VerticalAnchor belowTop(int value) {
         return context -> context.maxY() - value;
     }
 
-//    export interface WorldgenContext {
+    //    export interface WorldgenContext {
 //        minY: number
 //        height: number
 //        maxY: number
 //    }
     interface WorldgenContext {
         int minY();
+
         int height();
+
         int maxY();
     }
 
-//    export function create(minY: number, height: number) {
+    //    export function create(minY: number, height: number) {
 //        return {
 //                minY,
 //                height,

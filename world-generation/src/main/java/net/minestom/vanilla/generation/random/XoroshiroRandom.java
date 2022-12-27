@@ -56,7 +56,9 @@ import java.util.SplittableRandom;
  */
 
 public class XoroshiroRandom extends Random implements WorldGenRandom {
-    /** The internal state of the algorithm. */
+    /**
+     * The internal state of the algorithm.
+     */
     private long s0, s1;
 
     protected XoroshiroRandom(final long s0, final long s1) {
@@ -64,7 +66,8 @@ public class XoroshiroRandom extends Random implements WorldGenRandom {
         this.s1 = s1;
     }
 
-    /** Creates a new generator using a given seed.
+    /**
+     * Creates a new generator using a given seed.
      *
      * @param seed a seed for the generator.
      */
@@ -76,7 +79,8 @@ public class XoroshiroRandom extends Random implements WorldGenRandom {
         return new XoroshiroRandom(seed);
     }
 
-    /** Returns a copy of this generator. The sequences produced by this generator and by the returned generator will be identical.
+    /**
+     * Returns a copy of this generator. The sequences produced by this generator and by the returned generator will be identical.
      *
      * <p>This method is particularly useful in conjunction with the {@link #jump()} (or {@link #longJump()}) method: by calling repeatedly
      * {@link #jump() jump().copy()} over a generator it is possible to create several generators producing non-overlapping sequences.
@@ -103,7 +107,7 @@ public class XoroshiroRandom extends Random implements WorldGenRandom {
 
     @Override
     public int nextInt() {
-        return (int)nextLong();
+        return (int) nextLong();
     }
 
     @Override
@@ -115,10 +119,11 @@ public class XoroshiroRandom extends Random implements WorldGenRandom {
 
     @Override
     public int nextInt(final int n) {
-        return (int)nextLong(n);
+        return (int) nextLong(n);
     }
 
-    /** Returns a pseudorandom uniformly distributed {@code long} value
+    /**
+     * Returns a pseudorandom uniformly distributed {@code long} value
      * between 0 (inclusive) and the specified value (exclusive), drawn from
      * this random number generator's sequence. The algorithm used to generate
      * the value guarantees that the result is uniform, provided that the
@@ -132,7 +137,7 @@ public class XoroshiroRandom extends Random implements WorldGenRandom {
         long t = nextLong();
         final long nMinus1 = n - 1;
         // Rejection-based algorithm to get uniform integers in the general case
-        for (long u = t >>> 1; u + nMinus1 - (t = u % n) < 0; u = nextLong() >>> 1);
+        for (long u = t >>> 1; u + nMinus1 - (t = u % n) < 0; u = nextLong() >>> 1) ;
         return t;
     }
 
@@ -172,7 +177,6 @@ public class XoroshiroRandom extends Random implements WorldGenRandom {
      * @return the next pseudorandom, uniformly distributed {@code double}
      * value between {@code 0.0} and {@code 1.0} from this
      * random number generator's sequence, using 52 significant bits only.
-     *
      * @since 2.4.1
      */
     public double nextDoubleFast() {
@@ -192,9 +196,9 @@ public class XoroshiroRandom extends Random implements WorldGenRandom {
     @Override
     public void nextBytes(final byte[] bytes) {
         int i = bytes.length, n = 0;
-        while(i != 0) {
+        while (i != 0) {
             n = Math.min(i, 8);
-            for (long bits = nextLong(); n-- != 0; bits >>= 8) bytes[--i] = (byte)bits;
+            for (long bits = nextLong(); n-- != 0; bits >>= 8) bytes[--i] = (byte) bits;
         }
     }
 
@@ -202,7 +206,7 @@ public class XoroshiroRandom extends Random implements WorldGenRandom {
         long s0 = 0;
         long s1 = 0;
         for (final long element : jump)
-            for(int b = 0; b < 64; b++) {
+            for (int b = 0; b < 64; b++) {
                 if ((element & 1L << b) != 0) {
                     s0 ^= this.s0;
                     s1 ^= this.s1;
@@ -216,9 +220,10 @@ public class XoroshiroRandom extends Random implements WorldGenRandom {
     }
 
 
-    private static final long[] JUMP = { 0x2bd7a6a6e99c2ddcL, 0x0992ccaf6a6fca05L };
+    private static final long[] JUMP = {0x2bd7a6a6e99c2ddcL, 0x0992ccaf6a6fca05L};
 
-    /** The jump function for this generator. It is equivalent to 2<sup>64</sup>
+    /**
+     * The jump function for this generator. It is equivalent to 2<sup>64</sup>
      * calls to {@link #nextLong()}; it can be used to generate 2<sup>64</sup>
      * non-overlapping subsequences for parallel computations.
      *
@@ -230,9 +235,10 @@ public class XoroshiroRandom extends Random implements WorldGenRandom {
         return jump(JUMP);
     }
 
-    private static final long[] LONG_JUMP = { 0x360fd5f2cf8d5d99L, 0x9c6e6877736c46e3L };
+    private static final long[] LONG_JUMP = {0x360fd5f2cf8d5d99L, 0x9c6e6877736c46e3L};
 
-    /** The long-jump function for this generator. It is equivalent to 2<sup>96</sup>
+    /**
+     * The long-jump function for this generator. It is equivalent to 2<sup>96</sup>
      * calls to {@link #nextLong()}; it can be used to generate 2<sup>32</sup> starting points,
      * from each of which {@link #jump()} will generate 2<sup>32</sup> non-overlapping
      * subsequences for parallel distributed computations.
@@ -244,7 +250,6 @@ public class XoroshiroRandom extends Random implements WorldGenRandom {
     public XoroshiroRandom longJump() {
         return jump(LONG_JUMP);
     }
-
 
 
     /**
@@ -315,7 +320,8 @@ public class XoroshiroRandom extends Random implements WorldGenRandom {
         return split;
     }
 
-    /** Sets the seed of this generator.
+    /**
+     * Sets the seed of this generator.
      *
      * <p>The argument will be used to seed a {@link SplitMix64RandomGenerator}, whose output
      * will in turn be used to seed this generator. This approach makes &ldquo;warmup&rdquo; unnecessary,
@@ -332,19 +338,22 @@ public class XoroshiroRandom extends Random implements WorldGenRandom {
     }
 
 
-    /** Sets the state of this generator.
+    /**
+     * Sets the state of this generator.
      *
      * <p>The internal state of the generator will be reset, and the state array filled with the provided array.
      *
      * @param state an array of 2 longs; at least one must be nonzero.
      */
     public void setState(final long[] state) {
-        if (state.length != 2) throw new IllegalArgumentException("The argument array contains " + state.length + " longs instead of " + 2);
+        if (state.length != 2)
+            throw new IllegalArgumentException("The argument array contains " + state.length + " longs instead of " + 2);
         s0 = state[0];
         s1 = state[1];
     }
 
-    /** A fast, high-quality, non-splittable version of the <span style="font-variant: small-caps">SplitMix</span>
+    /**
+     * A fast, high-quality, non-splittable version of the <span style="font-variant: small-caps">SplitMix</span>
      * pseudorandom number generator used by {@link SplittableRandom}. Due to
      * the fixed increment constant and to different strategies in generating finite ranges, the methods of this generator
      * are usually faster than those of {@link SplittableRandom}.
@@ -356,13 +365,18 @@ public class XoroshiroRandom extends Random implements WorldGenRandom {
 
     public static class SplitMix64RandomGenerator {
 
-        /** 2<sup>64</sup> &middot; &phi;, &phi; = (&#x221A;5 &minus; 1)/2. */
+        /**
+         * 2<sup>64</sup> &middot; &phi;, &phi; = (&#x221A;5 &minus; 1)/2.
+         */
         private static final long PHI = 0x9E3779B97F4A7C15L;
 
-        /** The internal state of the algorithm (a Weyl generator using the {@link #PHI} as increment). */
+        /**
+         * The internal state of the algorithm (a Weyl generator using the {@link #PHI} as increment).
+         */
         private long x;
 
-        /** Creates a new generator using a given seed.
+        /**
+         * Creates a new generator using a given seed.
          *
          * @param seed a seed for the generator.
          */
@@ -383,7 +397,8 @@ public class XoroshiroRandom extends Random implements WorldGenRandom {
         }
 
 
-        /** Sets the seed of this generator.
+        /**
+         * Sets the seed of this generator.
          *
          * <p>The seed will be passed through {@link HashCommon#murmurHash3(long)}.
          *
@@ -394,7 +409,8 @@ public class XoroshiroRandom extends Random implements WorldGenRandom {
         }
 
 
-        /** Sets the state of this generator.
+        /**
+         * Sets the state of this generator.
          *
          * @param state the new state for this generator (must be nonzero).
          */

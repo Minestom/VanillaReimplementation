@@ -14,23 +14,23 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 public class Climate {
-        static final int PARAMETER_SPACE = 7;
+    static final int PARAMETER_SPACE = 7;
 
-//        export function target(temperature: number, humidity: number, continentalness: number, erosion: number, depth: number, weirdness: number) {
+    //        export function target(temperature: number, humidity: number, continentalness: number, erosion: number, depth: number, weirdness: number) {
 //        return new TargetPoint(temperature, humidity, continentalness, erosion, depth, weirdness)
 //        }
     public static TargetPoint target(double temperature, double humidity, double continentalness, double erosion, double depth, double weirdness) {
         return new TargetPoint(temperature, humidity, continentalness, erosion, depth, weirdness);
     }
 
-//        export function parameters(temperature: number | Param, humidity: number | Param, continentalness: number | Param, erosion: number | Param, depth: number | Param, weirdness: number | Param, offset: number) {
+    //        export function parameters(temperature: number | Param, humidity: number | Param, continentalness: number | Param, erosion: number | Param, depth: number | Param, weirdness: number | Param, offset: number) {
 //            return new ParamPoint(param(temperature), param(humidity), param(continentalness), param(erosion), param(depth), param(weirdness), offset)
 //        }
     public static ParamPoint parameters(double temperature, double humidity, double continentalness, double erosion, double depth, double weirdness, double offset) {
         return new ParamPoint(param(temperature), param(humidity), param(continentalness), param(erosion), param(depth), param(weirdness), offset);
     }
 
-//        export function param(value: number | Param, max?: number) {
+    //        export function param(value: number | Param, max?: number) {
 //        if (typeof value === 'number') {
 //        return new Param(value, max ?? value)
 //        }
@@ -58,13 +58,13 @@ public class Climate {
         throw new IllegalArgumentException("Cannot convert " + value + " to Param");
     }
 
-//        export class Param {
+    //        export class Param {
 //    constructor(
 //            public readonly min: number,
 //            public readonly max: number,
 //            ) {}
     public record Param(double min, double max) {
-    //    public distance(param: Param | number) {
+        //    public distance(param: Param | number) {
 //			const diffMax = (typeof param === 'number' ? param : param.min) - this.max
 //			const diffMin = this.min - (typeof param === 'number' ? param : param.max)
 //        if (diffMax > 0) {
@@ -72,53 +72,53 @@ public class Climate {
 //        }
 //        return Math.max(diffMin, 0)
 //    }
-    public double distance(Param param) {
-        double diffMax = param.min() - this.max();
-        double diffMin = this.min() - param.max();
-        if (diffMax > 0) {
-            return diffMax;
+        public double distance(Param param) {
+            double diffMax = param.min() - this.max();
+            double diffMin = this.min() - param.max();
+            if (diffMax > 0) {
+                return diffMax;
+            }
+            return Math.max(diffMin, 0);
         }
-        return Math.max(diffMin, 0);
-    }
 
-    //    public union(param: Param) {
+        //    public union(param: Param) {
 //        return new Param(
 //                Math.min(this.min, param.min),
 //                Math.max(this.max, param.max)
 //        )
 //    }
-    public Param union(Param param) {
-        return new Param(
-                Math.min(this.min(), param.min()),
-                Math.max(this.max(), param.max())
-        );
-    }
+        public Param union(Param param) {
+            return new Param(
+                    Math.min(this.min(), param.min()),
+                    Math.max(this.max(), param.max())
+            );
+        }
 
-    //    public static fromJson(obj: unknown) {
+        //    public static fromJson(obj: unknown) {
 //        if (typeof obj === 'number') return new Param(obj, obj)
 //			const [min, max] = Json.readArray(obj, e => Json.readNumber(e)) ?? []
 //        return new Param(min ?? 0, max ?? 0)
 //    }
-    public static Param fromJson(Object obj) {
-        if (obj instanceof JsonElement json) {
-            if (json.isJsonPrimitive()) {
-                return fromJson(json.getAsDouble());
+        public static Param fromJson(Object obj) {
+            if (obj instanceof JsonElement json) {
+                if (json.isJsonPrimitive()) {
+                    return fromJson(json.getAsDouble());
+                }
+                if (json.isJsonArray()) {
+                    double[] array = StreamSupport.stream(json.getAsJsonArray().spliterator(), false)
+                            .mapToDouble(JsonElement::getAsDouble)
+                            .toArray();
+                    return new Param(array[0], array[1]);
+                }
             }
-            if (json.isJsonArray()) {
-                double[] array = StreamSupport.stream(json.getAsJsonArray().spliterator(), false)
-                        .mapToDouble(JsonElement::getAsDouble)
-                        .toArray();
-                return new Param(array[0], array[1]);
+            if (obj instanceof Number) {
+                return new Param(((Number) obj).doubleValue(), ((Number) obj).doubleValue());
             }
+            throw new IllegalArgumentException("Cannot convert " + obj + " to Param");
         }
-        if (obj instanceof Number) {
-            return new Param(((Number) obj).doubleValue(), ((Number) obj).doubleValue());
-        }
-        throw new IllegalArgumentException("Cannot convert " + obj + " to Param");
-    }
     }
 
-//	export class ParamPoint {
+    //	export class ParamPoint {
 //    constructor(
 //            public readonly temperature: Param,
 //            public readonly humidity: Param,
@@ -128,7 +128,8 @@ public class Climate {
 //            public readonly weirdness: Param,
 //            public readonly offset: number,
 //            ) {}
-    public record ParamPoint(Param temperature, Param humidity, Param continentalness, Param erosion, Param depth, Param weirdness, double offset) {
+    public record ParamPoint(Param temperature, Param humidity, Param continentalness, Param erosion, Param depth,
+                             Param weirdness, double offset) {
         public double fittness(ParamPoint point) {
             return Util.square(this.temperature().distance(point.temperature()))
                     + Util.square(this.humidity().distance(point.humidity()))
@@ -151,14 +152,14 @@ public class Climate {
 //    }
 
 
-    //    public space() {
+        //    public space() {
 //        return [this.temperature, this.humidity, this.continentalness, this.erosion, this.depth, this.weirdness, new Param(this.offset, this.offset)]
 //    }
-    public Param[] space() {
-        return new Param[]{this.temperature(), this.humidity(), this.continentalness(), this.erosion(), this.depth(), this.weirdness(), new Param(this.offset(), this.offset())};
-    }
+        public Param[] space() {
+            return new Param[]{this.temperature(), this.humidity(), this.continentalness(), this.erosion(), this.depth(), this.weirdness(), new Param(this.offset(), this.offset())};
+        }
 
-    //    public static fromJson(obj: unknown) {
+        //    public static fromJson(obj: unknown) {
 //			const root = Json.readObject(obj) ?? {}
 //        return new ParamPoint(
 //                Param.fromJson(root.temperature),
@@ -170,27 +171,27 @@ public class Climate {
 //                Json.readInt(root.offset) ?? 0,
 //			)
 //    }
-    public static ParamPoint fromJson(Object obj) {
-        if (obj instanceof JsonElement json) {
-            if (json.isJsonObject()) {
-                JsonObject root = json.getAsJsonObject();
-                return new ParamPoint(
-                        Param.fromJson(root.get("temperature")),
-                        Param.fromJson(root.get("humidity")),
-                        Param.fromJson(root.get("continentalness")),
-                        Param.fromJson(root.get("erosion")),
-                        Param.fromJson(root.get("depth")),
-                        Param.fromJson(root.get("weirdness")),
-                        root.get("offset").getAsInt()
-                );
+        public static ParamPoint fromJson(Object obj) {
+            if (obj instanceof JsonElement json) {
+                if (json.isJsonObject()) {
+                    JsonObject root = json.getAsJsonObject();
+                    return new ParamPoint(
+                            Param.fromJson(root.get("temperature")),
+                            Param.fromJson(root.get("humidity")),
+                            Param.fromJson(root.get("continentalness")),
+                            Param.fromJson(root.get("erosion")),
+                            Param.fromJson(root.get("depth")),
+                            Param.fromJson(root.get("weirdness")),
+                            root.get("offset").getAsInt()
+                    );
+                }
             }
+            throw new IllegalArgumentException("Cannot convert " + obj + " to ParamPoint");
         }
-        throw new IllegalArgumentException("Cannot convert " + obj + " to ParamPoint");
-    }
     }
 
 
-//	export class TargetPoint {
+    //	export class TargetPoint {
 //    constructor(
 //            public readonly temperature: number,
 //            public readonly humidity: number,
@@ -199,23 +200,24 @@ public class Climate {
 //            public readonly depth: number,
 //            public readonly weirdness: number,
 //            ) {}
-public record TargetPoint(double temperature, double humidity, double continentalness, double erosion, double depth, double weirdness) {
+    public record TargetPoint(double temperature, double humidity, double continentalness, double erosion, double depth,
+                              double weirdness) {
 
 
-//    get offset() {
+        //    get offset() {
 //        return 0
 //    }
-    public double offset() {
-        return 0;
-    }
+        public double offset() {
+            return 0;
+        }
 
-//    public toArray() {
+        //    public toArray() {
 //        return [this.temperature, this.humidity, this.continentalness, this.erosion, this.depth, this.weirdness, this.offset]
 //    }
-    public double[] toArray() {
-        return new double[]{this.temperature(), this.humidity(), this.continentalness(), this.erosion(), this.depth(), this.weirdness(), this.offset()};
+        public double[] toArray() {
+            return new double[]{this.temperature(), this.humidity(), this.continentalness(), this.erosion(), this.depth(), this.weirdness(), this.offset()};
+        }
     }
-}
 
 //export class Parameters<T> {
 //    private readonly index: RTree<T>
@@ -229,7 +231,7 @@ public record TargetPoint(double temperature, double humidity, double continenta
 //    }
 //}
 
-    public class Parameters<T> {
+    public static class Parameters<T> {
         private final RTree<T> index;
 
         public Parameters(Map<ParamPoint, Supplier<T>> things) {
@@ -241,7 +243,7 @@ public record TargetPoint(double temperature, double humidity, double continenta
         }
     }
 
-//	export class Sampler {
+    //	export class Sampler {
 //    constructor(
 //            public readonly temperature: DensityFunction,
 //            public readonly humidity: DensityFunction,
@@ -260,7 +262,8 @@ public record TargetPoint(double temperature, double humidity, double continenta
 //        return Climate.target(this.temperature.compute(context), this.humidity.compute(context), this.continentalness.compute(context), this.erosion.compute(context), this.depth.compute(context), this.weirdness.compute(context))
 //    }
 //}
-    public record Sampler(DensityFunction temperature, DensityFunction humidity, DensityFunction continentalness, DensityFunction erosion, DensityFunction depth, DensityFunction weirdness) {
+    public record Sampler(DensityFunction temperature, DensityFunction humidity, DensityFunction continentalness,
+                          DensityFunction erosion, DensityFunction depth, DensityFunction weirdness) {
         public static Sampler fromRouter(NoiseRouter router) {
             return new Sampler(router.temperature(), router.vegetation(), router.continents(), router.erosion(), router.depth(), router.ridges());
         }
@@ -271,7 +274,7 @@ public record TargetPoint(double temperature, double humidity, double continenta
         }
     }
 
-//    type DistanceMetric<T> = (node: RNode<T>, values: number[]) => number
+    //    type DistanceMetric<T> = (node: RNode<T>, values: number[]) => number
     interface DistanceMetric<T> {
         double distance(RNode<T> node, double[] values);
     }
@@ -283,8 +286,8 @@ public record TargetPoint(double temperature, double humidity, double continenta
 //    public static readonly CHILDREN_PER_NODE = 10
 //    private readonly root: RNode<T>
 
-    private static final int CHILDREN_PER_NODE = 10;
-    private final RNode<T> root;
+        private static final int CHILDREN_PER_NODE = 10;
+        private final RNode<T> root;
 //
 //    constructor(points: [ParamPoint, () => T][]) {
 //        if (points.length === 0) {
@@ -293,18 +296,18 @@ public record TargetPoint(double temperature, double humidity, double continenta
 //        this.root = RTree.build(points.map(([point, thing]) => new RLeaf(point, thing)))
 //    }
 
-    public RTree(Map<ParamPoint, Supplier<T>> points) {
-        if (points.isEmpty()) {
-            throw new IllegalArgumentException("At least one point is required to build search tree");
+        public RTree(Map<ParamPoint, Supplier<T>> points) {
+            if (points.isEmpty()) {
+                throw new IllegalArgumentException("At least one point is required to build search tree");
+            }
+            var pointList = points.entrySet()
+                    .stream()
+                    .map(entry -> new RLeaf<>(entry.getKey(),
+                            entry.getValue()))
+                    .map(leaf -> (RNode<T>) leaf)
+                    .toList();
+            this.root = RTree.build(pointList);
         }
-        var pointList = points.entrySet()
-                .stream()
-                .map(entry -> new RLeaf<>(entry.getKey(),
-                        entry.getValue()))
-                .map(leaf -> (RNode<T>) leaf)
-                .toList();
-        this.root = RTree.build(pointList);
-    }
 
 //
 //		private static build<T>(nodes: RNode<T>[]): RNode<T> {
@@ -345,44 +348,44 @@ public record TargetPoint(double temperature, double humidity, double continenta
 //        return new RSubTree(result.map(subTree => RTree.build(subTree.children)))
 //    }
 
-    private static <T> RNode<T> build(List<RNode<T>> nodes) {
-        if (nodes.size() == 1) {
-            return nodes.get(0);
-        }
-        if (nodes.size() <= RTree.CHILDREN_PER_NODE) {
-            List<RNode<T>> sortedNodes = nodes.stream()
-                    .map(node -> {
-                        double key = 0.0;
-                        for (int i = 0; i < PARAMETER_SPACE; i += 1) {
-                            Param param = node.space[i];
-                            key += Math.abs((param.min() + param.max()) / 2.0);
-                        }
-                        return Map.entry(key, node);
-                    })
-                    .sorted(Comparator.comparingDouble(Map.Entry::getKey))
-                    .map(Map.Entry::getValue)
-                    .collect(Collectors.toList());
-            return new RSubTree<>(sortedNodes);
-        }
-        double f = Double.POSITIVE_INFINITY;
-        int n3 = -1;
-        List<RSubTree<T>> result = new ArrayList<>();
-        for (int n2 = 0; n2 < PARAMETER_SPACE; ++n2) {
-            nodes = RTree.sort(nodes, n2, false);
-            result = RTree.bucketize(nodes);
-            double f2 = 0.0;
-            for (RSubTree<T> subTree2 : result) {
-                f2 += RTree.area(subTree2.space());
+        private static <T> RNode<T> build(List<RNode<T>> nodes) {
+            if (nodes.size() == 1) {
+                return nodes.get(0);
             }
-            if (!(f > f2)) continue;
-            f = f2;
-            n3 = n2;
+            if (nodes.size() <= RTree.CHILDREN_PER_NODE) {
+                List<RNode<T>> sortedNodes = nodes.stream()
+                        .map(node -> {
+                            double key = 0.0;
+                            for (int i = 0; i < PARAMETER_SPACE; i += 1) {
+                                Param param = node.space[i];
+                                key += Math.abs((param.min() + param.max()) / 2.0);
+                            }
+                            return Map.entry(key, node);
+                        })
+                        .sorted(Comparator.comparingDouble(Map.Entry::getKey))
+                        .map(Map.Entry::getValue)
+                        .collect(Collectors.toList());
+                return new RSubTree<>(sortedNodes);
+            }
+            double f = Double.POSITIVE_INFINITY;
+            int n3 = -1;
+            List<RSubTree<T>> result = new ArrayList<>();
+            for (int n2 = 0; n2 < PARAMETER_SPACE; ++n2) {
+                nodes = RTree.sort(nodes, n2, false);
+                result = RTree.bucketize(nodes);
+                double f2 = 0.0;
+                for (RSubTree<T> subTree2 : result) {
+                    f2 += RTree.area(subTree2.space());
+                }
+                if (!(f > f2)) continue;
+                f = f2;
+                n3 = n2;
+            }
+            nodes = RTree.sort(nodes, n3, false);
+            result = RTree.bucketize(nodes);
+            result = RTree.sort(result, n3, true);
+            return new RSubTree<>(result.stream().map(subTree -> RTree.build(subTree.children)).collect(Collectors.toList()));
         }
-        nodes = RTree.sort(nodes, n3, false);
-        result = RTree.bucketize(nodes);
-        result = RTree.sort(result, n3, true);
-        return new RSubTree<>(result.stream().map(subTree -> RTree.build(subTree.children)).collect(Collectors.toList()));
-    }
 
 //
 //		private static sort<N extends RNode<unknown>>(nodes: N[], i: number, abs: boolean) {
@@ -397,18 +400,18 @@ public record TargetPoint(double temperature, double humidity, double continenta
 //				.map(({ node }) => node)
 //    }
 
-    private static <N extends RNode<?>> List<N> sort(List<N> nodes, int i, boolean abs) {
-        return nodes.stream()
-                .map(node -> {
-                    Param param = node.space().get(i);
-                    double f = (param.min() + param.max()) / 2;
-                    double key = abs ? Math.abs(f) : f;
-                    return Map.entry(key, node);
-                })
-                .sorted(Comparator.comparingDouble(Map.Entry::getKey))
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
-    }
+        private static <N extends RNode<?>> List<N> sort(List<N> nodes, int i, boolean abs) {
+            return nodes.stream()
+                    .map(node -> {
+                        Param param = node.space().get(i);
+                        double f = (param.min() + param.max()) / 2;
+                        double key = abs ? Math.abs(f) : f;
+                        return Map.entry(key, node);
+                    })
+                    .sorted(Comparator.comparingDouble(Map.Entry::getKey))
+                    .map(Map.Entry::getValue)
+                    .collect(Collectors.toList());
+        }
 
 //
 //		private static bucketize<T>(nodes: RNode<T>[]) {
@@ -427,21 +430,21 @@ public record TargetPoint(double temperature, double humidity, double continenta
 //        return arrayList
 //    }
 
-    private static <T> List<RSubTree<T>> bucketize(List<RNode<T>> nodes) {
-        List<RSubTree<T>> arrayList = new ArrayList<>();
-        List<RNode<T>> arrayList2 = new ArrayList<>();
-        double n = Math.pow(10.0, Math.floor(Math.log(nodes.size() - 0.01) / Math.log(10.0)));
-        for (RNode<T> node : nodes) {
-            arrayList2.add(node);
-            if (arrayList2.size() < n) continue;
-            arrayList.add(new RSubTree<>(arrayList2));
-            arrayList2 = new ArrayList<>();
+        private static <T> List<RSubTree<T>> bucketize(List<RNode<T>> nodes) {
+            List<RSubTree<T>> arrayList = new ArrayList<>();
+            List<RNode<T>> arrayList2 = new ArrayList<>();
+            double n = Math.pow(10.0, Math.floor(Math.log(nodes.size() - 0.01) / Math.log(10.0)));
+            for (RNode<T> node : nodes) {
+                arrayList2.add(node);
+                if (arrayList2.size() < n) continue;
+                arrayList.add(new RSubTree<>(arrayList2));
+                arrayList2 = new ArrayList<>();
+            }
+            if (arrayList2.size() != 0) {
+                arrayList.add(new RSubTree<>(arrayList2));
+            }
+            return arrayList;
         }
-        if (arrayList2.size() != 0) {
-            arrayList.add(new RSubTree<>(arrayList2));
-        }
-        return arrayList;
-    }
 
 //
 //    private static area(params: Param[]) {
@@ -452,13 +455,13 @@ public record TargetPoint(double temperature, double humidity, double continenta
 //        return f
 //    }
 
-    private static double area(Collection<Param> params) {
-        double f = 0.0;
-        for (Param param : params) {
-            f += Math.abs(param.max() - param.min());
+        private static double area(Collection<Param> params) {
+            double f = 0.0;
+            for (Param param : params) {
+                f += Math.abs(param.max() - param.min());
+            }
+            return f;
         }
-        return f;
-    }
 
 //
 //    public search(target: TargetPoint, distance: DistanceMetric<T>) {
@@ -466,14 +469,14 @@ public record TargetPoint(double temperature, double humidity, double continenta
 //        return leaf.thing()
 //    }
 
-    public T search(TargetPoint target, DistanceMetric<T> distance) {
-        RLeaf<T> leaf = this.root.search(target.toArray(), distance);
-        return leaf.thing.get();
-    }
+        public T search(TargetPoint target, DistanceMetric<T> distance) {
+            RLeaf<T> leaf = this.root.search(target.toArray(), distance);
+            return leaf.thing.get();
+        }
 //}
-}
+    }
 
-//	export abstract class RNode<T> {
+    //	export abstract class RNode<T> {
 //    constructor(public readonly space: Param[]) {}
 //
 //    public abstract search(values: number[], distance: DistanceMetric<T>): RLeaf<T>
@@ -486,29 +489,29 @@ public record TargetPoint(double temperature, double humidity, double continenta
 //        return result
 //    }
 //}
-static abstract class RNode<T> {
-    protected final Param[] space;
+    static abstract class RNode<T> {
+        protected final Param[] space;
 
-    public RNode(Param[] space) {
-        this.space = space;
-    }
-
-    public abstract RLeaf<T> search(double[] values, DistanceMetric<T> distance);
-
-    public double distance(double[] values) {
-        double result = 0;
-        for (int i = 0; i < PARAMETER_SPACE; i += 1) {
-            result += Util.square(this.space[i].distance(Param.fromJson(values[i])));
+        public RNode(Param[] space) {
+            this.space = space;
         }
-        return result;
+
+        public abstract RLeaf<T> search(double[] values, DistanceMetric<T> distance);
+
+        public double distance(double[] values) {
+            double result = 0;
+            for (int i = 0; i < PARAMETER_SPACE; i += 1) {
+                result += Util.square(this.space[i].distance(Param.fromJson(values[i])));
+            }
+            return result;
+        }
+
+        public List<Param> space() {
+            return Arrays.asList(this.space);
+        }
     }
 
-    public List<Param> space() {
-        return Arrays.asList(this.space);
-    }
-}
-
-//export class RSubTree<T> extends RNode<T> {
+    //export class RSubTree<T> extends RNode<T> {
 //    constructor(public readonly children: RNode<T>[]) {
 //        super(RSubTree.buildSpace(children))
 //    }
@@ -536,43 +539,43 @@ static abstract class RNode<T> {
 //        return leaf!
 //    }
 //}
-static class RSubTree<T> extends RNode<T> {
-    private final List<RNode<T>> children;
+    static class RSubTree<T> extends RNode<T> {
+        private final List<RNode<T>> children;
 
-    public RSubTree(List<RNode<T>> children) {
-        super(RSubTree.buildSpace(children));
-        this.children = children;
-    }
-
-    private static <T> Param[] buildSpace(List<RNode<T>> nodes) {
-        Param[] space = new Param[PARAMETER_SPACE];
-        for (int i = 0; i < PARAMETER_SPACE; i += 1) {
-            space[i] = new Param(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
+        public RSubTree(List<RNode<T>> children) {
+            super(RSubTree.buildSpace(children));
+            this.children = children;
         }
-        for (RNode<T> node : nodes) {
+
+        private static <T> Param[] buildSpace(List<RNode<T>> nodes) {
+            Param[] space = new Param[PARAMETER_SPACE];
             for (int i = 0; i < PARAMETER_SPACE; i += 1) {
-                space[i] = space[i].union(node.space().get(i));
+                space[i] = new Param(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY);
             }
+            for (RNode<T> node : nodes) {
+                for (int i = 0; i < PARAMETER_SPACE; i += 1) {
+                    space[i] = space[i].union(node.space().get(i));
+                }
+            }
+            return space;
         }
-        return space;
-    }
 
-    @Override
-    public RLeaf<T> search(double[] values, DistanceMetric<T> distance) {
-        double dist = Double.POSITIVE_INFINITY;
-        RLeaf<T> leaf = null;
-        for (RNode<T> node : this.children) {
-            double d1 = distance.distance(node, values);
-            if (dist <= d1) continue;
-            RLeaf<T> leaf2 = node.search(values, distance);
-            double d2 = node == leaf2 ? d1 : distance.distance(leaf2, values);
-            if (dist <= d2) continue;
-            dist = d2;
-            leaf = leaf2;
+        @Override
+        public RLeaf<T> search(double[] values, DistanceMetric<T> distance) {
+            double dist = Double.POSITIVE_INFINITY;
+            RLeaf<T> leaf = null;
+            for (RNode<T> node : this.children) {
+                double d1 = distance.distance(node, values);
+                if (dist <= d1) continue;
+                RLeaf<T> leaf2 = node.search(values, distance);
+                double d2 = node == leaf2 ? d1 : distance.distance(leaf2, values);
+                if (dist <= d2) continue;
+                dist = d2;
+                leaf = leaf2;
+            }
+            return leaf;
         }
-        return leaf;
     }
-}
 
 //	export class RLeaf<T> extends RNode<T> {
 //    constructor(point: ParamPoint, public readonly thing: () => T) {
@@ -585,12 +588,10 @@ static class RSubTree<T> extends RNode<T> {
 //}
 
     static class RLeaf<T> extends RNode<T> {
-        private final ParamPoint point;
         private final Supplier<T> thing;
 
         public RLeaf(ParamPoint point, Supplier<T> thing) {
             super(point.space());
-            this.point = point;
             this.thing = thing;
         }
 

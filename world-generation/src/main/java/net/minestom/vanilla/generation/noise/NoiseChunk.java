@@ -15,17 +15,17 @@ import java.util.List;
 import java.util.Map;
 
 public class NoiseChunk {
-    public int cellWidth;
-    public int cellHeight;
-    public int firstCellX;
-    public int firstCellZ;
-    public double firstNoiseX;
-    public double firstNoiseZ;
-    public double noiseSizeXZ;
-    private Map<Long, Integer> preliminarySurfaceLevel = new HashMap<>();
-    private Aquifer aquifer;
-    private MaterialRule materialRule;
-    private DensityFunction initialDensity;
+    public final int cellWidth;
+    public final int cellHeight;
+    public final int firstCellX;
+    public final int firstCellZ;
+    public final double firstNoiseX;
+    public final double firstNoiseZ;
+    public final double noiseSizeXZ;
+    private final Map<Long, Integer> preliminarySurfaceLevel = new HashMap<>();
+    private final Aquifer aquifer;
+    private final MaterialRule materialRule;
+    private final DensityFunction initialDensity;
 
     public int cellCountXZ;
     public int cellCountY;
@@ -53,7 +53,7 @@ public class NoiseChunk {
         this.firstNoiseZ = minZ >> 2;
         this.noiseSizeXZ = (cellCountXZ * this.cellWidth) >> 2;
 
-        if (!aquifersEnabled || true) { // WIP: Noise aquifers don't work yet
+        if (true) { // WIP: Noise aquifers don't work yet
             this.aquifer = Aquifer.createDisabled(fluidPicker);
         } else {
             Point chunkPos = new Vec(minX, 0, minZ);
@@ -77,7 +77,7 @@ public class NoiseChunk {
             int x = quartX << 2;
             int z = quartZ << 2;
             for (int y = this.settings.minY() + this.settings.height(); y >= this.settings.minY(); y -= this.cellHeight) {
-            double density = this.initialDensity.compute(DensityFunctions.context(x, y, z));
+                double density = this.initialDensity.compute(DensityFunctions.context(x, y, z));
                 if (density > 0.390625) {
                     return y;
                 }

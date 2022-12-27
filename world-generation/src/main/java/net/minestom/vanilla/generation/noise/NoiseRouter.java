@@ -1,6 +1,5 @@
 package net.minestom.vanilla.generation.noise;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import net.minestom.vanilla.generation.Holder;
 import net.minestom.vanilla.generation.WorldgenRegistries;
@@ -23,7 +22,7 @@ public record NoiseRouter(DensityFunction barrier, DensityFunction fluidLevelFlo
 
 
     //    export namespace NoiseRouter {
-    public static Function<Object, DensityFunction> fieldParser = obj ->
+    public static final Function<Object, DensityFunction> fieldParser = obj ->
             new DensityFunctions.HolderHolder(Holder.parser(WorldgenRegistries.DENSITY_FUNCTION, DensityFunctions::fromJson).apply(obj));
 
     //        export function fromJson(obj: unknown): NoiseRouter {
@@ -107,7 +106,7 @@ public record NoiseRouter(DensityFunction barrier, DensityFunction fluidLevelFlo
     }
 
     // new Map<string, [bigint | number, bigint | number, NormalNoise]>()
-    static Map<String, Object[]> noiseCache = new HashMap<>();
+    static final Map<String, Object[]> noiseCache = new HashMap<>();
 
     static NormalNoise instantiate(WorldGenRandom.Positional random, Holder<NormalNoise.NoiseParameters> noise) {
         if (noise.key() == null)
@@ -119,7 +118,7 @@ public record NoiseRouter(DensityFunction barrier, DensityFunction fluidLevelFlo
             return (NormalNoise) cached[2];
         }
         var result = new NormalNoise(random.fromHashOf(key), noise.value());
-        noiseCache.put(key, new Object[] {randomKey[0], randomKey[1], result});
+        noiseCache.put(key, new Object[]{randomKey[0], randomKey[1], result});
         return result;
     }
 }

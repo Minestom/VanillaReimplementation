@@ -1,6 +1,5 @@
 package net.minestom.vanilla.generation.noise;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minestom.vanilla.generation.math.Util;
@@ -81,9 +80,5 @@ public record NoiseGeneratorSettings(
                 Util.<Boolean>jsonElse(root, "ore_veins_enabled", false, JsonElement::getAsBoolean),
                 Util.<Boolean>jsonElse(root, "legacy_random_source", false, JsonElement::getAsBoolean)
         );
-    }
-
-    static NoiseGeneratorSettings create(NoiseGeneratorSettings settings) {
-        return null;
     }
 }

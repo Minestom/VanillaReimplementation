@@ -8,6 +8,7 @@ import java.util.function.Function;
 public interface Holder<T> {
 
     T value();
+
     NamespaceID key();
 
     static <T> Function<Object, Holder<T>> parser(Registry<T> registry, Function<Object, T> directParser) {

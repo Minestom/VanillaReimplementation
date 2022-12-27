@@ -14,11 +14,14 @@ public interface NoiseSettings {
 //    }
 
     int minY();
+
     int height();
+
     int xzSize();
+
     int ySize();
 
-//    export namespace NoiseSettings {
+    //    export namespace NoiseSettings {
 //        export function fromJson(obj: any): NoiseSettings {
 //		const root = Json.readObject(obj) ?? {}
 //            return {
@@ -38,49 +41,66 @@ public interface NoiseSettings {
         int xzSize = Util.<Integer>jsonElse(root, "size_horizontal", 1, JsonElement::getAsInt);
         int ySize = Util.<Integer>jsonElse(root, "size_vertical", 1, JsonElement::getAsInt);
         return new NoiseSettings() {
-            @Override public int minY() { return minY;}
-            @Override public int height() { return height; }
-            @Override public int xzSize() { return xzSize; }
-            @Override public int ySize() { return ySize; }
+            @Override
+            public int minY() {
+                return minY;
+            }
+
+            @Override
+            public int height() {
+                return height;
+            }
+
+            @Override
+            public int xzSize() {
+                return xzSize;
+            }
+
+            @Override
+            public int ySize() {
+                return ySize;
+            }
         };
     }
 
-//        export function cellHeight(settings: NoiseSettings) {
+    //        export function cellHeight(settings: NoiseSettings) {
 //            return settings.ySize << 2
 //        }
     static int cellHeight(NoiseSettings settings) {
         return settings.ySize() << 2;
     }
 
-//        export function cellWidth(settings: NoiseSettings) {
+    //        export function cellWidth(settings: NoiseSettings) {
 //            return settings.xzSize << 2
 //        }
     static int cellWidth(NoiseSettings settings) {
         return settings.xzSize() << 2;
     }
 
-//        export function cellCountY(settings: NoiseSettings) {
+    //        export function cellCountY(settings: NoiseSettings) {
 //            return settings.height / cellHeight(settings)
 //        }
     static double cellCountY(NoiseSettings settings) {
         return settings.height() / cellHeight(settings);
     }
 
-//        export function minCellY(settings: NoiseSettings) {
+    //        export function minCellY(settings: NoiseSettings) {
 //            return Math.floor(settings.minY / cellHeight(settings))
 //        }
     static double minCellY(NoiseSettings settings) {
         return Math.floor(settings.minY() / cellHeight(settings));
     }
 
-//    export type NoiseSlideSettings = {
+    //    export type NoiseSlideSettings = {
 //        target: number,
 //                size: number,
 //                offset: number,
 //    }
     interface SlideSettings {
         double target();
+
         double size();
+
         double offset();
 
 //        export function fromJson(obj: unknown): NoiseSlideSettings {
@@ -101,9 +121,20 @@ public interface NoiseSettings {
             double size = Util.<Double>jsonElse(root, "size", 0.0, JsonElement::getAsDouble);
             double offset = Util.<Double>jsonElse(root, "offset", 0.0, JsonElement::getAsDouble);
             return new SlideSettings() {
-                @Override public double target() { return target; }
-                @Override public double size() { return size; }
-                @Override public double offset() { return offset; }
+                @Override
+                public double target() {
+                    return target;
+                }
+
+                @Override
+                public double size() {
+                    return size;
+                }
+
+                @Override
+                public double offset() {
+                    return offset;
+                }
             };
         }
 

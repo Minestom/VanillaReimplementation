@@ -3,12 +3,12 @@ package net.minestom.vanilla.generation.random;
 import net.minestom.vanilla.generation.math.Util;
 
 public class LegacyRandom implements WorldGenRandom {
-    private static int MODULUS_BITS = 48;
-    private static long MODULUS_MASK = 281474976710655L;
-    private static long MULTIPLIER = 25214903917L;
-    private static long INCREMENT = 11L;
-    private static double FLOAT_MULTIPLIER = 1 / Math.pow(2, 24);
-    private static double DOUBLE_MULTIPLIER = 1 / Math.pow(2, 30);
+    private static final int MODULUS_BITS = 48;
+    private static final long MODULUS_MASK = 281474976710655L;
+    private static final long MULTIPLIER = 25214903917L;
+    private static final long INCREMENT = 11L;
+    private static final double FLOAT_MULTIPLIER = 1 / Math.pow(2, 24);
+    private static final double DOUBLE_MULTIPLIER = 1 / Math.pow(2, 30);
 
     private long seed;
 
@@ -39,7 +39,7 @@ public class LegacyRandom implements WorldGenRandom {
         }
     }
 
-//    protected next(bits: number): number {
+    //    protected next(bits: number): number {
 //        this.advance()
 //        const out = Number(this.seed >> BigInt(LegacyRandom.MODULUS_BITS - bits))
 //        return out > 2147483647 ? out - 4294967296 : out
@@ -50,7 +50,7 @@ public class LegacyRandom implements WorldGenRandom {
         return out > 2147483647L ? (int) (out - 4294967296L) : out;
     }
 
-//    public nextInt(max?: number): number {
+    //    public nextInt(max?: number): number {
 //        if (max === undefined) {
 //            return this.next(32)
 //        }
@@ -75,21 +75,21 @@ public class LegacyRandom implements WorldGenRandom {
         return b;
     }
 
-//    public nextLong() {
+    //    public nextLong() {
 //        return (BigInt(this.next(32)) << BigInt(32)) + BigInt(this.next(32))
 //    }
     public long nextLong() {
         return ((long) this.next(32) << 32) + (long) this.next(32);
     }
 
-//    public nextFloat(): number {
+    //    public nextFloat(): number {
 //        return this.next(24) * LegacyRandom.FLOAT_MULTIPLIER
 //    }
     public float nextFloat() {
         return this.next(24) * (float) LegacyRandom.FLOAT_MULTIPLIER;
     }
 
-//    public nextDouble(): number {
+    //    public nextDouble(): number {
 //    const a = this.next(30)
 //        this.advance()
 //        return a * LegacyRandom.DOUBLE_MULTIPLIER
@@ -100,7 +100,7 @@ public class LegacyRandom implements WorldGenRandom {
         return a * LegacyRandom.DOUBLE_MULTIPLIER;
     }
 
-//    export class LegacyPositionalRandom implements PositionalRandom {
+    //    export class LegacyPositionalRandom implements PositionalRandom {
 //        constructor(
 //                private readonly seed: bigint,
 //                ) {}
@@ -139,7 +139,7 @@ public class LegacyRandom implements WorldGenRandom {
         }
 
         public long[] seedKey() {
-            return new long[] { this.seed, 0L };
+            return new long[]{this.seed, 0L};
         }
     }
 }

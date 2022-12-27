@@ -1,11 +1,9 @@
 package net.minestom.vanilla.generation.math;
 
 import it.unimi.dsi.fastutil.doubles.DoubleList;
-import it.unimi.dsi.fastutil.doubles.DoubleLists;
 
 /**
  * Performs spline interpolation given a set of control points.
- *
  */
 public class SplineInterpolator {
 
@@ -21,21 +19,17 @@ public class SplineInterpolator {
 
     /**
      * Creates a monotone cubic spline from a given set of control points.
-     *
+     * <p>
      * The spline is guaranteed to pass through each control point exactly. Moreover, assuming the control points are
      * monotonic (Y is non-decreasing or non-increasing) then the interpolated values will also be monotonic.
-     *
+     * <p>
      * This function uses the Fritsch-Carlson method for computing the spline parameters.
      * <a href="http://en.wikipedia.org/wiki/Monotone_cubic_interpolation">see here</a>
      *
-     * @param x
-     *            The X component of the control points, strictly increasing.
-     * @param y
-     *            The Y component of the control points
+     * @param x The X component of the control points, strictly increasing.
+     * @param y The Y component of the control points
      * @return A monotone cubic spline interpolator.
-     *
-     * @throws IllegalArgumentException
-     *             if the X or Y arrays are null, have different lengths or have fewer than 2 values.
+     * @throws IllegalArgumentException if the X or Y arrays are null, have different lengths or have fewer than 2 values.
      */
     public static SplineInterpolator createMonotoneCubicSpline(DoubleList x, DoubleList y) {
         if (x == null || y == null || x.size() != y.size() || x.size() < 2) {
@@ -86,8 +80,7 @@ public class SplineInterpolator {
     /**
      * Interpolates the value of Y = f(X) for given X. Clamps X to the domain of the spline.
      *
-     * @param x
-     *            The X value.
+     * @param x The X value.
      * @return The interpolated Y = f(X) value.
      */
     public double interpolate(double x) {

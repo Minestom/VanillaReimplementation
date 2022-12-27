@@ -21,9 +21,9 @@ public class BlendedNoise implements Noise {
         this.xzFactor = xzFactor;
         this.yFactor = yFactor;
         this.smearScaleMultiplier = smearScaleMultiplier;
-        this.minLimitNoise = new PerlinNoise(random, -15, new double[] {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
-        this.maxLimitNoise = new PerlinNoise(random, -15, new double[] {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
-        this.mainNoise = new PerlinNoise(random, -7,new double[] {1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0});
+        this.minLimitNoise = new PerlinNoise(random, -15, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+        this.maxLimitNoise = new PerlinNoise(random, -15, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+        this.mainNoise = new PerlinNoise(random, -7, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0});
         this.xzMultiplier = 684.412 * xzScale;
         this.yMultiplier = 684.412 * yScale;
         this.maxValue = this.minLimitNoise.edgeValue(yScale + 2); //TODO
@@ -31,16 +31,16 @@ public class BlendedNoise implements Noise {
 
     @Override
     public double sample(double x, double y, double z) {
-		double scaledX = x * this.xzMultiplier;
-		double scaledY = y * this.yMultiplier;
-		double scaledZ = z * this.xzMultiplier;
+        double scaledX = x * this.xzMultiplier;
+        double scaledY = y * this.yMultiplier;
+        double scaledZ = z * this.xzMultiplier;
 
-		double factoredX = scaledX / this.xzFactor;
-		double factoredY = scaledY / this.yFactor;
-		double factoredZ = scaledZ / this.xzFactor;
+        double factoredX = scaledX / this.xzFactor;
+        double factoredY = scaledY / this.yFactor;
+        double factoredZ = scaledZ / this.xzFactor;
 
-		double smear = this.yMultiplier * this.smearScaleMultiplier;
-		double factoredSmear = smear / this.yFactor;
+        double smear = this.yMultiplier * this.smearScaleMultiplier;
+        double factoredSmear = smear / this.yFactor;
 
         @Nullable ImprovedNoise noise;
         double value = 0;
@@ -48,9 +48,9 @@ public class BlendedNoise implements Noise {
         for (int i = 0; i < 8; i += 1) {
             noise = this.mainNoise.getOctaveNoise(i);
             if (noise != null) {
-				double xx = PerlinNoise.wrap(factoredX * factor);
-				double yy = PerlinNoise.wrap(factoredY * factor);
-				double zz = PerlinNoise.wrap(factoredZ * factor);
+                double xx = PerlinNoise.wrap(factoredX * factor);
+                double yy = PerlinNoise.wrap(factoredY * factor);
+                double zz = PerlinNoise.wrap(factoredZ * factor);
                 value += noise.sample(xx, yy, zz, factoredSmear * factor, factoredY * factor) / factor;
             }
             factor /= 2;
@@ -61,9 +61,9 @@ public class BlendedNoise implements Noise {
         double min = 0;
         double max = 0;
         for (int i = 0; i < 16; i += 1) {
-			double xx = PerlinNoise.wrap(scaledX * factor);
-			double yy = PerlinNoise.wrap(scaledY * factor);
-			double zz = PerlinNoise.wrap(scaledZ * factor);
+            double xx = PerlinNoise.wrap(scaledX * factor);
+            double yy = PerlinNoise.wrap(scaledY * factor);
+            double zz = PerlinNoise.wrap(scaledZ * factor);
             double smearsmear = smear * factor;
             if (value < 1 && (noise = this.minLimitNoise.getOctaveNoise(i)) != null) {
                 min += noise.sample(xx, yy, zz, smearsmear, scaledY * factor) / factor;

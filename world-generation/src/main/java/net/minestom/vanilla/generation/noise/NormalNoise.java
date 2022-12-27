@@ -5,8 +5,6 @@ import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.minestom.vanilla.generation.random.WorldGenRandom;
 
-import java.util.Random;
-
 public class NormalNoise implements Noise {
 
     public record NoiseParameters(double firstOctave, DoubleList amplitudes) {
@@ -53,14 +51,14 @@ public class NormalNoise implements Noise {
             }
         }
 
-		double expectedDeviation = 0.1 * (1 + 1 / (max - min + 1));
+        double expectedDeviation = 0.1 * (1 + 1 / (max - min + 1));
         this.valueFactor = (1.0 / 6.0) / expectedDeviation;
         this.maxValue = (this.first.maxValue + this.second.maxValue) * this.valueFactor;
     }
 
     @Override
     public double sample(double x, double y, double z) {
-		double x2 = x * NormalNoise.INPUT_FACTOR;
+        double x2 = x * NormalNoise.INPUT_FACTOR;
         double y2 = y * NormalNoise.INPUT_FACTOR;
         double z2 = z * NormalNoise.INPUT_FACTOR;
         return (this.first.sample(x, y, z) + this.second.sample(x2, y2, z2)) * this.valueFactor;

@@ -1,9 +1,5 @@
 package net.minestom.vanilla.generation.random;
 
-import net.minestom.vanilla.generation.math.Util;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 record StdLibRandom(Random random) implements WorldGenRandom {

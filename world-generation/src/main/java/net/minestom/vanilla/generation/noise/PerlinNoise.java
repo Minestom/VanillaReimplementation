@@ -5,7 +5,7 @@ import net.minestom.vanilla.generation.random.WorldGenRandom;
 import net.minestom.vanilla.generation.random.XoroshiroRandom;
 
 public class PerlinNoise implements Noise {
-    public ImprovedNoise[] noiseLevels;
+    public final ImprovedNoise[] noiseLevels;
     public final double[] amplitudes;
     public final double lowestFreqInputFactor;
     public final double lowestFreqValueFactor;
@@ -20,11 +20,11 @@ public class PerlinNoise implements Noise {
         this.noiseLevels = new ImprovedNoise[amplitudes.size()];
 
         if (random instanceof XoroshiroRandom) {
-			WorldGenRandom.Positional forkedRandom = random.forkPositional();
+            WorldGenRandom.Positional forkedRandom = random.forkPositional();
 
-            for(int i = 0; i < amplitudes.size(); i++) {
+            for (int i = 0; i < amplitudes.size(); i++) {
                 if (amplitudes.getDouble(i) != 0.0) {
-					double octave = firstOctave + i;
+                    double octave = firstOctave + i;
                     this.noiseLevels[i] = new ImprovedNoise(forkedRandom.fromHashOf("octave_" + octave));
                 }
             }

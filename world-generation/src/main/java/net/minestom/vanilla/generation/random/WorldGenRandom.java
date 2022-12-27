@@ -15,17 +15,25 @@ public interface WorldGenRandom {
 //    forkPositional(): PositionalRandom
 
     void consume(int count);
+
     int nextInt(int max);
+
     long nextLong();
+
     float nextFloat();
+
     double nextDouble();
+
     WorldGenRandom fork();
+
     Positional forkPositional();
 
     interface Positional {
 
         WorldGenRandom at(int x, int y, int z);
+
         WorldGenRandom fromHashOf(String name);
+
         long[] seedKey();
     }
 }
