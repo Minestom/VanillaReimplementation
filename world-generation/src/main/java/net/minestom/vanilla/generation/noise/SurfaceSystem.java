@@ -23,20 +23,20 @@ public class SurfaceSystem {
     private final SurfaceRule rule;
     private final Block defaultBlock;
 
-    public SurfaceSystem(SurfaceRule rule, short defaultBlock, long seed) {
+    public SurfaceSystem(SurfaceRule rule, Block defaultBlock, long seed) {
         this.random = XoroshiroRandom.create(seed).forkPositional();
         this.surfaceNoise = NoiseRouter.instantiate(this.random, WorldgenRegistries.SURFACE_NOISE);
         this.surfaceSecondaryNoise = NoiseRouter.instantiate(this.random, WorldgenRegistries.SURFACE_SECONDARY_NOISE);
         this.positionalRandoms = new HashMap<>();
         this.rule = rule;
-        this.defaultBlock = Block.fromStateId(defaultBlock);
+        this.defaultBlock = defaultBlock;
     }
 
-    public void buildSurface(Chunk chunk, NoiseChunk noiseChunk, VerticalAnchor.WorldgenContext worldgenContext, Function<Point, String> getBiome) {
-        int minX = chunk.getChunkX() * Chunk.CHUNK_SIZE_X;
-        int minZ = chunk.getChunkZ() * Chunk.CHUNK_SIZE_Z;
-        int minY = chunk.getInstance().getDimensionType().getMinY();
-        int maxY = chunk.getInstance().getDimensionType().getMaxY();
+    public void buildSurface(NoiseChunkGenerator.TargetChunk chunk, NoiseChunk noiseChunk, VerticalAnchor.WorldgenContext worldgenContext, Function<Point, String> getBiome) {
+        int minX = chunk.minX();
+        int minZ = chunk.minZ();
+        int minY = chunk.minY();
+        int maxY = chunk.maxY();
         SurfaceContext surfaceContext = new SurfaceContext(this, chunk, noiseChunk, worldgenContext, getBiome);
         var ruleWithContext = this.rule.apply(surfaceContext);
 

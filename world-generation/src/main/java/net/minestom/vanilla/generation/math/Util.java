@@ -263,4 +263,12 @@ public class Util {
             return block;
         };
     }
+
+    public static int chunkMinY(Chunk chunk) {
+        return chunk.getInstance().getDimensionType().getMinY();
+    }
+
+    public static int chunkMaxY(Chunk chunk) {
+        return chunk.getInstance().getDimensionType().getMaxY();
+    }
 }

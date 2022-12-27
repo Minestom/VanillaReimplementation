@@ -23,12 +23,12 @@ public class SurfaceContext {
     public IntSupplier minSurfaceLevel = () -> 0;
 
     public final SurfaceSystem system;
-    public final Chunk chunk;
+    public final NoiseChunkGenerator.TargetChunk chunk;
     public final NoiseChunk noiseChunk;
     public final VerticalAnchor.WorldgenContext context;
     private final Function<Point, String> getBiome;
 
-    SurfaceContext(SurfaceSystem system, Chunk chunk, NoiseChunk noiseChunk, VerticalAnchor.WorldgenContext context,
+    SurfaceContext(SurfaceSystem system, NoiseChunkGenerator.TargetChunk chunk, NoiseChunk noiseChunk, VerticalAnchor.WorldgenContext context,
                    Function<Point, String> getBiome) {
         this.system = system;
         this.chunk = chunk;

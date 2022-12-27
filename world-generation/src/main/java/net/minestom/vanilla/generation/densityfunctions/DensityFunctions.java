@@ -1521,7 +1521,7 @@ public interface DensityFunctions {
         final Double min;
         final Double max;
 
-        Ap2(String type, DensityFunction argument1, DensityFunction argument2) {
+        public Ap2(String type, DensityFunction argument1, DensityFunction argument2) {
             this(type, argument1, argument2, null, null);
         }
 
@@ -1709,7 +1709,7 @@ public interface DensityFunctions {
         final double fromValue;
         final double toValue;
 
-        YClampedGradient(double fromY, double toY, double fromValue, double toValue) {
+        public YClampedGradient(double fromY, double toY, double fromValue, double toValue) {
             this.fromY = fromY;
             this.toY = toY;
             this.fromValue = fromValue;

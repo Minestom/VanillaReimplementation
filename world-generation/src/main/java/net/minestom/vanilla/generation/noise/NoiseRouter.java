@@ -13,12 +13,21 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
-public record NoiseRouter(DensityFunction barrier, DensityFunction fluidLevelFloodedness,
-                          DensityFunction fluidLevelSpread, DensityFunction lava, DensityFunction temperature,
-                          DensityFunction vegetation, DensityFunction continents, DensityFunction erosion,
-                          DensityFunction depth, DensityFunction ridges,
-                          DensityFunction initialDensityWithoutJaggedness, DensityFunction finalDensity,
-                          DensityFunction veinToggle, DensityFunction veinRidged, DensityFunction veinGap) {
+public record NoiseRouter(DensityFunction barrier,
+                          DensityFunction fluidLevelFloodedness,
+                          DensityFunction fluidLevelSpread,
+                          DensityFunction lava,
+                          DensityFunction temperature,
+                          DensityFunction vegetation,
+                          DensityFunction continents,
+                          DensityFunction erosion,
+                          DensityFunction depth,
+                          DensityFunction ridges,
+                          DensityFunction initialDensityWithoutJaggedness,
+                          DensityFunction finalDensity,
+                          DensityFunction veinToggle,
+                          DensityFunction veinRidged,
+                          DensityFunction veinGap) {
 
 
     //    export namespace NoiseRouter {

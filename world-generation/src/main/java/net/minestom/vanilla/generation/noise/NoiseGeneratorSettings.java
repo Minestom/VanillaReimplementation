@@ -2,13 +2,14 @@ package net.minestom.vanilla.generation.noise;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.generation.math.Util;
 
 public record NoiseGeneratorSettings(
         NoiseSettings noise,
         SurfaceSystem.SurfaceRule surfaceRule,
-        short defaultBlock,
-        short defaultFluid,
+        Block defaultBlock,
+        Block defaultFluid,
         NoiseRouter noiseRouter,
         int seaLevel,
         boolean disableMobGeneration,
@@ -71,8 +72,8 @@ public record NoiseGeneratorSettings(
         return new NoiseGeneratorSettings(
                 Util.jsonRequire(root, "noise", NoiseSettings::fromJson),
                 Util.jsonRequire(root, "surfaceRule", SurfaceSystem.SurfaceRule::fromJson),
-                Util.<Short>jsonRequire(root, "default_block", JsonElement::getAsShort),
-                Util.<Short>jsonRequire(root, "default_fluid", JsonElement::getAsShort),
+                Util.jsonRequire(root, "default_block", Util.jsonVanillaBlock()),
+                Util.jsonRequire(root, "default_fluid", Util.jsonVanillaBlock()),
                 Util.jsonRequire(root, "noise_router", NoiseRouter::fromJson),
                 Util.<Integer>jsonElse(root, "sea_level", 0, JsonElement::getAsInt),
                 Util.<Boolean>jsonElse(root, "disable_mob_generation", false, JsonElement::getAsBoolean),

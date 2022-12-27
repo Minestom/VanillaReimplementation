@@ -9,6 +9,10 @@ public class NormalNoise implements Noise {
 
     public record NoiseParameters(double firstOctave, DoubleList amplitudes) {
 
+        public NoiseParameters(double firstOctave, double... amplitudes) {
+            this(firstOctave, DoubleList.of(amplitudes));
+        }
+
         public static NoiseParameters create(double firstOctave, double[] amplitudes) {
             return new NoiseParameters(firstOctave, DoubleList.of(amplitudes));
         }

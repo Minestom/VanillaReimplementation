@@ -21,6 +21,8 @@ public interface NoiseSettings {
 
     int ySize();
 
+
+
     //    export namespace NoiseSettings {
 //        export function fromJson(obj: any): NoiseSettings {
 //		const root = Json.readObject(obj) ?? {}
@@ -31,6 +33,31 @@ public interface NoiseSettings {
 //                    ySize: Json.readInt(root.size_vertical) ?? 1,
 //		}
 //        }
+
+    static NoiseSettings create(int minY, int height) {
+        return new NoiseSettings() {
+            @Override
+            public int minY() {
+                return minY;
+            }
+
+            @Override
+            public int height() {
+                return height;
+            }
+
+            @Override
+            public int xzSize() {
+                return 1;
+            }
+
+            @Override
+            public int ySize() {
+                return 1;
+            }
+        };
+    }
+
     static NoiseSettings fromJson(Object obj) {
         if (obj instanceof String str)
             return fromJson(new Gson().fromJson(str, JsonObject.class));

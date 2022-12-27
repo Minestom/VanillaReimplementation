@@ -27,7 +27,7 @@ public class RandomState {
 
     public final long seed;
 
-    RandomState(NoiseGeneratorSettings settings, long seed) {
+    public RandomState(NoiseGeneratorSettings settings, long seed) {
         this.seed = seed;
         this.noiseCache = new HashMap<>();
         this.randomCache = new HashMap<>();
