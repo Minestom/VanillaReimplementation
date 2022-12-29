@@ -31,7 +31,7 @@ class VanillaServer {
     public static void main(String[] args) {
         // Use the static server process
         MinecraftServer server = MinecraftServer.init();
-        VanillaReimplementation vri = VanillaReimplementation.hook(MinecraftServer.process(), feature -> feature.namespaceID().value().contains("a"));
+        VanillaReimplementation vri = VanillaReimplementation.hook(MinecraftServer.process());
 
         VanillaServer vanillaServer = new VanillaServer(server, vri, args);
         vanillaServer.start("0.0.0.0", 25565);
