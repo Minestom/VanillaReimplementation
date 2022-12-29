@@ -1,7 +1,7 @@
 package net.minestom.vanilla.generation.noise;
 
-import net.minestom.vanilla.generation.math.Util;
-import net.minestom.vanilla.generation.random.WorldGenRandom;
+import net.minestom.vanilla.generation.Util;
+import net.minestom.vanilla.generation.random.WorldgenRandom;
 
 public class ImprovedNoise implements Noise {
 
@@ -10,7 +10,7 @@ public class ImprovedNoise implements Noise {
     public final double yo;
     public final double zo;
 
-    public ImprovedNoise(WorldGenRandom random) {
+    public ImprovedNoise(WorldgenRandom random) {
         this.xo = random.nextDouble() * 256;
         this.yo = random.nextDouble() * 256;
         this.zo = random.nextDouble() * 256;

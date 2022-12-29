@@ -3,7 +3,7 @@ package net.minestom.vanilla.generation.noise;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minestom.server.instance.block.Block;
-import net.minestom.vanilla.generation.math.Util;
+import net.minestom.vanilla.generation.Util;
 
 public record NoiseGeneratorSettings(
         NoiseSettings noise,

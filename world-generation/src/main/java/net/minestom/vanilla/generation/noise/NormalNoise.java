@@ -3,8 +3,8 @@ package net.minestom.vanilla.generation.noise;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
-import net.minestom.vanilla.generation.math.Util;
-import net.minestom.vanilla.generation.random.WorldGenRandom;
+import net.minestom.vanilla.generation.Util;
+import net.minestom.vanilla.generation.random.WorldgenRandom;
 
 public class NormalNoise implements Noise {
 
@@ -33,7 +33,7 @@ public class NormalNoise implements Noise {
     public final PerlinNoise second;
     public final double maxValue;
 
-    public NormalNoise(WorldGenRandom random, NoiseParameters parameters) {
+    public NormalNoise(WorldgenRandom random, NoiseParameters parameters) {
         double firstOctave = parameters.firstOctave();
         DoubleList amplitudes = parameters.amplitudes();
         this.first = new PerlinNoise(random, firstOctave, amplitudes);

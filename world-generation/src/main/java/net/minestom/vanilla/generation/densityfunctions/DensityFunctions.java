@@ -4,17 +4,16 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import it.unimi.dsi.fastutil.longs.Long2DoubleMap;
-import it.unimi.dsi.fastutil.longs.Long2DoubleOpenHashMap;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.generation.Holder;
 import net.minestom.vanilla.generation.WorldgenRegistries;
 import net.minestom.vanilla.generation.math.CubicSpline;
-import net.minestom.vanilla.generation.math.Util;
+import net.minestom.vanilla.generation.Util;
 import net.minestom.vanilla.generation.noise.BlendedNoise;
 import net.minestom.vanilla.generation.noise.NormalNoise;
 import net.minestom.vanilla.generation.noise.SimplexNoise;
-import net.minestom.vanilla.generation.random.WorldGenRandom;
+import net.minestom.vanilla.generation.random.WorldgenRandom;
+import net.minestom.vanilla.generation.util.DoubleStorage;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -455,7 +454,7 @@ public interface DensityFunctions {
 //    }
 
     abstract class Wrapper implements DensityFunction {
-        final DensityFunction wrapped;
+        protected final DensityFunction wrapped;
 
         public Wrapper(DensityFunction wrapped) {
             this.wrapped = wrapped;
@@ -688,8 +687,8 @@ public interface DensityFunctions {
 //    }
 
     class Interpolated extends Wrapper {
-        private final Long2DoubleMap values;
 
+        private final DoubleStorage storage;
         private final int cellWidth;
         private final int cellHeight;
 
@@ -699,7 +698,7 @@ public interface DensityFunctions {
 
         public Interpolated(DensityFunction wrapped, int cellWidth, int cellHeight) {
             super(wrapped);
-            this.values = new Long2DoubleOpenHashMap();
+            this.storage = DoubleStorage.exactCache(DoubleStorage.from(wrapped));
             this.cellWidth = cellWidth;
             this.cellHeight = cellHeight;
         }
@@ -729,9 +728,7 @@ public interface DensityFunctions {
         }
 
         private double computeCorner(int x, int y, int z) {
-            long key = Util.hash(x, y, z);
-            return this.values.computeIfAbsent(key, ignored ->
-                    this.wrapped.compute(DensityFunctions.context(x, y, z)));
+            return storage.obtain(x, y, z);
         }
 
         @Override
@@ -862,7 +859,7 @@ public interface DensityFunctions {
         }
 
         public EndIslands(long seed) {
-            WorldGenRandom random = WorldGenRandom.standard(seed);
+            WorldgenRandom random = WorldgenRandom.standard(seed);
             random.consume(17292);
             this.islandNoise = new SimplexNoise(random);
         }

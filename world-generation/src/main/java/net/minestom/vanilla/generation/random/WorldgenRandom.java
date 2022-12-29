@@ -2,8 +2,8 @@ package net.minestom.vanilla.generation.random;
 
 import java.util.Random;
 
-public interface WorldGenRandom {
-    static WorldGenRandom standard(long seed) {
+public interface WorldgenRandom {
+    static WorldgenRandom standard(long seed) {
         return new StdLibRandom(new Random(seed));
     }
 //    consume(count: number): void
@@ -24,15 +24,15 @@ public interface WorldGenRandom {
 
     double nextDouble();
 
-    WorldGenRandom fork();
+    WorldgenRandom fork();
 
     Positional forkPositional();
 
     interface Positional {
 
-        WorldGenRandom at(int x, int y, int z);
+        WorldgenRandom at(int x, int y, int z);
 
-        WorldGenRandom fromHashOf(String name);
+        WorldgenRandom fromHashOf(String name);
 
         long[] seedKey();
     }

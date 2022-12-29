@@ -1,21 +1,21 @@
 package net.minestom.vanilla.generation.random;
 
-import net.minestom.vanilla.generation.math.Util;
+import net.minestom.vanilla.generation.Util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-record XoroshiroPositionalRandom(long seedLow, long seedHigh) implements WorldGenRandom.Positional {
+record XoroshiroPositionalRandom(long seedLow, long seedHigh) implements WorldgenRandom.Positional {
 
     @Override
-    public WorldGenRandom at(int x, int y, int z) {
+    public WorldgenRandom at(int x, int y, int z) {
         long seed = Util.getSeed(x, y, z);
         long seedLow = this.seedLow ^ seed;
         return new XoroshiroRandom(seedLow, seedHigh);
     }
 
     @Override
-    public WorldGenRandom fromHashOf(String name) {
+    public WorldgenRandom fromHashOf(String name) {
         try {
             var messageDigest = MessageDigest.getInstance("MD5");
             messageDigest.update(name.getBytes());

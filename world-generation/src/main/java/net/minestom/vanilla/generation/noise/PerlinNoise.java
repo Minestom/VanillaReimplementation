@@ -1,7 +1,7 @@
 package net.minestom.vanilla.generation.noise;
 
 import it.unimi.dsi.fastutil.doubles.DoubleList;
-import net.minestom.vanilla.generation.random.WorldGenRandom;
+import net.minestom.vanilla.generation.random.WorldgenRandom;
 import net.minestom.vanilla.generation.random.XoroshiroRandom;
 
 public class PerlinNoise implements Noise {
@@ -11,16 +11,16 @@ public class PerlinNoise implements Noise {
     public final double lowestFreqValueFactor;
     public final double maxValue;
 
-    public PerlinNoise(WorldGenRandom random, double firstOctave, double[] amplitudes) {
+    public PerlinNoise(WorldgenRandom random, double firstOctave, double[] amplitudes) {
         this(random, firstOctave, DoubleList.of(amplitudes));
     }
 
-    public PerlinNoise(WorldGenRandom random, double firstOctave, DoubleList amplitudes) {
+    public PerlinNoise(WorldgenRandom random, double firstOctave, DoubleList amplitudes) {
         this.amplitudes = amplitudes.toDoubleArray();
         this.noiseLevels = new ImprovedNoise[amplitudes.size()];
 
         if (random instanceof XoroshiroRandom) {
-            WorldGenRandom.Positional forkedRandom = random.forkPositional();
+            WorldgenRandom.Positional forkedRandom = random.forkPositional();
 
             for (int i = 0; i < amplitudes.size(); i++) {
                 if (amplitudes.getDouble(i) != 0.0) {

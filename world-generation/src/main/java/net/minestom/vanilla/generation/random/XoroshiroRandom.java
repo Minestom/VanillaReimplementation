@@ -55,7 +55,7 @@ import java.util.SplittableRandom;
  * @version 1.0
  */
 
-public class XoroshiroRandom extends Random implements WorldGenRandom {
+public class XoroshiroRandom extends Random implements WorldgenRandom {
     /**
      * The internal state of the algorithm.
      */
@@ -75,7 +75,7 @@ public class XoroshiroRandom extends Random implements WorldGenRandom {
         setSeed(seed);
     }
 
-    public static WorldGenRandom create(long seed) {
+    public static WorldgenRandom create(long seed) {
         return new XoroshiroRandom(seed);
     }
 
@@ -147,7 +147,7 @@ public class XoroshiroRandom extends Random implements WorldGenRandom {
     }
 
     @Override
-    public WorldGenRandom fork() {
+    public WorldgenRandom fork() {
         return new XoroshiroRandom(nextLong(), nextLong());
     }
 

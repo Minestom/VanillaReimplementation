@@ -5,8 +5,8 @@ import net.minestom.vanilla.generation.Holder;
 import net.minestom.vanilla.generation.WorldgenRegistries;
 import net.minestom.vanilla.generation.densityfunctions.DensityFunction;
 import net.minestom.vanilla.generation.densityfunctions.DensityFunctions;
-import net.minestom.vanilla.generation.math.Util;
-import net.minestom.vanilla.generation.random.WorldGenRandom;
+import net.minestom.vanilla.generation.Util;
+import net.minestom.vanilla.generation.random.WorldgenRandom;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -117,7 +117,7 @@ public record NoiseRouter(DensityFunction barrier,
     // new Map<string, [bigint | number, bigint | number, NormalNoise]>()
     static final Map<String, Object[]> noiseCache = new HashMap<>();
 
-    static NormalNoise instantiate(WorldGenRandom.Positional random, Holder<NormalNoise.NoiseParameters> noise) {
+    static NormalNoise instantiate(WorldgenRandom.Positional random, Holder<NormalNoise.NoiseParameters> noise) {
         if (noise.key() == null)
             throw new Error("Cannot instantiate noise from direct holder");
         var key = noise.key().toString();

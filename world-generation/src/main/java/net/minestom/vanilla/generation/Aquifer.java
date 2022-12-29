@@ -5,10 +5,9 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.generation.densityfunctions.DensityFunction;
 import net.minestom.vanilla.generation.densityfunctions.DensityFunctions;
-import net.minestom.vanilla.generation.math.Util;
 import net.minestom.vanilla.generation.noise.NoiseChunk;
 import net.minestom.vanilla.generation.noise.NoiseRouter;
-import net.minestom.vanilla.generation.random.WorldGenRandom;
+import net.minestom.vanilla.generation.random.WorldgenRandom;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -62,14 +61,14 @@ public interface Aquifer {
 
         private final NoiseChunk noiseChunk;
         private final NoiseRouter router;
-        private final WorldGenRandom.Positional random;
+        private final WorldgenRandom.Positional random;
         private final FluidPicker globalFluidPicker;
 
         public NoiseAquifer(
                 NoiseChunk noiseChunk,
                 Point chunkPos,
                 NoiseRouter router,
-                WorldGenRandom.Positional random,
+                WorldgenRandom.Positional random,
                 int minY,
                 int height,
                 FluidPicker globalFluidPicker) {
@@ -259,7 +258,7 @@ public interface Aquifer {
             if (Vec.ZERO.equals(cachedLocation)) {
                 return cachedLocation;
             }
-            WorldGenRandom random = this.random.at(x, y, z);
+            WorldgenRandom random = this.random.at(x, y, z);
             Point location = new Vec(
                     x * NoiseAquifer.X_SPACING + random.nextInt(10),
                     y * NoiseAquifer.Y_SPACING + random.nextInt(9),

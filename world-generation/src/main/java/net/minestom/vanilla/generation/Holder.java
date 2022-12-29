@@ -1,7 +1,6 @@
 package net.minestom.vanilla.generation;
 
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.vanilla.generation.math.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;

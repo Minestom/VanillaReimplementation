@@ -3,7 +3,6 @@ package net.minestom.vanilla.generation;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.generation.densityfunctions.DensityFunction;
 import net.minestom.vanilla.generation.densityfunctions.DensityFunctions;
-import net.minestom.vanilla.generation.math.Util;
 import net.minestom.vanilla.generation.noise.NoiseGeneratorSettings;
 import net.minestom.vanilla.generation.noise.NormalNoise;
 

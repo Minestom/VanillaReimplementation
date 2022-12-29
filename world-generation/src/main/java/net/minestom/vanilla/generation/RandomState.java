@@ -6,7 +6,7 @@ import net.minestom.vanilla.generation.densityfunctions.DensityFunction;
 import net.minestom.vanilla.generation.densityfunctions.DensityFunctions;
 import net.minestom.vanilla.generation.noise.*;
 import net.minestom.vanilla.generation.random.LegacyRandom;
-import net.minestom.vanilla.generation.random.WorldGenRandom;
+import net.minestom.vanilla.generation.random.WorldgenRandom;
 import net.minestom.vanilla.generation.random.XoroshiroRandom;
 
 import java.util.HashMap;
@@ -16,11 +16,11 @@ import java.util.function.Function;
 
 public class RandomState {
     private final Map<String, NormalNoise> noiseCache;
-    private final Map<String, WorldGenRandom.Positional> randomCache;
+    private final Map<String, WorldgenRandom.Positional> randomCache;
 
-    public final WorldGenRandom.Positional random;
-    public final WorldGenRandom.Positional aquiferRandom;
-    public final WorldGenRandom.Positional oreRandom;
+    public final WorldgenRandom.Positional random;
+    public final WorldgenRandom.Positional aquiferRandom;
+    public final WorldgenRandom.Positional oreRandom;
     public final SurfaceSystem surfaceSystem;
     public final NoiseRouter router;
     public final Climate.Sampler sampler;
@@ -171,7 +171,7 @@ public class RandomState {
 //            this.random.fromHashOf(key).forkPositional()
 //        )
 //    }
-    public WorldGenRandom.Positional getOrCreateRandom(NamespaceID id) {
+    public WorldgenRandom.Positional getOrCreateRandom(NamespaceID id) {
         return randomCache.computeIfAbsent(id.toString(),
                 key -> random.fromHashOf(key).forkPositional());
     }

@@ -1,7 +1,7 @@
 package net.minestom.vanilla.generation.noise;
 
 import com.google.gson.JsonObject;
-import net.minestom.vanilla.generation.math.Util;
+import net.minestom.vanilla.generation.Util;
 
 public interface VerticalAnchor {
 

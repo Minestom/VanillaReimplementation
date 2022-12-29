@@ -8,8 +8,8 @@ import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.generation.NoiseChunkGenerator;
 import net.minestom.vanilla.generation.WorldgenRegistries;
-import net.minestom.vanilla.generation.math.Util;
-import net.minestom.vanilla.generation.random.WorldGenRandom;
+import net.minestom.vanilla.generation.Util;
+import net.minestom.vanilla.generation.random.WorldgenRandom;
 import net.minestom.vanilla.generation.random.XoroshiroRandom;
 
 import java.util.*;
@@ -18,8 +18,8 @@ import java.util.function.Function;
 public class SurfaceSystem {
     private final NormalNoise surfaceNoise;
     private final NormalNoise surfaceSecondaryNoise;
-    private final WorldGenRandom.Positional random;
-    private final Map<String, WorldGenRandom> positionalRandoms;
+    private final WorldgenRandom.Positional random;
+    private final Map<String, WorldgenRandom> positionalRandoms;
 
     private final SurfaceRule rule;
     private final Block defaultBlock;
@@ -100,7 +100,7 @@ public class SurfaceSystem {
         return this.surfaceSecondaryNoise.sample(x, 0, z);
     }
 
-    public WorldGenRandom getRandom(String name) {
+    public WorldgenRandom getRandom(String name) {
         return positionalRandoms.computeIfAbsent(name, this.random::fromHashOf);
     }
 
@@ -334,7 +334,7 @@ public class SurfaceSystem {
                 if (context.blockY >= falseAtAndAboveY) {
                     return false;
                 }
-                WorldGenRandom random = context.system.getRandom(randomName);
+                WorldgenRandom random = context.system.getRandom(randomName);
                 double chance = Util.map(context.blockY, trueAtAndBelowY, falseAtAndAboveY, 1, 0);
                 return random.nextFloat() < chance;
             };

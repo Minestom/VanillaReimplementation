@@ -1,6 +1,6 @@
 package net.minestom.vanilla.generation.noise;
 
-import net.minestom.vanilla.generation.random.WorldGenRandom;
+import net.minestom.vanilla.generation.random.WorldgenRandom;
 
 public class SimplexNoise implements Noise {
 
@@ -15,7 +15,7 @@ public class SimplexNoise implements Noise {
     public final double yo;
     public final double zo;
 
-    public SimplexNoise(WorldGenRandom random) {
+    public SimplexNoise(WorldgenRandom random) {
         this.xo = random.nextDouble() * 256;
         this.yo = random.nextDouble() * 256;
         this.zo = random.nextDouble() * 256;

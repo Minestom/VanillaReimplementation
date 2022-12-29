@@ -1,8 +1,8 @@
 package net.minestom.vanilla.generation.random;
 
-import net.minestom.vanilla.generation.math.Util;
+import net.minestom.vanilla.generation.Util;
 
-public class LegacyRandom implements WorldGenRandom {
+public class LegacyRandom implements WorldgenRandom {
     private static final int MODULUS_BITS = 48;
     private static final long MODULUS_MASK = 281474976710655L;
     private static final long MULTIPLIER = 25214903917L;
@@ -17,11 +17,11 @@ public class LegacyRandom implements WorldGenRandom {
     }
 
     @Override
-    public WorldGenRandom fork() {
+    public WorldgenRandom fork() {
         return new LegacyRandom(this.nextLong());
     }
 
-    public WorldGenRandom.Positional forkPositional() {
+    public WorldgenRandom.Positional forkPositional() {
         return new LegacyPositionalRandom(this.nextLong());
     }
 
@@ -120,19 +120,19 @@ public class LegacyRandom implements WorldGenRandom {
 //            return [this.seed, BigInt(0)]
 //        }
 //    }
-    public static class LegacyPositionalRandom implements WorldGenRandom.Positional {
+    public static class LegacyPositionalRandom implements WorldgenRandom.Positional {
         private final long seed;
 
         public LegacyPositionalRandom(long seed) {
             this.seed = seed;
         }
 
-        public WorldGenRandom at(int x, int y, int z) {
+        public WorldgenRandom at(int x, int y, int z) {
             long seed = Util.getSeed(x, y, z);
             return new LegacyRandom(seed ^ this.seed);
         }
 
-        public WorldGenRandom fromHashOf(String name) {
+        public WorldgenRandom fromHashOf(String name) {
             byte[] hash = Util.md5(name);
             long seed = Util.longfromBytes(hash[0], hash[1], hash[2], hash[3], hash[4], hash[5], hash[6], hash[7]);
             return new LegacyRandom(seed ^ this.seed);

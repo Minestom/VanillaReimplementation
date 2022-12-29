@@ -1,7 +1,7 @@
 package net.minestom.vanilla.generation.noise;
 
-import net.minestom.vanilla.generation.math.Util;
-import net.minestom.vanilla.generation.random.WorldGenRandom;
+import net.minestom.vanilla.generation.Util;
+import net.minestom.vanilla.generation.random.WorldgenRandom;
 import org.jetbrains.annotations.Nullable;
 
 public class BlendedNoise implements Noise {
@@ -17,7 +17,7 @@ public class BlendedNoise implements Noise {
     private final double yFactor;
     private final double smearScaleMultiplier;
 
-    public BlendedNoise(WorldGenRandom random, double xzScale, double yScale, double xzFactor, double yFactor, double smearScaleMultiplier) {
+    public BlendedNoise(WorldgenRandom random, double xzScale, double yScale, double xzFactor, double yFactor, double smearScaleMultiplier) {
         this.xzFactor = xzFactor;
         this.yFactor = yFactor;
         this.smearScaleMultiplier = smearScaleMultiplier;

@@ -1,4 +1,4 @@
-package net.minestom.vanilla.generation.math;
+package net.minestom.vanilla.generation;
 
 import com.google.gson.*;
 import net.minestom.server.coordinate.Point;
@@ -150,6 +150,15 @@ public class Util {
     public static JsonArray jsonArray(JsonElement element) {
         if (element.isJsonArray()) {
             return element.getAsJsonArray();
+        }
+        throw new IllegalArgumentException("Expected array, got " + element);
+    }
+
+    public static <T> List<T> jsonArray(JsonElement element, Function<JsonElement, T> mapper) {
+        if (element.isJsonArray()) {
+            return StreamSupport.stream(element.getAsJsonArray().spliterator(), false)
+                    .map(mapper)
+                    .toList();
         }
         throw new IllegalArgumentException("Expected array, got " + element);
     }
