@@ -4,8 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.vanilla.generation.densityfunctions.DensityFunction;
 import net.minestom.vanilla.generation.Util;
+import net.minestom.vanilla.generation.densityfunctions.DensityFunction;
 
 import java.util.List;
 import java.util.Map;
@@ -13,7 +13,10 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-interface BiomeSelectors {
+/**
+ * Contains all native biome selectors.
+ */
+class NativeBiomeSelectors {
 
     record CheckerboardBiomeSelector(int n, int shift, List<NamespaceID> biomes) implements BiomeSelector {
 
@@ -28,7 +31,7 @@ interface BiomeSelectors {
         }
 
         @Override
-        public NamespaceID getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
+        public NamespaceID select(int x, int y, int z, Climate.Sampler climateSampler) {
             int i = (((x >> this.shift) + (z >> this.shift)) % this.n + this.n) % this.n;
             return this.biomes.get(i);
         }
@@ -50,7 +53,7 @@ interface BiomeSelectors {
     record FixedBiomeSelector(NamespaceID biome) implements BiomeSelector {
 
         @Override
-        public NamespaceID getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
+        public NamespaceID select(int x, int y, int z, Climate.Sampler climateSampler) {
             return this.biome;
         }
 
@@ -64,7 +67,7 @@ interface BiomeSelectors {
     record MultiNoiseBiomeSelector(Climate.Parameters<NamespaceID> parameters) implements BiomeSelector {
 
         @Override
-        public NamespaceID getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
+        public NamespaceID select(int x, int y, int z, Climate.Sampler climateSampler) {
             Climate.Result target = climateSampler.sample(x, y, z);
             return this.parameters.find(target);
         }
@@ -97,7 +100,7 @@ interface BiomeSelectors {
         private static final NamespaceID BARRENS = NamespaceID.from("end_barrens");
 
         @Override
-        public NamespaceID getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
+        public NamespaceID select(int x, int y, int z, Climate.Sampler climateSampler) {
             int blockX = x << 2;
             int blockY = y << 2;
             int blockZ = z << 2;

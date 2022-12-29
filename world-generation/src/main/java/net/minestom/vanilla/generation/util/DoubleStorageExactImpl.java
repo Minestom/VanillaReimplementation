@@ -9,6 +9,7 @@ class DoubleStorageExactImpl implements DoubleStorage {
 
     // The storage
     private final Long2DoubleMap storage;
+
     public DoubleStorageExactImpl(DoubleStorage original) {
         this.original = original;
         this.storage = new Long2DoubleOpenHashMap();

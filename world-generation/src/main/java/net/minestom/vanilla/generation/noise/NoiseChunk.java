@@ -32,7 +32,7 @@ public class NoiseChunk {
 
     public int minX;
     public int minZ;
-    public NoiseSettings settings;
+    public final NoiseSettings settings;
 
     public NoiseChunk(
             int cellCountXZ,

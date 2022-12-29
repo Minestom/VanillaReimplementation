@@ -16,7 +16,7 @@ public class Registry<T> {
 
 
     public final NamespaceID key;
-    public @Nullable Function<Object, T> parser;
+    public final @Nullable Function<Object, T> parser;
 
     Registry(NamespaceID key, @Nullable Function<Object, T> parser) {
         this.key = key;

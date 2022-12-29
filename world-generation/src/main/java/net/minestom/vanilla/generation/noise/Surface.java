@@ -42,8 +42,7 @@ public interface Surface {
             String type = Util.jsonElse(root, "type", "", JsonElement::getAsString).replace("minecraft:", "");
             return switch (type) {
                 case "block" -> block(Util.jsonRequire(root, "result_state", Util.jsonVanillaBlock()));
-                case "sequence" ->
-                        sequence(Util.jsonRequire(root, "sequence", Util.jsonReadArray(Rule::fromJson)));
+                case "sequence" -> sequence(Util.jsonRequire(root, "sequence", Util.jsonReadArray(Rule::fromJson)));
                 case "condition" ->
                         condition(Condition.fromJson(Util.jsonRequire(root, "if_true", JsonElement::getAsJsonObject)),
                                 fromJson(Util.jsonRequire(root, "then_run", JsonElement::getAsJsonObject)));
@@ -117,8 +116,7 @@ public interface Surface {
             return switch (type) {
                 case "above_preliminary_surface" -> abovePreliminarySurface();
                 case "biome" -> biome(Util.jsonRequire(root, "biome_is", Util.jsonReadArray(JsonElement::getAsString)));
-                case "not" ->
-                        Condition.not(fromJson(Util.jsonRequire(root, "invert", JsonElement::getAsJsonObject)));
+                case "not" -> Condition.not(fromJson(Util.jsonRequire(root, "invert", JsonElement::getAsJsonObject)));
                 case "stone_depth" -> stoneDepth(
                         Util.jsonElse(root, "offset", 0, JsonElement::getAsInt),
                         Util.jsonElse(root, "add_surface_depth", false, JsonElement::getAsBoolean),
