@@ -229,6 +229,7 @@ public enum VanillaBlocks {
                     })
                     .build());
         }
+        vri.process().eventHandler().addChild(events);
     }
 
     private static void registerEvents(EventNode<Event> node, short stateId, VanillaBlockBehaviour behaviour) {

@@ -14,6 +14,7 @@ public class InventoryManipulation {
 
     /**
      * If this function returns false, the operation did not complete.
+     *
      * @return true if there was enough items to consume, false otherwise.
      */
     public static boolean consumeItemIfNotCreative(Player player, Player.Hand hand, int amount) {
