@@ -2,8 +2,8 @@ package net.minestom.vanilla.blocks;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ChestBlockHandler extends ChestLikeBlockHandler {
-    public ChestBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+public class ChestBlockBehaviour extends ChestLikeBlockBehaviour {
+    public ChestBlockBehaviour(@NotNull VanillaBlocks.BlockContext context) {
         super(context, 3 * 9);
     }
 

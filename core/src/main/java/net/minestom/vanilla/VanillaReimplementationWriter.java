@@ -8,7 +8,6 @@ import org.tinylog.writers.Writer;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Set;
 
 import static org.fusesource.jansi.Ansi.ansi;

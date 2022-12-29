@@ -23,17 +23,17 @@ import java.util.Random;
  * <p>
  * Requires onPlace enhancements
  */
-public class JukeboxBlockHandler extends VanillaBlockHandler {
+public class JukeboxBlockBehaviour extends VanillaBlockBehaviour {
 
     public static final Tag<ItemStack> DISC_KEY = Tag.ItemStack("minestom:jokebox_disc");
 
-    public JukeboxBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+    public JukeboxBlockBehaviour(@NotNull VanillaBlocks.BlockContext context) {
         super(context);
     }
 
     @Override
-    public void onDestroy(Destroy destroy) {
-        stopPlayback(destroy.getInstance(), destroy.getBlockPosition(), destroy.getBlock());
+    public void onDestroy(@NotNull VanillaDestroy destroy) {
+        stopPlayback(destroy.instance(), destroy.blockPosition(), destroy.block());
     }
 
     public @Nullable ItemStack getDisc(Block block) {
@@ -56,12 +56,12 @@ public class JukeboxBlockHandler extends VanillaBlockHandler {
     }
 
     @Override
-    public boolean onInteract(Interaction interaction) {
-        Player player = interaction.getPlayer();
-        Player.Hand hand = interaction.getHand();
-        Instance instance = interaction.getInstance();
-        Block block = interaction.getBlock();
-        Point pos = interaction.getBlockPosition();
+    public boolean onInteract(@NotNull VanillaInteraction interaction) {
+        Player player = interaction.player();
+        Player.Hand hand = interaction.hand();
+        Instance instance = interaction.instance();
+        Block block = interaction.block();
+        Point pos = interaction.blockPosition();
         ItemStack heldItem = player.getInventory().getItemInMainHand();
 
         ItemStack stack = this.getDisc(block);
@@ -106,8 +106,8 @@ public class JukeboxBlockHandler extends VanillaBlockHandler {
         return true;
     }
 
-    public void tick(@NotNull Tick tick) {
-        Instance instance = tick.getInstance();
+    public void tick(@NotNull VanillaTick tick) {
+        Instance instance = tick.instance();
 
         long age = instance.getWorldAge();
 

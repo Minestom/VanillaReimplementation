@@ -1,9 +1,5 @@
 package net.minestom.vanilla;
 
-import it.unimi.dsi.fastutil.shorts.Short2IntMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenCustomHashMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -12,7 +8,6 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
-import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import net.minestom.server.tag.TagWritable;
@@ -29,6 +24,7 @@ import org.tinylog.Logger;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 class VanillaReimplementationImpl implements VanillaReimplementation {
 
@@ -37,8 +33,6 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
     private final Map<EntityType, VanillaRegistry.EntitySpawner> entity2Spawner = new ConcurrentHashMap<>();
     private final Map<String, VanillaRecipe> id2Recipe = new ConcurrentHashMap<>();
     private final Map<Object, Random> randoms = Collections.synchronizedMap(new WeakHashMap<>());
-    private final Map<String, Block> id2Block = new ConcurrentHashMap<>();
-    private final Short2ObjectMap<Block> stateId2Block = new Short2ObjectOpenHashMap<>();
 
     private VanillaReimplementationImpl(@NotNull ServerProcess process) {
         this.process = process;
@@ -47,13 +41,14 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
     /**
      * Creates a new instance of {@link VanillaReimplementationImpl} and hooks into the server process.
      *
-     * @param process the server process
+     * @param process   the server process
+     * @param predicate
      * @return the new instance
      */
-    public static @NotNull VanillaReimplementationImpl hook(@NotNull ServerProcess process) {
+    public static @NotNull VanillaReimplementationImpl hook(@NotNull ServerProcess process, Predicate<Feature> predicate) {
         Logger.info("Setting up VanillaReimplementation...");
         VanillaReimplementationImpl vri = new VanillaReimplementationImpl(process);
-        vri.INTERNAL_HOOK();
+        vri.INTERNAL_HOOK(predicate);
         Logger.info("VanillaReimplementation has been setup!");
         return vri;
     }
@@ -171,22 +166,6 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
         return randoms.computeIfAbsent(key, k -> new Random(key.hashCode()));
     }
 
-    @Override
-    public @NotNull Block block(short stateId) {
-        Block block = stateId2Block.get(stateId);
-        if (block == null) block = Block.fromStateId(stateId);
-        Objects.requireNonNull(block, "Block with state id " + stateId + " is not registered!");
-        return block;
-    }
-
-    @Override
-    public @NotNull Block block(@NotNull NamespaceID namespace) {
-        Block block = id2Block.get(namespace.value());
-        if (block == null) block = Block.fromNamespaceId(namespace);
-        Objects.requireNonNull(block, "Block with namespace " + namespace + " is not registered!");
-        return block;
-    }
-
     final class VanillaRegistryImpl implements VanillaRegistry {
         @Override
         public void register(@NotNull EntityType type, @NotNull EntitySpawner supplier) {
@@ -197,15 +176,9 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
         public void register(@NotNull String recipeId, @NotNull VanillaRecipe recipe) {
             id2Recipe.put(recipeId, recipe);
         }
-
-        @Override
-        public void register(@NotNull Block block) {
-            id2Block.put(block.namespace().toString(), block);
-            stateId2Block.put(block.stateId(), block);
-        }
     }
 
-    private void INTERNAL_HOOK() {
+    private void INTERNAL_HOOK(Predicate<Feature> predicate) {
         // Create the registry
         VanillaRegistry registry = new VanillaRegistryImpl();
 
@@ -215,6 +188,10 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
         // Load all the features and hook them
         Logger.info("Loading features...");
         for (Feature feature : ServiceLoader.load(Feature.class)) {
+            if (!predicate.test(feature)) {
+                Logger.info("Skipping feature {}...", feature.namespaceID());
+                continue;
+            }
             Logger.info("Hooking feature: " + feature.namespaceID());
             feature.hook(this, registry);
         }

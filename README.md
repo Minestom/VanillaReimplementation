@@ -2,10 +2,9 @@
 
 Priority is currently on the core of Minestom (see below). This project has only a very limited list of features:
 
-1. Nether portals
-2. Bed placing
-3. Anvil (partial) loading and saving
-4. Fluid simulation [Thank you TogAr2](https://github.com/TogAr2/MinestomFluids)
+1. Some block interactions (Cakes, Beds, Copper Oxidisation)
+2. Some commands (Gamemode, help, execute)
+3. Fluid simulation [Thank you TogAr2](https://github.com/TogAr2/MinestomFluids)
 
 # About Minestom
 

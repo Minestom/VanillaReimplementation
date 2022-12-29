@@ -8,26 +8,29 @@ import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.inventory.InventoryManipulation;
 import org.jetbrains.annotations.NotNull;
 
-public class WaxedHandler extends OxidatedHandler {
+import java.util.Objects;
+
+public class WaxedBlockBehaviour extends OxidatedBlockBehaviour {
     private final short unWaxed;
 
-    public WaxedHandler(VanillaBlocks.@NotNull BlockContext context, Block unWaxed, int oxidisedLevel) {
-        super(context, context.vri().block(context.stateId()), oxidisedLevel);
+    public WaxedBlockBehaviour(VanillaBlocks.@NotNull BlockContext context, Block unWaxed, int oxidisedLevel) {
+        super(context, Block.fromStateId(context.stateId()), oxidisedLevel);
         this.unWaxed = unWaxed.stateId();
     }
 
     @Override
-    public boolean onInteract(@NotNull Interaction interaction) {
-        Player.Hand hand = interaction.getHand();
-        Player player = interaction.getPlayer();
-        Block interactionBlock = interaction.getBlock();
+    public boolean onInteract(@NotNull VanillaInteraction interaction) {
+        Player.Hand hand = interaction.hand();
+        Player player = interaction.player();
+        Block interactionBlock = interaction.block();
 
         ItemStack item = player.getInventory().getItemInHand(hand);
         Material material = item.material();
 
         if (material.namespace().value().toLowerCase().contains("_axe")) { // TODO: Better way to check if it's an axe
-            Block previousBlock = context.vri().block(unWaxed);
-            interaction.getInstance().setBlock(interaction.getBlockPosition(), previousBlock);
+            Block previousBlock = Block.fromStateId(unWaxed);
+            Objects.requireNonNull(previousBlock, "Previous block with state id " + unWaxed + " was not found");
+            interaction.instance().setBlock(interaction.blockPosition(), previousBlock);
             InventoryManipulation.damageItemIfNotCreative(player, hand, 1);
             return false;
         }

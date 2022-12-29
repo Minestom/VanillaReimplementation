@@ -8,7 +8,6 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.event.Event;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdatable;
@@ -24,18 +23,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.Optional;
 
-public class NetherPortalBlockHandler extends VanillaBlockHandler implements BlockUpdatable {
+public class NetherPortalBlockBehaviour extends VanillaBlockBehaviour implements BlockUpdatable {
 
     /**
      * Time the entity has spent inside a portal. Reset when entering a different portal or by
      * reentering a portal after leaving one
      */
-    public static final Tag<Long> TICKS_SPENT_IN_PORTAL_KEY = Tag.Long("minestom:time_spent_in_nether_portal");
+    public static final Tag<Long> TICKS_SPENT_IN_PORTAL_KEY = Tag.Long("minestom:time_spent_in_nether_portal").defaultValue(0L);
 
     /**
      * Prevents multiple updates from different portal blocks
      */
-    public static final Tag<Long> LAST_PORTAL_UPDATE_KEY = Tag.Long("minestom:last_nether_portal_update_time");
+    public static final Tag<Long> LAST_PORTAL_UPDATE_KEY = Tag.Long("minestom:last_nether_portal_update_time").defaultValue(Long.MAX_VALUE);
 
     /**
      * Used to check whether the last portal entered is corresponding to this portal block or not
@@ -45,23 +44,23 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler implements Blo
     /**
      * Time before teleporting an entity
      */
-    public static final Tag<Long> PORTAL_COOLDOWN_TIME_KEY = Tag.Long("minestom:nether_portal_cooldown_time");
+    public static final Tag<Long> PORTAL_COOLDOWN_TIME_KEY = Tag.Long("minestom:nether_portal_cooldown_time").defaultValue(0L);
 
     /**
      * The portal related to this block
      */
     public static final Tag<Long> RELATED_PORTAL_KEY = Tag.Long("minestom:related_portal");
 
-    public NetherPortalBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+    public NetherPortalBlockBehaviour(@NotNull VanillaBlocks.BlockContext context) {
         super(context);
     }
 
     @Override
-    public void onTouch(@NotNull BlockHandler.Touch touch) {
-        Block block = touch.getBlock();
-        Instance instance = touch.getInstance();
-        Point pos = touch.getBlockPosition();
-        Entity touching = touch.getTouching();
+    public void onTouch(@NotNull VanillaTouch touch) {
+        Block block = touch.block();
+        Instance instance = touch.instance();
+        Point pos = touch.blockPosition();
+        Entity touching = touch.touching();
 
         Long lastPortalUpdate = block.getTag(LAST_PORTAL_UPDATE_KEY);
 
@@ -276,9 +275,9 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler implements Blo
     }
 
     @Override
-    public void onDestroy(BlockHandler.Destroy destroy) {
-        Block block = destroy.getBlock();
-        Instance instance = destroy.getInstance();
+    public void onDestroy(@NotNull VanillaDestroy destroy) {
+        Block block = destroy.block();
+        Instance instance = destroy.instance();
 
         NetherPortal netherPortal = getPortal(block);
         if (netherPortal != null) {
@@ -312,15 +311,6 @@ public class NetherPortalBlockHandler extends VanillaBlockHandler implements Blo
 
     public void setRelatedPortal(Instance instance, Point blockPosition, Block block, NetherPortal portal) {
         instance.setBlock(blockPosition, block.withTag(RELATED_PORTAL_KEY, portal.id()));
-    }
-
-    @Override
-    public @NotNull Map<Tag<?>, ?> defaultTagValues() {
-        return Map.of(
-                TICKS_SPENT_IN_PORTAL_KEY, 0L,
-                LAST_PORTAL_UPDATE_KEY, Long.MAX_VALUE,
-                PORTAL_COOLDOWN_TIME_KEY, 0L
-        );
     }
 
     @Override

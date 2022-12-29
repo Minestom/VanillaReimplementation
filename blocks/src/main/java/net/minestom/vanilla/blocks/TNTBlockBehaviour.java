@@ -16,11 +16,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Random;
 
-public class TNTBlockHandler extends VanillaBlockHandler {
+public class TNTBlockBehaviour extends VanillaBlockBehaviour {
 
     public static final Random TNT_RANDOM = new Random();
 
-    public TNTBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+    public TNTBlockBehaviour(@NotNull VanillaBlocks.BlockContext context) {
         super(context);
     }
 
@@ -30,10 +30,10 @@ public class TNTBlockHandler extends VanillaBlockHandler {
 //    }
 
     @Override
-    public boolean onInteract(Interaction interaction) {
-        Point blockPosition = interaction.getBlockPosition();
-        Player player = interaction.getPlayer();
-        Player.Hand hand = interaction.getHand();
+    public boolean onInteract(@NotNull VanillaInteraction interaction) {
+        Point blockPosition = interaction.blockPosition();
+        Player player = interaction.player();
+        Player.Hand hand = interaction.hand();
         PlayerInventory inventory = player.getInventory();
 
         if (inventory.getItemInHand(hand).getMaterial() != Material.FLINT_AND_STEEL) {

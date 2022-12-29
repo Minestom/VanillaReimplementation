@@ -1,5 +1,7 @@
 package net.minestom.vanilla.blockupdatesystem;
 
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -12,6 +14,8 @@ import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.vanilla.randomticksystem.RandomTickManager;
+import net.minestom.vanilla.randomticksystem.RandomTickable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -26,6 +30,15 @@ public class BlockUpdateManager {
     // Block update manager by instance
     private static final Map<Instance, BlockUpdateManager> instance2BlockUpdateManager =
             Collections.synchronizedMap(new WeakHashMap<>());
+
+    // Block updatables
+    private static final Short2ObjectMap<BlockUpdatable> blockUpdatables = new Short2ObjectOpenHashMap<>();
+
+    public static void registerUpdatable(short stateId, @NotNull BlockUpdatable updatable) {
+        synchronized (blockUpdatables) {
+            blockUpdatables.put(stateId, updatable);
+        }
+    }
 
     public static void init(EventNode<Event> eventNode) {
         eventNode.addListener(InstanceTickEvent.class, BlockUpdateManager::instanceTick);
@@ -47,13 +60,15 @@ public class BlockUpdateManager {
             int minZ = chunk.getChunkZ() * Chunk.CHUNK_SIZE_Z;
 
             Instance instance = event.getInstance();
-            BlockUpdateManager blockUpdateManager = BlockUpdateManager.from(instance);
+            BlockUpdateManager.from(instance);
 
-            for (int x = minX; x < minX + Chunk.CHUNK_SIZE_X; x++) {
-                for (int z = minZ; z < minZ + Chunk.CHUNK_SIZE_Z; z++) {
-                    for (int y = minY; y < maxY; y++) {
-                        Block block = chunk.getBlock(x, y, z);
-                        if (block.handler() instanceof BlockUpdatable updatable) {
+            synchronized (blockUpdatables) {
+                for (int x = minX; x < minX + Chunk.CHUNK_SIZE_X; x++) {
+                    for (int z = minZ; z < minZ + Chunk.CHUNK_SIZE_Z; z++) {
+                        for (int y = minY; y < maxY; y++) {
+                            Block block = chunk.getBlock(x, y, z);
+                            BlockUpdatable updatable = blockUpdatables.get(block.stateId());
+                            if (updatable == null) continue;
                             updatable.blockUpdate(instance, new Vec(x, y, z), BlockUpdateInfo.CHUNK_LOAD());
                         }
                     }
@@ -84,6 +99,10 @@ public class BlockUpdateManager {
                 updatable.blockUpdate(instance, pos, info);
             }
         };
+    }
+
+    public static void registerRandomTickable(short stateId, RandomTickable randomTickable) {
+        RandomTickManager.registerRandomTickable(stateId, randomTickable);
     }
 
     public interface UpdateHandler {

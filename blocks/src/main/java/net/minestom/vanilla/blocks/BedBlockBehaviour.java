@@ -7,7 +7,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.PlayerMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.MathUtils;
@@ -20,8 +19,8 @@ import org.jetbrains.annotations.NotNull;
  * This block handler needs to be able to override block placements in the onPlace method to work correctly.
  */
 @SuppressWarnings("UnstableApiUsage")
-public class BedBlockHandler extends VanillaBlockHandler {
-    public BedBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+public class BedBlockBehaviour extends VanillaBlockBehaviour {
+    public BedBlockBehaviour(@NotNull VanillaBlocks.BlockContext context) {
         super(context);
     }
 
@@ -70,10 +69,10 @@ public class BedBlockHandler extends VanillaBlockHandler {
     }
 
     @Override
-    public boolean onInteract(@NotNull BlockHandler.Interaction interaction) {
-        Instance instance = interaction.getInstance();
-        Point pos = interaction.getBlockPosition();
-        Player player = interaction.getPlayer();
+    public boolean onInteract(@NotNull VanillaInteraction interaction) {
+        Instance instance = interaction.instance();
+        Point pos = interaction.blockPosition();
+        Player player = interaction.player();
 
         if (instance.getDimensionType().isBedSafe()) {
             // TODO: make player sleep
@@ -113,10 +112,10 @@ public class BedBlockHandler extends VanillaBlockHandler {
     }
 
     @Override
-    public void onDestroy(@NotNull BlockHandler.Destroy destroy) {
-        Instance instance = destroy.getInstance();
-        Block block = destroy.getBlock();
-        Point pos = destroy.getBlockPosition();
+    public void onDestroy(@NotNull VanillaDestroy destroy) {
+        Instance instance = destroy.instance();
+        Block block = destroy.block();
+        Point pos = destroy.blockPosition();
 
         System.out.println(block.name());
 

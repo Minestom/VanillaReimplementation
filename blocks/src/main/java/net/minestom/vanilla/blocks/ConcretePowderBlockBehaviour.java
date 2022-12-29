@@ -6,10 +6,10 @@ import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 // TODO: When placing concrete powder in water, it turns to the solid block correctly, however it falls like a regular concrete powder block
-public class ConcretePowderBlockHandler extends GravityBlockHandler {
+public class ConcretePowderBlockBehaviour extends GravityBlockBehaviour {
     private final Block solidifiedBlock;
 
-    public ConcretePowderBlockHandler(@NotNull VanillaBlocks.BlockContext context, Block solidifiedBlock) {
+    public ConcretePowderBlockBehaviour(@NotNull VanillaBlocks.BlockContext context, Block solidifiedBlock) {
         super(context);
         this.solidifiedBlock = solidifiedBlock;
     }
@@ -21,8 +21,8 @@ public class ConcretePowderBlockHandler extends GravityBlockHandler {
     }
 
     @Override
-    public void tick(Tick tick) {
-        tryConvert(tick.getInstance(), tick.getBlockPosition());
+    public void tick(@NotNull VanillaTick tick) {
+        tryConvert(tick.instance(), tick.getBlockPosition());
     }
 
     private void tryConvert(Instance instance, Point blockPosition) {

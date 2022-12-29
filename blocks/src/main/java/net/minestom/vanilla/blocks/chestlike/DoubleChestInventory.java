@@ -1,15 +1,20 @@
 package net.minestom.vanilla.blocks.chestlike;
 
+import it.unimi.dsi.fastutil.objects.ObjectIterables;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public class DoubleChestInventory extends Inventory {
-    private final Inventory left;
-    private final Inventory right;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Stream;
 
-    public DoubleChestInventory(Inventory left, Inventory right, String title) {
+public class DoubleChestInventory extends Inventory {
+    private final ChestInventory left;
+    private final ChestInventory right;
+
+    public DoubleChestInventory(ChestInventory left, ChestInventory right, String title) {
         super(InventoryType.CHEST_6_ROW, title);
         this.left = left;
         this.right = right;
@@ -33,10 +38,15 @@ public class DoubleChestInventory extends Inventory {
     }
 
     @Override
+    @Deprecated
     public ItemStack[] getItemStacks() {
-        ItemStack[] stacks = new ItemStack[getSize()];
-        System.arraycopy(left.getItemStacks(), 0, stacks, 0, left.getSize());
-        System.arraycopy(right.getItemStacks(), 0, stacks, left.getSize(), right.getSize());
-        return stacks;
+        return itemStacks().toArray(ItemStack[]::new);
+    }
+
+    public List<ItemStack> itemStacks() {
+        return Stream.of(left, right)
+                .map(ChestInventory::itemStacks)
+                .flatMap(Collection::stream)
+                .toList();
     }
 }

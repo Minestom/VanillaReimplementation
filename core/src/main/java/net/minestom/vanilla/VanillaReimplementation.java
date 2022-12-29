@@ -5,16 +5,15 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.TagWritable;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.Random;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public interface VanillaReimplementation {
 
@@ -25,7 +24,21 @@ public interface VanillaReimplementation {
      * @return the new instance
      */
     static @NotNull VanillaReimplementation hook(@NotNull ServerProcess process) {
-        return VanillaReimplementationImpl.hook(process);
+        return VanillaReimplementation.hook(process, feature -> true);
+    }
+
+    /**
+     * Creates a new instance of {@link VanillaReimplementation} and hooks all features into the server process.
+     * <p>
+     * This method only hooks the features that pass the given predicate.
+     * </p>
+     *
+     * @param process   the server process
+     * @param predicate the predicate to test the features
+     * @return the new instance
+     */
+    static @NotNull VanillaReimplementation hook(@NotNull ServerProcess process, Predicate<Feature> predicate) {
+        return VanillaReimplementationImpl.hook(process, predicate);
     }
 
     // Vri Methods
@@ -43,7 +56,8 @@ public interface VanillaReimplementation {
      * @return the context
      */
     default @NotNull VanillaRegistry.EntityContext entityContext(EntityType type, Point position) {
-        return entityContext(type, position, writer -> {});
+        return entityContext(type, position, writer -> {
+        });
     }
 
     /**
@@ -81,6 +95,7 @@ public interface VanillaReimplementation {
 
     /**
      * Gets a registered vanilla instance.
+     *
      * @param namespace the namespace of the instance
      * @return the instance, or null if not found
      */
@@ -88,28 +103,14 @@ public interface VanillaReimplementation {
 
     /**
      * Retrieves or generates a random object unique to the given object.
+     * <br>
+     * Note that this method does not keep the given key in memory, however it does always return the same random for
+     * any given (equal) key object.
+     *
      * @param key the key
      * @return the random
      */
     @NotNull Random random(@NotNull Object key);
-
-    /**
-     * Gets the vanilla block from the given state id.
-     * @param stateId the state id
-     * @return the block
-     */
-    @NotNull Block block(short stateId);
-
-    /**
-     * Gets the vanilla block from it's vanilla namespace id.
-     * @param namespace the namespace id
-     * @return the block
-     */
-    @NotNull Block block(@NotNull NamespaceID namespace);
-
-    default @NotNull Block block(Block minestomBlock) {
-        return block(minestomBlock.stateId());
-    }
 
     /**
      * A feature is a collection of logic that can be hooked into a server process.
@@ -118,6 +119,9 @@ public interface VanillaReimplementation {
 
         /**
          * Hooks into this server process.
+         * <p>
+         * DO NOT manually call this method, use {@link VanillaReimplementation#hook} instead.
+         * </p>
          *
          * @param vri      the vanilla reimplementation object
          * @param registry the registry object

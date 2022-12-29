@@ -25,13 +25,13 @@ import java.util.Random;
  * <p>
  * This class needs onPlace to be able to change the block being placed
  */
-public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
+public abstract class ChestLikeBlockBehaviour extends VanillaBlockBehaviour {
 
     public static final Tag<List<ItemStack>> TAG_ITEMS = Tag.ItemStack("vri:chest_items").list();
     protected static final Random rng = new Random();
     protected final int size;
 
-    public ChestLikeBlockHandler(@NotNull VanillaBlocks.BlockContext context, int size) {
+    public ChestLikeBlockBehaviour(@NotNull VanillaBlocks.BlockContext context, int size) {
         super(context);
         this.size = size;
     }
@@ -58,20 +58,20 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
     }
 
     @Override
-    public void onDestroy(@NotNull BlockHandler.Destroy destroy) {
-        Instance instance = destroy.getInstance();
-        Point pos = destroy.getBlockPosition();
-        Block block = destroy.getBlock();
+    public void onDestroy(@NotNull VanillaDestroy destroy) {
+        Instance instance = destroy.instance();
+        Point pos = destroy.blockPosition();
+        Block block = destroy.block();
 
         // TODO: Introduce a way to get the block this is getting replaced with, enabling us to remove the tick delay.
-        destroy.getInstance().scheduleNextTick(ignored -> {
+        destroy.instance().scheduleNextTick(ignored -> {
             if (instance.getBlock(pos).compare(block)) {
                 // Same block, don't remove chest inventory
                 return;
             }
 
             // Different block, remove chest inventory
-            ItemStack[] items = ChestInventory.remove(instance, pos);
+            List<ItemStack> items = ChestInventory.remove(instance, pos);
 
             if (!dropContentsOnDestroy()) {
                 return;
@@ -85,7 +85,7 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
 
                 ItemEntity entity = new ItemEntity(item);
 
-                entity.setInstance(destroy.getInstance());
+                entity.setInstance(destroy.instance());
                 entity.teleport(new Pos(pos.x() + rng.nextDouble(), pos.y() + .5f, pos.z() + rng.nextDouble()));
             }
         });
@@ -101,14 +101,14 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
 //    }
 
     @Override
-    public boolean onInteract(@NotNull BlockHandler.Interaction interaction) {
+    public boolean onInteract(@NotNull VanillaInteraction interaction) {
         // TODO: handle double chests
         // TODO: Handle crouching players
 
-        Block block = interaction.getBlock();
-        Instance instance = interaction.getInstance();
-        Point pos = interaction.getBlockPosition();
-        Player player = interaction.getPlayer();
+        Block block = interaction.block();
+        Instance instance = interaction.instance();
+        Point pos = interaction.blockPosition();
+        Player player = interaction.player();
 
         Block above = instance.getBlock(pos.blockX(), pos.blockY() + 1, pos.blockZ());
 
@@ -167,7 +167,7 @@ public abstract class ChestLikeBlockHandler extends VanillaBlockHandler {
         Block otherBlock = instance.getBlock(positionOfOtherChest);
         BlockHandler handler = otherBlock.handler();
 
-        if (handler instanceof ChestLikeBlockHandler chestLike) {
+        if (handler instanceof ChestLikeBlockBehaviour chestLike) {
             items.addAll(chestLike.getItems(otherBlock));
         }
 

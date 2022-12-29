@@ -13,8 +13,8 @@ import net.minestom.vanilla.blockupdatesystem.BlockUpdateManager;
 import net.minestom.vanilla.entitymeta.EntityTags;
 import org.jetbrains.annotations.NotNull;
 
-public class GravityBlockHandler extends VanillaBlockHandler implements BlockUpdatable {
-    public GravityBlockHandler(@NotNull VanillaBlocks.BlockContext context) {
+public class GravityBlockBehaviour extends VanillaBlockBehaviour implements BlockUpdatable {
+    public GravityBlockBehaviour(@NotNull VanillaBlocks.BlockContext context) {
         super(context);
     }
 
