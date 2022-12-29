@@ -10,49 +10,39 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.world.DimensionType;
-import net.minestom.vanilla.generation.biome.BiomeSource;
+import net.minestom.vanilla.generation.biome.BiomeSelector;
 import net.minestom.vanilla.generation.noise.NoiseChunk;
 import net.minestom.vanilla.generation.noise.NoiseGeneratorSettings;
 import net.minestom.vanilla.generation.noise.NoiseSettings;
 import net.minestom.vanilla.generation.noise.VerticalAnchor;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class NoiseChunkGenerator implements ChunkGenerator {
-    private final Map<Long, NoiseChunk> noiseChunkCache = new HashMap<>();
+    private final Map<Long, NoiseChunk> noiseChunkCache = new ConcurrentHashMap<>();
     private final Aquifer.FluidPicker globalFluidPicker;
 
-//    constructor(
-//                    private readonly biomeSource: BiomeSource,
-//                    private readonly settings: NoiseGeneratorSettings,
-//                    ) {
-//        this.noiseChunkCache = new Map()
-//
-//    const lavaFluid = new FluidStatus(-54, BlockState.LAVA)
-//    const defaultFluid = new FluidStatus(settings.seaLevel, settings.defaultFluid)
-//        this.globalFluidPicker = (x, y, z) => {
-//            if (y < Math.min(-54, settings.seaLevel)) {
-//                return lavaFluid
-//            }
-//            return defaultFluid
-//        }
-//    }
-
-    private final @NotNull BiomeSource biomeSource;
+    private final @NotNull BiomeSelector biomeSelector;
     private final @NotNull NoiseGeneratorSettings settings;
+    private final ChunkSeedProvider seedProvider;
 
 
     // Minestom
     private final DimensionType dimensionType;
 
-    public NoiseChunkGenerator(@NotNull BiomeSource biomeSource, @NotNull NoiseGeneratorSettings settings, DimensionType dimensionType) {
-        this.biomeSource = biomeSource;
+    public NoiseChunkGenerator(BiomeSelector biomeSelector,
+                               NoiseGeneratorSettings settings,
+                               DimensionType dimensionType,
+                               @Nullable ChunkSeedProvider seedProvider) {
+        this.biomeSelector = biomeSelector;
         this.settings = settings;
+        this.seedProvider = seedProvider == null ? ChunkSeedProvider.DEFAULT : seedProvider;
         this.dimensionType = dimensionType;
 
         Aquifer.FluidStatus lavaFluid = new Aquifer.FluidStatus(-54, Block.LAVA);
@@ -65,21 +55,11 @@ public class NoiseChunkGenerator implements ChunkGenerator {
         };
     }
 
-//    public fill(randomState: RandomState, chunk: Chunk, onlyFirstZ: boolean = false) {
-//        const minY = Math.max(chunk.minY, this.settings.noise.minY)
-//        const maxY = Math.min(chunk.maxY, this.settings.noise.minY + this.settings.noise.height)
-//
-//        const cellWidth = NoiseSettings.cellWidth(this.settings.noise)
-//        const cellHeight = NoiseSettings.cellHeight(this.settings.noise)
-//        const cellCountXZ = Math.floor(16 / cellWidth)
-//
-//        const minCellY = Math.floor(minY / cellHeight)
-//        const cellCountY = Math.floor((maxY - minY) / cellHeight)
-//
-//        const minX = ChunkPos.minBlockX(chunk.pos)
-//        const minZ = ChunkPos.minBlockZ(chunk.pos)
-//
-//        const noiseChunk = this.getOrCreateNoiseChunk(randomState, chunk)
+    @ApiStatus.Experimental
+    interface ChunkSeedProvider {
+        ChunkSeedProvider DEFAULT = (x, z) -> 128;
+        long getSeed(int chunkX, int chunkZ);
+    }
 
     public void fill(RandomState randomState, TargetChunk chunk) {
         fill(randomState, chunk, false);
@@ -97,34 +77,6 @@ public class NoiseChunkGenerator implements ChunkGenerator {
         int cellCountY = Math.floorDiv(maxY - minY, cellHeight);
 
         NoiseChunk noiseChunk = this.getOrCreateNoiseChunk(randomState, chunk);
-
-//
-//        for (let cellX = 0; cellX < cellCountXZ; cellX += 1) {
-//            for (let cellZ = 0; cellZ < (onlyFirstZ ? 1 : cellCountXZ); cellZ += 1) {
-//                let section = chunk.getOrCreateSection(chunk.sectionsCount - 1)
-//                for (let cellY = cellCountY - 1; cellY >= 0; cellY -= 1) {
-//                    for (let offY = cellHeight - 1; offY >= 0; offY -= 1) {
-//                    const blockY = (minCellY + cellY) * cellHeight + offY
-//                    const sectionY = blockY & 0xF
-//                    const sectionIndex = chunk.getSectionIndex(blockY)
-//                        if (chunk.getSectionIndex(section.minBlockY) !== sectionIndex) {
-//                            section = chunk.getOrCreateSection(sectionIndex)
-//                        }
-//                        for (let offX = 0; offX < cellWidth; offX += 1) {
-//                        const blockX = minX + cellX * cellWidth + offX
-//                        const sectionX = blockX & 0xF
-//                            for (let offZ = 0; offZ < (onlyFirstZ ? 1 : cellWidth); offZ += 1) {
-//                            const blockZ = minZ + cellZ * cellWidth + offZ
-//                            const sectionZ = blockZ & 0xF
-//                            const state = noiseChunk.getFinalState(blockX, blockY, blockZ) ?? this.settings.defaultBlock
-//                                section.setBlockState(sectionX, sectionY, sectionZ, state)
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
 
         for (int cellX = 0; cellX < cellCountXZ; cellX += 1) {
             for (int cellZ = 0; cellZ < (onlyFirstZ ? 1 : cellCountXZ); cellZ += 1) {
@@ -169,7 +121,7 @@ public class NoiseChunkGenerator implements ChunkGenerator {
 //        return this.biomeSource.getBiome(quartX, quartY, quartZ, randomState.sampler)
 //    }
     public NamespaceID computeBiome(RandomState randomState, int quartX, int quartY, int quartZ) {
-        return this.biomeSource.getBiome(quartX, quartY, quartZ, randomState.sampler);
+        return this.biomeSelector.getBiome(quartX, quartY, quartZ, randomState.sampler);
     }
 
     private NoiseChunk getOrCreateNoiseChunk(RandomState randomState, TargetChunk chunk) {
@@ -204,12 +156,12 @@ public class NoiseChunkGenerator implements ChunkGenerator {
     }
 
     @Override
-    public synchronized void generateChunkData(@NotNull ChunkBatch batch, int chunkX, int chunkZ) {
+    public void generateChunkData(@NotNull ChunkBatch batch, int chunkX, int chunkZ) {
         TargetChunkImpl chunk = new TargetChunkImpl(batch,
                 chunkX, chunkZ,
                 dimensionType.getMinY() / Chunk.CHUNK_SECTION_SIZE,
                 dimensionType.getMaxY() / Chunk.CHUNK_SECTION_SIZE);
-        RandomState randomState = new RandomState(settings, 125);
+        RandomState randomState = new RandomState(settings, seedProvider.getSeed(chunkX, chunkZ));
         fill(randomState, chunk);
     }
 

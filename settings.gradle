@@ -12,5 +12,4 @@ include 'entity-meta'
 include 'server'
 include 'items'
 include 'crafting-data'
-include 'datapack-loading'
 
