@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 public sealed interface VanillaRecipe {
 
     @NotNull Type type();
+
     @Nullable String group();
 
     /**
@@ -45,7 +46,8 @@ public sealed interface VanillaRecipe {
      * The default cooking time is 100 ticks, or 5 seconds, even though all vanilla campfire cooking recipes have a
      * cook time of 600 ticks, or 30 seconds. Campfire recipes do not trigger the recipe_unlocked criteria.
      */
-    record CampfireCooking(Ingredient ingredient, Result result, double experience, int cookingTime, String group) implements CookingRecipe {
+    record CampfireCooking(Ingredient ingredient, Result result, double experience, int cookingTime,
+                           String group) implements CookingRecipe {
 
         public static final int DEFAULT_COOKING_TIME = 100;
 
@@ -92,7 +94,8 @@ public sealed interface VanillaRecipe {
      * Represents a shapeless crafting recipe in a crafting table.
      * The ingredients list must have at least one and at most nine entries.
      */
-    record CraftingShapeless(Map<Ingredient, Integer> ingredients, Result result, String group) implements VanillaRecipe {
+    record CraftingShapeless(Map<Ingredient, Integer> ingredients, Result result,
+                             String group) implements VanillaRecipe {
         @Override
         public Type type() {
             return Type.CRAFTING_SHAPELESS;
@@ -226,6 +229,7 @@ public sealed interface VanillaRecipe {
             public Item(String item) {
                 this(item, Map.of());
             }
+
             public Item {
                 extraData = Map.copyOf(extraData);
             }
@@ -238,16 +242,18 @@ public sealed interface VanillaRecipe {
             public AnyOf(Ingredient... ingredients) {
                 this(Set.of(ingredients));
             }
+
             public AnyOf(Collection<Ingredient> ingredients) {
                 this(Set.copyOf(ingredients));
             }
+
             public AnyOf {
                 ingredients = Set.copyOf(ingredients);
             }
         }
     }
 
-    record Result(int count, Ingredient.Item item)  {
+    record Result(int count, Ingredient.Item item) {
     }
 
     enum Slot {
@@ -286,7 +292,9 @@ public sealed interface VanillaRecipe {
 
     sealed interface CookingRecipe extends VanillaRecipe {
         Ingredient ingredient();
+
         Result result();
+
         double experience();
 
         /**

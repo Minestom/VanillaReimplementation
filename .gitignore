@@ -39,4 +39,4 @@ out/
 server.properties
 world/
 mojang-data/
-
+vanilla_worldgen/*
