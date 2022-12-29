@@ -2,6 +2,7 @@ package net.minestom.vanilla.generation.noise;
 
 import com.google.gson.JsonObject;
 import net.minestom.vanilla.generation.Util;
+import net.minestom.vanilla.generation.WorldgenContext;
 
 public interface VerticalAnchor {
 
@@ -31,38 +32,4 @@ public interface VerticalAnchor {
         return context -> context.maxY() - value;
     }
 
-    interface WorldgenContext {
-        int minY();
-
-        int height();
-
-        int maxY();
-
-        static WorldgenContext create(int minY, int height) {
-            return new WorldgenContext() {
-                @Override
-                public int minY() {
-                    return minY;
-                }
-
-                @Override
-                public int height() {
-                    return height;
-                }
-
-                @Override
-                public int maxY() {
-                    return minY + height - 1;
-                }
-            };
-        }
-    }
-
-    //    export function create(minY: number, height: number) {
-//        return {
-//                minY,
-//                height,
-//                maxY: minY + height - 1,
-//		}
-//
 }

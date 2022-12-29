@@ -135,10 +135,6 @@ public class Util {
         return x + 1;
     }
 
-    public static BigInteger fromBytes(byte[] digest) {
-        return new BigInteger(1, digest);
-    }
-
     public static <T> @NotNull T jsonRequire(JsonObject root, String key, Function<JsonElement, T> mapper) {
         JsonElement element = root.get(key);
         if (element == null) {
