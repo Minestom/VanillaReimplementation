@@ -18,6 +18,9 @@ public enum VanillaCommands {
     STOP(StopCommand::new),
     HELP(HelpCommand::new),
     SAVE_ALL(SaveAllCommand::new),
+    CLEAR(ClearCommand::new),
+    OP(OpCommand::new),
+
     ;
 
     private final Supplier<Command> commandCreator;
