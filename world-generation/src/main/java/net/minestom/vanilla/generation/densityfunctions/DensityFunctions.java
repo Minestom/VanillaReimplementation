@@ -1,8 +1,9 @@
 package net.minestom.vanilla.generation.densityfunctions;
 
 import net.minestom.vanilla.generation.Holder;
-import net.minestom.vanilla.generation.Util;
+import net.minestom.vanilla.generation.WorldgenRegistries;
 import net.minestom.vanilla.generation.math.CubicSpline;
+import net.minestom.vanilla.generation.Util;
 import net.minestom.vanilla.generation.noise.BlendedNoise;
 import net.minestom.vanilla.generation.noise.NormalNoise;
 import net.minestom.vanilla.generation.noise.SimplexNoise;
@@ -15,9 +16,12 @@ import java.util.Map;
 import java.util.function.DoubleSupplier;
 import java.util.function.Function;
 
-class NativeDensityFunctions {
+public interface DensityFunctions {
 
-    abstract static class Transformer implements DensityFunction {
+    record ContextImpl(double x, double y, double z) implements DensityFunction.Context {
+    }
+
+    abstract class Transformer implements DensityFunction {
         protected final DensityFunction input;
 
         public DensityFunction input() {
@@ -35,63 +39,9 @@ class NativeDensityFunctions {
         }
     }
 
-    static abstract class Wrapper implements DensityFunction {
-        protected final DensityFunction wrapped;
+    Function<Object, Holder<NormalNoise.NoiseParameters>> NoiseParser = Holder.parser(WorldgenRegistries.NOISE, NormalNoise.NoiseParameters::fromJson);
 
-        public Wrapper(DensityFunction wrapped) {
-            this.wrapped = wrapped;
-        }
-
-        @Override
-        public double minValue() {
-            return this.wrapped.minValue();
-        }
-
-        @Override
-        public double maxValue() {
-            return this.wrapped.maxValue();
-        }
-    }
-
-    static abstract class ShiftNoise implements DensityFunction {
-        public final Holder<NormalNoise.NoiseParameters> noiseData;
-
-        public Holder<NormalNoise.NoiseParameters> noiseData() {
-            return noiseData;
-        }
-
-        public final NormalNoise offsetNoise;
-
-        public NormalNoise offsetNoise() {
-            return offsetNoise;
-        }
-
-        ShiftNoise(
-                Holder<NormalNoise.NoiseParameters> noiseData,
-                @Nullable NormalNoise offsetNoise) {
-            this.noiseData = noiseData;
-            this.offsetNoise = offsetNoise;
-        }
-
-        //        public compute(context: Context) {
-//            return this.offsetNoise?.sample(context.x * 0.25, context.y * 0.25, context.z * 0.25) ?? 0
-//        }
-        public double compute(Context context) {
-            return this.offsetNoise.sample(context.x() * 0.25, context.y() * 0.25, context.z() * 0.25);
-        }
-
-        //        public maxValue() {
-//            return (this.offsetNoise?.maxValue ?? 2) * 4
-//        }
-        public double maxValue() {
-            return this.offsetNoise.maxValue * 4;
-        }
-
-        //        public abstract withNewNoise(noise: NormalNoise): ShiftNoise
-        public abstract ShiftNoise withNewNoise(NormalNoise noise);
-    }
-
-    static class Constant implements DensityFunction {
+    class Constant implements DensityFunction {
         public static final Constant ZERO = new Constant(0);
         public static Constant ONE = new Constant(1);
 
@@ -131,7 +81,25 @@ class NativeDensityFunctions {
         }
     }
 
-    static class ConstantMinMax extends Constant {
+//    public class ConstantMinMax implements DensityFunction.Constant {
+//        constructor(
+//                value: number,
+//                private readonly min: number,
+//                private readonly max: number
+//        ){
+//            super(value)
+//        }
+//
+//        public minValue() {
+//            return this.min
+//        }
+//
+//        public maxValue() {
+//            return this.max
+//        }
+//    }
+
+    class ConstantMinMax extends Constant {
 
         final double min;
         final double max;
@@ -153,13 +121,74 @@ class NativeDensityFunctions {
         }
     }
 
-    record OldBlendedNoise(double xzScale, double yScale,
-                           double xzFactor, double yFactor,
-                           double smearScaleMultiplier,
-                           @Nullable BlendedNoise blendedNoise) implements DensityFunction {
+//    public class OldBlendedNoise implements DensityFunction {
+//        constructor(
+//                public readonly xzScale: number,
+//                public readonly yScale: number,
+//                public readonly xzFactor: number,
+//                public readonly yFactor: number,
+//                public readonly smearScaleMultiplier: number,
+//                private readonly blendedNoise?: BlendedNoise
+//        ) {
+//            super()
+//        }
+//        public compute(context: Context) {
+//            return this.blendedNoise?.sample(context.x, context.y, context.z) ?? 0
+//        }
+//        public maxValue() {
+//            return this.blendedNoise?.maxValue ?? 0
+//        }
+//    }
+
+    class OldBlendedNoise implements DensityFunction {
+
+        final double xzScale;
+
+        public double xzScale() {
+            return xzScale;
+        }
+
+        final double yScale;
+
+        public double yScale() {
+            return yScale;
+        }
+
+        final double xzFactor;
+
+        public double xzFactor() {
+            return xzFactor;
+        }
+
+        final double yFactor;
+
+        public double yFactor() {
+            return yFactor;
+        }
+
+        final double smearScaleMultiplier;
+
+        public double smearScaleMultiplier() {
+            return smearScaleMultiplier;
+        }
+
+        final BlendedNoise blendedNoise;
+
+        public BlendedNoise blendedNoise() {
+            return blendedNoise;
+        }
 
         public OldBlendedNoise(double xzScale, double yScale, double xzFactor, double yFactor, double smearScaleMultiplier) {
             this(xzScale, yScale, xzFactor, yFactor, smearScaleMultiplier, null);
+        }
+
+        public OldBlendedNoise(double xzScale, double yScale, double xzFactor, double yFactor, double smearScaleMultiplier, @Nullable BlendedNoise blendedNoise) {
+            this.xzScale = xzScale;
+            this.yScale = yScale;
+            this.xzFactor = xzFactor;
+            this.yFactor = yFactor;
+            this.smearScaleMultiplier = smearScaleMultiplier;
+            this.blendedNoise = blendedNoise;
         }
 
         @Override
@@ -173,7 +202,62 @@ class NativeDensityFunctions {
         }
     }
 
-    static class FlatCache extends Wrapper {
+
+//    abstract class Wrapper implements DensityFunction {
+//        constructor(
+//                protected readonly wrapped: DensityFunction,
+//                ) {
+//            super()
+//        }
+//        public minValue() {
+//            return this.wrapped.minValue()
+//        }
+//        public maxValue() {
+//            return this.wrapped.maxValue()
+//        }
+//    }
+
+    abstract class Wrapper implements DensityFunction {
+        protected final DensityFunction wrapped;
+
+        public Wrapper(DensityFunction wrapped) {
+            this.wrapped = wrapped;
+        }
+
+        @Override
+        public double minValue() {
+            return this.wrapped.minValue();
+        }
+
+        @Override
+        public double maxValue() {
+            return this.wrapped.maxValue();
+        }
+    }
+
+//    public class FlatCache extends Wrapper {
+//        private lastQuartX?: number
+//        private lastQuartZ?: number
+//        private lastValue: number = 0
+//        constructor(wrapped: DensityFunction) {
+//            super(wrapped)
+//        }
+//        public compute(context: Context): number {
+//			const quartX = context.x >> 2
+//			const quartZ = context.z >> 2
+//            if (this.lastQuartX !== quartX || this.lastQuartZ !== quartZ) {
+//                this.lastValue = this.wrapped.compute(DensityFunction.context(quartX << 2, 0, quartZ << 2))
+//                this.lastQuartX = quartX
+//                this.lastQuartZ = quartZ
+//            }
+//            return this.lastValue
+//        }
+//        public mapAll(visitor: Visitor) {
+//            return visitor.map(new FlatCache(this.wrapped.mapAll(visitor)))
+//        }
+//    }
+
+    class FlatCache extends Wrapper {
         private int lastQuartX = 0;
         private int lastQuartZ = 0;
         private double lastValue = 0;
@@ -194,11 +278,23 @@ class NativeDensityFunctions {
         }
 
         public DensityFunction mapAll(Mapper mapper) {
-            return mapper.map(new NativeDensityFunctions.FlatCache(this.wrapped.mapAll(mapper)));
+            return mapper.map(new FlatCache(this.wrapped.mapAll(mapper)));
         }
     }
 
-    static class CacheAllInCell extends Wrapper {
+//    public class CacheAllInCell extends Wrapper {
+//        constructor(wrapped: DensityFunction) {
+//            super(wrapped)
+//        }
+//        public compute(context: Context) {
+//            return this.wrapped.compute(context)
+//        }
+//        public mapAll(visitor: Visitor) {
+//            return visitor.map(new CacheAllInCell(this.wrapped.mapAll(visitor)))
+//        }
+//    }
+
+    class CacheAllInCell extends Wrapper {
         public CacheAllInCell(DensityFunction wrapped) {
             super(wrapped);
         }
@@ -212,7 +308,29 @@ class NativeDensityFunctions {
         }
     }
 
-    static class Cache2D extends Wrapper {
+//    public class Cache2D extends Wrapper {
+//        private lastBlockX?: number
+//        private lastBlockZ?: number
+//        private lastValue: number = 0
+//        constructor(wrapped: DensityFunction) {
+//            super(wrapped)
+//        }
+//        public compute(context: Context) {
+//			const blockX = context.x
+//			const blockZ = context.z
+//            if (this.lastBlockX !== blockX || this.lastBlockZ !== blockZ) {
+//                this.lastValue = this.wrapped.compute(context)
+//                this.lastBlockX = blockX
+//                this.lastBlockZ = blockZ
+//            }
+//            return this.lastValue
+//        }
+//        public mapAll(visitor: Visitor) {
+//            return visitor.map(new Cache2D(this.wrapped.mapAll(visitor)))
+//        }
+//    }
+
+    class Cache2D extends Wrapper {
         private int lastBlockX = 0;
         private int lastBlockZ = 0;
         private double lastValue = 0;
@@ -237,7 +355,32 @@ class NativeDensityFunctions {
         }
     }
 
-    static class CacheOnce extends Wrapper {
+//    public class CacheOnce extends Wrapper {
+//        private lastBlockX?: number
+//        private lastBlockY?: number
+//        private lastBlockZ?: number
+//        private lastValue: number = 0
+//        constructor(wrapped: DensityFunction) {
+//            super(wrapped)
+//        }
+//        public compute(context: DensityFunction.Context) {
+//			const blockX = context.x
+//			const blockY = context.y
+//			const blockZ = context.z
+//            if (this.lastBlockX !== blockX || this.lastBlockY !== blockY || this.lastBlockZ !== blockZ) {
+//                this.lastValue = this.wrapped.compute(context)
+//                this.lastBlockX = blockX
+//                this.lastBlockY = blockY
+//                this.lastBlockZ = blockZ
+//            }
+//            return this.lastValue
+//        }
+//        public mapAll(visitor: Visitor) {
+//            return visitor.map(new CacheOnce(this.wrapped.mapAll(visitor)))
+//        }
+//    }
+
+    class CacheOnce extends Wrapper {
         private int lastBlockX = 0;
         private int lastBlockY = 0;
         private int lastBlockZ = 0;
@@ -265,7 +408,49 @@ class NativeDensityFunctions {
         }
     }
 
-    static class Interpolated extends Wrapper {
+//    public class Interpolated extends Wrapper {
+//        private readonly values: Map<string, number>
+//        constructor(
+//                        wrapped: DensityFunction,
+//                        private readonly cellWidth: number = 4,
+//                        private readonly cellHeight: number = 4,
+//                        ) {
+//            super(wrapped)
+//            this.values = new Map()
+//        }
+//        public compute({ x: blockX, y: blockY, z: blockZ }: DensityFunction.Context) {
+//			const w = this.cellWidth
+//			const h = this.cellHeight
+//			const x = ((blockX % w + w) % w) / w
+//			const y = ((blockY % h + h) % h) / h
+//			const z = ((blockZ % w + w) % w) / w
+//			const firstX = Math.floor(blockX / w) * w
+//			const firstY = Math.floor(blockY / h) * h
+//			const firstZ = Math.floor(blockZ / w) * w
+//			const noise000 = () => this.computeCorner(firstX, firstY, firstZ)
+//			const noise001 = () => this.computeCorner(firstX, firstY, firstZ + w)
+//			const noise010 = () => this.computeCorner(firstX, firstY + h, firstZ)
+//			const noise011 = () => this.computeCorner(firstX, firstY + h, firstZ + w)
+//			const noise100 = () => this.computeCorner(firstX + w, firstY, firstZ)
+//			const noise101 = () => this.computeCorner(firstX + w, firstY, firstZ + w)
+//			const noise110 = () => this.computeCorner(firstX + w, firstY + h, firstZ)
+//			const noise111 = () => this.computeCorner(firstX + w, firstY + h, firstZ + w)
+//            return lazyLerp3(x, y, z, noise000, noise100, noise010, noise110, noise001, noise101, noise011, noise111)
+//        }
+//        private computeCorner(x: number, y: number, z: number) {
+//            return computeIfAbsent(this.values, `${x} ${y} ${z}`, () => {
+//                return this.wrapped.compute(DensityFunction.context(x, y, z))
+//            })
+//        }
+//        public mapAll(visitor: Visitor) {
+//            return visitor.map(new Interpolated(this.wrapped.mapAll(visitor)))
+//        }
+//        public withCellSize(cellWidth: number, cellHeight: number) {
+//            return new Interpolated(this.wrapped, cellWidth, cellHeight)
+//        }
+//    }
+
+    class Interpolated extends Wrapper {
 
         private final DoubleStorage storage;
         private final int cellWidth;
@@ -320,7 +505,25 @@ class NativeDensityFunctions {
         }
     }
 
-    static class Noise implements DensityFunction {
+
+//    public class Noise implements DensityFunction {
+//        constructor(
+//                public readonly xzScale: number,
+//                public readonly yScale: number,
+//                public readonly noiseData: Holder<NoiseParameters>,
+//                public readonly noise?: NormalNoise,
+//                ) {
+//            super()
+//        }
+//        public compute(context: Context) {
+//            return this.noise?.sample(context.x * this.xzScale, context.y * this.yScale, context.z * this.xzScale) ?? 0
+//        }
+//        public maxValue() {
+//            return this.noise?.maxValue ?? 2
+//        }
+//    }
+
+    class Noise implements DensityFunction {
         public final double xzScale;
 
         public double xzScale() {
@@ -368,7 +571,51 @@ class NativeDensityFunctions {
         }
     }
 
-    static class EndIslands implements DensityFunction {
+//    public class EndIslands implements DensityFunction {
+//        private readonly islandNoise: SimplexNoise
+//        constructor(seed?: bigint) {
+//            super()
+//			const random = new LegacyRandom(seed ?? BigInt(0))
+//            random.consume(17292)
+//            this.islandNoise = new SimplexNoise(random)
+//        }
+//        private getHeightValue(x: number, z: number) {
+//			const x0 = Math.floor(x / 2)
+//			const z0 = Math.floor(z / 2)
+//			const x1 = x % 2
+//			const z1 = z % 2
+//            let f = clamp(100 - Math.sqrt(x * x + z * z), -100, 80)
+//
+//            for (let i = -12; i <= 12; i += 1) {
+//                for (let j = -12; j <= 12; j += 1) {
+//					const x2 = x0 + i
+//					const z2 = z0 + j
+//                    if (x2 * x2 + z2 * z2 <= 4096 || this.islandNoise.sample2D(x2, z2) >= -0.9) {
+//                        continue
+//                    }
+//					const f1 = (Math.abs(x2) * 3439 + Math.abs(z2) * 147) % 13 + 9
+//					const x3 = x1 + i * 2
+//					const z3 = z1 + j * 2
+//					const f2 = 100 - Math.sqrt(x3 * x3 + z3 * z3) * f1
+//					const f3 = clamp(f2, -100, 80)
+//                    f = Math.max(f, f3)
+//                }
+//            }
+//
+//            return f
+//        }
+//        public compute({ x, y, z }: DensityFunction.Context) {
+//            return (this.getHeightValue(Math.floor(x / 8), Math.floor(z / 8)) - 8) / 128
+//        }
+//        public minValue() {
+//            return -0.84375
+//        }
+//        public maxValue() {
+//            return 0.5625
+//        }
+//    }
+
+    class EndIslands implements DensityFunction {
         private final SimplexNoise islandNoise;
 
         public EndIslands() {
@@ -423,7 +670,66 @@ class NativeDensityFunctions {
         }
     }
 
-    static class WeirdScaledSampler extends Transformer {
+    //	const RarityValueMapper = ['type_1', 'type_2'] as const
+    String[] RarityValueMapper = new String[]{"type_1", "type_2"};
+
+    //    public class WeirdScaledSampler extends Transformer {
+//        private static readonly ValueMapper: Record<typeof RarityValueMapper[number], (value: number) => number> = {
+//            type_1: WeirdScaledSampler.rarityValueMapper1,
+//                    type_2: WeirdScaledSampler.rarityValueMapper2,
+//        }
+//        private readonly mapper: (value: number) => number
+//        constructor(
+//                        input: DensityFunction,
+//                        public readonly rarityValueMapper: typeof RarityValueMapper[number],
+//                        public readonly noiseData: Holder<NoiseParameters>,
+//                        public readonly noise?: NormalNoise,
+//                        ) {
+//            super(input)
+//            this.mapper = WeirdScaledSampler.ValueMapper[this.rarityValueMapper]
+//        }
+//        public transform(context: Context, density: number) {
+//            if (!this.noise) {
+//                return 0
+//            }
+//			const rarity = this.mapper(density)
+//            return rarity * Math.abs(this.noise.sample(context.x / rarity, context.y / rarity, context.z / rarity))
+//        }
+//        public mapAll(visitor: Visitor) {
+//            return visitor.map(new WeirdScaledSampler(this.input.mapAll(visitor), this.rarityValueMapper, this.noiseData, this.noise))
+//        }
+//        public minValue(): number {
+//            return 0
+//        }
+//        public maxValue(): number {
+//            return this.rarityValueMapper === 'type_1' ? 2 : 3
+//        }
+//        public static rarityValueMapper1(value: number) {
+//            if (value < -0.5) {
+//                return 0.75
+//            } else if (value < 0) {
+//                return 1
+//            } else if (value < 0.5) {
+//                return 1.5
+//            } else {
+//                return 2
+//            }
+//        }
+//        public static rarityValueMapper2(value: number) {
+//            if (value < -0.75) {
+//                return 0.5
+//            } else if (value < -0.5) {
+//                return 0.75
+//            } else if (value < 0.5) {
+//                return 1
+//            } else if (value < 0.75) {
+//                return 2
+//            } else {
+//                return 3
+//            }
+//        }
+//    }
+    class WeirdScaledSampler extends Transformer {
         private static final Map<String, Function<Double, Double>> ValueMapper = new HashMap<>();
 
         static {
@@ -515,7 +821,7 @@ class NativeDensityFunctions {
         }
     }
 
-    static class ShiftedNoise extends Noise {
+    class ShiftedNoise extends Noise {
 
         public final DensityFunction shiftX;
 
@@ -545,6 +851,12 @@ class NativeDensityFunctions {
             this.shiftZ = shiftZ;
         }
 
+        //        public compute(context: Context) {
+//			const xx = context.x * this.xzScale + this.shiftX.compute(context)
+//			const yy = context.y * this.yScale + this.shiftY.compute(context)
+//			const zz = context.z * this.xzScale + this.shiftZ.compute(context)
+//            return this.noise?.sample(xx, yy, zz) ?? 0
+//        }
         public double compute(Context context) {
             return this.noise.sample(
                     context.x() * this.xzScale + this.shiftX.compute(context),
@@ -558,12 +870,12 @@ class NativeDensityFunctions {
         }
     }
 
-    static class RangeChoice implements DensityFunction {
-        public final DensityFunction input;
-        public final double minInclusive;
-        public final double maxExclusive;
-        public final DensityFunction whenInRange;
-        public final DensityFunction whenOutOfRange;
+    class RangeChoice implements DensityFunction {
+        public DensityFunction input;
+        public double minInclusive;
+        public double maxExclusive;
+        public DensityFunction whenInRange;
+        public DensityFunction whenOutOfRange;
 
         RangeChoice(DensityFunction input, double minInclusive, double maxExclusive, DensityFunction whenInRange,
                     DensityFunction whenOutOfRange) {
@@ -573,6 +885,12 @@ class NativeDensityFunctions {
             this.whenInRange = whenInRange;
             this.whenOutOfRange = whenOutOfRange;
         }
+//        public compute(context: Context) {
+//			const x = this.input.compute(context)
+//            return (this.minInclusive <= x && x < this.maxExclusive)
+//                    ? this.whenInRange.compute(context)
+//                    : this.whenOutOfRange.compute(context)
+//        }
 
         public double compute(Context context) {
             return this.input.compute(context) >= this.minInclusive && this.input.compute(context) < this.maxExclusive
@@ -580,9 +898,20 @@ class NativeDensityFunctions {
                     : this.whenOutOfRange.compute(context);
         }
 
+//        public mapAll(visitor: Visitor) {
+//            return visitor.map(new RangeChoice(this.input.mapAll(visitor), this.minInclusive, this.maxExclusive, this.whenInRange.mapAll(visitor), this.whenOutOfRange.mapAll(visitor)))
+//        }
+
         public DensityFunction mapAll(Mapper mapper) {
             return mapper.map(new RangeChoice(this.input.mapAll(mapper), this.minInclusive, this.maxExclusive, this.whenInRange.mapAll(mapper), this.whenOutOfRange.mapAll(mapper)));
         }
+
+//        public minValue() {
+//            return Math.min(this.whenInRange.minValue(), this.whenOutOfRange.minValue())
+//        }
+//        public maxValue() {
+//            return Math.max(this.whenInRange.maxValue(), this.whenOutOfRange.maxValue())
+//        }
 
         public double minValue() {
             return Math.min(this.whenInRange.minValue(), this.whenOutOfRange.minValue());
@@ -593,7 +922,45 @@ class NativeDensityFunctions {
         }
     }
 
-    static class ShiftA extends ShiftNoise {
+    abstract class ShiftNoise implements DensityFunction {
+        public final Holder<NormalNoise.NoiseParameters> noiseData;
+
+        public Holder<NormalNoise.NoiseParameters> noiseData() {
+            return noiseData;
+        }
+
+        public final NormalNoise offsetNoise;
+
+        public NormalNoise offsetNoise() {
+            return offsetNoise;
+        }
+
+        ShiftNoise(
+                Holder<NormalNoise.NoiseParameters> noiseData,
+                @Nullable NormalNoise offsetNoise) {
+            this.noiseData = noiseData;
+            this.offsetNoise = offsetNoise;
+        }
+
+        //        public compute(context: Context) {
+//            return this.offsetNoise?.sample(context.x * 0.25, context.y * 0.25, context.z * 0.25) ?? 0
+//        }
+        public double compute(Context context) {
+            return this.offsetNoise.sample(context.x() * 0.25, context.y() * 0.25, context.z() * 0.25);
+        }
+
+        //        public maxValue() {
+//            return (this.offsetNoise?.maxValue ?? 2) * 4
+//        }
+        public double maxValue() {
+            return this.offsetNoise.maxValue * 4;
+        }
+
+        //        public abstract withNewNoise(noise: NormalNoise): ShiftNoise
+        public abstract ShiftNoise withNewNoise(NormalNoise noise);
+    }
+
+    class ShiftA extends ShiftNoise {
 
         ShiftA(Holder<NormalNoise.NoiseParameters> noiseData, @Nullable NormalNoise offsetNoise) {
             super(noiseData, offsetNoise);
@@ -603,6 +970,9 @@ class NativeDensityFunctions {
             super(noiseData, null);
         }
 
+        //        public compute(context: Context) {
+//            return super.compute(DensityFunction.context(context.x, 0, context.z))
+//        }
         public double compute(Context context) {
             return super.compute(DensityFunction.context(context.x(), 0, context.z()));
         }
@@ -615,7 +985,21 @@ class NativeDensityFunctions {
         }
     }
 
-    static class ShiftB extends ShiftNoise {
+    //    public class ShiftB extends ShiftNoise {
+//        constructor(
+//                noiseData: Holder<NoiseParameters>,
+//                offsetNoise?: NormalNoise,
+//                ) {
+//            super(noiseData, offsetNoise)
+//        }
+//        public compute(context: Context) {
+//            return super.compute(DensityFunction.context(context.z, context.x, 0))
+//        }
+//        public withNewNoise(newNoise: NormalNoise) {
+//            return new ShiftB(this.noiseData, newNoise)
+//        }
+//    }
+    class ShiftB extends ShiftNoise {
         ShiftB(Holder<NormalNoise.NoiseParameters> noiseData, NormalNoise offsetNoise) {
             super(noiseData, offsetNoise);
         }
@@ -633,7 +1017,18 @@ class NativeDensityFunctions {
         }
     }
 
-    static class Shift extends ShiftNoise {
+    //    public class Shift extends ShiftNoise {
+//        constructor(
+//                noiseData: Holder<NoiseParameters>,
+//                offsetNoise?: NormalNoise,
+//                ) {
+//            super(noiseData, offsetNoise)
+//        }
+//        public withNewNoise(newNoise: NormalNoise) {
+//            return new Shift(this.noiseData, newNoise)
+//        }
+//    }
+    class Shift extends ShiftNoise {
         Shift(Holder<NormalNoise.NoiseParameters> noiseData, NormalNoise offsetNoise) {
             super(noiseData, offsetNoise);
         }
@@ -647,7 +1042,26 @@ class NativeDensityFunctions {
         }
     }
 
-    static class BlendDensity extends Transformer {
+    //    public class BlendDensity extends Transformer {
+//        constructor(
+//                input: DensityFunction,
+//                ) {
+//            super(input)
+//        }
+//        public transform(context: Context, density: number) {
+//            return density // blender not supported
+//        }
+//        public mapAll(visitor: Visitor): DensityFunction {
+//            return visitor.map(new BlendDensity(this.input.mapAll(visitor)))
+//        }
+//        public minValue() {
+//            return -Infinity
+//        }
+//        public maxValue() {
+//            return Infinity
+//        }
+//    }
+    class BlendDensity extends Transformer {
         BlendDensity(DensityFunction input) {
             super(input);
         }
@@ -669,7 +1083,28 @@ class NativeDensityFunctions {
         }
     }
 
-    static class Clamp extends Transformer {
+    //    public class Clamp extends Transformer {
+//        constructor(
+//                input: DensityFunction,
+//                public readonly min: number,
+//                public readonly max: number,
+//                ) {
+//            super(input)
+//        }
+//        public transform(context: Context, density: number) {
+//            return clamp(density, this.min, this.max)
+//        }
+//        public mapAll(visitor: Visitor): DensityFunction {
+//            return visitor.map(new Clamp(this.input.mapAll(visitor), this.min, this.max))
+//        }
+//        public minValue() {
+//            return this.min
+//        }
+//        public maxValue() {
+//            return this.max
+//        }
+//    }
+    class Clamp extends Transformer {
         final double min;
         final double max;
 
@@ -696,7 +1131,55 @@ class NativeDensityFunctions {
         }
     }
 
-    static class Mapped extends Transformer {
+    //	const MappedType = ['abs', 'square', 'cube', 'half_negative', 'quarter_negative', 'squeeze'] as const
+    String[] MappedType = {"abs", "square", "cube", "half_negative", "quarter_negative", "squeeze"};
+
+    //    public class Mapped extends Transformer {
+//        private static readonly MappedTypes: Record<typeof MappedType[number], (density: number) => number> = {
+//            abs: d => Math.abs(d),
+//                    square: d => d * d,
+//                    cube: d => d * d * d,
+//                    half_negative: d => d > 0 ? d : d * 0.5,
+//                    quarter_negative: d => d > 0 ? d : d * 0.25,
+//                    squeeze: d => {
+//				const c = clamp(d, -1, 1)
+//                return c / 2 - c * c * c / 24
+//            },
+//        }
+//        private readonly transformer: (density: number) => number
+//        constructor(
+//                        public readonly type: typeof MappedType[number],
+//                        input: DensityFunction,
+//                        private readonly min?: number,
+//                        private readonly max?: number,
+//                        ) {
+//            super(input)
+//            this.transformer = Mapped.MappedTypes[this.type]
+//        }
+//        public transform(context: Context, density: number) {
+//            return this.transformer(density)
+//        }
+//        public mapAll(visitor: Visitor): DensityFunction {
+//            return visitor.map(new Mapped(this.type, this.input.mapAll(visitor)))
+//        }
+//        public minValue() {
+//            return this.min ?? -Infinity
+//        }
+//        public maxValue() {
+//            return this.max ?? Infinity
+//        }
+//        public withMinMax() {
+//			const minInput = this.input.minValue()
+//            let min = this.transformer(minInput)
+//            let max = this.transformer(this.input.maxValue())
+//            if (this.type === 'abs' || this.type === 'square') {
+//                max = Math.max(min, max)
+//                min = Math.max(0, minInput)
+//            }
+//            return new Mapped(this.type, this.input, min, max)
+//        }
+//    }
+    class Mapped extends Transformer {
         private static final Map<String, Function<Double, Double>> MappedTypes = new HashMap<>();
 
         static {
@@ -756,7 +1239,72 @@ class NativeDensityFunctions {
         }
     }
 
-    static class Ap2 implements DensityFunction {
+    //	const Ap2Type = ['add', 'mul', 'min', 'max'] as const
+    String[] Ap2Type = {"add", "mul", "min", "max"};
+
+    //    public class Ap2 implements DensityFunction {
+//        constructor(
+//                public readonly type: typeof Ap2Type[number],
+//                public readonly argument1: DensityFunction,
+//                public readonly argument2: DensityFunction,
+//                private readonly min?: number,
+//                private readonly max?: number,
+//                ) {
+//            super()
+//        }
+//        public compute(context: Context) {
+//			const a = this.argument1.compute(context)
+//            switch (this.type) {
+//                case 'add': return a + this.argument2.compute(context)
+//                case 'mul': return a === 0 ? 0 : a * this.argument2.compute(context)
+//                case 'min': return a < this.argument2.minValue() ? a : Math.min(a, this.argument2.compute(context))
+//                case 'max': return a > this.argument2.maxValue() ? a : Math.max(a, this.argument2.compute(context))
+//            }
+//        }
+//        public mapAll(visitor: Visitor) {
+//            return visitor.map(new Ap2(this.type, this.argument1.mapAll(visitor), this.argument2.mapAll(visitor)))
+//        }
+//        public minValue() {
+//            return this.min ?? -Infinity
+//        }
+//        public maxValue() {
+//            return this.max ?? Infinity
+//        }
+//        public withMinMax() {
+//			const min1 = this.argument1.minValue()
+//			const min2 = this.argument2.minValue()
+//			const max1 = this.argument1.maxValue()
+//			const max2 = this.argument2.maxValue()
+//            if ((this.type === 'min' || this.type === 'max') && (min1 >= max2 || min2 >= max1)) {
+//                console.warn(`Creating a ${this.type} function between two non-overlapping inputs`)
+//            }
+//            let min, max
+//            switch (this.type) {
+//                case 'add':
+//                    min = min1 + min2
+//                    max = max1 + max2
+//                    break
+//                case 'mul':
+//                    min = min1 > 0 && min2 > 0 ? (min1 * min2) || 0
+//                            : max1 < 0 && max2 < 0 ? (max1 * max2) || 0
+//                            : Math.min((min1 * max2) || 0, (min2 * max1) || 0)
+//                    max = min1 > 0 && min2 > 0 ? (max1 * max2) || 0
+//                            : max1 < 0 && max2 < 0 ? (min1 * min2) || 0
+//                            : Math.max((min1 * min2) || 0, (max1 * max2) || 0)
+//                    break
+//                case 'min':
+//                    min = Math.min(min1, min2)
+//                    max = Math.min(max1, max2)
+//                    break
+//                case 'max':
+//                    min = Math.max(min1, min2)
+//                    max = Math.max(max1, max2)
+//                    break
+//            }
+//            return new Ap2(this.type, this.argument1, this.argument2, min, max)
+//        }
+//    }
+    class Ap2 implements DensityFunction {
         final String type;
         final DensityFunction argument1;
         final DensityFunction argument2;
@@ -868,7 +1416,39 @@ class NativeDensityFunctions {
         }
     }
 
-    record Spline(CubicSpline<Context> spline) implements DensityFunction {
+
+    //    public class Spline implements DensityFunction {
+//        constructor(
+//                public readonly spline: CubicSpline<Context>,
+//                ) {
+//            super()
+//        }
+//        public compute(context: Context) {
+//            return this.spline.compute(context)
+//        }
+//        public mapAll(visitor: Visitor): DensityFunction {
+//			const newCubicSpline = this.spline.mapAll((fn) => {
+//            if (fn instanceof DensityFunction) {
+//                return fn.mapAll(visitor)
+//            }
+//            return fn
+//			})
+//            newCubicSpline.calculateMinMax()
+//            return visitor.map(new Spline(newCubicSpline))
+//        }
+//        public minValue() {
+//            return this.spline.min()
+//        }
+//        public maxValue() {
+//            return this.spline.max()
+//        }
+//    }
+    class Spline implements DensityFunction {
+        final CubicSpline<Context> spline;
+
+        Spline(CubicSpline<Context> spline) {
+            this.spline = spline;
+        }
 
         public double compute(Context context) {
             return this.spline.compute(context);
@@ -894,7 +1474,37 @@ class NativeDensityFunctions {
         }
     }
 
-    record YClampedGradient(double fromY, double toY, double fromValue, double toValue) implements DensityFunction {
+    //    public class YClampedGradient implements DensityFunction {
+//        constructor(
+//                public readonly fromY: number,
+//                public readonly toY: number,
+//                public readonly fromValue: number,
+//                public readonly toValue: number,
+//                ) {
+//            super()
+//        }
+//        public compute(context: Context) {
+//            return clampedMap(context.y, this.fromY, this.toY, this.fromValue, this.toValue)
+//        }
+//        public minValue() {
+//            return Math.min(this.fromValue, this.toValue)
+//        }
+//        public maxValue() {
+//            return Math.max(this.fromValue, this.toValue)
+//        }
+//    }
+    class YClampedGradient implements DensityFunction {
+        final double fromY;
+        final double toY;
+        final double fromValue;
+        final double toValue;
+
+        public YClampedGradient(double fromY, double toY, double fromValue, double toValue) {
+            this.fromY = fromY;
+            this.toY = toY;
+            this.fromValue = fromValue;
+            this.toValue = toValue;
+        }
 
         public double compute(Context context) {
             return Util.clampedMap(context.y(), this.fromY, this.toY, this.fromValue, this.toValue);

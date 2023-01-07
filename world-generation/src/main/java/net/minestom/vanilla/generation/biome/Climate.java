@@ -3,8 +3,8 @@ package net.minestom.vanilla.generation.biome;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minestom.vanilla.generation.Util;
 import net.minestom.vanilla.generation.densityfunctions.DensityFunction;
+import net.minestom.vanilla.generation.Util;
 import net.minestom.vanilla.generation.noise.NoiseRouter;
 
 import java.util.*;

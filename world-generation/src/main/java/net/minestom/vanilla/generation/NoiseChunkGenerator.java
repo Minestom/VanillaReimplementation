@@ -28,8 +28,8 @@ public class NoiseChunkGenerator implements ChunkGenerator {
     private final Map<Long, NoiseChunk> noiseChunkCache = new ConcurrentHashMap<>();
     private final Aquifer.FluidPicker globalFluidPicker;
 
-    private final BiomeSelector biomeSelector;
-    private final NoiseGeneratorSettings settings;
+    private final @NotNull BiomeSelector biomeSelector;
+    private final @NotNull NoiseGeneratorSettings settings;
     private final ChunkSeedProvider seedProvider;
 
 
@@ -58,7 +58,6 @@ public class NoiseChunkGenerator implements ChunkGenerator {
     @ApiStatus.Experimental
     interface ChunkSeedProvider {
         ChunkSeedProvider DEFAULT = (x, z) -> 128;
-
         long getSeed(int chunkX, int chunkZ);
     }
 
@@ -122,7 +121,7 @@ public class NoiseChunkGenerator implements ChunkGenerator {
 //        return this.biomeSource.getBiome(quartX, quartY, quartZ, randomState.sampler)
 //    }
     public NamespaceID computeBiome(RandomState randomState, int quartX, int quartY, int quartZ) {
-        return this.biomeSelector.select(quartX, quartY, quartZ, randomState.sampler);
+        return this.biomeSelector.getBiome(quartX, quartY, quartZ, randomState.sampler);
     }
 
     private NoiseChunk getOrCreateNoiseChunk(RandomState randomState, TargetChunk chunk) {

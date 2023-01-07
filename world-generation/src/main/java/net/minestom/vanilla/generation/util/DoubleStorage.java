@@ -13,7 +13,6 @@ public interface DoubleStorage {
 
     /**
      * A storage that caches an exact, unique value for each 3d coordinate once.
-     *
      * @param original the original storage to cache
      * @return a new storage that caches the original
      */
