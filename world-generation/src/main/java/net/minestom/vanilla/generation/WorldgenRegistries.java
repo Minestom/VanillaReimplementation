@@ -2,6 +2,7 @@ package net.minestom.vanilla.generation;
 
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.generation.densityfunctions.DensityFunction;
+import net.minestom.vanilla.generation.densityfunctions.DensityFunctions;
 import net.minestom.vanilla.generation.noise.NoiseGeneratorSettings;
 import net.minestom.vanilla.generation.noise.NormalNoise;
 
@@ -9,7 +10,7 @@ import java.util.function.Function;
 
 public class WorldgenRegistries {
     public static final Registry<NormalNoise.NoiseParameters> NOISE = register("worldgen/noise", NormalNoise.NoiseParameters::fromJson);
-    public static final Registry<DensityFunction> DENSITY_FUNCTION = register("worldgen/density_function", DensityFunction::fromJson);
+    public static final Registry<DensityFunction> DENSITY_FUNCTION = register("worldgen/density_function", DensityFunctions::fromJson);
     public static final Registry<NoiseGeneratorSettings> NOISE_SETTINGS = register("worldgen/noise_settings", NoiseGeneratorSettings::fromJson);
 
     static {
@@ -20,7 +21,7 @@ public class WorldgenRegistries {
 
         // Density functions
         for (var entry : Util.densityFunctionJsons().entrySet()) {
-            DENSITY_FUNCTION.register(NamespaceID.from(entry.getKey()), DensityFunction.fromJson(entry.getValue()));
+            DENSITY_FUNCTION.register(NamespaceID.from(entry.getKey()), DensityFunctions.fromJson(entry.getValue()));
         }
 
         // Noise settings

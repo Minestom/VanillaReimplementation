@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.generation.densityfunctions.DensityFunction;
+import net.minestom.vanilla.generation.densityfunctions.DensityFunctions;
 import net.minestom.vanilla.generation.Util;
 
 import java.util.List;
@@ -13,15 +14,15 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-interface BiomeSelectors {
+interface BiomeSources {
 
-    record CheckerboardBiomeSelector(int n, int shift, List<NamespaceID> biomes) implements BiomeSelector {
+    record CheckerboardBiomeSource(int n, int shift, List<NamespaceID> biomes) implements BiomeSource {
 
-        public CheckerboardBiomeSelector(int shift, NamespaceID[] biomes) {
+        public CheckerboardBiomeSource(int shift, NamespaceID[] biomes) {
             this(biomes.length, shift, List.of(biomes));
         }
 
-        public CheckerboardBiomeSelector {
+        public CheckerboardBiomeSource {
             if (biomes.isEmpty()) {
                 throw new IllegalArgumentException("Cannot create checkerboard biome source without biomes");
             }
@@ -33,7 +34,7 @@ interface BiomeSelectors {
             return this.biomes.get(i);
         }
 
-        public static CheckerboardBiomeSelector fromJson(Object obj) {
+        public static CheckerboardBiomeSource fromJson(Object obj) {
             int scale = Util.jsonElse(Util.jsonObject(obj), "scale", 2, JsonElement::getAsInt);
             NamespaceID[] biomes;
             if (obj instanceof String) {
@@ -43,53 +44,53 @@ interface BiomeSelectors {
             } else {
                 throw new IllegalArgumentException("Cannot parse biome source from " + obj);
             }
-            return new CheckerboardBiomeSelector(scale + 2, biomes);
+            return new CheckerboardBiomeSource(scale + 2, biomes);
         }
     }
 
-    record FixedBiomeSelector(NamespaceID biome) implements BiomeSelector {
+    record FixedBiomeSource(NamespaceID biome) implements BiomeSource {
 
         @Override
         public NamespaceID getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
             return this.biome;
         }
 
-        public static FixedBiomeSelector fromJson(Object obj) {
+        public static FixedBiomeSource fromJson(Object obj) {
             JsonObject root = Util.jsonObject(obj);
             NamespaceID biome = NamespaceID.from(Util.jsonElse(root, "biome", "plains", JsonElement::getAsString));
-            return new FixedBiomeSelector(biome);
+            return new FixedBiomeSource(biome);
         }
     }
 
-    record MultiNoiseBiomeSelector(Climate.Parameters<NamespaceID> parameters) implements BiomeSelector {
+    record MultiNoiseBiomeSource(Climate.Parameters<NamespaceID> parameters) implements BiomeSource {
 
         @Override
         public NamespaceID getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
-            Climate.Result target = climateSampler.sample(x, y, z);
+            Climate.TargetPoint target = climateSampler.sample(x, y, z);
             return this.parameters.find(target);
         }
 
-        public static MultiNoiseBiomeSelector fromJson(Object obj) {
+        public static MultiNoiseBiomeSource fromJson(Object obj) {
             JsonObject root = Util.jsonObject(obj);
             JsonArray biomes = Util.jsonArray(root.get("biomes"));
 
             var biomesList = StreamSupport.stream(biomes.spliterator(), false).map(b -> {
                 JsonObject json = Util.jsonObject(b);
                 var biomeName = NamespaceID.from(Util.jsonRequire(json, "biome", JsonElement::getAsString));
-                var parameters = Climate.RangePoint.fromJson(json.get("parameters"));
+                var parameters = Climate.ParamPoint.fromJson(json.get("parameters"));
                 return Map.entry(biomeName, parameters);
             }).toList();
 
-            Map<Climate.RangePoint, Supplier<NamespaceID>> parameters = biomesList.stream().collect(Collectors.toMap(
+            Map<Climate.ParamPoint, Supplier<NamespaceID>> parameters = biomesList.stream().collect(Collectors.toMap(
                     Map.Entry::getValue,
                     e -> e::getKey
             ));
 
-            return new MultiNoiseBiomeSelector(new Climate.Parameters<>(parameters));
+            return new MultiNoiseBiomeSource(new Climate.Parameters<>(parameters));
         }
     }
 
-    record TheEndBiomeSelector() implements BiomeSelector {
+    record TheEndBiomeSource() implements BiomeSource {
         private static final NamespaceID END = NamespaceID.from("the_end");
         private static final NamespaceID HIGHLANDS = NamespaceID.from("end_highlands");
         private static final NamespaceID MIDLANDS = NamespaceID.from("end_midlands");
@@ -109,7 +110,7 @@ interface BiomeSelectors {
                 return END;
             }
 
-            DensityFunction.Context context = DensityFunction.context((sectionX * 2 + 1) * 8, blockY, (sectionZ * 2 + 1) * 8);
+            DensityFunction.Context context = DensityFunctions.context((sectionX * 2 + 1) * 8, blockY, (sectionZ * 2 + 1) * 8);
             double erosion = climateSampler.erosion().compute(context);
 
             if (erosion > 0.25) {
@@ -123,8 +124,8 @@ interface BiomeSelectors {
             }
         }
 
-        public static TheEndBiomeSelector fromJson(Object obj) {
-            return new TheEndBiomeSelector();
+        public static TheEndBiomeSource fromJson(Object obj) {
+            return new TheEndBiomeSource();
         }
     }
 }

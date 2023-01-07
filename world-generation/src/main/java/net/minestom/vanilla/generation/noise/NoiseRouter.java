@@ -32,7 +32,7 @@ public record NoiseRouter(DensityFunction barrier,
 
     //    export namespace NoiseRouter {
     public static final Function<Object, DensityFunction> fieldParser = obj ->
-            new DensityFunctions.HolderHolder(Holder.parser(WorldgenRegistries.DENSITY_FUNCTION, DensityFunction::fromJson).apply(obj));
+            new DensityFunctions.HolderHolder(Holder.parser(WorldgenRegistries.DENSITY_FUNCTION, DensityFunctions::fromJson).apply(obj));
 
     //        export function fromJson(obj: unknown): NoiseRouter {
 //		const root = Json.readObject(obj) ?? {}
@@ -94,23 +94,23 @@ public record NoiseRouter(DensityFunction barrier,
 //                    veinGap: router.veinGap.mapAll(visitor),
 //		    }
 //        }
-    public static NoiseRouter mapAll(NoiseRouter router, DensityFunction.Mapper mapper) {
+    public static NoiseRouter mapAll(NoiseRouter router, DensityFunction.Visitor visitor) {
         return new NoiseRouter(
-                router.barrier().mapAll(mapper),
-                router.fluidLevelFloodedness().mapAll(mapper),
-                router.fluidLevelSpread().mapAll(mapper),
-                router.lava().mapAll(mapper),
-                router.temperature().mapAll(mapper),
-                router.vegetation().mapAll(mapper),
-                router.continents().mapAll(mapper),
-                router.erosion().mapAll(mapper),
-                router.depth().mapAll(mapper),
-                router.ridges().mapAll(mapper),
-                router.initialDensityWithoutJaggedness().mapAll(mapper),
-                router.finalDensity().mapAll(mapper),
-                router.veinToggle().mapAll(mapper),
-                router.veinRidged().mapAll(mapper),
-                router.veinGap().mapAll(mapper)
+                router.barrier().mapAll(visitor),
+                router.fluidLevelFloodedness().mapAll(visitor),
+                router.fluidLevelSpread().mapAll(visitor),
+                router.lava().mapAll(visitor),
+                router.temperature().mapAll(visitor),
+                router.vegetation().mapAll(visitor),
+                router.continents().mapAll(visitor),
+                router.erosion().mapAll(visitor),
+                router.depth().mapAll(visitor),
+                router.ridges().mapAll(visitor),
+                router.initialDensityWithoutJaggedness().mapAll(visitor),
+                router.finalDensity().mapAll(visitor),
+                router.veinToggle().mapAll(visitor),
+                router.veinRidged().mapAll(visitor),
+                router.veinGap().mapAll(visitor)
         );
     }
 

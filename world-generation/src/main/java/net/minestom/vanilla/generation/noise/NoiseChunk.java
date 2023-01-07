@@ -1,7 +1,5 @@
 package net.minestom.vanilla.generation.noise;
 
-import it.unimi.dsi.fastutil.longs.Long2IntMap;
-import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
@@ -9,9 +7,12 @@ import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.vanilla.generation.Aquifer;
 import net.minestom.vanilla.generation.RandomState;
 import net.minestom.vanilla.generation.densityfunctions.DensityFunction;
+import net.minestom.vanilla.generation.densityfunctions.DensityFunctions;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class NoiseChunk {
     public final int cellWidth;
@@ -21,7 +22,7 @@ public class NoiseChunk {
     public final double firstNoiseX;
     public final double firstNoiseZ;
     public final double noiseSizeXZ;
-    private final Long2IntMap preliminarySurfaceLevel = new Long2IntOpenHashMap();
+    private final Map<Long, Integer> preliminarySurfaceLevel = new HashMap<>();
     private final Aquifer aquifer;
     private final MaterialRule materialRule;
     private final DensityFunction initialDensity;
@@ -51,7 +52,6 @@ public class NoiseChunk {
         this.firstNoiseX = minX >> 2;
         this.firstNoiseZ = minZ >> 2;
         this.noiseSizeXZ = (cellCountXZ * this.cellWidth) >> 2;
-        this.settings = settings;
 
         if (true) { // WIP: Noise aquifers don't work yet
             this.aquifer = Aquifer.createDisabled(fluidPicker);
@@ -69,7 +69,7 @@ public class NoiseChunk {
     }
 
     public @Nullable Block getFinalState(int x, int y, int z) {
-        return this.materialRule.compute(DensityFunction.context(x, y, z));
+        return this.materialRule.compute(DensityFunctions.context(x, y, z));
     }
 
     public int getPreliminarySurfaceLevel(int quartX, int quartZ) {
@@ -77,7 +77,7 @@ public class NoiseChunk {
             int x = quartX << 2;
             int z = quartZ << 2;
             for (int y = this.settings.minY() + this.settings.height(); y >= this.settings.minY(); y -= this.cellHeight) {
-                double density = this.initialDensity.compute(DensityFunction.context(x, y, z));
+                double density = this.initialDensity.compute(DensityFunctions.context(x, y, z));
                 if (density > 0.390625) {
                     return y;
                 }
