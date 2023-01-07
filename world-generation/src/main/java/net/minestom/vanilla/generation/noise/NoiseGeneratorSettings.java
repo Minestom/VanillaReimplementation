@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.generation.Util;
-import net.minestom.vanilla.generation.surface.Surface;
 
 public record NoiseGeneratorSettings(
         NoiseSettings noise,

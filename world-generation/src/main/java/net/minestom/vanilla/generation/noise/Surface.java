@@ -1,4 +1,4 @@
-package net.minestom.vanilla.generation.surface;
+package net.minestom.vanilla.generation.noise;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -7,9 +7,6 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.generation.NoiseChunkGenerator;
 import net.minestom.vanilla.generation.Util;
-import net.minestom.vanilla.generation.WorldgenContext;
-import net.minestom.vanilla.generation.noise.NoiseChunk;
-import net.minestom.vanilla.generation.noise.VerticalAnchor;
 import net.minestom.vanilla.generation.random.WorldgenRandom;
 
 import java.util.HashSet;
@@ -267,10 +264,10 @@ public interface Surface {
         public final SurfaceSystem system;
         public final NoiseChunkGenerator.TargetChunk chunk;
         public final NoiseChunk noiseChunk;
-        public final WorldgenContext context;
+        public final VerticalAnchor.WorldgenContext context;
         private final Function<Point, String> getBiome;
 
-        Context(SurfaceSystem system, NoiseChunkGenerator.TargetChunk chunk, NoiseChunk noiseChunk, WorldgenContext context,
+        Context(SurfaceSystem system, NoiseChunkGenerator.TargetChunk chunk, NoiseChunk noiseChunk, VerticalAnchor.WorldgenContext context,
                 Function<Point, String> getBiome) {
             this.system = system;
             this.chunk = chunk;

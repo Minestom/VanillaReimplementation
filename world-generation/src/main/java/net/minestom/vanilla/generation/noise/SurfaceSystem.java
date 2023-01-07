@@ -1,15 +1,11 @@
-package net.minestom.vanilla.generation.surface;
+package net.minestom.vanilla.generation.noise;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.generation.NoiseChunkGenerator;
-import net.minestom.vanilla.generation.WorldgenContext;
 import net.minestom.vanilla.generation.WorldgenRegistries;
-import net.minestom.vanilla.generation.noise.NoiseChunk;
-import net.minestom.vanilla.generation.noise.NoiseRouter;
-import net.minestom.vanilla.generation.noise.NormalNoise;
 import net.minestom.vanilla.generation.random.WorldgenRandom;
 import net.minestom.vanilla.generation.random.XoroshiroRandom;
 
@@ -35,7 +31,7 @@ public class SurfaceSystem {
         this.defaultBlock = defaultBlock;
     }
 
-    public void buildSurface(NoiseChunkGenerator.TargetChunk chunk, NoiseChunk noiseChunk, WorldgenContext worldgenContext, Function<Point, String> getBiome) {
+    public void buildSurface(NoiseChunkGenerator.TargetChunk chunk, NoiseChunk noiseChunk, VerticalAnchor.WorldgenContext worldgenContext, Function<Point, String> getBiome) {
         int minX = chunk.minX();
         int minZ = chunk.minZ();
         int minY = chunk.minY();

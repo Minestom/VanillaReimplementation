@@ -14,6 +14,7 @@ import net.minestom.vanilla.generation.biome.BiomeSelector;
 import net.minestom.vanilla.generation.noise.NoiseChunk;
 import net.minestom.vanilla.generation.noise.NoiseGeneratorSettings;
 import net.minestom.vanilla.generation.noise.NoiseSettings;
+import net.minestom.vanilla.generation.noise.VerticalAnchor;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -113,7 +114,7 @@ public class NoiseChunkGenerator implements ChunkGenerator {
 //    }
     public void buildSurface(RandomState randomState, TargetChunk chunk, String biome) {
         NoiseChunk noiseChunk = this.getOrCreateNoiseChunk(randomState, chunk);
-        WorldgenContext context = WorldgenContext.create(this.settings.noise().minY(), this.settings.noise().height());
+        VerticalAnchor.WorldgenContext context = VerticalAnchor.WorldgenContext.create(this.settings.noise().minY(), this.settings.noise().height());
         randomState.surfaceSystem.buildSurface(chunk, noiseChunk, context, point -> biome);
     }
 

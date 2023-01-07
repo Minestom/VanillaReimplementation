@@ -80,7 +80,7 @@ public record NoiseRouter(DensityFunction barrier,
     private record Cache(long randomA, long randomB, NormalNoise noise) {
     }
 
-    public static NormalNoise instantiate(WorldgenRandom.Positional random, Holder<NormalNoise.NoiseParameters> noise) {
+    static NormalNoise instantiate(WorldgenRandom.Positional random, Holder<NormalNoise.NoiseParameters> noise) {
         if (noise.key() == null)
             throw new Error("Cannot instantiate noise from direct holder");
         var key = noise.key().toString();

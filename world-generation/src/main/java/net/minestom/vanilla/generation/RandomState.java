@@ -7,7 +7,6 @@ import net.minestom.vanilla.generation.noise.*;
 import net.minestom.vanilla.generation.random.LegacyRandom;
 import net.minestom.vanilla.generation.random.WorldgenRandom;
 import net.minestom.vanilla.generation.random.XoroshiroRandom;
-import net.minestom.vanilla.generation.surface.SurfaceSystem;
 
 import java.util.HashMap;
 import java.util.Map;
