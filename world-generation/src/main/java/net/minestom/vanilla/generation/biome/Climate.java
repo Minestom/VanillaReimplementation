@@ -292,7 +292,7 @@ public class Climate {
         }
 
         public List<Range> space() {
-            return new ArrayList<>(this.space);
+            return this.space;
         }
     }
 
