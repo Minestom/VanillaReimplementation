@@ -5,8 +5,9 @@ import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.minestom.vanilla.generation.Util;
 import net.minestom.vanilla.generation.random.WorldgenRandom;
+import org.jetbrains.annotations.NotNull;
 
-public class NormalNoise implements Noise {
+public record NormalNoise(@NotNull PerlinNoise first, @NotNull PerlinNoise second, double valueFactor, double maxValue) implements Noise {
 
     public record NoiseParameters(double firstOctave, DoubleList amplitudes) {
 
@@ -14,7 +15,7 @@ public class NormalNoise implements Noise {
             this(firstOctave, DoubleList.of(amplitudes));
         }
 
-        public static NoiseParameters create(double firstOctave, double[] amplitudes) {
+        public static NoiseParameters create(double firstOctave, double @NotNull... amplitudes) {
             return new NoiseParameters(firstOctave, DoubleList.of(amplitudes));
         }
 
@@ -28,16 +29,11 @@ public class NormalNoise implements Noise {
 
     private static final double INPUT_FACTOR = 1.0181268882175227;
 
-    public final double valueFactor;
-    public final PerlinNoise first;
-    public final PerlinNoise second;
-    public final double maxValue;
-
-    public NormalNoise(WorldgenRandom random, NoiseParameters parameters) {
+    public static @NotNull NormalNoise ofRandom(WorldgenRandom random, NoiseParameters parameters) {
         double firstOctave = parameters.firstOctave();
         DoubleList amplitudes = parameters.amplitudes();
-        this.first = new PerlinNoise(random, firstOctave, amplitudes);
-        this.second = new PerlinNoise(random, firstOctave, amplitudes);
+        var first = new PerlinNoise(random, firstOctave, amplitudes);
+        var second = new PerlinNoise(random, firstOctave, amplitudes);
 
         double min = Double.MAX_VALUE;
         double max = Double.MIN_VALUE;
@@ -49,8 +45,10 @@ public class NormalNoise implements Noise {
         }
 
         double expectedDeviation = 0.1 * (1 + 1 / (max - min + 1));
-        this.valueFactor = (1.0 / 6.0) / expectedDeviation;
-        this.maxValue = (this.first.maxValue + this.second.maxValue) * this.valueFactor;
+        var valueFactor = (1.0 / 6.0) / expectedDeviation;
+        var maxValue = (first.maxValue + second.maxValue) * valueFactor;
+
+        return new NormalNoise(first, second, valueFactor, maxValue);
     }
 
     @Override

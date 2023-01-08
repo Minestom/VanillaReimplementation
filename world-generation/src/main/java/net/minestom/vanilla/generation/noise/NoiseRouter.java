@@ -85,7 +85,7 @@ public record NoiseRouter(DensityFunction barrier,
         if (cached != null && Objects.equals(cached[0], randomKey[0]) && Objects.equals(cached[1], randomKey[1])) {
             return (NormalNoise) cached[2];
         }
-        var result = new NormalNoise(random.fromHashOf(key), noise.value());
+        var result = NormalNoise.ofRandom(random.fromHashOf(key), noise.value());
         noiseCache.put(key, new Object[]{randomKey[0], randomKey[1], result});
         return result;
     }

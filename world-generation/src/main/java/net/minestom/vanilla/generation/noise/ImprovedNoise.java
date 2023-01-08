@@ -2,29 +2,26 @@ package net.minestom.vanilla.generation.noise;
 
 import net.minestom.vanilla.generation.Util;
 import net.minestom.vanilla.generation.random.WorldgenRandom;
+import org.jetbrains.annotations.NotNull;
 
-public class ImprovedNoise implements Noise {
+public record ImprovedNoise(int[] p, double xo, double yo, double zo) implements Noise {
 
-    public final int[] p;
-    public final double xo;
-    public final double yo;
-    public final double zo;
-
-    public ImprovedNoise(WorldgenRandom random) {
-        this.xo = random.nextDouble() * 256;
-        this.yo = random.nextDouble() * 256;
-        this.zo = random.nextDouble() * 256;
-        this.p = new int[256];
+    public static @NotNull ImprovedNoise ofRandom(@NotNull WorldgenRandom random) {
+        double xo = random.nextDouble() * 256;
+        double yo = random.nextDouble() * 256;
+        double zo = random.nextDouble() * 256;
+        int[] p = new int[256];
 
         for (int i = 0; i < 256; i += 1) {
-            this.p[i] = i > 127 ? i - 256 : i;
+            p[i] = i > 127 ? i - 256 : i;
         }
         for (int i = 0; i < 256; i += 1) {
             int j = random.nextInt(256 - i);
-            int b = this.p[i];
-            this.p[i] = this.p[i + j];
-            this.p[i + j] = b;
+            int b = p[i];
+            p[i] = p[i + j];
+            p[i + j] = b;
         }
+        return new ImprovedNoise(p, xo, yo, zo);
     }
 
     public double sample(double x, double y, double z) {

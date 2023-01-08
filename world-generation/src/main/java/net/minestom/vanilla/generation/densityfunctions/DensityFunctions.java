@@ -236,7 +236,7 @@ public interface DensityFunctions {
 
         @Override
         public double maxValue() {
-            return this.blendedNoise.maxValue;
+            return this.blendedNoise.maxValue();
         }
     }
 
@@ -414,7 +414,7 @@ public interface DensityFunctions {
 
     record Noise(double xzScale, double yScale,
                  @NotNull Holder<NormalNoise.NoiseParameters> noiseData,
-                 @NotNull NormalNoise noise) implements DensityFunction {
+                 @Nullable NormalNoise noise) implements DensityFunction {
 
         public Noise(double xzScale, double yScale, Holder<NormalNoise.NoiseParameters> noiseData) {
             this(xzScale, yScale, noiseData, null);
@@ -428,7 +428,7 @@ public interface DensityFunctions {
 
         @Override
         public double maxValue() {
-            return this.noise == null ? 2 : this.noise.maxValue;
+            return this.noise == null ? 2 : this.noise.maxValue();
         }
     }
 
@@ -444,7 +444,7 @@ public interface DensityFunctions {
         private static SimplexNoise standard(long seed) {
             WorldgenRandom random = WorldgenRandom.standard(seed);
             random.consume(17292);
-            return new SimplexNoise(random);
+            return SimplexNoise.ofRandom(random);
         }
 
         private double getHeightValue(int x, int z) {
@@ -573,7 +573,7 @@ public interface DensityFunctions {
 
         @Override
         public double maxValue() {
-            return this.noise == null ? 2 : this.noise.maxValue;
+            return this.noise == null ? 2 : this.noise.maxValue();
         }
 
         @Override
@@ -628,7 +628,7 @@ public interface DensityFunctions {
 
         @Override
         default double maxValue() {
-            return offsetNoise().maxValue * 4;
+            return offsetNoise().maxValue() * 4;
         }
 
         @NotNull ShiftNoise withNewNoise(NormalNoise noise);

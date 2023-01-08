@@ -5,6 +5,7 @@ import net.minestom.vanilla.generation.densityfunctions.DensityFunction;
 import net.minestom.vanilla.generation.densityfunctions.DensityFunctions;
 import net.minestom.vanilla.generation.noise.NoiseGeneratorSettings;
 import net.minestom.vanilla.generation.noise.NormalNoise;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
@@ -30,7 +31,6 @@ public class WorldgenRegistries {
         }
     }
 
-
     static <F, T> Registry<T> register(String name, Function<F, T> parser) {
         //noinspection unchecked
         Function<Object, T> ambigiousParser = (Function<Object, T>) parser;
@@ -39,10 +39,10 @@ public class WorldgenRegistries {
         return registry;
     }
 
-    public static final Holder<NormalNoise.NoiseParameters> SURFACE_NOISE = createNoise("surface", -6, new double[]{1, 1, 1});
-    public static final Holder<NormalNoise.NoiseParameters> SURFACE_SECONDARY_NOISE = createNoise("surface_secondary", -6, new double[]{1, 1, 0, 1});
+    public static final Holder<NormalNoise.NoiseParameters> SURFACE_NOISE = createNoise("surface", -6, 1, 1, 1);
+    public static final Holder<NormalNoise.NoiseParameters> SURFACE_SECONDARY_NOISE = createNoise("surface_secondary", -6, 1, 1, 0, 1);
 
-    static Holder<NormalNoise.NoiseParameters> createNoise(String name, double firstOctave, double[] amplitudes) {
+    static Holder<NormalNoise.NoiseParameters> createNoise(String name, double firstOctave, double @NotNull ... amplitudes) {
         return WorldgenRegistries.NOISE.register(NamespaceID.from(name), NormalNoise.NoiseParameters.create(firstOctave, amplitudes), true);
     }
 }

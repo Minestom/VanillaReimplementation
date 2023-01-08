@@ -50,13 +50,13 @@ public class RandomState {
             }
             if (legacyRandom) {
                 if (key.equals(NamespaceID.from("temperature"))) {
-                    return new NormalNoise(new LegacyRandom(this.seed), NormalNoise.NoiseParameters.create(-7, new double[]{1, 1}));
+                    return NormalNoise.ofRandom(new LegacyRandom(this.seed), NormalNoise.NoiseParameters.create(-7, 1, 1));
                 }
                 if (key.equals(NamespaceID.from("vegetation"))) {
-                    return new NormalNoise(new LegacyRandom(this.seed + 1), NormalNoise.NoiseParameters.create(-7, new double[]{1, 1}));
+                    return NormalNoise.ofRandom(new LegacyRandom(this.seed + 1), NormalNoise.NoiseParameters.create(-7, 1, 1));
                 }
                 if (key.equals(NamespaceID.from("offset"))) {
-                    return new NormalNoise(this.random.fromHashOf("offset"), NormalNoise.NoiseParameters.create(0, new double[]{0}));
+                    return NormalNoise.ofRandom(this.random.fromHashOf("offset"), NormalNoise.NoiseParameters.create(0, 0));
                 }
             }
             return this.getOrCreateNoise(key);
@@ -130,7 +130,7 @@ public class RandomState {
         Registry<NormalNoise.NoiseParameters> noises = (Registry<NormalNoise.NoiseParameters>)
                 Registry.REGISTRY.getOrThrow(NamespaceID.from("worldgen/noise"));
         return noiseCache.computeIfAbsent(id.toString(),
-                key -> new NormalNoise(random.fromHashOf(key), noises.getOrThrow(id)));
+                key -> NormalNoise.ofRandom(random.fromHashOf(key), noises.getOrThrow(id)));
     }
 
     public WorldgenRandom.Positional getOrCreateRandom(NamespaceID id) {

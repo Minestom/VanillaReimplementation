@@ -1,8 +1,9 @@
 package net.minestom.vanilla.generation.noise;
 
 import net.minestom.vanilla.generation.random.WorldgenRandom;
+import org.jetbrains.annotations.NotNull;
 
-public class SimplexNoise implements Noise {
+public record SimplexNoise(int[] p, double xo, double yo, double zo) implements Noise {
 
     private static final int[][] GRADIENT = new int[][]{{1, 1, 0}, {-1, 1, 0}, {1, -1, 0}, {-1, -1, 0}, {1, 0, 1},
             {-1, 0, 1}, {1, 0, -1}, {-1, 0, -1}, {0, 1, 1}, {0, -1, 1}, {0, 1, -1}, {0, -1, -1}, {1, 1, 0}, {0, -1, 1},
@@ -10,24 +11,22 @@ public class SimplexNoise implements Noise {
     private static final double F2 = 0.5 * (Math.sqrt(3.0) - 1.0);
     private static final double G2 = (3.0 - Math.sqrt(3.0)) / 6.0;
 
-    public final int[] p;
-    public final double xo, yo, zo;
-
-    public SimplexNoise(WorldgenRandom random) {
-        this.xo = random.nextDouble() * 256;
-        this.yo = random.nextDouble() * 256;
-        this.zo = random.nextDouble() * 256;
-        this.p = new int[256];
+    public static @NotNull SimplexNoise ofRandom(@NotNull WorldgenRandom random) {
+        double xo = random.nextDouble() * 256;
+        double yo = random.nextDouble() * 256;
+        double zo = random.nextDouble() * 256;
+        int[] p = new int[256];
 
         for (int i = 0; i < 256; i += 1) {
-            this.p[i] = i;
+            p[i] = i;
         }
         for (int i = 0; i < 256; i += 1) {
             int j = random.nextInt(256 - i);
-            int b = this.p[i];
-            this.p[i] = this.p[i + j];
-            this.p[i + j] = b;
+            int b = p[i];
+            p[i] = p[i + j];
+            p[i + j] = b;
         }
+        return new SimplexNoise(p, xo, yo, zo);
     }
 
     public double sample2D(double d, double d2) {
@@ -63,11 +62,11 @@ public class SimplexNoise implements Noise {
     }
 
     public double sample(double x, double y, double z) {
-        var d5 = (x + y + z) * 0.3333333333333333;
+        var d5 = (x + y + z) * (1 / 3.0);
         int x2 = (int) Math.floor(x + d5);
         int y2 = (int) Math.floor(y + d5);
         int z2 = (int) Math.floor(z + d5);
-        var d7 = (x2 + y2 + z2) * 0.16666666666666666;
+        var d7 = (x2 + y2 + z2) * (1 / 6.0);
         var x3 = x - (x2 - d7);
         var y3 = y - (y2 - d7);
         var z3 = z - (z2 - d7);

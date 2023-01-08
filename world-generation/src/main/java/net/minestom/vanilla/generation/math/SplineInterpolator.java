@@ -2,13 +2,14 @@ package net.minestom.vanilla.generation.math;
 
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 
+import java.util.StringJoiner;
+
 /**
  * Performs spline interpolation given a set of control points.
  */
 public class SplineInterpolator {
 
-    private final DoubleList mX;
-    private final DoubleList mY;
+    private final DoubleList mX, mY;
     private final double[] mM;
 
     private SplineInterpolator(DoubleList x, DoubleList y, double[] m) {

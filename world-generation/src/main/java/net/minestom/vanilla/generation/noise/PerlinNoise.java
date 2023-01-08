@@ -25,7 +25,7 @@ public class PerlinNoise implements Noise {
             for (int i = 0; i < amplitudes.size(); i++) {
                 if (amplitudes.getDouble(i) != 0.0) {
                     double octave = firstOctave + i;
-                    this.noiseLevels[i] = new ImprovedNoise(forkedRandom.fromHashOf("octave_" + octave));
+                    this.noiseLevels[i] = ImprovedNoise.ofRandom(forkedRandom.fromHashOf("octave_" + octave));
                 }
             }
         } else {
@@ -36,7 +36,7 @@ public class PerlinNoise implements Noise {
 
             for (int i = (int) -firstOctave; i >= 0; i -= 1) {
                 if (i < amplitudes.size() && amplitudes.getDouble(i) != 0) {
-                    this.noiseLevels[i] = new ImprovedNoise(random);
+                    this.noiseLevels[i] = ImprovedNoise.ofRandom(random);
                 } else {
                     random.consume(262);
                 }
@@ -60,7 +60,7 @@ public class PerlinNoise implements Noise {
             if (noise != null) {
                 value += this.amplitudes[i] * valueF * noise.sample(
                         PerlinNoise.wrap(x * inputF),
-                        fixY ? -noise.yo : PerlinNoise.wrap(y * inputF),
+                        fixY ? -noise.yo() : PerlinNoise.wrap(y * inputF),
                         PerlinNoise.wrap(z * inputF),
                         yScale * inputF,
                         yLimit * inputF);

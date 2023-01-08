@@ -2,31 +2,40 @@ package net.minestom.vanilla.generation.noise;
 
 import net.minestom.vanilla.generation.Util;
 import net.minestom.vanilla.generation.random.WorldgenRandom;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class BlendedNoise implements Noise {
-    public final PerlinNoise minLimitNoise;
-    public final PerlinNoise maxLimitNoise;
-    public final PerlinNoise mainNoise;
-    private final double xzMultiplier;
-    private final double yMultiplier;
-    public final double maxValue;
+public record BlendedNoise(@NotNull PerlinNoise minLimitNoise,
+                           @NotNull PerlinNoise maxLimitNoise,
+                           @NotNull PerlinNoise mainNoise,
+                           double xzMultiplier,
+                           double yMultiplier,
+                           double maxValue,
+                           double xzFactor,
+                           double yFactor,
+                           double smearScaleMultiplier) implements Noise {
 
-    // constructor fields
-    private final double xzFactor;
-    private final double yFactor;
-    private final double smearScaleMultiplier;
+    private BlendedNoise(WorldgenRandom random, @NotNull PerlinNoise minLimitNoise,
+                         double xzScale, double yScale, double xzFactor, double yFactor,
+                         double smearScaleMultiplier) {
+        this(
+                minLimitNoise,
+                new PerlinNoise(random, -15, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
+                new PerlinNoise(random, -7, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0}),
+                684.412 * xzScale,
+                684.412 * yScale,
+                minLimitNoise.edgeValue(yScale + 2), // TODO
+                xzFactor,
+                yFactor,
+                smearScaleMultiplier
+        );
+    }
 
     public BlendedNoise(WorldgenRandom random, double xzScale, double yScale, double xzFactor, double yFactor, double smearScaleMultiplier) {
-        this.xzFactor = xzFactor;
-        this.yFactor = yFactor;
-        this.smearScaleMultiplier = smearScaleMultiplier;
-        this.minLimitNoise = new PerlinNoise(random, -15, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
-        this.maxLimitNoise = new PerlinNoise(random, -15, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
-        this.mainNoise = new PerlinNoise(random, -7, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0});
-        this.xzMultiplier = 684.412 * xzScale;
-        this.yMultiplier = 684.412 * yScale;
-        this.maxValue = this.minLimitNoise.edgeValue(yScale + 2); //TODO
+        this(random,
+                new PerlinNoise(random, -15, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
+                xzScale, yScale, xzFactor, yFactor, smearScaleMultiplier
+        );
     }
 
     @Override
