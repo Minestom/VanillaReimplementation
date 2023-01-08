@@ -7,7 +7,6 @@ import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.vanilla.generation.Aquifer;
 import net.minestom.vanilla.generation.RandomState;
 import net.minestom.vanilla.generation.densityfunctions.DensityFunction;
-import net.minestom.vanilla.generation.densityfunctions.DensityFunctions;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -15,12 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 public class NoiseChunk {
-    public final int cellWidth;
-    public final int cellHeight;
-    public final int firstCellX;
-    public final int firstCellZ;
-    public final double firstNoiseX;
-    public final double firstNoiseZ;
+    public final int cellWidth, cellHeight;
+    public final int firstCellX, firstCellZ;
+    public final double firstNoiseX, firstNoiseZ;
     public final double noiseSizeXZ;
     private final Map<Long, Integer> preliminarySurfaceLevel = new HashMap<>();
     private final Aquifer aquifer;
@@ -31,8 +27,7 @@ public class NoiseChunk {
     public int cellCountY;
     public int cellNoiseMinY;
 
-    public int minX;
-    public int minZ;
+    public int minX, minZ;
     public NoiseSettings settings;
 
     public NoiseChunk(
@@ -59,7 +54,7 @@ public class NoiseChunk {
             Point chunkPos = new Vec(minX, 0, minZ);
             int minY = cellNoiseMinY * NoiseSettings.cellHeight(settings);
             int height = cellCountY * NoiseSettings.cellHeight(settings);
-            this.aquifer = new Aquifer.NoiseAquifer(this, chunkPos, randomState.router, randomState.aquiferRandom, minY, height, fluidPicker);
+            this.aquifer = Aquifer.noise(this, chunkPos, randomState.router, randomState.aquiferRandom, minY, height, fluidPicker);
         }
         DensityFunction finalDensity = randomState.router.finalDensity();
         this.materialRule = MaterialRule.fromList(List.of(
@@ -69,7 +64,7 @@ public class NoiseChunk {
     }
 
     public @Nullable Block getFinalState(int x, int y, int z) {
-        return this.materialRule.compute(DensityFunctions.context(x, y, z));
+        return this.materialRule.compute(new Vec(x, y, z));
     }
 
     public int getPreliminarySurfaceLevel(int quartX, int quartZ) {
@@ -77,7 +72,7 @@ public class NoiseChunk {
             int x = quartX << 2;
             int z = quartZ << 2;
             for (int y = this.settings.minY() + this.settings.height(); y >= this.settings.minY(); y -= this.cellHeight) {
-                double density = this.initialDensity.compute(DensityFunctions.context(x, y, z));
+                double density = this.initialDensity.compute(new Vec(x, y, z));
                 if (density > 0.390625) {
                     return y;
                 }
@@ -87,12 +82,12 @@ public class NoiseChunk {
     }
 
     public interface MaterialRule {
-        @Nullable Block compute(DensityFunction.Context context);
+        @Nullable Block compute(Point point);
 
         static MaterialRule fromList(List<MaterialRule> rules) {
-            return (context) -> {
+            return point -> {
                 for (MaterialRule rule : rules) {
-                    Block state = rule.compute(context);
+                    Block state = rule.compute(point);
                     if (state != null) return state;
                 }
                 return null;

@@ -11,9 +11,9 @@ import java.util.function.Function;
 
 public class Registry<T> {
     public static final Registry<Registry<?>> REGISTRY = new Registry<>(NamespaceID.from("root"));
+
     private final Map<NamespaceID, T> storage = new HashMap<>();
     private final Map<NamespaceID, T> builtin = new HashMap<>();
-
 
     public final NamespaceID key;
     public @Nullable Function<Object, T> parser;

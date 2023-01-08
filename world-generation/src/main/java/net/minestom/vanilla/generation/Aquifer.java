@@ -3,11 +3,10 @@ package net.minestom.vanilla.generation;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
-import net.minestom.vanilla.generation.densityfunctions.DensityFunction;
-import net.minestom.vanilla.generation.densityfunctions.DensityFunctions;
 import net.minestom.vanilla.generation.noise.NoiseChunk;
 import net.minestom.vanilla.generation.noise.NoiseRouter;
 import net.minestom.vanilla.generation.random.WorldgenRandom;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -16,7 +15,7 @@ import java.util.function.DoubleSupplier;
 
 public interface Aquifer {
 
-    @Nullable Block compute(DensityFunction.Context context, double density);
+    @Nullable Block compute(Point point, double density);
 
     record FluidStatus(int level, Block type) {
         public Block at(int level) {
@@ -29,15 +28,52 @@ public interface Aquifer {
     }
 
     static Aquifer createDisabled(FluidPicker fluidPicker) {
-        return (context, density) -> {
+        return (point, density) -> {
             if (density > 0) {
                 return null;
             }
-            return fluidPicker.pickFluid(context.blockX(), context.blockY(), context.blockZ()).at(context.blockY());
+            return fluidPicker.pickFluid(point.blockX(), point.blockY(), point.blockZ()).at(point.blockY());
         };
     }
 
-    class NoiseAquifer implements Aquifer {
+    public static @NotNull NoiseAquifer noise(@NotNull NoiseChunk noiseChunk,
+                                               @NotNull Point chunkPos,
+                                               @NotNull NoiseRouter router,
+                                               @NotNull WorldgenRandom.Positional random,
+                                               int minY,
+                                               int height,
+                                               @NotNull FluidPicker globalFluidPicker) {
+        int minGridX = NoiseAquifer.gridX(Util.chunkMinX(chunkPos)) - 1;
+        int minGridY = NoiseAquifer.gridY(minY) - 1;
+        int minGridZ = NoiseAquifer.gridZ(Util.chunkMinZ(chunkPos)) - 1;
+
+        int gridSizeX = NoiseAquifer.gridX(Util.chunkMaxX(chunkPos)) + 1 - minGridX + 1;
+        int gridSizeY = NoiseAquifer.gridY(minY + height) + 1 - minGridY + 1;
+        int gridSizeZ = NoiseAquifer.gridZ(Util.chunkMaxZ(chunkPos)) + 1 - minGridZ + 1;
+        return new NoiseAquifer(
+                minGridX, minGridY, minGridZ,
+                gridSizeX, gridSizeY,
+                gridSizeX * gridSizeY * gridSizeZ,
+                new HashMap<>(),
+                new HashMap<>(),
+                noiseChunk,
+                router,
+                random,
+                globalFluidPicker
+        );
+    }
+
+    record NoiseAquifer(
+            int minGridX, int minGridY, int minGridZ,
+            int gridSizeX, int gridSizeZ, int gridSize,
+            @NotNull Map<Integer, FluidStatus> aquiferCache,
+            @NotNull Map<Integer, Point> aquiferLocationCache,
+            @NotNull NoiseChunk noiseChunk,
+            @NotNull NoiseRouter router,
+            @NotNull WorldgenRandom.Positional random,
+            @NotNull FluidPicker globalFluidPicker
+    ) implements Aquifer {
+
         private static final int X_SPACING = 16;
         private static final int Y_SPACING = 12;
         private static final int Z_SPACING = 16;
@@ -49,62 +85,21 @@ public interface Aquifer {
                 {-2, 1}, {-1, 1}, {0, 1},
                 {1, 1}};
 
-        private final int minGridX;
-        private final int minGridY;
-        private final int minGridZ;
-        private final int gridSizeX;
-        private final int gridSizeZ;
-        private final int gridSize;
-
-        private final Map<Integer, FluidStatus> aquiferCache;
-        private final Map<Integer, Point> aquiferLocationCache;
-
-        private final NoiseChunk noiseChunk;
-        private final NoiseRouter router;
-        private final WorldgenRandom.Positional random;
-        private final FluidPicker globalFluidPicker;
-
-        public NoiseAquifer(
-                NoiseChunk noiseChunk,
-                Point chunkPos,
-                NoiseRouter router,
-                WorldgenRandom.Positional random,
-                int minY,
-                int height,
-                FluidPicker globalFluidPicker) {
-            this.noiseChunk = noiseChunk;
-            this.router = router;
-            this.random = random;
-            this.globalFluidPicker = globalFluidPicker;
-            this.minGridX = this.gridX(Util.chunkMinX(chunkPos)) - 1;
-            this.gridSizeX = this.gridX(Util.chunkMaxX(chunkPos)) + 1 - this.minGridX + 1;
-            this.minGridY = this.gridY(minY) - 1;
-            this.minGridZ = this.gridZ(Util.chunkMinZ(chunkPos)) - 1;
-            this.gridSizeZ = this.gridZ(Util.chunkMaxZ(chunkPos)) + 1 - this.minGridZ + 1;
-            int gridSizeY = this.gridY(minY + height) + 1 - this.minGridY + 1;
-            this.gridSize = this.gridSizeX * gridSizeY * this.gridSizeZ;
-            this.aquiferCache = new HashMap<>();
-            this.aquiferLocationCache = new HashMap<>();
-        }
-
-        public Block compute(DensityFunction.Context context, double density) {
-            int x = context.blockX();
-            int y = context.blockY();
-            int z = context.blockZ();
+        public Block compute(Point point, double density) {
+            int x = point.blockX();
+            int y = point.blockY();
+            int z = point.blockZ();
             if (density <= 0) {
                 if (this.globalFluidPicker.pickFluid(x, y, z).at(y).compare(Block.LAVA)) {
                     return Block.LAVA;
                 }
 
-                int gridX = this.gridX(x - 5);
-                int gridY = this.gridY(y + 1);
-                int gridZ = this.gridZ(z - 5);
-                double mag1 = Integer.MAX_VALUE;
-                double mag2 = Integer.MAX_VALUE;
-                double mag3 = Integer.MAX_VALUE;
-                Point loc1 = Vec.ZERO;
-                Point loc2 = Vec.ZERO;
-                Point loc3 = Vec.ZERO;
+                int gridX = gridX(x - 5);
+                int gridY = gridY(y + 1);
+                int gridZ = gridZ(z - 5);
+
+                double mag1 = Integer.MAX_VALUE, mag2 = Integer.MAX_VALUE, mag3 = Integer.MAX_VALUE;
+                Point loc1 = Vec.ZERO, loc2 = Vec.ZERO, loc3 = Vec.ZERO;
 
                 for (int xOffset = 0; xOffset <= 1; xOffset += 1) {
                     for (int yOffset = -1; yOffset <= 1; yOffset += 1) {
@@ -141,7 +136,7 @@ public interface Aquifer {
                 if (status1.at(y).compare(Block.WATER) && this.globalFluidPicker.pickFluid(x, y - 1, z).at(y - 1).compare(Block.LAVA)) {
                     pressure = 1;
                 } else if (similarity12 > -1) {
-                    DoubleSupplier barrier = Util.lazyDouble(() -> this.router.barrier().compute(DensityFunctions.context(x, y * 0.5, z)));
+                    DoubleSupplier barrier = Util.lazyDouble(() -> this.router.barrier().compute(new Vec(x, y * 0.5, z)));
                     double pressure12 = this.calculatePressure(y, status1, status2, barrier);
                     double pressure13 = this.calculatePressure(y, status1, status3, barrier);
                     double pressure23 = this.calculatePressure(y, status2, status3, barrier);
@@ -188,7 +183,7 @@ public interface Aquifer {
             int x = location.blockX();
             int y = location.blockY();
             int z = location.blockZ();
-            int index = this.getIndex(this.gridX(x), this.gridY(y), this.gridZ(z));
+            int index = this.getIndex(gridX(x), gridY(y), gridZ(z));
             FluidStatus cachedStatus = this.aquiferCache.get(index);
             if (cachedStatus != null) {
                 return cachedStatus;
@@ -226,7 +221,7 @@ public interface Aquifer {
             }
 
             double allowedFloodedness = isAquifer ? Util.clampedMap(minPreliminarySurface + 8 - y, 0, 64, 1, 0) : 0;
-            double floodedness = Util.clamp(this.router.fluidLevelFloodedness().compute(DensityFunctions.context(x, y * 0.67, z)), -1, 1);
+            double floodedness = Util.clamp(this.router.fluidLevelFloodedness().compute(new Vec(x, y * 0.67, z)), -1, 1);
             if (floodedness > Util.map(allowedFloodedness, 1, 0, -0.3, 0.8)) {
                 return globalStatus;
             }
@@ -235,7 +230,7 @@ public interface Aquifer {
             }
 
             int gridY = (int) Math.floor(y / 40);
-            double spread = this.router.fluidLevelSpread().compute(DensityFunctions.context(Math.floor(x / 16), gridY, Math.floor(z / 16)));
+            double spread = this.router.fluidLevelSpread().compute(new Vec(Math.floor(x / 16), gridY, Math.floor(z / 16)));
             int level = gridY * 40 + 20 + (int) Math.floor(spread / 3) * 3;
             int statusLevel = Math.min(minPreliminarySurface, level);
             Block fluid = this.getFluidType(x, y, z, globalStatus.type, level);
@@ -244,7 +239,7 @@ public interface Aquifer {
 
         private Block getFluidType(double x, double y, double z, Block global, int level) {
             if (level <= -10) {
-                double lava = this.router.lava().compute(DensityFunctions.context(Math.floor(x / 64), Math.floor(y / 40), Math.floor(z / 64)));
+                double lava = this.router.lava().compute(new Vec(Math.floor(x / 64), Math.floor(y / 40), Math.floor(z / 64)));
                 if (Math.abs(lava) > 0.3) {
                     return Block.LAVA;
                 }
@@ -278,16 +273,16 @@ public interface Aquifer {
             return index;
         }
 
-        private int gridX(int x) {
-            return (int) Math.floor(x / NoiseAquifer.X_SPACING);
+        private static int gridX(int x) {
+            return (int) Math.floor(x / X_SPACING);
         }
 
-        private int gridY(int y) {
-            return (int) Math.floor(y / NoiseAquifer.Y_SPACING);
+        private static int gridY(int y) {
+            return (int) Math.floor(y / Y_SPACING);
         }
 
-        private int gridZ(int z) {
-            return (int) Math.floor(z / NoiseAquifer.Z_SPACING);
+        private static int gridZ(int z) {
+            return (int) Math.floor(z / Z_SPACING);
         }
     }
 }

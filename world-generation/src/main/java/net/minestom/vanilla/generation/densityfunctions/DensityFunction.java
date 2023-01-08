@@ -1,9 +1,10 @@
 package net.minestom.vanilla.generation.densityfunctions;
 
+import net.minestom.server.coordinate.Point;
 import net.minestom.vanilla.generation.math.NumberFunction;
 
-public interface DensityFunction extends DensityFunctions, NumberFunction<DensityFunction.Context> {
-    double compute(Context context);
+public interface DensityFunction extends DensityFunctions, NumberFunction<Point> {
+    double compute(Point point);
 
     default double minValue() {
         return -maxValue();
@@ -15,23 +16,4 @@ public interface DensityFunction extends DensityFunctions, NumberFunction<Densit
         return visitor.map().apply(this);
     }
 
-    interface Context {
-        double x();
-
-        default int blockX() {
-            return (int) Math.floor(x());
-        }
-
-        double y();
-
-        default int blockY() {
-            return (int) Math.floor(y());
-        }
-
-        double z();
-
-        default int blockZ() {
-            return (int) Math.floor(z());
-        }
-    }
 }
