@@ -15,7 +15,7 @@ import java.util.function.DoubleSupplier;
 
 public interface Aquifer {
 
-    @Nullable Block compute(Point point, double density);
+    @Nullable Block compute(@NotNull Point point, double density);
 
     record FluidStatus(int level, Block type) {
         public Block at(int level) {
@@ -36,7 +36,7 @@ public interface Aquifer {
         };
     }
 
-    public static @NotNull NoiseAquifer noise(@NotNull NoiseChunk noiseChunk,
+    static @NotNull NoiseAquifer noise(@NotNull NoiseChunk noiseChunk,
                                                @NotNull Point chunkPos,
                                                @NotNull NoiseRouter router,
                                                @NotNull WorldgenRandom.Positional random,
@@ -85,7 +85,7 @@ public interface Aquifer {
                 {-2, 1}, {-1, 1}, {0, 1},
                 {1, 1}};
 
-        public Block compute(Point point, double density) {
+        public @Nullable Block compute(@NotNull Point point, double density) {
             int x = point.blockX();
             int y = point.blockY();
             int z = point.blockZ();

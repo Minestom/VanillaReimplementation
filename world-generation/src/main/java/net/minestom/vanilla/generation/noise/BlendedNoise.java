@@ -15,10 +15,9 @@ public record BlendedNoise(@NotNull PerlinNoise minLimitNoise,
                            double yFactor,
                            double smearScaleMultiplier) implements Noise {
 
-    private BlendedNoise(WorldgenRandom random, @NotNull PerlinNoise minLimitNoise,
-                         double xzScale, double yScale, double xzFactor, double yFactor,
-                         double smearScaleMultiplier) {
-        this(
+    public static @NotNull BlendedNoise ofDataAndRandom(WorldgenRandom random, double xzScale, double yScale, double xzFactor, double yFactor, double smearScaleMultiplier) {
+        var minLimitNoise = new PerlinNoise(random, -15, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+        return new BlendedNoise(
                 minLimitNoise,
                 new PerlinNoise(random, -15, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
                 new PerlinNoise(random, -7, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0}),
@@ -28,13 +27,6 @@ public record BlendedNoise(@NotNull PerlinNoise minLimitNoise,
                 xzFactor,
                 yFactor,
                 smearScaleMultiplier
-        );
-    }
-
-    public BlendedNoise(WorldgenRandom random, double xzScale, double yScale, double xzFactor, double yFactor, double smearScaleMultiplier) {
-        this(random,
-                new PerlinNoise(random, -15, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
-                xzScale, yScale, xzFactor, yFactor, smearScaleMultiplier
         );
     }
 

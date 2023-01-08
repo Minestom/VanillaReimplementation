@@ -103,7 +103,7 @@ public class RandomState {
                         return new DensityFunction.OldBlendedNoise(oldBlendedNoise.xzScale(),
                                 oldBlendedNoise.yScale(), oldBlendedNoise.xzFactor(), oldBlendedNoise.yFactor(),
                                 oldBlendedNoise.smearScaleMultiplier(),
-                                new BlendedNoise(random.fromHashOf(NamespaceID.from("terrain").toString()),
+                                BlendedNoise.ofDataAndRandom(random.fromHashOf(NamespaceID.from("terrain").toString()),
                                         oldBlendedNoise.xzScale(), oldBlendedNoise.yScale(), oldBlendedNoise.xzFactor(),
                                         oldBlendedNoise.yFactor(), oldBlendedNoise.smearScaleMultiplier()));
                     }
