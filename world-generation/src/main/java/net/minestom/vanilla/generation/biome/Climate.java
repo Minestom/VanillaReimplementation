@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
 public class Climate {
@@ -48,20 +49,7 @@ public class Climate {
         throw new IllegalArgumentException("Cannot convert " + value + " to Param");
     }
 
-    //        export class Param {
-//    constructor(
-//            public readonly min: number,
-//            public readonly max: number,
-//            ) {}
     public record Param(double min, double max) {
-        //    public distance(param: Param | number) {
-//			const diffMax = (typeof param === 'number' ? param : param.min) - this.max
-//			const diffMin = this.min - (typeof param === 'number' ? param : param.max)
-//        if (diffMax > 0) {
-//            return diffMax
-//        }
-//        return Math.max(diffMin, 0)
-//    }
         public double distance(Param param) {
             double diffMax = param.min() - this.max();
             double diffMin = this.min() - param.max();
@@ -71,12 +59,6 @@ public class Climate {
             return Math.max(diffMin, 0);
         }
 
-        //    public union(param: Param) {
-//        return new Param(
-//                Math.min(this.min, param.min),
-//                Math.max(this.max, param.max)
-//        )
-//    }
         public Param union(Param param) {
             return new Param(
                     Math.min(this.min(), param.min()),
@@ -84,11 +66,6 @@ public class Climate {
             );
         }
 
-        //    public static fromJson(obj: unknown) {
-//        if (typeof obj === 'number') return new Param(obj, obj)
-//			const [min, max] = Json.readArray(obj, e => Json.readNumber(e)) ?? []
-//        return new Param(min ?? 0, max ?? 0)
-//    }
         public static Param fromJson(Object obj) {
             if (obj instanceof JsonElement json) {
                 if (json.isJsonPrimitive()) {
@@ -108,16 +85,6 @@ public class Climate {
         }
     }
 
-    //	export class ParamPoint {
-//    constructor(
-//            public readonly temperature: Param,
-//            public readonly humidity: Param,
-//            public readonly continentalness: Param,
-//            public readonly erosion: Param,
-//            public readonly depth: Param,
-//            public readonly weirdness: Param,
-//            public readonly offset: number,
-//            ) {}
     public record ParamPoint(Param temperature, Param humidity, Param continentalness, Param erosion, Param depth,
                              Param weirdness, double offset) {
         public double fittness(ParamPoint point) {
@@ -130,21 +97,6 @@ public class Climate {
                     + Util.square(this.offset() - point.offset());
         }
 
-
-//    public fittness(point: ParamPoint | TargetPoint) {
-//        return square(this.temperature.distance(point.temperature))
-//                + square(this.humidity.distance(point.humidity))
-//                + square(this.continentalness.distance(point.continentalness))
-//                + square(this.erosion.distance(point.erosion))
-//                + square(this.depth.distance(point.depth))
-//                + square(this.weirdness.distance(point.weirdness))
-//                + square(this.offset - point.offset)
-//    }
-
-
-        //    public space() {
-//        return [this.temperature, this.humidity, this.continentalness, this.erosion, this.depth, this.weirdness, new Param(this.offset, this.offset)]
-//    }
         public List<Param> space() {
             return List.of(
                     temperature(),
@@ -157,18 +109,6 @@ public class Climate {
             );
         }
 
-        //    public static fromJson(obj: unknown) {
-//			const root = Json.readObject(obj) ?? {}
-//        return new ParamPoint(
-//                Param.fromJson(root.temperature),
-//                Param.fromJson(root.humidity),
-//                Param.fromJson(root.continentalness),
-//                Param.fromJson(root.erosion),
-//                Param.fromJson(root.depth),
-//                Param.fromJson(root.weirdness),
-//                Json.readInt(root.offset) ?? 0,
-//			)
-//    }
         public static ParamPoint fromJson(Object obj) {
             if (obj instanceof JsonElement json) {
                 if (json.isJsonObject()) {
@@ -188,46 +128,17 @@ public class Climate {
         }
     }
 
-
-    //	export class TargetPoint {
-//    constructor(
-//            public readonly temperature: number,
-//            public readonly humidity: number,
-//            public readonly continentalness: number,
-//            public readonly erosion: number,
-//            public readonly depth: number,
-//            public readonly weirdness: number,
-//            ) {}
     public record TargetPoint(double temperature, double humidity, double continentalness, double erosion, double depth,
                               double weirdness) {
 
-
-        //    get offset() {
-//        return 0
-//    }
         public double offset() {
             return 0;
         }
 
-        //    public toArray() {
-//        return [this.temperature, this.humidity, this.continentalness, this.erosion, this.depth, this.weirdness, this.offset]
-//    }
         public double[] toArray() {
             return new double[]{this.temperature(), this.humidity(), this.continentalness(), this.erosion(), this.depth(), this.weirdness(), this.offset()};
         }
     }
-
-//export class Parameters<T> {
-//    private readonly index: RTree<T>
-//
-//    constructor(public readonly things: [ParamPoint, () => T][]) {
-//        this.index = new RTree(things)
-//    }
-//
-//    public find(target: TargetPoint) {
-//        return this.index.search(target, (node, values) => node.distance(values))
-//    }
-//}
 
     public static class Parameters<T> {
         private final RTree<T> index;
@@ -241,25 +152,6 @@ public class Climate {
         }
     }
 
-    //	export class Sampler {
-//    constructor(
-//            public readonly temperature: DensityFunction,
-//            public readonly humidity: DensityFunction,
-//            public readonly continentalness: DensityFunction,
-//            public readonly erosion: DensityFunction,
-//            public readonly depth: DensityFunction,
-//            public readonly weirdness: DensityFunction,
-//            ) {}
-//
-//    public static fromRouter(router: NoiseRouter) {
-//        return new Climate.Sampler(router.temperature, router.vegetation, router.continents, router.erosion, router.depth, router.ridges)
-//    }
-//
-//    sample(x: number, y: number, z: number) {
-//			const context = DensityFunction.context(x << 2, y << 2, z << 2)
-//        return Climate.target(this.temperature.compute(context), this.humidity.compute(context), this.continentalness.compute(context), this.erosion.compute(context), this.depth.compute(context), this.weirdness.compute(context))
-//    }
-//}
     public record Sampler(DensityFunction temperature, DensityFunction humidity, DensityFunction continentalness,
                           DensityFunction erosion, DensityFunction depth, DensityFunction weirdness) {
         public static Sampler fromRouter(NoiseRouter router) {
@@ -322,7 +214,7 @@ public class Climate {
             }
             double f = Double.POSITIVE_INFINITY;
             int n3 = -1;
-            List<RSubTree<T>> result = new ArrayList<>();
+            List<RSubTree<T>> result;
             for (int n2 = 0; n2 < PARAMETER_SPACE; ++n2) {
                 nodes = RTree.sort(nodes, n2, false);
                 result = RTree.bucketize(nodes);
@@ -392,11 +284,10 @@ public class Climate {
 
         default double distance(double[] values) {
             var space = space();
-            double result = 0;
-            for (int i = 0; i < PARAMETER_SPACE; i += 1) {
-                result += Util.square(space.get(i).distance(Param.fromJson(values[i])));
-            }
-            return result;
+            return IntStream
+                    .range(0, PARAMETER_SPACE)
+                    .mapToDouble(i -> Util.square(space.get(i).distance(Param.fromJson(values[i]))))
+                    .sum();
         }
 
     }

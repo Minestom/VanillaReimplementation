@@ -3,9 +3,7 @@ package net.minestom.vanilla.generation;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -45,8 +43,8 @@ public class Registry<T> {
         return deleted;
     }
 
-    public NamespaceID[] keys() {
-        return this.storage.keySet().toArray(NamespaceID[]::new);
+    public Set<NamespaceID> keys() {
+        return Collections.unmodifiableSet(storage.keySet());
     }
 
     public boolean as(NamespaceID id) {

@@ -11,9 +11,7 @@ public class SimplexNoise implements Noise {
     private static final double G2 = (3.0 - Math.sqrt(3.0)) / 6.0;
 
     public final int[] p;
-    public final double xo;
-    public final double yo;
-    public final double zo;
+    public final double xo, yo, zo;
 
     public SimplexNoise(WorldgenRandom random) {
         this.xo = random.nextDouble() * 256;
@@ -73,12 +71,7 @@ public class SimplexNoise implements Noise {
         var x3 = x - (x2 - d7);
         var y3 = y - (y2 - d7);
         var z3 = z - (z2 - d7);
-        int a;
-        int b;
-        int c;
-        int d;
-        int e;
-        int f;
+        int a, b, c, d, e, f;
         if (x3 >= y3) {
             if (y3 >= z3) {
                 a = 1;
@@ -124,12 +117,12 @@ public class SimplexNoise implements Noise {
             e = 1;
             f = 0;
         }
-        double x4 = x3 - a + 0.16666666666666666;
-        double y4 = y3 - b + 0.16666666666666666;
-        double z4 = z3 - c + 0.16666666666666666;
-        double x5 = x3 - d + 0.3333333333333333;
-        double y5 = y3 - e + 0.3333333333333333;
-        double z5 = z3 - f + 0.3333333333333333;
+        double x4 = x3 - a + (1 / 6.0);
+        double y4 = y3 - b + (1 / 6.0);
+        double z4 = z3 - c + (1 / 6.0);
+        double x5 = x3 - d + (1 / 3.0);
+        double y5 = y3 - e + (1 / 3.0);
+        double z5 = z3 - f + (1 / 3.0);
         double x6 = x3 - 0.5;
         double y6 = y3 - 0.5;
         double z6 = z3 - 0.5;

@@ -10,9 +10,7 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 public class SurfaceContext {
-    public int blockX;
-    public int blockY;
-    public int blockZ;
+    public int blockX, blockY, blockZ;
     public int stoneDepthAbove;
     public int stoneDepthBelow;
     public int surfaceDepth;

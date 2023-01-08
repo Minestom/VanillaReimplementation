@@ -29,71 +29,30 @@ public record NoiseRouter(DensityFunction barrier,
                           DensityFunction veinRidged,
                           DensityFunction veinGap) {
 
-
-    //    export namespace NoiseRouter {
     public static final Function<Object, DensityFunction> fieldParser = obj ->
             new DensityFunctions.HolderHolder(Holder.parser(WorldgenRegistries.DENSITY_FUNCTION, DensityFunctions::fromJson).apply(obj));
 
-    //        export function fromJson(obj: unknown): NoiseRouter {
-//		const root = Json.readObject(obj) ?? {}
-//            return {
-//                    barrier: fieldParser(root.barrier),
-//                    fluidLevelFloodedness: fieldParser(root.fluid_level_floodedness),
-//                    fluidLevelSpread: fieldParser(root.fluid_level_spread),
-//                    lava: fieldParser(root.lava),
-//                    temperature: fieldParser(root.temperature),
-//                    vegetation: fieldParser(root.vegetation),
-//                    continents: fieldParser(root.continents),
-//                    erosion: fieldParser(root.erosion),
-//                    depth: fieldParser(root.depth),
-//                    ridges: fieldParser(root.ridges),
-//                    initialDensityWithoutJaggedness: fieldParser(root.initial_density_without_jaggedness),
-//                    finalDensity: fieldParser(root.final_density),
-//                    veinToggle: fieldParser(root.vein_toggle),
-//                    veinRidged: fieldParser(root.vein_ridged),
-//                    veinGap: fieldParser(root.vein_gap),
-//		}
-//        }
     public static NoiseRouter fromJson(Object obj) {
         JsonObject root = Util.jsonObject(obj);
         return new NoiseRouter(
-                Util.jsonRequire(root, "barrier", element -> fieldParser.apply(element)),
-                Util.jsonRequire(root, "fluid_level_floodedness", element -> fieldParser.apply(element)),
-                Util.jsonRequire(root, "fluid_level_spread", element -> fieldParser.apply(element)),
-                Util.jsonRequire(root, "lava", element -> fieldParser.apply(element)),
-                Util.jsonRequire(root, "temperature", element -> fieldParser.apply(element)),
-                Util.jsonRequire(root, "vegetation", element -> fieldParser.apply(element)),
-                Util.jsonRequire(root, "continents", element -> fieldParser.apply(element)),
-                Util.jsonRequire(root, "erosion", element -> fieldParser.apply(element)),
-                Util.jsonRequire(root, "depth", element -> fieldParser.apply(element)),
-                Util.jsonRequire(root, "ridges", element -> fieldParser.apply(element)),
-                Util.jsonRequire(root, "initial_density_without_jaggedness", element -> fieldParser.apply(element)),
-                Util.jsonRequire(root, "final_density", element -> fieldParser.apply(element)),
-                Util.jsonRequire(root, "vein_toggle", element -> fieldParser.apply(element)),
-                Util.jsonRequire(root, "vein_ridged", element -> fieldParser.apply(element)),
-                Util.jsonRequire(root, "vein_gap", element -> fieldParser.apply(element))
+                Util.jsonRequire(root, "barrier", fieldParser::apply),
+                Util.jsonRequire(root, "fluid_level_floodedness", fieldParser::apply),
+                Util.jsonRequire(root, "fluid_level_spread", fieldParser::apply),
+                Util.jsonRequire(root, "lava", fieldParser::apply),
+                Util.jsonRequire(root, "temperature", fieldParser::apply),
+                Util.jsonRequire(root, "vegetation", fieldParser::apply),
+                Util.jsonRequire(root, "continents", fieldParser::apply),
+                Util.jsonRequire(root, "erosion", fieldParser::apply),
+                Util.jsonRequire(root, "depth", fieldParser::apply),
+                Util.jsonRequire(root, "ridges", fieldParser::apply),
+                Util.jsonRequire(root, "initial_density_without_jaggedness", fieldParser::apply),
+                Util.jsonRequire(root, "final_density", fieldParser::apply),
+                Util.jsonRequire(root, "vein_toggle", fieldParser::apply),
+                Util.jsonRequire(root, "vein_ridged", fieldParser::apply),
+                Util.jsonRequire(root, "vein_gap", fieldParser::apply)
         );
     }
 
-    //        export function mapAll(router: NoiseRouter, visitor: DensityFunction.Visitor) {
-//            return {
-//                    barrier: router.barrier.mapAll(visitor),
-//                    fluidLevelFloodedness: router.fluidLevelFloodedness.mapAll(visitor),
-//                    fluidLevelSpread: router.fluidLevelSpread.mapAll(visitor),
-//                    lava: router.lava.mapAll(visitor),
-//                    temperature: router.temperature.mapAll(visitor),
-//                    vegetation: router.vegetation.mapAll(visitor),
-//                    continents: router.continents.mapAll(visitor),
-//                    erosion: router.erosion.mapAll(visitor),
-//                    depth: router.depth.mapAll(visitor),
-//                    ridges: router.ridges.mapAll(visitor),
-//                    initialDensityWithoutJaggedness: router.initialDensityWithoutJaggedness.mapAll(visitor),
-//                    finalDensity: router.finalDensity.mapAll(visitor),
-//                    veinToggle: router.veinToggle.mapAll(visitor),
-//                    veinRidged: router.veinRidged.mapAll(visitor),
-//                    veinGap: router.veinGap.mapAll(visitor),
-//		    }
-//        }
     public static NoiseRouter mapAll(NoiseRouter router, DensityFunction.Visitor visitor) {
         return new NoiseRouter(
                 router.barrier().mapAll(visitor),
