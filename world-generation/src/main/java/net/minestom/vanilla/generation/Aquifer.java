@@ -17,8 +17,8 @@ public interface Aquifer {
 
     @Nullable Block compute(@NotNull Point point, double density);
 
-    record FluidStatus(int level, Block type) {
-        public Block at(int level) {
+    record FluidStatus(int level, @NotNull Block type) {
+        public @NotNull Block at(int level) {
             return level < this.level ? this.type : Block.AIR;
         }
     }
@@ -27,7 +27,7 @@ public interface Aquifer {
         FluidStatus pickFluid(int x, int y, int z);
     }
 
-    static Aquifer createDisabled(FluidPicker fluidPicker) {
+    static @NotNull Aquifer createDisabled(@NotNull FluidPicker fluidPicker) {
         return (point, density) -> {
             if (density > 0) {
                 return null;

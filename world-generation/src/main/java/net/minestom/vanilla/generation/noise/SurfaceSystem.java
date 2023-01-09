@@ -16,8 +16,8 @@ import java.util.*;
 import java.util.function.Function;
 
 public class SurfaceSystem {
-    private final NormalNoise surfaceNoise;
-    private final NormalNoise surfaceSecondaryNoise;
+    private final Noise.Bounded surfaceNoise;
+    private final Noise.Bounded surfaceSecondaryNoise;
     private final WorldgenRandom.Positional random;
     private final Map<String, WorldgenRandom> positionalRandoms;
 

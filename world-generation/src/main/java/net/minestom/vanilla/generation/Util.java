@@ -135,11 +135,11 @@ public class Util {
         return x + 1;
     }
 
-    public static BigInteger fromBytes(byte[] digest) {
+    public static @NotNull BigInteger fromBytes(byte[] digest) {
         return new BigInteger(1, digest);
     }
 
-    public static <T> @NotNull T jsonRequire(JsonObject root, String key, Function<JsonElement, T> mapper) {
+    public static <T> @NotNull T jsonRequire(@NotNull JsonObject root, @NotNull String key, @NotNull Function<JsonElement, T> mapper) {
         JsonElement element = root.get(key);
         if (element == null) {
             throw new IllegalArgumentException("Missing required key " + key);
@@ -147,14 +147,14 @@ public class Util {
         return mapper.apply(element);
     }
 
-    public static JsonArray jsonArray(JsonElement element) {
+    public static JsonArray jsonArray(@NotNull JsonElement element) {
         if (element.isJsonArray()) {
             return element.getAsJsonArray();
         }
         throw new IllegalArgumentException("Expected array, got " + element);
     }
 
-    public static <T> List<T> jsonArray(JsonElement element, Function<JsonElement, T> mapper) {
+    public static <T> List<T> jsonArray(@NotNull JsonElement element, @NotNull Function<JsonElement, T> mapper) {
         if (element.isJsonArray()) {
             return StreamSupport.stream(element.getAsJsonArray().spliterator(), false)
                     .map(mapper)
@@ -163,7 +163,7 @@ public class Util {
         throw new IllegalArgumentException("Expected array, got " + element);
     }
 
-    public static <T> @NotNull T jsonElse(JsonObject root, String key, T defaultValue, Function<JsonElement, T> mapper) {
+    public static <T> T jsonElse(@NotNull JsonObject root, @NotNull String key, T defaultValue, @NotNull Function<JsonElement, T> mapper) {
         JsonElement element = root.get(key);
         if (element == null) {
             return defaultValue;
@@ -171,7 +171,7 @@ public class Util {
         return mapper.apply(element);
     }
 
-    public static <T> Supplier<T> lazy(Supplier<T> supplier) {
+    public static <T> @NotNull Supplier<T> lazy(@NotNull Supplier<T> supplier) {
         return new Supplier<>() {
             private T value;
 
@@ -185,7 +185,7 @@ public class Util {
         };
     }
 
-    public static IntSupplier lazyInt(IntSupplier supplier) {
+    public static @NotNull IntSupplier lazyInt(@NotNull IntSupplier supplier) {
         return new IntSupplier() {
             private int value;
 
@@ -199,7 +199,7 @@ public class Util {
         };
     }
 
-    public static DoubleSupplier lazyDouble(DoubleSupplier supplier) {
+    public static @NotNull DoubleSupplier lazyDouble(@NotNull DoubleSupplier supplier) {
         return new DoubleSupplier() {
             private double value;
 
@@ -213,15 +213,17 @@ public class Util {
         };
     }
 
+    public static final @NotNull Gson GSON = new GsonBuilder().create();
+
     public static JsonObject jsonObject(Object obj) {
         if (obj instanceof String str)
-            return jsonObject(new Gson().fromJson(str, JsonElement.class));
+            return jsonObject(Util.GSON.fromJson(str, JsonElement.class));
         if (!(obj instanceof JsonObject object))
             throw new IllegalArgumentException("Expected a JsonObject, got " + obj.getClass().getName());
         return object;
     }
 
-    public static <A> Function<JsonElement, List<A>> jsonReadArray(Function<JsonElement, A> mapper) {
+    public static <A> @NotNull Function<JsonElement, List<A>> jsonReadArray(@NotNull Function<JsonElement, A> mapper) {
         return element -> {
             if (element.isJsonArray()) {
                 return StreamSupport.stream(element.getAsJsonArray().spliterator(), false)
@@ -233,25 +235,23 @@ public class Util {
         };
     }
 
-    public static int chunkMinX(Point chunkPos) {
-        int chunkX = chunkPos.chunkX();
-        return chunkX * Chunk.CHUNK_SIZE_X;
+    public static int chunkMinX(@NotNull Point chunkPos) {
+        return chunkPos.chunkX() * Chunk.CHUNK_SIZE_X;
     }
 
-    public static int chunkMinZ(Point chunkPos) {
-        int chunkZ = chunkPos.chunkZ();
-        return chunkZ * Chunk.CHUNK_SIZE_Z;
+    public static int chunkMinZ(@NotNull Point chunkPos) {
+        return chunkPos.chunkZ() * Chunk.CHUNK_SIZE_Z;
     }
 
-    public static int chunkMaxX(Point chunkPos) {
+    public static int chunkMaxX(@NotNull Point chunkPos) {
         return chunkMinX(chunkPos) + Chunk.CHUNK_SIZE_X;
     }
 
-    public static int chunkMaxZ(Point chunkPos) {
+    public static int chunkMaxZ(@NotNull Point chunkPos) {
         return chunkMinZ(chunkPos) + Chunk.CHUNK_SIZE_Z;
     }
 
-    public static byte[] md5(String name) {
+    public static byte[] md5(@NotNull String name) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             return md.digest(name.getBytes(StandardCharsets.UTF_8));
@@ -260,7 +260,7 @@ public class Util {
         }
     }
 
-    public static Function<JsonElement, Block> jsonVanillaBlock() {
+    public static @NotNull Function<JsonElement, Block> jsonVanillaBlock() {
         return element -> {
             if (element.isJsonPrimitive()) {
                 String name = element.getAsString();
@@ -285,11 +285,11 @@ public class Util {
         };
     }
 
-    public static int chunkMinY(Chunk chunk) {
+    public static int chunkMinY(@NotNull Chunk chunk) {
         return chunk.getInstance().getDimensionType().getMinY();
     }
 
-    public static int chunkMaxY(Chunk chunk) {
+    public static int chunkMaxY(@NotNull Chunk chunk) {
         return chunk.getInstance().getDimensionType().getMaxY();
     }
 
@@ -345,7 +345,7 @@ public class Util {
         }
     }
 
-    public static @Nullable Double parseDouble(String str) {
+    public static @Nullable Double parseDouble(@NotNull String str) {
         try {
             return Double.parseDouble(str);
         } catch (NumberFormatException e) {

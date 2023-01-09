@@ -3,7 +3,7 @@ package net.minestom.vanilla.generation.noise;
 import net.minestom.vanilla.generation.random.WorldgenRandom;
 import org.jetbrains.annotations.NotNull;
 
-public record SimplexNoise(int[] p, double xo, double yo, double zo) implements Noise {
+record SimplexNoise(int[] p, double xOffset, double yOffset, double zOffset) implements Noise.TwoDimensional {
 
     private static final int[][] GRADIENT = new int[][]{{1, 1, 0}, {-1, 1, 0}, {1, -1, 0}, {-1, -1, 0}, {1, 0, 1},
             {-1, 0, 1}, {1, 0, -1}, {-1, 0, -1}, {0, 1, 1}, {0, -1, 1}, {0, 1, -1}, {0, -1, -1}, {1, 1, 0}, {0, -1, 1},
@@ -11,7 +11,7 @@ public record SimplexNoise(int[] p, double xo, double yo, double zo) implements 
     private static final double F2 = 0.5 * (Math.sqrt(3.0) - 1.0);
     private static final double G2 = (3.0 - Math.sqrt(3.0)) / 6.0;
 
-    public static @NotNull SimplexNoise ofRandom(@NotNull WorldgenRandom random) {
+    static @NotNull SimplexNoise create(@NotNull WorldgenRandom random) {
         double xo = random.nextDouble() * 256;
         double yo = random.nextDouble() * 256;
         double zo = random.nextDouble() * 256;
@@ -62,11 +62,11 @@ public record SimplexNoise(int[] p, double xo, double yo, double zo) implements 
     }
 
     public double sample(double x, double y, double z) {
-        var d5 = (x + y + z) * (1 / 3.0);
+        var d5 = (x + y + z) * (1.0 / 3.0);
         int x2 = (int) Math.floor(x + d5);
         int y2 = (int) Math.floor(y + d5);
         int z2 = (int) Math.floor(z + d5);
-        var d7 = (x2 + y2 + z2) * (1 / 6.0);
+        var d7 = (x2 + y2 + z2) * (1.0 / 6.0);
         var x3 = x - (x2 - d7);
         var y3 = y - (y2 - d7);
         var z3 = z - (z2 - d7);
@@ -116,12 +116,12 @@ public record SimplexNoise(int[] p, double xo, double yo, double zo) implements 
             e = 1;
             f = 0;
         }
-        double x4 = x3 - a + (1 / 6.0);
-        double y4 = y3 - b + (1 / 6.0);
-        double z4 = z3 - c + (1 / 6.0);
-        double x5 = x3 - d + (1 / 3.0);
-        double y5 = y3 - e + (1 / 3.0);
-        double z5 = z3 - f + (1 / 3.0);
+        double x4 = x3 - a + (1.0 / 6.0);
+        double y4 = y3 - b + (1.0 / 6.0);
+        double z4 = z3 - c + (1.0 / 6.0);
+        double x5 = x3 - d + (1.0 / 3.0);
+        double y5 = y3 - e + (1.0 / 3.0);
+        double z5 = z3 - f + (1.0 / 3.0);
         double x6 = x3 - 0.5;
         double y6 = y3 - 0.5;
         double z6 = z3 - 0.5;

@@ -27,46 +27,46 @@ public class Climate {
         return new ParamPoint(param(temperature), param(humidity), param(continentalness), param(erosion), param(depth), param(weirdness), offset);
     }
 
-    public static Param param(double min, double max) {
+    public static @NotNull Param param(double min, double max) {
         return new Param(min, max);
     }
 
-    public static Param param(double value) {
+    public static @NotNull Param param(double value) {
         return new Param(value, value);
     }
 
-    public static Param param(Param value) {
+    public static @NotNull Param param(@NotNull Param value) {
         return value;
     }
 
-    public static Param param(Object value) {
-        if (value instanceof Param) {
-            return (Param) value;
+    public static @NotNull Param param(Object value) {
+        if (value instanceof Param param) {
+            return param;
         }
-        if (value instanceof Number) {
-            return new Param(((Number) value).doubleValue(), ((Number) value).doubleValue());
+        if (value instanceof Number number) {
+            return param(number.doubleValue());
         }
         throw new IllegalArgumentException("Cannot convert " + value + " to Param");
     }
 
     public record Param(double min, double max) {
-        public double distance(Param param) {
-            double diffMax = param.min() - this.max();
-            double diffMin = this.min() - param.max();
+        public double distance(@NotNull Param other) {
+            double diffMax = other.min() - this.max();
+            double diffMin = this.min() - other.max();
             if (diffMax > 0) {
                 return diffMax;
             }
             return Math.max(diffMin, 0);
         }
 
-        public Param union(Param param) {
+        public @NotNull Param union(@NotNull Param other) {
             return new Param(
-                    Math.min(this.min(), param.min()),
-                    Math.max(this.max(), param.max())
+                    Math.min(this.min(), other.min()),
+                    Math.max(this.max(), other.max())
             );
         }
 
-        public static Param fromJson(Object obj) {
+        public static @NotNull Param fromJson(Object obj) {
             if (obj instanceof JsonElement json) {
                 if (json.isJsonPrimitive()) {
                     return fromJson(json.getAsDouble());
@@ -77,27 +77,27 @@ public class Climate {
                             .toArray();
                     return new Param(array[0], array[1]);
                 }
-            }
-            if (obj instanceof Number) {
-                return new Param(((Number) obj).doubleValue(), ((Number) obj).doubleValue());
+            } else if (obj instanceof Number number) {
+                return param(number.doubleValue());
             }
             throw new IllegalArgumentException("Cannot convert " + obj + " to Param");
         }
     }
 
-    public record ParamPoint(Param temperature, Param humidity, Param continentalness, Param erosion, Param depth,
-                             Param weirdness, double offset) {
-        public double fittness(ParamPoint point) {
-            return Util.square(this.temperature().distance(point.temperature()))
-                    + Util.square(this.humidity().distance(point.humidity()))
-                    + Util.square(this.continentalness().distance(point.continentalness()))
-                    + Util.square(this.erosion().distance(point.erosion()))
-                    + Util.square(this.depth().distance(point.depth()))
-                    + Util.square(this.weirdness().distance(point.weirdness()))
-                    + Util.square(this.offset() - point.offset());
+    public record ParamPoint(@NotNull Param temperature, @NotNull Param humidity, @NotNull Param continentalness,
+                             @NotNull Param erosion, @NotNull Param depth, @NotNull Param weirdness, double offset) {
+
+        public double fittness(@NotNull ParamPoint other) {
+            return Util.square(this.temperature().distance(other.temperature()))
+                    + Util.square(this.humidity().distance(other.humidity()))
+                    + Util.square(this.continentalness().distance(other.continentalness()))
+                    + Util.square(this.erosion().distance(other.erosion()))
+                    + Util.square(this.depth().distance(other.depth()))
+                    + Util.square(this.weirdness().distance(other.weirdness()))
+                    + Util.square(this.offset() - other.offset());
         }
 
-        public List<Param> space() {
+        public @NotNull List<@NotNull Param> space() {
             return List.of(
                     temperature(),
                     humidity(),
@@ -109,27 +109,24 @@ public class Climate {
             );
         }
 
-        public static ParamPoint fromJson(Object obj) {
-            if (obj instanceof JsonElement json) {
-                if (json.isJsonObject()) {
-                    JsonObject root = json.getAsJsonObject();
-                    return new ParamPoint(
-                            Param.fromJson(root.get("temperature")),
-                            Param.fromJson(root.get("humidity")),
-                            Param.fromJson(root.get("continentalness")),
-                            Param.fromJson(root.get("erosion")),
-                            Param.fromJson(root.get("depth")),
-                            Param.fromJson(root.get("weirdness")),
-                            root.get("offset").getAsInt()
-                    );
-                }
+        public static @NotNull ParamPoint fromJson(Object obj) {
+            if (!(obj instanceof JsonObject root)) {
+                throw new IllegalArgumentException("Cannot convert " + obj + " to ParamPoint");
             }
-            throw new IllegalArgumentException("Cannot convert " + obj + " to ParamPoint");
+            return new ParamPoint(
+                    Param.fromJson(root.get("temperature")),
+                    Param.fromJson(root.get("humidity")),
+                    Param.fromJson(root.get("continentalness")),
+                    Param.fromJson(root.get("erosion")),
+                    Param.fromJson(root.get("depth")),
+                    Param.fromJson(root.get("weirdness")),
+                    root.get("offset").getAsInt()
+            );
         }
     }
 
-    public record TargetPoint(double temperature, double humidity, double continentalness, double erosion, double depth,
-                              double weirdness) {
+    public record TargetPoint(double temperature, double humidity, double continentalness,
+                              double erosion, double depth, double weirdness) {
 
         public double offset() {
             return 0;
@@ -152,13 +149,15 @@ public class Climate {
         }
     }
 
-    public record Sampler(DensityFunction temperature, DensityFunction humidity, DensityFunction continentalness,
-                          DensityFunction erosion, DensityFunction depth, DensityFunction weirdness) {
-        public static Sampler fromRouter(NoiseRouter router) {
+    public record Sampler(@NotNull DensityFunction temperature, @NotNull DensityFunction humidity,
+                          @NotNull DensityFunction continentalness, @NotNull DensityFunction erosion,
+                          @NotNull DensityFunction depth, @NotNull DensityFunction weirdness) {
+
+        public static @NotNull Sampler fromRouter(@NotNull NoiseRouter router) {
             return new Sampler(router.temperature(), router.vegetation(), router.continents(), router.erosion(), router.depth(), router.ridges());
         }
 
-        public TargetPoint sample(int x, int y, int z) {
+        public @NotNull TargetPoint sample(int x, int y, int z) {
             Point point = new Vec(x << 2, y << 2, z << 2);
             return Climate.target(
                     this.temperature().compute(point),
@@ -172,7 +171,7 @@ public class Climate {
     }
 
     interface DistanceMetric<T> {
-        double distance(RNode<T> node, double[] values);
+        double distance(@NotNull RNode<T> node, double[] values);
     }
 
     public static class RTree<T> {
@@ -180,20 +179,19 @@ public class Climate {
         private static final int CHILDREN_PER_NODE = 10;
         private final RNode<T> root;
 
-        public RTree(Map<ParamPoint, Supplier<T>> points) {
+        public RTree(@NotNull Map<ParamPoint, Supplier<T>> points) {
             if (points.isEmpty()) {
                 throw new IllegalArgumentException("At least one point is required to build search tree");
             }
             var pointList = points.entrySet()
                     .stream()
-                    .map(entry -> new RLeaf<>(entry.getKey(),
-                            entry.getValue()))
+                    .map(entry -> new RLeaf<>(entry.getKey(), entry.getValue()))
                     .map(leaf -> (RNode<T>) leaf)
                     .toList();
             this.root = RTree.build(pointList);
         }
 
-        private static <T> RNode<T> build(List<RNode<T>> nodes) {
+        private static <T> RNode<T> build(@NotNull List<RNode<T>> nodes) {
             if (nodes.size() == 1) {
                 return nodes.get(0);
             }

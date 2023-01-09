@@ -4,9 +4,9 @@ import net.minestom.vanilla.generation.Util;
 import net.minestom.vanilla.generation.random.WorldgenRandom;
 import org.jetbrains.annotations.NotNull;
 
-public record ImprovedNoise(int[] p, double xo, double yo, double zo) implements Noise {
+record ImprovedNoise(int[] p, double xOffset, double yOffset, double zOffset) implements Noise.Scaled {
 
-    public static @NotNull ImprovedNoise ofRandom(@NotNull WorldgenRandom random) {
+    static @NotNull ImprovedNoise create(@NotNull WorldgenRandom random) {
         double xo = random.nextDouble() * 256;
         double yo = random.nextDouble() * 256;
         double zo = random.nextDouble() * 256;
@@ -29,9 +29,9 @@ public record ImprovedNoise(int[] p, double xo, double yo, double zo) implements
     }
 
     public double sample(double x, double y, double z, double yScale, double yLimit) {
-        double x2 = x + this.xo;
-        double y2 = y + this.yo;
-        double z2 = z + this.zo;
+        double x2 = x + this.xOffset;
+        double y2 = y + this.yOffset;
+        double z2 = z + this.zOffset;
         int x3 = (int) Math.floor(x2);
         int y3 = (int) Math.floor(y2);
         int z3 = (int) Math.floor(z2);

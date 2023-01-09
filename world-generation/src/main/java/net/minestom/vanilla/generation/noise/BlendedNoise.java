@@ -5,21 +5,22 @@ import net.minestom.vanilla.generation.random.WorldgenRandom;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public record BlendedNoise(@NotNull PerlinNoise minLimitNoise,
-                           @NotNull PerlinNoise maxLimitNoise,
-                           @NotNull PerlinNoise mainNoise,
-                           double xzMultiplier,
-                           double yMultiplier,
-                           double maxValue,
-                           double xzFactor,
-                           double yFactor,
-                           double smearScaleMultiplier) implements Noise {
+record BlendedNoise(@NotNull PerlinNoise minLimitNoise,
+                    @NotNull PerlinNoise maxLimitNoise,
+                    @NotNull PerlinNoise mainNoise,
+                    double xzMultiplier,
+                    double yMultiplier,
+                    double maxValue,
+                    double xzFactor,
+                    double yFactor,
+                    double smearScaleMultiplier) implements Noise.Bounded {
 
-    public static @NotNull BlendedNoise ofDataAndRandom(WorldgenRandom random, double xzScale, double yScale, double xzFactor, double yFactor, double smearScaleMultiplier) {
+    static @NotNull BlendedNoise create(@NotNull WorldgenRandom random, double xzScale, double yScale, double xzFactor, double yFactor, double smearScaleMultiplier) {
         var minLimitNoise = new PerlinNoise(random, -15, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+        var maxLimitNoise = new PerlinNoise(random, -15, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
         return new BlendedNoise(
                 minLimitNoise,
-                new PerlinNoise(random, -15, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
+                maxLimitNoise,
                 new PerlinNoise(random, -7, new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0}),
                 684.412 * xzScale,
                 684.412 * yScale,
@@ -43,7 +44,7 @@ public record BlendedNoise(@NotNull PerlinNoise minLimitNoise,
         double smear = this.yMultiplier * this.smearScaleMultiplier;
         double factoredSmear = smear / this.yFactor;
 
-        @Nullable ImprovedNoise noise;
+        @Nullable Noise.Scaled noise;
         double value = 0;
         double factor = 1;
         for (int i = 0; i < 8; i += 1) {

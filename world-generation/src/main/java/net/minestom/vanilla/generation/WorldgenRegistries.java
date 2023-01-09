@@ -3,21 +3,21 @@ package net.minestom.vanilla.generation;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.generation.densityfunctions.DensityFunction;
 import net.minestom.vanilla.generation.densityfunctions.DensityFunctions;
+import net.minestom.vanilla.generation.noise.Noise;
 import net.minestom.vanilla.generation.noise.NoiseGeneratorSettings;
-import net.minestom.vanilla.generation.noise.NormalNoise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
 public class WorldgenRegistries {
-    public static final Registry<NormalNoise.NoiseParameters> NOISE = register("worldgen/noise", NormalNoise.NoiseParameters::fromJson);
+    public static final Registry<Noise.NoiseParameters> NOISE = register("worldgen/noise", Noise.NoiseParameters::fromJson);
     public static final Registry<DensityFunction> DENSITY_FUNCTION = register("worldgen/density_function", DensityFunctions::fromJson);
     public static final Registry<NoiseGeneratorSettings> NOISE_SETTINGS = register("worldgen/noise_settings", NoiseGeneratorSettings::fromJson);
 
     static {
         // Noise parameters
         for (var entry : Util.noiseParametersJsons().entrySet()) {
-            NOISE.register(NamespaceID.from(entry.getKey()), NormalNoise.NoiseParameters.fromJson(entry.getValue()));
+            NOISE.register(NamespaceID.from(entry.getKey()), Noise.NoiseParameters.fromJson(entry.getValue()));
         }
 
         // Density functions
@@ -39,10 +39,10 @@ public class WorldgenRegistries {
         return registry;
     }
 
-    public static final Holder<NormalNoise.NoiseParameters> SURFACE_NOISE = createNoise("surface", -6, 1, 1, 1);
-    public static final Holder<NormalNoise.NoiseParameters> SURFACE_SECONDARY_NOISE = createNoise("surface_secondary", -6, 1, 1, 0, 1);
+    public static final Holder<Noise.NoiseParameters> SURFACE_NOISE = createNoise("surface", -6, 1, 1, 1);
+    public static final Holder<Noise.NoiseParameters> SURFACE_SECONDARY_NOISE = createNoise("surface_secondary", -6, 1, 1, 0, 1);
 
-    static Holder<NormalNoise.NoiseParameters> createNoise(String name, double firstOctave, double @NotNull ... amplitudes) {
-        return WorldgenRegistries.NOISE.register(NamespaceID.from(name), NormalNoise.NoiseParameters.create(firstOctave, amplitudes), true);
+    static Holder<Noise.NoiseParameters> createNoise(String name, double firstOctave, double @NotNull ... amplitudes) {
+        return WorldgenRegistries.NOISE.register(NamespaceID.from(name), Noise.NoiseParameters.create(firstOctave, amplitudes), true);
     }
 }

@@ -4,8 +4,8 @@ import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.minestom.vanilla.generation.random.WorldgenRandom;
 import net.minestom.vanilla.generation.random.XoroshiroRandom;
 
-public class PerlinNoise implements Noise {
-    public final ImprovedNoise[] noiseLevels;
+class PerlinNoise implements Noise {
+    public final Noise.Scaled[] noiseLevels;
     public final double[] amplitudes;
     public final double lowestFreqInputFactor;
     public final double lowestFreqValueFactor;
@@ -17,15 +17,15 @@ public class PerlinNoise implements Noise {
 
     public PerlinNoise(WorldgenRandom random, double firstOctave, DoubleList amplitudes) {
         this.amplitudes = amplitudes.toDoubleArray();
-        this.noiseLevels = new ImprovedNoise[amplitudes.size()];
 
+        var noiseLevels = new Noise.Scaled[amplitudes.size()];
         if (random instanceof XoroshiroRandom) {
             WorldgenRandom.Positional forkedRandom = random.forkPositional();
 
             for (int i = 0; i < amplitudes.size(); i++) {
                 if (amplitudes.getDouble(i) != 0.0) {
                     double octave = firstOctave + i;
-                    this.noiseLevels[i] = ImprovedNoise.ofRandom(forkedRandom.fromHashOf("octave_" + octave));
+                    noiseLevels[i] = Noise.improved(forkedRandom.fromHashOf("octave_" + octave));
                 }
             }
         } else {
@@ -36,12 +36,14 @@ public class PerlinNoise implements Noise {
 
             for (int i = (int) -firstOctave; i >= 0; i -= 1) {
                 if (i < amplitudes.size() && amplitudes.getDouble(i) != 0) {
-                    this.noiseLevels[i] = ImprovedNoise.ofRandom(random);
+                    noiseLevels[i] = Noise.improved(random);
                 } else {
                     random.consume(262);
                 }
             }
         }
+
+        this.noiseLevels = noiseLevels;
         this.lowestFreqInputFactor = Math.pow(2, firstOctave);
         this.lowestFreqValueFactor = Math.pow(2, (amplitudes.size() - 1)) / (Math.pow(2, amplitudes.size()) - 1);
         this.maxValue = this.edgeValue(2);
@@ -56,11 +58,11 @@ public class PerlinNoise implements Noise {
         double inputF = this.lowestFreqInputFactor;
         double valueF = this.lowestFreqValueFactor;
         for (var i = 0; i < this.noiseLevels.length; i += 1) {
-            ImprovedNoise noise = this.noiseLevels[i];
+            Noise.Scaled noise = this.noiseLevels[i];
             if (noise != null) {
                 value += this.amplitudes[i] * valueF * noise.sample(
                         PerlinNoise.wrap(x * inputF),
-                        fixY ? -noise.yo() : PerlinNoise.wrap(y * inputF),
+                        fixY ? -noise.yOffset() : PerlinNoise.wrap(y * inputF),
                         PerlinNoise.wrap(z * inputF),
                         yScale * inputF,
                         yLimit * inputF);
@@ -71,7 +73,7 @@ public class PerlinNoise implements Noise {
         return value;
     }
 
-    public ImprovedNoise getOctaveNoise(int i) {
+    public Noise.Scaled getOctaveNoise(int i) {
         return this.noiseLevels[this.noiseLevels.length - 1 - i];
     }
 

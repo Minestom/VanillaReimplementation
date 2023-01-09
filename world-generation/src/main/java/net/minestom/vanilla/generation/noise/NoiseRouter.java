@@ -76,7 +76,7 @@ public record NoiseRouter(DensityFunction barrier,
     // new Map<string, [bigint | number, bigint | number, NormalNoise]>()
     static final Map<String, Object[]> noiseCache = new HashMap<>();
 
-    static NormalNoise instantiate(WorldgenRandom.Positional random, Holder<NormalNoise.NoiseParameters> noise) {
+    static Noise.Bounded instantiate(WorldgenRandom.Positional random, Holder<NormalNoise.NoiseParameters> noise) {
         if (noise.key() == null)
             throw new Error("Cannot instantiate noise from direct holder");
         var key = noise.key().toString();
@@ -85,7 +85,7 @@ public record NoiseRouter(DensityFunction barrier,
         if (cached != null && Objects.equals(cached[0], randomKey[0]) && Objects.equals(cached[1], randomKey[1])) {
             return (NormalNoise) cached[2];
         }
-        var result = NormalNoise.ofRandom(random.fromHashOf(key), noise.value());
+        var result = Noise.normal(random.fromHashOf(key), noise.value());
         noiseCache.put(key, new Object[]{randomKey[0], randomKey[1], result});
         return result;
     }

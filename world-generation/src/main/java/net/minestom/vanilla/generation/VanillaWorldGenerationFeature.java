@@ -18,7 +18,7 @@ public class VanillaWorldGenerationFeature implements VanillaReimplementation.Fe
             NoiseGeneratorSettings settings = WorldgenRegistries.NOISE_SETTINGS.getOrThrow(NamespaceID.from("minecraft:overworld"));
 //            BiomeSource.fromJson()
 
-            NoiseChunkGenerator generator = new NoiseChunkGenerator((x, y, z, sampler) -> plains, settings, event.getInstance().getDimensionType());
+            NoiseChunkGenerator generator = new NoiseChunkGenerator(BiomeSource.fixed(plains), settings, event.getInstance().getDimensionType());
             event.getInstance().setChunkGenerator(generator);
         });
     }

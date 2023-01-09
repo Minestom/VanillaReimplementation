@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public class RandomState {
-    private final Map<String, NormalNoise> noiseCache;
+    private final Map<String, Noise.Bounded> noiseCache;
     private final Map<String, WorldgenRandom.Positional> randomCache;
 
     public final WorldgenRandom.Positional random;
@@ -43,20 +43,20 @@ public class RandomState {
     public DensityFunctions.Visitor createVisitor(NoiseSettings noiseSettings, boolean legacyRandom) {
         Map<String, DensityFunction> mapped = new HashMap<>();
 
-        Function<Holder<NormalNoise.NoiseParameters>, NormalNoise> getNoise = (noise) -> {
+        Function<Holder<Noise.NoiseParameters>, Noise.Bounded> getNoise = (noise) -> {
             NamespaceID key = noise.key();
             if (key == null) {
                 throw new Error("Cannot create noise without key");
             }
             if (legacyRandom) {
                 if (key.equals(NamespaceID.from("temperature"))) {
-                    return NormalNoise.ofRandom(new LegacyRandom(this.seed), NormalNoise.NoiseParameters.create(-7, 1, 1));
+                    return Noise.normal(new LegacyRandom(this.seed), Noise.NoiseParameters.create(-7, 1, 1));
                 }
                 if (key.equals(NamespaceID.from("vegetation"))) {
-                    return NormalNoise.ofRandom(new LegacyRandom(this.seed + 1), NormalNoise.NoiseParameters.create(-7, 1, 1));
+                    return Noise.normal(new LegacyRandom(this.seed + 1), Noise.NoiseParameters.create(-7, 1, 1));
                 }
                 if (key.equals(NamespaceID.from("offset"))) {
-                    return NormalNoise.ofRandom(this.random.fromHashOf("offset"), NormalNoise.NoiseParameters.create(0, 0));
+                    return Noise.normal(this.random.fromHashOf("offset"), Noise.NoiseParameters.create(0, 0));
                 }
             }
             return this.getOrCreateNoise(key);
@@ -103,7 +103,7 @@ public class RandomState {
                         return new DensityFunction.OldBlendedNoise(oldBlendedNoise.xzScale(),
                                 oldBlendedNoise.yScale(), oldBlendedNoise.xzFactor(), oldBlendedNoise.yFactor(),
                                 oldBlendedNoise.smearScaleMultiplier(),
-                                BlendedNoise.ofDataAndRandom(random.fromHashOf(NamespaceID.from("terrain").toString()),
+                                Noise.blended(random.fromHashOf(NamespaceID.from("terrain").toString()),
                                         oldBlendedNoise.xzScale(), oldBlendedNoise.yScale(), oldBlendedNoise.xzFactor(),
                                         oldBlendedNoise.yFactor(), oldBlendedNoise.smearScaleMultiplier()));
                     }
@@ -125,12 +125,12 @@ public class RandomState {
         };
     }
 
-    public NormalNoise getOrCreateNoise(NamespaceID id) {
+    public Noise.Bounded getOrCreateNoise(NamespaceID id) {
         //noinspection unchecked
-        Registry<NormalNoise.NoiseParameters> noises = (Registry<NormalNoise.NoiseParameters>)
+        Registry<Noise.NoiseParameters> noises = (Registry<Noise.NoiseParameters>)
                 Registry.REGISTRY.getOrThrow(NamespaceID.from("worldgen/noise"));
         return noiseCache.computeIfAbsent(id.toString(),
-                key -> NormalNoise.ofRandom(random.fromHashOf(key), noises.getOrThrow(id)));
+                key -> Noise.normal(random.fromHashOf(key), noises.getOrThrow(id)));
     }
 
     public WorldgenRandom.Positional getOrCreateRandom(NamespaceID id) {

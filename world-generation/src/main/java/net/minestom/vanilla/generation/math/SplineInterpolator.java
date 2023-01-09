@@ -2,8 +2,6 @@ package net.minestom.vanilla.generation.math;
 
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 
-import java.util.StringJoiner;
-
 /**
  * Performs spline interpolation given a set of control points.
  */

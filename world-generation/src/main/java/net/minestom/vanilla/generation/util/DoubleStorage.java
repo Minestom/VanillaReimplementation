@@ -6,9 +6,12 @@ import org.jetbrains.annotations.NotNull;
 
 public interface DoubleStorage {
 
+    /**
+     * @return the double associated with the provided coordinates
+     */
     double obtain(int x, int y, int z);
 
-    static DoubleStorage from(DensityFunction densityFunction) {
+    static @NotNull DoubleStorage from(@NotNull DensityFunction densityFunction) {
         return (x, y, z) -> densityFunction.compute(new Vec(x, y, z));
     }
 
@@ -17,7 +20,7 @@ public interface DoubleStorage {
      * @param original the original storage to cache
      * @return a new storage that caches the original
      */
-    static @NotNull DoubleStorage exactCache(DoubleStorage original) {
+    static @NotNull DoubleStorage exactCache(@NotNull DoubleStorage original) {
         return new DoubleStorageExactImpl(original);
     }
 }

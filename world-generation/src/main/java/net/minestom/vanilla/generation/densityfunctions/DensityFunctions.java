@@ -11,9 +11,9 @@ import net.minestom.vanilla.generation.Holder;
 import net.minestom.vanilla.generation.Util;
 import net.minestom.vanilla.generation.WorldgenRegistries;
 import net.minestom.vanilla.generation.math.CubicSpline;
-import net.minestom.vanilla.generation.noise.BlendedNoise;
-import net.minestom.vanilla.generation.noise.NormalNoise;
-import net.minestom.vanilla.generation.noise.SimplexNoise;
+import net.minestom.vanilla.generation.noise.Noise;
+import net.minestom.vanilla.generation.noise.Noise.Bounded;
+import net.minestom.vanilla.generation.noise.Noise.NoiseParameters;
 import net.minestom.vanilla.generation.random.WorldgenRandom;
 import net.minestom.vanilla.generation.util.DoubleStorage;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +41,7 @@ public interface DensityFunctions {
         }
     }
 
-    Function<Object, Holder<NormalNoise.NoiseParameters>> NoiseParser = Holder.parser(WorldgenRegistries.NOISE, NormalNoise.NoiseParameters::fromJson);
+    Function<Object, Holder<NoiseParameters>> NoiseParser = Holder.parser(WorldgenRegistries.NOISE, NoiseParameters::fromJson);
 
     static DensityFunction fromJson(Object obj) {
         return DensityFunctions.fromJson(obj, null);
@@ -65,10 +65,9 @@ public interface DensityFunctions {
             return new Constant(number.doubleValue());
         }
 
-//		const root = Json.readObject(obj) ?? {}
         JsonObject root;
         {
-            JsonElement element = new Gson().fromJson(obj.toString(), JsonElement.class);
+            JsonElement element = Util.GSON.fromJson(obj.toString(), JsonElement.class);
             if (element instanceof JsonObject json) {
                 root = json;
             } else if (Util.jsonIsString(element)) {
@@ -200,22 +199,13 @@ public interface DensityFunctions {
         }
     }
 
-    record ConstantMinMax(double value, double min, double max) implements DensityFunction {
+    record ConstantMinMax(double value, double minValue, double maxValue) implements DensityFunction {
 
         @Override
         public double compute(Point point) {
             return value;
         }
 
-        @Override
-        public double minValue() {
-            return this.min;
-        }
-
-        @Override
-        public double maxValue() {
-            return this.max;
-        }
     }
 
     record OldBlendedNoise(double xzScale,
@@ -223,7 +213,7 @@ public interface DensityFunctions {
                            double xzFactor,
                            double yFactor,
                            double smearScaleMultiplier,
-                           @Nullable BlendedNoise blendedNoise) implements DensityFunction {
+                           @Nullable Bounded blendedNoise) implements DensityFunction {
 
         public OldBlendedNoise(double xzScale, double yScale, double xzFactor, double yFactor, double smearScaleMultiplier) {
             this(xzScale, yScale, xzFactor, yFactor, smearScaleMultiplier, null);
@@ -413,10 +403,10 @@ public interface DensityFunctions {
     }
 
     record Noise(double xzScale, double yScale,
-                 @NotNull Holder<NormalNoise.NoiseParameters> noiseData,
-                 @Nullable NormalNoise noise) implements DensityFunction {
+                 @NotNull Holder<NoiseParameters> noiseData,
+                 @Nullable Bounded noise) implements DensityFunction {
 
-        public Noise(double xzScale, double yScale, Holder<NormalNoise.NoiseParameters> noiseData) {
+        public Noise(double xzScale, double yScale, Holder<NoiseParameters> noiseData) {
             this(xzScale, yScale, noiseData, null);
         }
 
@@ -432,7 +422,7 @@ public interface DensityFunctions {
         }
     }
 
-    record EndIslands(@NotNull SimplexNoise islandNoise) implements DensityFunction {
+    record EndIslands(@NotNull net.minestom.vanilla.generation.noise.Noise.TwoDimensional islandNoise) implements DensityFunction {
         public EndIslands() {
             this(0);
         }
@@ -441,10 +431,10 @@ public interface DensityFunctions {
             this(standard(seed));
         }
 
-        private static SimplexNoise standard(long seed) {
+        private static net.minestom.vanilla.generation.noise.Noise.TwoDimensional standard(long seed) {
             WorldgenRandom random = WorldgenRandom.standard(seed);
             random.consume(17292);
-            return SimplexNoise.ofRandom(random);
+            return net.minestom.vanilla.generation.noise.Noise.simplex(random);
         }
 
         private double getHeightValue(int x, int z) {
@@ -494,8 +484,8 @@ public interface DensityFunctions {
     record WeirdScaledSampler(@NotNull DensityFunction input,
                               @NotNull String rarityValueMapper,
                               @NotNull DoubleUnaryOperator mapper,
-                              @NotNull Holder<NormalNoise.NoiseParameters> noiseData,
-                              @Nullable NormalNoise noise) implements Transformer {
+                              @NotNull Holder<NoiseParameters> noiseData,
+                              @Nullable Bounded noise) implements Transformer {
 
         private static final Map<String, DoubleUnaryOperator> ValueMapper = Map.of(
                 "type_1", WeirdScaledSampler::rarityValueMapper1,
@@ -504,12 +494,12 @@ public interface DensityFunctions {
 
 
         public WeirdScaledSampler(DensityFunction input, String rarityValueMapper,
-                                  Holder<NormalNoise.NoiseParameters> noiseData, @Nullable NormalNoise noise) {
+                                  Holder<NoiseParameters> noiseData, @Nullable Bounded noise) {
             this(input, rarityValueMapper, WeirdScaledSampler.ValueMapper.get(rarityValueMapper), noiseData, noise);
         }
 
         public WeirdScaledSampler(DensityFunction input, String rarityValueMapper,
-                                  Holder<NormalNoise.NoiseParameters> noiseData) {
+                                  Holder<NoiseParameters> noiseData) {
             this(input, rarityValueMapper, noiseData, null);
         }
 
@@ -568,8 +558,8 @@ public interface DensityFunctions {
                         @NotNull DensityFunction shiftY,
                         @NotNull DensityFunction shiftZ,
                         double xzScale, double yScale,
-                        @NotNull Holder<NormalNoise.NoiseParameters> noiseData,
-                        @NotNull NormalNoise noise) implements DensityFunction {
+                        @NotNull Holder<NoiseParameters> noiseData,
+                        Bounded noise) implements DensityFunction {
 
         @Override
         public double maxValue() {
@@ -617,9 +607,9 @@ public interface DensityFunctions {
 
     interface ShiftNoise extends DensityFunction {
 
-        @NotNull Holder<NormalNoise.NoiseParameters> noiseData();
+        @NotNull Holder<NoiseParameters> noiseData();
 
-        @Nullable NormalNoise offsetNoise();
+        @Nullable Bounded offsetNoise();
 
         @Override
         default double compute(Point point) {
@@ -631,12 +621,12 @@ public interface DensityFunctions {
             return offsetNoise().maxValue() * 4;
         }
 
-        @NotNull ShiftNoise withNewNoise(NormalNoise noise);
+        @NotNull ShiftNoise withNewNoise(Bounded noise);
 
     }
 
-    record ShiftA(@NotNull Holder<NormalNoise.NoiseParameters> noiseData, @Nullable NormalNoise offsetNoise) implements ShiftNoise {
-        ShiftA(Holder<NormalNoise.NoiseParameters> noiseData) {
+    record ShiftA(@NotNull Holder<NoiseParameters> noiseData, @Nullable Bounded offsetNoise) implements ShiftNoise {
+        ShiftA(Holder<NoiseParameters> noiseData) {
             this(noiseData, null);
         }
 
@@ -644,13 +634,13 @@ public interface DensityFunctions {
             return ShiftNoise.super.compute(new Vec(point.x(), 0, point.z()));
         }
 
-        public ShiftNoise withNewNoise(NormalNoise newNoise) {
+        public ShiftNoise withNewNoise(Bounded newNoise) {
             return new ShiftA(this.noiseData, newNoise);
         }
     }
 
-    record ShiftB(@NotNull Holder<NormalNoise.NoiseParameters> noiseData, @Nullable NormalNoise offsetNoise) implements ShiftNoise {
-        ShiftB(Holder<NormalNoise.NoiseParameters> noiseData) {
+    record ShiftB(@NotNull Holder<NoiseParameters> noiseData, @Nullable Bounded offsetNoise) implements ShiftNoise {
+        ShiftB(Holder<NoiseParameters> noiseData) {
             this(noiseData, null);
         }
 
@@ -658,17 +648,17 @@ public interface DensityFunctions {
             return ShiftNoise.super.compute(new Vec(point.z(), point.x(), 0));
         }
 
-        public ShiftNoise withNewNoise(NormalNoise newNoise) {
+        public ShiftNoise withNewNoise(Bounded newNoise) {
             return new ShiftB(this.noiseData, newNoise);
         }
     }
 
-    record Shift(@NotNull Holder<NormalNoise.NoiseParameters> noiseData, @Nullable NormalNoise offsetNoise) implements ShiftNoise {
-        Shift(Holder<NormalNoise.NoiseParameters> noiseData) {
+    record Shift(@NotNull Holder<NoiseParameters> noiseData, @Nullable Bounded offsetNoise) implements ShiftNoise {
+        Shift(Holder<NoiseParameters> noiseData) {
             this(noiseData, null);
         }
 
-        public ShiftNoise withNewNoise(NormalNoise newNoise) {
+        public ShiftNoise withNewNoise(Bounded newNoise) {
             return new Shift(this.noiseData, newNoise);
         }
     }

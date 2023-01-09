@@ -23,7 +23,7 @@ public interface NoiseSettings {
 
     static NoiseSettings fromJson(Object obj) {
         if (obj instanceof String str)
-            return fromJson(new Gson().fromJson(str, JsonObject.class));
+            return fromJson(Util.GSON.fromJson(str, JsonObject.class));
         if (!(obj instanceof JsonObject root))
             throw new IllegalStateException("Root is not a JsonObject");
         int minY = Util.<Integer>jsonElse(root, "min_y", 0, JsonElement::getAsInt);
@@ -58,7 +58,7 @@ public interface NoiseSettings {
 
         static SlideSettings fromJson(Object obj) {
             if (obj instanceof String str)
-                return SlideSettings.fromJson(new Gson().fromJson(str, JsonObject.class));
+                return SlideSettings.fromJson(Util.GSON.fromJson(str, JsonObject.class));
             if (!(obj instanceof JsonObject root))
                 throw new IllegalStateException("Root is not a JsonObject");
             double target = Util.<Double>jsonElse(root, "target", 0.0, JsonElement::getAsDouble);

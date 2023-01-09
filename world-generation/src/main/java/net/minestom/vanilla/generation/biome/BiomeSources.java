@@ -7,6 +7,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.generation.Util;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,7 @@ import java.util.stream.StreamSupport;
 
 interface BiomeSources {
 
-    record CheckerboardBiomeSource(int n, int shift, List<NamespaceID> biomes) implements BiomeSource {
+    record CheckerboardBiomeSource(int n, int shift, @NotNull List<@NotNull NamespaceID> biomes) implements BiomeSource {
 
         public CheckerboardBiomeSource(int shift, NamespaceID[] biomes) {
             this(biomes.length, shift, List.of(biomes));
@@ -29,7 +30,7 @@ interface BiomeSources {
         }
 
         @Override
-        public NamespaceID getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
+        public @NotNull NamespaceID getBiome(int x, int y, int z, Climate.@NotNull Sampler climateSampler) {
             int i = (((x >> this.shift) + (z >> this.shift)) % this.n + this.n) % this.n;
             return this.biomes.get(i);
         }
@@ -48,10 +49,10 @@ interface BiomeSources {
         }
     }
 
-    record FixedBiomeSource(NamespaceID biome) implements BiomeSource {
+    record FixedBiomeSource(@NotNull NamespaceID biome) implements BiomeSource {
 
         @Override
-        public NamespaceID getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
+        public @NotNull NamespaceID getBiome(int x, int y, int z, Climate.@NotNull Sampler climateSampler) {
             return this.biome;
         }
 
@@ -62,10 +63,10 @@ interface BiomeSources {
         }
     }
 
-    record MultiNoiseBiomeSource(Climate.Parameters<NamespaceID> parameters) implements BiomeSource {
+    record MultiNoiseBiomeSource(@NotNull Climate.Parameters<@NotNull NamespaceID> parameters) implements BiomeSource {
 
         @Override
-        public NamespaceID getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
+        public @NotNull NamespaceID getBiome(int x, int y, int z, @NotNull Climate.Sampler climateSampler) {
             Climate.TargetPoint target = climateSampler.sample(x, y, z);
             return this.parameters.find(target);
         }
@@ -98,7 +99,7 @@ interface BiomeSources {
         private static final NamespaceID BARRENS = NamespaceID.from("end_barrens");
 
         @Override
-        public NamespaceID getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
+        public @NotNull NamespaceID getBiome(int x, int y, int z, Climate.@NotNull Sampler climateSampler) {
             int blockX = x << 2;
             int blockY = y << 2;
             int blockZ = z << 2;
