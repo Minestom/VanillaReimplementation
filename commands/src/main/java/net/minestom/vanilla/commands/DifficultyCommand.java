@@ -1,51 +1,54 @@
 package net.minestom.vanilla.commands;
 
+import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
-import net.minestom.server.command.builder.arguments.Argument;
+import net.minestom.server.command.builder.arguments.ArgumentEnum;
 import net.minestom.server.command.builder.arguments.ArgumentType;
-import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
 import net.minestom.server.world.Difficulty;
-import org.jetbrains.annotations.NotNull;
+
+import static net.minestom.server.command.builder.arguments.ArgumentEnum.Format;
 
 /**
- * Command that make an instance change difficulty
+ * Sets the difficulty level (peaceful, easy, etc.).
+ *
+ * @see <a href=https://minecraft.fandom.com/wiki/Commands/difficulty>Source<a/>
  */
-public class DifficultyCommand extends Command {
+public class DifficultyCommand extends VanillaCommand {
+
     public DifficultyCommand() {
-        super("difficulty");
-
-        setCondition(this::isAllowed);
-
-        setDefaultExecutor(this::usage);
-
-        Argument<?> difficulty = ArgumentType.Word("difficulty").from("peaceful", "easy", "normal", "hard");
-
-
-        difficulty.setCallback(this::difficultyCallback);
-
+        super("difficulty", 2);
+        var difficulty = arg();
+        setDefaultExecutor(((sender, context) -> this.sendTranslatable(sender, "commands.difficulty.query", difficulty)));
         addSyntax(this::execute, difficulty);
     }
 
-    private void usage(CommandSender player, CommandContext arguments) {
-        player.sendMessage("Usage: /difficulty (peaceful|easy|normal|hard)");
+    public Component difficulty() {
+        String difficulty = MinecraftServer.getDifficulty().name().toLowerCase();
+        String key = "options.difficulty." + difficulty;
+        return Component.translatable(key);
     }
 
-    private void execute(CommandSender player, CommandContext arguments) {
+    @Override
+    protected String usage() {
+        return """
+                /difficulty [peaceful]
+                /difficulty [easy]
+                /difficulty [normal]
+                /difficulty [hard]""";
+    }
+
+    private void execute(CommandSender sender, CommandContext arguments) {
         String difficultyName = arguments.get("difficulty");
         Difficulty difficulty = Difficulty.valueOf(difficultyName.toUpperCase());
         MinecraftServer.setDifficulty(difficulty);
-        player.sendMessage("You are now playing in " + difficultyName);
+        sendTranslatable(sender, "commands.difficulty.success", difficulty());
     }
 
-    private void difficultyCallback(@NotNull CommandSender sender, @NotNull ArgumentSyntaxException exception) {
-        sender.asPlayer().sendMessage("'" + exception.getInput() + "' is not a valid difficulty!");
-    }
-
-    private boolean isAllowed(CommandSender player, String commandName) {
-        return true; // TODO: permissions
+    private ArgumentEnum<Difficulty> arg() {
+        var arg = ArgumentType.Enum("difficulty", Difficulty.class).setFormat(Format.LOWER_CASED);
+        arg.setCallback((sender, exception) -> sendTranslatable(sender, "command.unknown.argument"));
+        return arg;
     }
 }
-

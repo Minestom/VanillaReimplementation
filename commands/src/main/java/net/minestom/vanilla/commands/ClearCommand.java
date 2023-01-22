@@ -1,43 +1,84 @@
 package net.minestom.vanilla.commands;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.ArgumentType;
+import net.minestom.server.command.builder.condition.Conditions;
 import net.minestom.server.entity.Player;
+import net.minestom.server.inventory.PlayerInventory;
+import net.minestom.server.utils.entity.EntityFinder;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 /**
- * Command that clears a player's inventory
+ * Clears items from player inventory, including items being dragged by the player.
+ *
+ * @see <a href=https://minecraft.fandom.com/wiki/Commands/clear>Source</a>
  */
 public class ClearCommand extends VanillaCommand {
 
     public ClearCommand() {
-        super("clear", "minecraft.command.clear");
-        setCondition(this::condition);
-
-        var target = ArgumentType.Entity("target").onlyPlayers(true);
-        addSyntax(this::targetedSyntax, target);
-        addSyntax(this::nonTargetedSyntax);
+        super("clear", 2);
+        var targets = ArgumentType.Entity("targets").onlyPlayers(true);
+        addSyntax(this::executeOthers, targets);
+        addSyntax(this::executeSelf);
     }
 
     @Override
-    public boolean condition(@NotNull CommandSender sender, String command) {
-        return hasPermissionOrLevel(sender, 2);
+    protected String usage() {
+        return "/clear [<targets>] [<item>]";
     }
 
-    @Override
-    protected void usage(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        sender.sendMessage(Component.text("/clear [username]"));
+    private void clearSingleInventory(@NotNull CommandSender sender, @NotNull Player player) {
+        final PlayerInventory inv = player.getInventory();
+        final int items = inv.getItemStacks().length;
+
+        if (items > 0) {
+            inv.clear();
+            sender.sendMessage("Removed " + items + " items from " + player.getUsername());
+        } else {
+            sender.sendMessage(Component.text("No items were found on " + player.getUsername(), NamedTextColor.RED));
+        }
     }
 
-    public void nonTargetedSyntax(CommandSender sender, CommandContext context) {
-        Player player = (Player) sender;
-        player.getInventory().clear();
+    private void clearMultipleInventory(@NotNull CommandSender sender, List<Player> players) {
+        int totalItems = 0;
+        int totalCleared = 0;
+
+        for (Player player : players) {
+            final PlayerInventory inv = player.getInventory();
+            final int items = inv.getItemStacks().length;
+
+            if (items > 0) {
+                totalItems += items;
+                totalCleared++;
+                inv.clear();
+            }
+        }
+
+        if (totalCleared == 0) {
+            sender.sendMessage("No items found on " + players.size() + " players");
+        } else {
+            sender.sendMessage("Removed " + totalItems + " items from " + totalCleared + " players");
+        }
     }
 
-    public void targetedSyntax(CommandSender sender, CommandContext context) {
-        Player player = context.get("target");
-        player.getInventory().clear();
+    public void executeSelf(CommandSender sender, CommandContext context) {
+        if (Conditions.playerOnly(sender, context.getCommandName()))
+            clearSingleInventory(sender, (Player) sender);
+    }
+
+    public void executeOthers(CommandSender sender, CommandContext context) {
+        EntityFinder finder = context.get("targets");
+        List<Player> targets = finder.find(sender).stream().map(e -> (Player) e).toList();
+
+        switch (targets.size()) {
+            case 0 -> sender.sendMessage(Component.text("No players found", NamedTextColor.RED));
+            case 1 -> clearSingleInventory(sender, targets.get(0));
+            default -> clearMultipleInventory(sender, targets);
+        }
     }
 }

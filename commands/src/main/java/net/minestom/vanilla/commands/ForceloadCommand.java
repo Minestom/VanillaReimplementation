@@ -1,9 +1,9 @@
 package net.minestom.vanilla.commands;
 
 import net.minestom.server.command.CommandSender;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.ArgumentType;
+import net.minestom.server.command.builder.condition.Conditions;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
@@ -11,24 +11,22 @@ import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.utils.location.RelativeVec;
 import net.minestom.vanilla.instancemeta.tickets.TicketManager;
 import net.minestom.vanilla.instancemeta.tickets.TicketUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 /**
- * "forceload":
- * Description: "Forces chunks to constantly be loaded or not. "
- * BE: false
- * EE: false
- * JE: true
- * OP_Level: 2
- * BE_EE_OP_Level: 0
- * MP_Only: false
+ * Force chunks to load constantly or not, {@code forceload add}, {@code forceload query} and
+ * {@code forceload remove} are three separated commands
+ *
+ * @see <a href=https://minecraft.fandom.com/wiki/Commands/forceload>Source</a>
+ *
+ * TODO: Translatable messages
  */
-@SuppressWarnings("UnstableApiUsage")
-public class ForceloadCommand extends Command {
+public class ForceloadCommand extends VanillaCommand {
 
     public ForceloadCommand() {
-        super("forceload");
+        super("forceload", 2);
 
         // forceload add <from> [<to>]
         //    Forces the chunk at the <from> position (through to <to> if set) in the dimension of the command's execution to be loaded constantly.
@@ -46,17 +44,28 @@ public class ForceloadCommand extends Command {
 
         // forceload remove <from> [<to>]
         //    Unforces the chunk at the <from> position (through to <to> if set) in the dimension of the command's execution to be loaded constantly.
-        this.addSyntax(
-                this::usageRemoveFrom,
+        this.addSyntax(this::usageRemoveFrom,
                 ArgumentType.Literal("remove"),
                 ArgumentType.RelativeVec2("from")
         );
-        this.addSyntax(
-                this::usageRemoveFromTo,
+        this.addSyntax(this::usageRemoveFromTo,
                 ArgumentType.Literal("remove"),
                 ArgumentType.RelativeVec2("from"),
                 ArgumentType.RelativeVec2("to")
         );
+    }
+
+    @Override
+    protected boolean condition(@NotNull CommandSender sender, String commandName) {
+        return super.condition(sender, commandName) && Conditions.playerOnly(sender, commandName);
+    }
+
+    @Override
+    protected String usage() {
+        return """
+                /forceload add <from> [<to>]
+                /forceload remove (<from>|all)
+                /forceload query [<pos>]""";
     }
 
     private void addForceLoad(Instance instance, int chunkX, int chunkZ) {
@@ -79,7 +88,7 @@ public class ForceloadCommand extends Command {
     }
 
     private void usageAddFrom(CommandSender sender, CommandContext context) {
-        Player player = sender.asPlayer();
+        Player player = (Player) sender;
         RelativeVec fromVec = context.get("from");
         Vec position = fromVec.from(player.getPosition());
 
@@ -93,7 +102,7 @@ public class ForceloadCommand extends Command {
     }
 
     private void usageAddFromTo(CommandSender sender, CommandContext context) {
-        Player player = sender.asPlayer();
+        Player player = (Player) sender;
         RelativeVec fromVec = context.get("from");
         RelativeVec toVec = context.get("to");
         Vec from = fromVec.from(player.getPosition());
@@ -117,7 +126,7 @@ public class ForceloadCommand extends Command {
     }
 
     private void usageRemoveFrom(CommandSender sender, CommandContext context) {
-        Player player = sender.asPlayer();
+        Player player = (Player) sender;
         RelativeVec fromVec = context.get("from");
         Vec position = fromVec.from(player.getPosition());
 
@@ -132,7 +141,7 @@ public class ForceloadCommand extends Command {
     }
 
     private void usageRemoveFromTo(CommandSender sender, CommandContext context) {
-        Player player = sender.asPlayer();
+        Player player = (Player) sender;
         RelativeVec fromVec = context.get("from");
         RelativeVec toVec = context.get("to");
         Vec from = fromVec.from(player.getPosition());

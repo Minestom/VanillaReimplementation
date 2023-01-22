@@ -4,6 +4,9 @@ import net.minestom.server.command.CommandManager;
 import net.minestom.server.command.builder.Command;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -20,13 +23,16 @@ public enum VanillaCommands {
     SAVE_ALL(SaveAllCommand::new),
     CLEAR(ClearCommand::new),
     OP(OpCommand::new),
+    DEOP(DeopCommand::new);
 
-    ;
+    private final Supplier<VanillaCommand> commandCreator;
 
-    private final Supplier<Command> commandCreator;
-
-    VanillaCommands(Supplier<Command> commandCreator) {
+    VanillaCommands(Supplier<VanillaCommand> commandCreator) {
         this.commandCreator = commandCreator;
+    }
+
+    public VanillaCommand getCommand() {
+        return commandCreator.get();
     }
 
     /**
@@ -40,4 +46,11 @@ public enum VanillaCommands {
             manager.register(command);
         }
     }
+
+    static final List<String> USAGES = Arrays.stream(VanillaCommands.values())
+            .sorted(Comparator.comparing(o -> o.getCommand().getName()))
+            .map(c -> c.getCommand().usage())
+            .toList();
+
+
 }
