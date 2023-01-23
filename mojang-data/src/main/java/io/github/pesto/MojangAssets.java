@@ -16,39 +16,48 @@ import java.util.zip.ZipInputStream;
 
 import static java.nio.file.StandardOpenOption.*;
 
-
 public final class MojangAssets {
     private static final String VERSION_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
+    private File data;
+    private boolean completed = false;
 
-    public static void downloadResources(String version, @NotNull File root) {
+    public File getDataDirectory() {
+        return data;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void downloadResources(String version, @NotNull File root) {
+        this.data = new File(root, version);
+
         try {
+            // Check if source files already exist
+            if (validateSources())
+                return;
+
             // Get version info
             String versionInfoUrl = findVersionInfoUrl(version);
             JsonObject versionInfo = downloadJson(versionInfoUrl);
 
-            // Check if source files already exist
-            if (!validateSources(root, versionInfo)) {
+            // Download jar
+            System.out.println("Downloading vanilla jar...");
+            File jar = downloadJar(versionInfo, root);
 
-                // Download jar
-                System.out.println("Downloading vanilla jar...");
-                File jar = downloadJar(versionInfo, root);
-
-                // Extract files
-                System.out.println("Extracting assets from jar...");
-                extractJarAssets(jar, root);
-
-                // Clean up
-                jar.delete();
-            }
+            // Extract files
+            System.out.println("Extracting assets from jar...");
+            this.completed = extractJarAssets(jar, root);
         } catch (IOException e) {
             exitError(e.getMessage());
         }
+
     }
 
-    private static boolean validateSources(File root, JsonObject versionInfo) {
-        String version = versionInfo.get("id").getAsString();
-        File file = new File(root, version + File.separator + ".mcassetsroot");
-        return file.exists();
+    private boolean validateSources() {
+        File file = new File(data, ".mcassetsroot");
+        this.completed = file.exists();
+        return completed;
     }
 
     /**
@@ -58,7 +67,7 @@ public final class MojangAssets {
      * @return The url to the version info
      * @throws IOException If the version info url could not be found
      */
-    private static String findVersionInfoUrl(@NotNull String version) throws IOException {
+    private String findVersionInfoUrl(@NotNull String version) throws IOException {
         // Get manifest
         JsonObject manifest = downloadJson(VERSION_MANIFEST_URL);
 
@@ -87,7 +96,7 @@ public final class MojangAssets {
      *
      * @param versionInfo The version info
      */
-    private static File downloadJar(JsonObject versionInfo, @NotNull File root) throws IOException {
+    private File downloadJar(JsonObject versionInfo, @NotNull File root) throws IOException {
         JsonObject downloads = versionInfo.getAsJsonObject("downloads");
         JsonObject client = downloads.getAsJsonObject("client");
         String url = client.get("url").getAsString();
@@ -110,7 +119,7 @@ public final class MojangAssets {
         return destination;
     }
 
-    private static boolean checkOrCreate(@NotNull File file) throws IOException {
+    private boolean checkOrCreate(@NotNull File file) throws IOException {
         if (file.exists())
             return true;
 
@@ -121,7 +130,7 @@ public final class MojangAssets {
         return true;
     }
 
-    private static File checkAndCreateFile(File destination, ZipEntry entry) throws IOException {
+    private File checkAndCreateFile(File destination, ZipEntry entry) throws IOException {
         String path = entry.getName().replace("data/", "").replace("minecraft/", "");
         File destFile = new File(destination, path);
 
@@ -135,7 +144,7 @@ public final class MojangAssets {
         return destFile;
     }
 
-    private static void extractJarAssets(@NotNull File jarFile, File root) {
+    private boolean extractJarAssets(@NotNull File jarFile, File root) {
         File output = new File(root, jarFile.getParentFile().getName());
 
         try (ZipInputStream zip = new ZipInputStream(new FileInputStream(jarFile))) {
@@ -162,20 +171,24 @@ public final class MojangAssets {
                 }
             }
             zip.closeEntry();
+            jarFile.delete();
+
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
-    private static JsonObject downloadJson(String url) throws IOException {
+    private JsonObject downloadJson(String url) throws IOException {
         return JsonParser.parseReader(new InputStreamReader(getDownloadStream(url))).getAsJsonObject();
     }
 
-    private static InputStream getDownloadStream(String url) throws IOException {
+    private InputStream getDownloadStream(String url) throws IOException {
         return new URL(url).openStream();
     }
 
-    private static void exitError(String message) {
+    private void exitError(String message) {
         System.err.println(message);
         System.exit(1);
     }
