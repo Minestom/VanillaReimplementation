@@ -3,6 +3,8 @@ package io.github.pesto;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.github.pesto.files.ByteArray;
+import io.github.pesto.files.CacheFileSystem;
 import io.github.pesto.files.FileSystem;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,9 +19,9 @@ import static java.nio.file.StandardOpenOption.*;
 
 public final class MojangAssets {
     private static final String VERSION_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
-    private FileSystem<byte[]> fs = null;
+    private CacheFileSystem<ByteArray> fs = null;
 
-    public FileSystem<byte[]> getFileSystem() {
+    public CacheFileSystem<ByteArray> getFileSystem() {
         return fs;
     }
 
@@ -39,7 +41,7 @@ public final class MojangAssets {
                 jar = downloadJar(versionInfo, root);
             }
 
-            this.fs = FileSystem.fromZipFile(jar);
+            this.fs = new CacheFileSystem<>(FileSystem.fromZipFile(jar));
 
             // Extract files
             // System.out.println("Extracting assets from jar...");

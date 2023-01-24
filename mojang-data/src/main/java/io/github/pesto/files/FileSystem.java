@@ -39,7 +39,7 @@ public interface FileSystem<F> {
         return new PathFileSystem(path);
     }
 
-    static FileSystem<byte[]> fromZipFile(File file) {
+    static FileSystem<ByteArray> fromZipFile(File file) {
         return FileSystemUtil.unzipIntoFileSource(file);
     }
 }

@@ -10,7 +10,7 @@ import java.util.zip.ZipInputStream;
 
 public class FileSystemUtil {
 
-    public static <I extends InputStream> FileSystem<byte[]> toBytes(FileSystem<I> source) {
+    static <I extends InputStream> FileSystem<byte[]> toBytes(FileSystem<I> source) {
         return source.map(inputStream -> {
             try {
                 return inputStream.readAllBytes();
@@ -20,17 +20,17 @@ public class FileSystemUtil {
         });
     }
 
-    public static <I extends InputStream> FileSystem<String> toString(FileSystem<I> source) {
+    static <I extends InputStream> FileSystem<String> toString(FileSystem<I> source) {
         return toBytes(source).map(String::new);
     }
 
-    public static <T extends InputStream> FileSystem<JsonElement> toJson(FileSystem<T> source) {
+    static <T extends InputStream> FileSystem<JsonElement> toJson(FileSystem<T> source) {
         Gson gson = new Gson();
         return toString(source).map(str -> gson.fromJson(str, JsonElement.class));
     }
 
-    public static FileSystem<byte[]> unzipIntoFileSource(@NotNull File file) {
-        DynamicFileSystem<byte[]> source = new DynamicFileSystem<>();
+    static FileSystem<ByteArray> unzipIntoFileSource(@NotNull File file) {
+        DynamicFileSystem<ByteArray> source = new DynamicFileSystem<>();
         try (ZipInputStream in = new ZipInputStream(new FileInputStream(file))) {
             ZipEntry entry;
             while ((entry = in.getNextEntry()) != null) {
@@ -41,7 +41,7 @@ public class FileSystemUtil {
                 if (entry.isDirectory() || name.endsWith("\\")) {
                     source.processDirectory(name);
                 } else {
-                    source.processFile(name, in.readAllBytes());
+                    source.processFile(name, ByteArray.of(in.readAllBytes()));
                 }
             }
         } catch (IOException e) {

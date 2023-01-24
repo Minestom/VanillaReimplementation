@@ -1,6 +1,7 @@
 package io.github.pesto;
 
-import io.github.pesto.files.FileSystem;
+import io.github.pesto.files.ByteArray;
+import io.github.pesto.files.CacheFileSystem;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
@@ -29,7 +30,7 @@ public class MojangDataFeature implements VanillaReimplementation.Feature {
         return NamespaceID.from("io.github.pesto:mojang_data");
     }
 
-    public FileSystem<byte[]> getAssetsDirectory() {
+    public CacheFileSystem<ByteArray> getAssests() {
         return assets.getFileSystem();
     }
 }
