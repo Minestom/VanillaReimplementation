@@ -3,6 +3,7 @@ package io.github.pesto;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.github.pesto.files.FileSystem;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -10,54 +11,44 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.file.Files;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import static java.nio.file.StandardOpenOption.*;
 
 public final class MojangAssets {
     private static final String VERSION_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
-    private File data;
-    private boolean completed = false;
+    private FileSystem<byte[]> fs = null;
 
-    public File getDataDirectory() {
-        return data;
-    }
-
-    public boolean isCompleted() {
-        return completed;
+    public FileSystem<byte[]> getFileSystem() {
+        return fs;
     }
 
     public void downloadResources(String version, @NotNull File root) {
-        this.data = new File(root, version);
-
         try {
             // Check if source files already exist
-            if (validateSources())
-                return;
+            File jar = new File(root, version + File.separator + "sources.jar");
 
-            // Get version info
-            String versionInfoUrl = findVersionInfoUrl(version);
-            JsonObject versionInfo = downloadJson(versionInfoUrl);
+            if (!jar.exists()) {
 
-            // Download jar
-            System.out.println("Downloading vanilla jar...");
-            File jar = downloadJar(versionInfo, root);
+                // Get version info
+                String versionInfoUrl = findVersionInfoUrl(version);
+                JsonObject versionInfo = downloadJson(versionInfoUrl);
+
+                // Download jar
+                System.out.println("Downloading vanilla jar...");
+                jar = downloadJar(versionInfo, root);
+            }
+
+            this.fs = FileSystem.fromZipFile(jar);
 
             // Extract files
-            System.out.println("Extracting assets from jar...");
-            this.completed = extractJarAssets(jar, root);
+            // System.out.println("Extracting assets from jar...");
+            // this.completed = extractJarAssets(jar, root);
+
         } catch (IOException e) {
             exitError(e.getMessage());
         }
 
-    }
-
-    private boolean validateSources() {
-        File file = new File(data, ".mcassetsroot");
-        this.completed = file.exists();
-        return completed;
     }
 
     /**
@@ -144,41 +135,41 @@ public final class MojangAssets {
         return destFile;
     }
 
-    private boolean extractJarAssets(@NotNull File jarFile, File root) {
-        File output = new File(root, jarFile.getParentFile().getName());
-
-        try (ZipInputStream zip = new ZipInputStream(new FileInputStream(jarFile))) {
-            ZipEntry entry;
-            while ((entry = zip.getNextEntry()) != null) {
-
-                // Skip unrelated entries
-                if (!entry.getName().startsWith("data"))
-                    continue;
-
-                // Validate that the file exists
-                File file = checkAndCreateFile(output, entry);
-                if (file.exists()) continue;
-
-                if (entry.isDirectory()) {
-                    if (!file.isDirectory() && !file.mkdirs())
-                        throw new IOException("Failed to create directory " + file);
-                } else {
-                    File parent = file.getParentFile();
-                    if (!parent.isDirectory() && !parent.mkdirs())
-                        throw new IOException("Failed to create directory " + parent);
-
-                    Files.copy(zip, file.toPath());
-                }
-            }
-            zip.closeEntry();
-            jarFile.delete();
-
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
+//    private boolean extractJarAssets(@NotNull File jarFile, File root) {
+//        File output = new File(root, jarFile.getParentFile().getName());
+//
+//        try (ZipInputStream zip = new ZipInputStream(new FileInputStream(jarFile))) {
+//            ZipEntry entry;
+//            while ((entry = zip.getNextEntry()) != null) {
+//
+//                // Skip unrelated entries
+//                if (!entry.getName().startsWith("data"))
+//                    continue;
+//
+//                // Validate that the file exists
+//                File file = checkAndCreateFile(output, entry);
+//                if (file.exists()) continue;
+//
+//                if (entry.isDirectory()) {
+//                    if (!file.isDirectory() && !file.mkdirs())
+//                        throw new IOException("Failed to create directory " + file);
+//                } else {
+//                    File parent = file.getParentFile();
+//                    if (!parent.isDirectory() && !parent.mkdirs())
+//                        throw new IOException("Failed to create directory " + parent);
+//
+//                    Files.copy(zip, file.toPath());
+//                }
+//            }
+//            zip.closeEntry();
+//            jarFile.delete();
+//
+//            return true;
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return false;
+//    }
 
     private JsonObject downloadJson(String url) throws IOException {
         return JsonParser.parseReader(new InputStreamReader(getDownloadStream(url))).getAsJsonObject();
