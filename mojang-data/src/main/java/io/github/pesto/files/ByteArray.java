@@ -1,5 +1,7 @@
 package io.github.pesto.files;
 
+import net.minestom.server.utils.MathUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -26,7 +28,7 @@ public class ByteArray {
     }
 
     public byte index(int i) throws ArrayIndexOutOfBoundsException {
-        if (i > size())
+        if (!MathUtils.isBetween(i, 0, size()))
             throw new ArrayIndexOutOfBoundsException();
 
         return bytes[i];
