@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.github.pesto.files.ByteArray;
-import io.github.pesto.files.DynamicFileSystem;
 import io.github.pesto.files.FileSystem;
 import org.jetbrains.annotations.NotNull;
 

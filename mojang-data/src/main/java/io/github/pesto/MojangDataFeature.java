@@ -1,7 +1,6 @@
 package io.github.pesto;
 
 import io.github.pesto.files.ByteArray;
-import io.github.pesto.files.DynamicFileSystem;
 import io.github.pesto.files.FileSystem;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaRegistry;
@@ -15,12 +14,6 @@ public class MojangDataFeature implements VanillaReimplementation.Feature {
     private static final File ROOT = new File(".", "mojang-data");
     private static final String VERSION = "1.19.2";
     private final MojangAssets assets = new MojangAssets();
-
-    public static void main(String[] args) {
-        MojangAssets a = new MojangAssets();
-        a.downloadResources(VERSION, ROOT);
-        System.out.println(a.getAssets().folder("tags", "worldgen", "structure", "hello", "no").file("village.json"));
-    }
 
     public void initialize() {
         assets.downloadResources(VERSION, ROOT);
