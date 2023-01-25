@@ -2,6 +2,7 @@ package io.github.pesto.files;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 public class ByteArray {
@@ -10,6 +11,10 @@ public class ByteArray {
 
     private ByteArray(byte[] b) {
         this.bytes = deepCopy(b);
+    }
+
+    public static ByteArray of(byte[] bytes) {
+        return new ByteArray(bytes);
     }
 
     public byte[] array() {
@@ -31,14 +36,14 @@ public class ByteArray {
         return new ByteArrayInputStream(bytes);
     }
 
+    public String toString() {
+        return new String(bytes, StandardCharsets.UTF_8);
+    }
+
     private byte[] deepCopy(byte[] source) {
         byte[] copy = new byte[source.length];
         System.arraycopy(source, 0, copy, 0, source.length);
         return copy;
-    }
-
-    public static ByteArray of(byte[] bytes) {
-        return new ByteArray(bytes);
     }
 
     @Override

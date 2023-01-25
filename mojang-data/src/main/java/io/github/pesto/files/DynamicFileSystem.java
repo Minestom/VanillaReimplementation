@@ -1,5 +1,7 @@
 package io.github.pesto.files;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -7,10 +9,12 @@ import java.util.stream.Collectors;
 
 public class DynamicFileSystem<F> implements FileSystem<F> {
 
-    public final Map<String, F> files = new ConcurrentHashMap<>();
-    public final Map<String, DynamicFileSystem<F>> folders = new ConcurrentHashMap<>();
+    protected final Map<String, F> files = new ConcurrentHashMap<>();
+    protected final Map<String, DynamicFileSystem<F>> folders = new ConcurrentHashMap<>();
 
-    public void processDirectory(String directoryName) {
+    protected DynamicFileSystem() {}
+
+    protected void processDirectory(String directoryName) {
         String folderName = directoryName.substring(0, directoryName.indexOf("/"));
         DynamicFileSystem<F> newFileSource = folder(folderName);
         String remaining = directoryName.substring(directoryName.indexOf("/") + 1);
@@ -19,7 +23,7 @@ public class DynamicFileSystem<F> implements FileSystem<F> {
         }
     }
 
-    public void processFile(String name, F contents) {
+    protected void processFile(String name, F contents) {
         if (name.contains("/")) {
             String folderName = name.substring(0, name.indexOf("/"));
             DynamicFileSystem<F> newFileSource = folder(folderName);
@@ -46,7 +50,7 @@ public class DynamicFileSystem<F> implements FileSystem<F> {
     }
 
     @Override
-    public DynamicFileSystem<F> folder(String path) {
+    public DynamicFileSystem<F> folder(@NotNull String path) {
         return folders.computeIfAbsent(path, ignored -> new DynamicFileSystem<>());
     }
 }

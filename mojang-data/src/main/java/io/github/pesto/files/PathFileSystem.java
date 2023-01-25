@@ -1,17 +1,21 @@
 package io.github.pesto.files;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public record PathFileSystem(Path path) implements FileSystem<InputStream> {
+public class PathFileSystem implements FileSystem<ByteArray> {
+    private final Path path;
+
+    protected PathFileSystem(Path path) {
+        this.path = path;
+    }
 
     @Override
-    public Map<String, InputStream> readAll() {
+    public Map<String, ByteArray> readAll() {
         // Return all files in the path directory (Only this directory, not subdirectories)
         try {
             return Files.walk(this.path, 0)
@@ -20,7 +24,7 @@ public record PathFileSystem(Path path) implements FileSystem<InputStream> {
                             path -> path.getFileName().toString(),
                             path -> {
                                 try {
-                                    return Files.newInputStream(path);
+                                    return ByteArray.of(Files.readAllBytes(path));
                                 } catch (IOException e) {
                                     throw new RuntimeException(e);
                                 }

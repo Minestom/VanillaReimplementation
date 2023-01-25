@@ -4,32 +4,33 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.github.pesto.files.ByteArray;
-import io.github.pesto.files.CacheFileSystem;
+import io.github.pesto.files.DynamicFileSystem;
 import io.github.pesto.files.FileSystem;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
-import java.util.zip.ZipEntry;
 
 import static java.nio.file.StandardOpenOption.*;
 
 public final class MojangAssets {
     private static final String VERSION_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
-    private CacheFileSystem<ByteArray> fs = null;
+    private FileSystem<ByteArray> fs;
 
-    public CacheFileSystem<ByteArray> getFileSystem() {
+    public FileSystem<ByteArray> getAssets() {
         return fs;
     }
 
     public void downloadResources(String version, @NotNull File root) {
         try {
             // Check if source files already exist
-            File jar = new File(root, version + File.separator + "sources.jar");
-
+            File jar = new File(root, version + File.separator + "resources.jar");
             if (!jar.exists()) {
 
                 // Get version info
@@ -38,10 +39,11 @@ public final class MojangAssets {
 
                 // Download jar
                 System.out.println("Downloading vanilla jar...");
-                jar = downloadJar(versionInfo, root);
+                downloadJar(versionInfo, jar);
             }
 
-            this.fs = new CacheFileSystem<>(FileSystem.fromZipFile(jar));
+            this.fs = FileSystem.fromZipFile(jar, path -> path.startsWith("data/minecraft/"))
+                    .folder("data", "minecraft");
 
             // Extract files
             // System.out.println("Extracting assets from jar...");
@@ -50,7 +52,6 @@ public final class MojangAssets {
         } catch (IOException e) {
             exitError(e.getMessage());
         }
-
     }
 
     /**
@@ -89,15 +90,16 @@ public final class MojangAssets {
      *
      * @param versionInfo The version info
      */
-    private File downloadJar(JsonObject versionInfo, @NotNull File root) throws IOException {
+    private void downloadJar(JsonObject versionInfo, @NotNull File destination) throws IOException {
         JsonObject downloads = versionInfo.getAsJsonObject("downloads");
         JsonObject client = downloads.getAsJsonObject("client");
         String url = client.get("url").getAsString();
 
-        String version = versionInfo.get("id").getAsString();
-        File destination = new File(root, version + File.separator + "resources.jar");
-        if (checkOrCreate(destination))
-            return destination;
+        // Create if it doesn't exist
+        if (!destination.exists()) {
+            destination.getParentFile().mkdirs();
+            destination.createNewFile();
+        }
 
         try (
                 ReadableByteChannel in = Channels.newChannel(new URL(url).openStream());
@@ -109,32 +111,6 @@ public final class MojangAssets {
             if (!success)
                 throw new IOException("Failed to download client JAR");
         }
-        return destination;
-    }
-
-    private boolean checkOrCreate(@NotNull File file) throws IOException {
-        if (file.exists())
-            return true;
-
-        file.getParentFile().mkdirs();
-        if (!file.exists())
-            return file.createNewFile();
-
-        return true;
-    }
-
-    private File checkAndCreateFile(File destination, ZipEntry entry) throws IOException {
-        String path = entry.getName().replace("data/", "").replace("minecraft/", "");
-        File destFile = new File(destination, path);
-
-        String dirPath = destination.getCanonicalPath();
-        String filePath = destFile.getCanonicalPath();
-
-        if (!filePath.startsWith(dirPath + File.separator)) {
-            throw new IOException("Entry outside target: " + entry.getName());
-        }
-
-        return destFile;
     }
 
 //    private boolean extractJarAssets(@NotNull File jarFile, File root) {

@@ -1,11 +1,15 @@
 package io.github.pesto.files;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
-import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public interface FileSystem<F> {
 
@@ -16,16 +20,37 @@ public interface FileSystem<F> {
 
     /**
      * Queries all the folders in the given directory and returns a set of folder names.
+     *
      * @return a set of folder names (no directory prefix)
      */
     Set<String> folders();
 
     /**
      * Navigates to the given subdirectory and returns a new FileSource for that directory.
+     *
      * @param path the path to the subdirectory
      * @return a new FileSource for the subdirectory
      */
     FileSystem<F> folder(String path);
+
+    default FileSystem<F> folder(@NotNull String... paths) {
+        if (paths.length == 0)
+            return this;
+
+        Iterator<String> iter = Arrays.stream(paths).iterator();
+        FileSystem<F> fs = folder(iter.next());
+
+        while (iter.hasNext()) {
+            fs = fs.folder(iter.next());
+            if (fs.folders().isEmpty())
+                return fs;
+        }
+        return fs;
+    }
+
+    default FileSystem<F> folder(@NotNull String path, @NotNull String separator) {
+        return folder(path.split(separator));
+    }
 
     default F file(String path) {
         return readAll().get(path);
@@ -35,11 +60,19 @@ public interface FileSystem<F> {
         return new MappedFileSystem<>(this, mapper);
     }
 
-    static FileSystem<InputStream> fileSystem(Path path) {
+    default CacheFileSystem<F> cache() {
+        return new CacheFileSystem<>(this);
+    }
+
+    static FileSystem<ByteArray> fileSystem(Path path) {
         return new PathFileSystem(path);
     }
 
-    static FileSystem<ByteArray> fromZipFile(File file) {
-        return FileSystemUtil.unzipIntoFileSource(file);
+    static DynamicFileSystem<ByteArray> fromZipFile(File file) {
+        return fromZipFile(file, p -> true);
+    }
+
+    static DynamicFileSystem<ByteArray> fromZipFile(File file, Predicate<String> pathFilter) {
+        return FileSystemUtil.unzipIntoFileSystem(file, pathFilter);
     }
 }

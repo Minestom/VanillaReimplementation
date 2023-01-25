@@ -11,7 +11,7 @@ public class CacheFileSystem<F> implements FileSystem<F> {
     private Map<String, F> allFiles = null;
     private Map<String, FileSystem<F>> subSources = null;
 
-    public CacheFileSystem(FileSystem<F> original) {
+    protected CacheFileSystem(FileSystem<F> original) {
         this.original = original;
     }
 

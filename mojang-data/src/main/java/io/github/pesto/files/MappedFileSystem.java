@@ -10,7 +10,7 @@ public class MappedFileSystem<F, T> implements FileSystem<T> {
     private final FileSystem<F> original;
     private final Function<F, T> mapper;
 
-    public MappedFileSystem(FileSystem<F> original, Function<F, T> mapper) {
+    protected MappedFileSystem(FileSystem<F> original, Function<F, T> mapper) {
         this.original = original;
         this.mapper = mapper;
     }
