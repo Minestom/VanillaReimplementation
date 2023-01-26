@@ -20,7 +20,7 @@ public class VanillaWorldGenerationFeature implements VanillaReimplementation.Fe
     }
 
     @Override
-    public @NotNull NamespaceID namespaceID() {
+    public @NotNull NamespaceID namespaceId() {
         return NamespaceID.from("vri:worldgeneration");
     }
 }

@@ -57,7 +57,7 @@ public class CraftingDataFeature implements VanillaReimplementation.Feature {
     }
 
     @Override
-    public @NotNull NamespaceID namespaceID() {
+    public @NotNull NamespaceID namespaceId() {
         return NamespaceID.from("vri:crafting_data");
     }
 }

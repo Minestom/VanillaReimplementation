@@ -3,7 +3,10 @@ package net.minestom.vanilla.commands;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
+import net.minestom.vanilla.instancemeta.InstanceMetaFeature;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Set;
 
 public class VanillaCommandsFeature implements VanillaReimplementation.Feature {
 
@@ -13,7 +16,7 @@ public class VanillaCommandsFeature implements VanillaReimplementation.Feature {
     }
 
     @Override
-    public @NotNull NamespaceID namespaceID() {
+    public @NotNull NamespaceID namespaceId() {
         return NamespaceID.from("vri:commands");
     }
 
@@ -24,5 +27,10 @@ public class VanillaCommandsFeature implements VanillaReimplementation.Feature {
         private void hook(@NotNull VanillaReimplementation vri) {
             VanillaCommands.registerAll(vri.process().command());
         }
+    }
+
+    @Override
+    public @NotNull Set<Class<? extends VanillaReimplementation.Feature>> dependencies() {
+        return Set.of(InstanceMetaFeature.class);
     }
 }
