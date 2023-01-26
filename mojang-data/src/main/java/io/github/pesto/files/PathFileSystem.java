@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class PathFileSystem implements FileSystem<ByteArray> {
+class PathFileSystem implements FileSystem<ByteArray> {
     private final Path path;
 
     protected PathFileSystem(Path path) {
@@ -24,7 +24,7 @@ public class PathFileSystem implements FileSystem<ByteArray> {
                             path -> path.getFileName().toString(),
                             path -> {
                                 try {
-                                    return ByteArray.of(Files.readAllBytes(path));
+                                    return ByteArray.wrap(Files.readAllBytes(path));
                                 } catch (IOException e) {
                                     throw new RuntimeException(e);
                                 }

@@ -13,12 +13,12 @@ import java.util.regex.PatternSyntaxException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class FileSystemUtil {
+class FileSystemUtil {
 
     static <I extends InputStream> FileSystem<ByteArray> toBytes(FileSystem<I> source) {
         return source.map(inputStream -> {
             try {
-                return ByteArray.of(inputStream.readAllBytes());
+                return ByteArray.copyOf(inputStream.readAllBytes());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -48,7 +48,7 @@ public class FileSystemUtil {
                     source.processDirectory(name);
                 } else {
                     System.out.println(name);
-                    source.processFile(name, ByteArray.of(in.readAllBytes()));
+                    source.processFile(name, ByteArray.copyOf(in.readAllBytes()));
                 }
             }
         } catch (IOException | PatternSyntaxException e) {

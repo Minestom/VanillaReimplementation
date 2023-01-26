@@ -14,7 +14,7 @@ public class DynamicFileSystem<F> implements FileSystem<F> {
 
     protected DynamicFileSystem() {}
 
-    protected void processDirectory(String directoryName) {
+    public void processDirectory(String directoryName) {
         String folderName = directoryName.substring(0, directoryName.indexOf("/"));
         DynamicFileSystem<F> newFileSource = folder(folderName);
         String remaining = directoryName.substring(directoryName.indexOf("/") + 1);
@@ -23,7 +23,7 @@ public class DynamicFileSystem<F> implements FileSystem<F> {
         }
     }
 
-    protected void processFile(String name, F contents) {
+    public void processFile(String name, F contents) {
         if (name.contains("/")) {
             String folderName = name.substring(0, name.indexOf("/"));
             DynamicFileSystem<F> newFileSource = folder(folderName);

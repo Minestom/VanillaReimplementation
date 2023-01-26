@@ -15,21 +15,26 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.nio.file.StandardOpenOption.*;
 
 public final class MojangAssets {
+    private static final File ROOT = new File(".", "mojang-data");
     private static final String VERSION_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
-    private FileSystem<ByteArray> fs;
+    private final Map<String, CompletableFuture<FileSystem<ByteArray>>> versions = new ConcurrentHashMap<>();
 
-    public FileSystem<ByteArray> getAssets() {
-        return fs;
+    public CompletableFuture<FileSystem<ByteArray>> getAssets(@NotNull String version) {
+        versions.putIfAbsent(version, CompletableFuture.supplyAsync(() -> downloadResources(version)));
+        return versions.get(version);
     }
 
-    public void downloadResources(String version, @NotNull File root) {
+    private FileSystem<ByteArray> downloadResources(@NotNull String version) {
         try {
             // Check if source files already exist
-            File jar = new File(root, version + File.separator + "resources.jar");
+            File jar = new File(ROOT, version + File.separator + "resources.jar");
             if (!jar.exists()) {
 
                 // Get version info
@@ -41,16 +46,13 @@ public final class MojangAssets {
                 downloadJar(versionInfo, jar);
             }
 
-            this.fs = FileSystem.fromZipFile(jar, path -> path.startsWith("data/minecraft/"))
+            return FileSystem.fromZipFile(jar, path -> path.startsWith("data/minecraft/"))
                     .folder("data", "minecraft");
-
-            // Extract files
-            // System.out.println("Extracting assets from jar...");
-            // this.completed = extractJarAssets(jar, root);
 
         } catch (IOException e) {
             exitError(e.getMessage());
         }
+        return FileSystem.empty();
     }
 
     /**

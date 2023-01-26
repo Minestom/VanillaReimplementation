@@ -60,19 +60,23 @@ public interface FileSystem<F> {
         return new MappedFileSystem<>(this, mapper);
     }
 
-    default CacheFileSystem<F> cache() {
+    default FileSystem<F> cache() {
         return new CacheFileSystem<>(this);
+    }
+
+    static FileSystem<ByteArray> empty() {
+        return new DynamicFileSystem<>();
     }
 
     static FileSystem<ByteArray> fileSystem(Path path) {
         return new PathFileSystem(path);
     }
 
-    static DynamicFileSystem<ByteArray> fromZipFile(File file) {
+    static FileSystem<ByteArray> fromZipFile(File file) {
         return fromZipFile(file, p -> true);
     }
 
-    static DynamicFileSystem<ByteArray> fromZipFile(File file, Predicate<String> pathFilter) {
+    static FileSystem<ByteArray> fromZipFile(File file, Predicate<String> pathFilter) {
         return FileSystemUtil.unzipIntoFileSystem(file, pathFilter);
     }
 }

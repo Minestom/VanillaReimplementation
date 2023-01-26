@@ -10,27 +10,36 @@ import java.util.Arrays;
 public class ByteArray {
 
     private final byte[] bytes;
+    private final boolean copy;
 
-    private ByteArray(byte[] b) {
-        this.bytes = deepCopy(b);
+    private ByteArray(byte[] b, boolean copy) {
+        this.copy = copy;
+        this.bytes = copy ? deepCopy(b) : b;
     }
 
-    public static ByteArray of(byte[] bytes) {
-        return new ByteArray(bytes);
+    public static ByteArray wrap(byte[] bytes) {
+        return new ByteArray(bytes, false);
+    }
+
+    public static ByteArray copyOf(byte[] bytes) {
+        return new ByteArray(bytes, true);
     }
 
     public byte[] array() {
-        return deepCopy(bytes);
+        return copy ? deepCopy(bytes) : bytes;
     }
 
     public int size() {
         return bytes.length;
     }
 
-    public byte index(int i) throws ArrayIndexOutOfBoundsException {
+    public boolean isCopy() {
+        return copy;
+    }
+
+    public byte index(int i) {
         if (!MathUtils.isBetween(i, 0, size()))
             throw new ArrayIndexOutOfBoundsException();
-
         return bytes[i];
     }
 

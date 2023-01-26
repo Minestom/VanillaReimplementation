@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class MappedFileSystem<F, T> implements FileSystem<T> {
+class MappedFileSystem<F, T> implements FileSystem<T> {
 
     private final FileSystem<F> original;
     private final Function<F, T> mapper;

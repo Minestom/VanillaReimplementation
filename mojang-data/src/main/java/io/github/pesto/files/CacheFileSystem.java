@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class CacheFileSystem<F> implements FileSystem<F> {
+class CacheFileSystem<F> implements FileSystem<F> {
 
     private final FileSystem<F> original;
     private Map<String, F> allFiles = null;
