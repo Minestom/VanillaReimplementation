@@ -47,7 +47,6 @@ class FileSystemUtil {
                 if (entry.isDirectory() || name.endsWith("\\")) {
                     source.processDirectory(name);
                 } else {
-                    System.out.println(name);
                     source.processFile(name, ByteArray.copyOf(in.readAllBytes()));
                 }
             }
