@@ -10,10 +10,8 @@ import java.util.Arrays;
 public class ByteArray {
 
     private final byte[] bytes;
-    private final boolean copy;
 
     private ByteArray(byte[] b, boolean copy) {
-        this.copy = copy;
         this.bytes = copy ? deepCopy(b) : b;
     }
 
@@ -26,15 +24,11 @@ public class ByteArray {
     }
 
     public byte[] array() {
-        return copy ? deepCopy(bytes) : bytes;
+        return deepCopy(bytes);
     }
 
     public int size() {
         return bytes.length;
-    }
-
-    public boolean isCopy() {
-        return copy;
     }
 
     public byte index(int i) {
