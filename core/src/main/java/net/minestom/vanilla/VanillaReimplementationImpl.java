@@ -16,6 +16,7 @@ import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.crafting.VanillaRecipe;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.instance.SetupVanillaInstanceEvent;
+import net.minestom.vanilla.utils.DependencySorting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -25,6 +26,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 class VanillaReimplementationImpl implements VanillaReimplementation {
 
@@ -186,15 +188,42 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
         hookCoreLibrary();
 
         // Load all the features and hook them
+        Logger.info("Fetching features...");
+        Set<Feature> features = ServiceLoader.load(Feature.class)
+                .stream()
+                .map(ServiceLoader.Provider::get)
+                .collect(Collectors.toUnmodifiableSet());
+
+        Logger.info("Validating dependencies...");
+        for (Feature feature : features) {
+            try {
+                for (Class<? extends Feature> dependency : feature.dependencies()) {
+                    Objects.requireNonNull(dependency, "Dependency cannot be null!");
+                }
+            } catch (Exception e) {
+                Logger.error("Failed to load features!", e);
+                throw new RuntimeException(e);
+            }
+        }
+
+        Logger.info("Sorting features by dependencies...");
+        List<Feature> sortedByDependencies = DependencySorting.sort(features);
+
         Logger.info("Loading features...");
-        for (Feature feature : ServiceLoader.load(Feature.class)) {
+        for (Feature feature : sortedByDependencies) {
             if (!predicate.test(feature)) {
-                Logger.info("Skipping feature {}...", feature.namespaceID());
+                Logger.info("Skipping feature {}...", feature.namespaceId());
                 continue;
             }
-            Logger.info("Hooking feature: " + feature.namespaceID());
-            feature.hook(this, registry);
+
+            Logger.info("Hooking feature: " + feature.namespaceId());
+            try {
+                feature.hook(this, registry);
+            } catch (Exception e) {
+                Logger.error("Failed to load feature: " + feature.namespaceId(), e);
+            }
         }
+
         Logger.info("All features have been loaded!");
     }
 

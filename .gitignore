@@ -38,5 +38,4 @@ out/
 # Vanilla-like server
 server.properties
 world/
-mojang-data/
 vanilla_worldgen/*

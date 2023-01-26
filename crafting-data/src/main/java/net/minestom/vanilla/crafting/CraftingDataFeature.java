@@ -20,22 +20,28 @@ public class CraftingDataFeature implements VanillaReimplementation.Feature {
 
     @Override
     public void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry) {
-        JsonRecipeReader reader = new JsonRecipeReader(isDebug);
-
-        Map<String, VanillaRecipe> recipes = new HashMap<>();
-
-        walk(Path.of("mojang-data", "recipes"), (path, attributes) -> {
-            if (!attributes.isRegularFile()) {
+        try {
+            JsonRecipeReader reader = new JsonRecipeReader(isDebug);
+            Map<String, VanillaRecipe> recipes = new HashMap<>();
+            Path recipePath = Path.of("mojang-data", "recipes");
+            if (!Files.exists(recipePath)) {
+                Logger.error("Failed to load recipes from mojang-data/recipes, skipping crafting feature.");
                 return;
             }
-            FileReader fileReader = new FileReader(path.toFile());
-            VanillaRecipe recipe = reader.read(fileReader);
-            recipes.put(path.getFileName().toString(), recipe);
-            fileReader.close();
-        });
-
-        recipes.forEach(registry::register);
-        Logger.info("Loaded {} recipes", recipes.size());
+            walk(recipePath, (path, attributes) -> {
+                if (!attributes.isRegularFile()) {
+                    return;
+                }
+                FileReader fileReader = new FileReader(path.toFile());
+                VanillaRecipe recipe = reader.read(fileReader);
+                recipes.put(path.getFileName().toString(), recipe);
+                fileReader.close();
+            });
+            recipes.forEach(registry::register);
+            Logger.info("Loaded {} recipes", recipes.size());
+        } catch (Throwable e) {
+            Logger.error(e, "Failed to load recipes from mojang-data/recipes, skipping crafting feature.");
+        }
     }
 
     private interface Walker {
@@ -57,7 +63,7 @@ public class CraftingDataFeature implements VanillaReimplementation.Feature {
     }
 
     @Override
-    public @NotNull NamespaceID namespaceID() {
+    public @NotNull NamespaceID namespaceId() {
         return NamespaceID.from("vri:crafting_data");
     }
 }

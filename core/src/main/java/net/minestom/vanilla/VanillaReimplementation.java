@@ -8,10 +8,12 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.TagWritable;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
+import net.minestom.vanilla.utils.DependencySorting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -115,7 +117,7 @@ public interface VanillaReimplementation {
     /**
      * A feature is a collection of logic that can be hooked into a server process.
      */
-    interface Feature {
+    interface Feature extends DependencySorting.NamespaceDependent<Class<? extends Feature>> {
 
         /**
          * Hooks into this server process.
@@ -128,11 +130,25 @@ public interface VanillaReimplementation {
          */
         void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry);
 
-//        @NotNull Collection<Class<? extends Feature>> dependencies();
+        /**
+         * Obtains the dependencies of this feature.
+         * These dependencies will be loaded before this feature.
+         * @return the dependencies
+         */
+        default @NotNull Set<Class<? extends Feature>> dependencies() {
+            return Set.of();
+        }
 
         /**
          * @return a unique {@link NamespaceID} for this feature
          */
-        @NotNull NamespaceID namespaceID();
+        @NotNull NamespaceID namespaceId();
+
+        /**
+         * @return a unique {@link NamespaceID} for this feature
+         */
+        default @NotNull Class<? extends Feature> identity() {
+            return getClass();
+        }
     }
 }

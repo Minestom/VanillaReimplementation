@@ -20,7 +20,7 @@ public class InstanceMetaFeature implements VanillaReimplementation.Feature {
     }
 
     @Override
-    public @NotNull NamespaceID namespaceID() {
+    public @NotNull NamespaceID namespaceId() {
         return NamespaceID.from("vri:instancemeta");
     }
 

@@ -14,7 +14,7 @@ public class MinestomEntitiesFeature implements VanillaReimplementation.Feature 
     }
 
     @Override
-    public @NotNull NamespaceID namespaceID() {
+    public @NotNull NamespaceID namespaceId() {
         return NamespaceID.from("vri:entities");
     }
 }
