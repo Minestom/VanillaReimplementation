@@ -8,6 +8,10 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.TagWritable;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
+import net.minestom.vanilla.logging.Level;
+import net.minestom.vanilla.logging.Loading;
+import net.minestom.vanilla.logging.Logger;
+import net.minestom.vanilla.logging.StatusUpdater;
 import net.minestom.vanilla.utils.DependencySorting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +44,14 @@ public interface VanillaReimplementation {
      * @return the new instance
      */
     static @NotNull VanillaReimplementation hook(@NotNull ServerProcess process, Predicate<Feature> predicate) {
-        return VanillaReimplementationImpl.hook(process, predicate);
+        try {
+            Loading.level(Level.SETUP);
+            Loading.start("Initialising");
+            return VanillaReimplementationImpl.hook(process, predicate);
+        } finally {
+            Loading.finish();
+            Logger.setup().nextLine();
+        }
     }
 
     // Vri Methods
@@ -128,7 +139,25 @@ public interface VanillaReimplementation {
          * @param vri      the vanilla reimplementation object
          * @param registry the registry object
          */
-        void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry);
+        @Deprecated
+        default void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry) {
+        }
+
+        /**
+         * Hooks into this server process.
+         * <p>
+         * DO NOT manually call this method, use {@link VanillaReimplementation#hook} instead.
+         * </p>
+         *
+         * @param context the context containing all related objects
+         */
+        void hook(@NotNull HookContext context);
+
+        interface HookContext {
+            @NotNull VanillaReimplementation vri();
+            @NotNull VanillaRegistry registry();
+            @NotNull StatusUpdater status();
+        }
 
         /**
          * Obtains the dependencies of this feature.

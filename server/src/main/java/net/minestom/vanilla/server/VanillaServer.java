@@ -6,12 +6,15 @@ import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.VanillaReimplementation;
+import net.minestom.vanilla.logging.Loading;
 import net.minestom.vanilla.logging.Logger;
 import net.minestom.vanilla.system.RayFastManager;
 import net.minestom.vanilla.system.ServerProperties;
@@ -19,6 +22,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.IntStream;
 
 class VanillaServer {
 
@@ -30,9 +35,11 @@ class VanillaServer {
     public static void main(String[] args) {
         // Use the static server process
         MinecraftServer server = MinecraftServer.init();
+        Logger.info("Setting up vri...");
         VanillaReimplementation vri = VanillaReimplementation.hook(MinecraftServer.process());
 
         VanillaServer vanillaServer = new VanillaServer(server, vri, args);
+        Logger.info("vri is setup.");
         vanillaServer.start("0.0.0.0", 25565);
     }
 
@@ -94,6 +101,18 @@ class VanillaServer {
             player.kick("Server is closing.");
             connectionManager.removePlayer(player.getPlayerConnection());
         }));
+
+        // Preload 64x64 chunks
+        int width = 32;
+        //noinspection unchecked
+        CompletableFuture<Chunk>[] chunkFutures = new CompletableFuture[width * 2 * width * 2];
+        for (int x = -width; x < width; x++) {
+            for (int z = -width; z < width; z++) {
+                int index = (x + width) + (z + width) * width;
+                chunkFutures[index] = overworld.loadChunk(x, z);
+            }
+        }
+        Loading.process("Preloading chunks", chunkFutures);
 
         // Debug
         if (Arrays.asList(args).contains("-debug")) {

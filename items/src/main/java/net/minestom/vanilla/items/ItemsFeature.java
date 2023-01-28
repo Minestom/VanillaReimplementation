@@ -6,14 +6,15 @@ import net.minestom.vanilla.VanillaReimplementation;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemsFeature implements VanillaReimplementation.Feature {
+
     @Override
-    public void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry) {
+    public void hook(@NotNull HookContext context) {
         ItemManager manager = ItemManager.accumulate(accumulator -> {
             for (VanillaItems item : VanillaItems.values()) {
                 accumulator.accumulate(item.getMaterial(), item.getItemHandlerSupplier().get());
             }
         });
-        manager.registerEvents(vri.process().eventHandler());
+        manager.registerEvents(context.vri().process().eventHandler());
     }
 
     @Override
