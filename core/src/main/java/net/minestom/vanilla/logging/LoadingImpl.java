@@ -19,6 +19,7 @@ class LoadingImpl implements Loading {
 
     public synchronized void waitTask(String name) {
         LoadingImpl loading;
+        Logger.logger().level(level).nextLine();
         if (loadingBar == null) {
             loading = new LoadingImpl(this, LoadingBar.logger(name, Logger.logger().level(level)), level);
         } else {

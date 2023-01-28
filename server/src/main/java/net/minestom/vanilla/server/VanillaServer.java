@@ -127,7 +127,6 @@ class VanillaServer {
             if (future != null) future.join();
         }
         Loading.finish();
-        Logger.setup("loaded %d chunks", radius * 2 * radius * 2);
 
         // Debug
         if (Arrays.asList(args).contains("-debug")) {

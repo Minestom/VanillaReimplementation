@@ -5,11 +5,13 @@ import java.util.function.Consumer;
 class LoggingLoadingBar implements LoadingBar {
 
     private static final double PROGRESS_BAR_WIDTH = Integer.parseInt(System.getProperty("vri.loadingBarWidth", "20"));
+    private static final Color MESSAGE_COLOR = Color.valueOf(System.getProperty("vri.loadingBarMessageColor", "BLUE_BOLD"));
 
     private String message;
     private double progress;
     private final StatusUpdater updater;
     private final Consumer<String> out;
+    private final int depth = 0;
     public LoggingLoadingBar(String initialMessage, Consumer<String> out) {
         this.message = initialMessage;
         this.progress = 0;
@@ -20,7 +22,7 @@ class LoggingLoadingBar implements LoadingBar {
 
     @Override
     public SubTaskLoadingBar subTask(String task) {
-        return new SubTaskLoadingBar(this, task);
+        return new SubTaskLoadingBar(this, task, depth + 1);
     }
 
     public StatusUpdater updater() {
@@ -35,11 +37,11 @@ class LoggingLoadingBar implements LoadingBar {
     private void renderThis() {
         out.accept("\r");
         render(message, progress, out);
-        out.accept("");
     }
 
     private static void render(String message, double progress, Consumer<String> out) {
         StringBuilder sb = new StringBuilder();
+        sb.append(MESSAGE_COLOR);
         sb.append(message);
         sb.append(" ");
         accumulate(progress * PROGRESS_BAR_WIDTH, PROGRESS_BAR_WIDTH, sb);
@@ -55,7 +57,7 @@ class LoggingLoadingBar implements LoadingBar {
         out.append(Color.RESET);
         out.append(Color.CYAN);
         double remaining = total - width;
-        while (width >= 1) {
+        while (width > 1) {
             width -= 1;
             out.append("=");
         }
@@ -96,24 +98,30 @@ class LoggingLoadingBar implements LoadingBar {
         private String message;
         private double progress;
         private final UpdaterImpl updater;
-        public SubTaskLoadingBar(LoadingBar parent, String message) {
+        private final int depth;
+        public SubTaskLoadingBar(LoadingBar parent, String message, int depth) {
             this.parent = parent;
             this.message = message;
             this.progress = 0;
             this.updater = new UpdaterImpl();
+            this.depth = depth;
         }
 
         @Override
         public LoadingBar subTask(String task) {
-            return new SubTaskLoadingBar(this, task);
+            return new SubTaskLoadingBar(this, task, depth + 1);
+        }
+
+        private void printIndent(LoadingBar bar) {
+            if (bar instanceof SubTaskLoadingBar sub) {
+                printIndent(sub.parent);
+            }
+            out.accept("    ");
         }
 
         private void renderThis() {
-            if (parent instanceof LoggingLoadingBar root) {
-                root.renderThis();
-            } else if (parent instanceof SubTaskLoadingBar sub) {
-                sub.renderThis();
-            }
+            printIndent(parent);
+            out.accept(MESSAGE_COLOR.toString());
             render(message, progress, out);
         }
 

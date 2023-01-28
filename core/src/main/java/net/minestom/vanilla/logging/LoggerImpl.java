@@ -105,8 +105,8 @@ record LoggerImpl(Level level) implements Logger {
     @Override
     public Logger nextLine() {
         synchronized (printLock) {
-            if (LOG_LEVEL.ordinal() > level.ordinal()) return this;
-            if (!newLine) consolePrint(System.lineSeparator());
+            if (LOG_LEVEL.ordinal() < level.ordinal()) return this;
+            if (!newLine) newLine();
             return this;
         }
     }
