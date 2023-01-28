@@ -15,8 +15,9 @@ import java.util.WeakHashMap;
 
 public class InstanceMetaFeature implements VanillaReimplementation.Feature {
 
-    public void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry) {
-        new Logic().hook(vri);
+    @Override
+    public void hook(@NotNull HookContext context) {
+        new Logic().hook(context.vri());
     }
 
     @Override

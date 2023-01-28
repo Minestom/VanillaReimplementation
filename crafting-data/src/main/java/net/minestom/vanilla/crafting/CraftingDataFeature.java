@@ -21,7 +21,7 @@ public class CraftingDataFeature implements VanillaReimplementation.Feature {
     private final boolean isDebug = System.getProperty("minestom.vri.debug") != null;
 
     @Override
-    public void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry) {
+    public void hook(@NotNull HookContext context) {
         try {
             JsonRecipeReader reader = new JsonRecipeReader(isDebug);
             Map<String, VanillaRecipe> recipes = new HashMap<>();
@@ -39,8 +39,8 @@ public class CraftingDataFeature implements VanillaReimplementation.Feature {
                 recipes.put(path.getFileName().toString(), recipe);
                 fileReader.close();
             });
-            recipes.forEach(registry::register);
-            Logger.info("Loaded %s recipes", recipes.size());
+            recipes.forEach(context.registry()::register);
+            Logger.info("Loaded %s recipes%n", recipes.size());
         } catch (Throwable e) {
             Logger.warn(e, "Failed to load recipes from mojang-data/recipes, skipping crafting feature.");
         }
