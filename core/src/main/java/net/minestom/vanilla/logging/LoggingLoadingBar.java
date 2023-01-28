@@ -75,17 +75,18 @@ class LoggingLoadingBar implements LoadingBar {
     private class UpdaterImpl implements StatusUpdater {
         @Override
         public synchronized void progress(double progress) {
-            LoggingLoadingBar.this.progress = progress;
+            if (LoggingLoadingBar.this.progress != progress) {
+                LoggingLoadingBar.this.progress = progress;
+                renderThis();
+            }
         }
 
         @Override
         public synchronized void message(String message) {
-            LoggingLoadingBar.this.message = message;
-        }
-
-        @Override
-        public void update() {
-            renderThis();
+            if (!LoggingLoadingBar.this.message.equals(message)) {
+                LoggingLoadingBar.this.message = message;
+                renderThis();
+            }
         }
     }
 
@@ -129,17 +130,18 @@ class LoggingLoadingBar implements LoadingBar {
         private class UpdaterImpl implements StatusUpdater {
             @Override
             public void progress(double progress) {
-                SubTaskLoadingBar.this.progress = progress;
+                if (SubTaskLoadingBar.this.progress != progress) {
+                    SubTaskLoadingBar.this.progress = progress;
+                    renderThis();
+                }
             }
 
             @Override
             public void message(String message) {
-                SubTaskLoadingBar.this.message = message;
-            }
-
-            @Override
-            public void update() {
-                renderThis();
+                if (!SubTaskLoadingBar.this.message.equals(message)) {
+                    SubTaskLoadingBar.this.message = message;
+                    renderThis();
+                }
             }
         }
     }

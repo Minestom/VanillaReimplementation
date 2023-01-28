@@ -12,6 +12,4 @@ public interface StatusUpdater {
      * @param message the new message
      */
     void message(String message);
-
-    void update();
 }

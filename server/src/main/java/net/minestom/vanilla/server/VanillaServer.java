@@ -14,6 +14,7 @@ import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.VanillaReimplementation;
+import net.minestom.vanilla.logging.Level;
 import net.minestom.vanilla.logging.Loading;
 import net.minestom.vanilla.logging.Logger;
 import net.minestom.vanilla.system.RayFastManager;
@@ -36,6 +37,9 @@ class VanillaServer {
     public static void main(String[] args) {
         // Use the static server process
         MinecraftServer server = MinecraftServer.init();
+
+        // Use SETUP logging level since this is a standalone server.
+        Loading.level(Level.SETUP);
         Logger.info("Setting up vri...");
         VanillaReimplementation vri = VanillaReimplementation.hook(MinecraftServer.process());
 
@@ -105,8 +109,9 @@ class VanillaServer {
 
         // Preload 16x16 chunks
         int radius = 16 / 2;
-        Loading.start("Preloading chunks");
-        CompletableFuture<?>[] chunkFutures = new CompletableFuture[radius * 2 * radius * 2];
+        int total = radius * 2 * radius * 2;
+        Loading.start("Preloading " + total + " chunks");
+        CompletableFuture<?>[] chunkFutures = new CompletableFuture[total];
         AtomicInteger completed = new AtomicInteger(0);
         for (int x = -radius; x < radius; x++) {
             for (int z = -radius; z < radius; z++) {
@@ -115,7 +120,6 @@ class VanillaServer {
                         .thenRun(() -> {
                             int completedCount = completed.incrementAndGet();
                             Loading.updater().progress((double) completedCount / (double) chunkFutures.length);
-                            Loading.updater().update();
                         });
             }
         }

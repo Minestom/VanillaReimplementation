@@ -53,7 +53,6 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
      * @return the new instance
      */
     public static @NotNull VanillaReimplementationImpl hook(@NotNull ServerProcess process, Predicate<Feature> predicate) {
-        Loading.level(Level.SETUP);
         Loading.start("Initialising");
 
         Loading.start("Initialising Minestom Resources...");
@@ -249,7 +248,6 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
                 throw new RuntimeException(e);
             }
         }
-        Loading.updater().update();
     }
 
     private void instructHook(Feature feature, VanillaRegistry registry) {
