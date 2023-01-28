@@ -54,13 +54,6 @@ subprojects {
 
         // Annotations
         api("org.jetbrains:annotations:${project.property("annotations_version")}")
-
-        // Tinylog for colored logging
-        api("org.tinylog:tinylog-api:2.5.0")
-        implementation("org.tinylog:tinylog-impl:2.5.0")
-
-        // jansi for colored console
-        implementation("org.fusesource.jansi:jansi:2.4.0")
     }
 
     publishing {
