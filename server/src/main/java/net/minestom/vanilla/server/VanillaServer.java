@@ -1,19 +1,18 @@
 package net.minestom.vanilla.server;
 
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.CommandManager;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerLoginEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.VanillaReimplementation;
+import net.minestom.vanilla.logging.Logger;
 import net.minestom.vanilla.system.RayFastManager;
 import net.minestom.vanilla.system.ServerProperties;
 import org.jetbrains.annotations.NotNull;

@@ -3,16 +3,18 @@ package net.minestom.vanilla.crafting;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
+import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.tinylog.Logger;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 public class CraftingDataFeature implements VanillaReimplementation.Feature {
 
@@ -25,7 +27,7 @@ public class CraftingDataFeature implements VanillaReimplementation.Feature {
             Map<String, VanillaRecipe> recipes = new HashMap<>();
             Path recipePath = Path.of("mojang-data", "recipes");
             if (!Files.exists(recipePath)) {
-                Logger.error("Failed to load recipes from mojang-data/recipes, skipping crafting feature.");
+                Logger.warn("Failed to load recipes from mojang-data/recipes, skipping crafting feature.");
                 return;
             }
             walk(recipePath, (path, attributes) -> {
@@ -38,9 +40,9 @@ public class CraftingDataFeature implements VanillaReimplementation.Feature {
                 fileReader.close();
             });
             recipes.forEach(registry::register);
-            Logger.info("Loaded {} recipes", recipes.size());
+            Logger.info("Loaded %s recipes", recipes.size());
         } catch (Throwable e) {
-            Logger.error(e, "Failed to load recipes from mojang-data/recipes, skipping crafting feature.");
+            Logger.warn(e, "Failed to load recipes from mojang-data/recipes, skipping crafting feature.");
         }
     }
 

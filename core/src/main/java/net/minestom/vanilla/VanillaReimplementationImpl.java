@@ -16,11 +16,12 @@ import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.crafting.VanillaRecipe;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.instance.SetupVanillaInstanceEvent;
+import net.minestom.vanilla.logging.Logger;
 import net.minestom.vanilla.utils.DependencySorting;
+import net.minestom.vanilla.utils.MinestomResources;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
-import org.tinylog.Logger;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,10 +49,15 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
      * @return the new instance
      */
     public static @NotNull VanillaReimplementationImpl hook(@NotNull ServerProcess process, Predicate<Feature> predicate) {
+        Logger.info("Initialising Minestom Resources...");
+        MinestomResources.initialize();
+
         Logger.info("Setting up VanillaReimplementation...");
+        long start = System.currentTimeMillis();
         VanillaReimplementationImpl vri = new VanillaReimplementationImpl(process);
         vri.INTERNAL_HOOK(predicate);
-        Logger.info("VanillaReimplementation has been setup!");
+        Logger.info("VanillaReimplementation has been setup! Took %dms%n", System.currentTimeMillis() - start);
+
         return vri;
     }
 
@@ -201,7 +207,7 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
                     Objects.requireNonNull(dependency, "Dependency cannot be null!");
                 }
             } catch (Exception e) {
-                Logger.error("Failed to load features!", e);
+                Logger.error("Failed to load features! Does one of your features have a missing dependency feature?", e);
                 throw new RuntimeException(e);
             }
         }
@@ -212,13 +218,16 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
         Logger.info("Loading features...");
         for (Feature feature : sortedByDependencies) {
             if (!predicate.test(feature)) {
-                Logger.info("Skipping feature {}...", feature.namespaceId());
+                Logger.info("Skipping feature %s...", feature.namespaceId());
                 continue;
             }
 
-            Logger.info("Hooking feature: " + feature.namespaceId());
             try {
+                Logger.debug("Hooking feature: %s...%n", feature.namespaceId());
+                long start = System.nanoTime();
                 feature.hook(this, registry);
+                long end = System.nanoTime();
+                Logger.info("Feature %s has been loaded in %d ms!%n", feature.namespaceId(), (end - start) / 1000000);
             } catch (Exception e) {
                 Logger.error("Failed to load feature: " + feature.namespaceId(), e);
             }
