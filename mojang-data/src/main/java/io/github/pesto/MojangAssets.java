@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.github.pesto.files.ByteArray;
 import io.github.pesto.files.FileSystem;
+import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -42,7 +43,7 @@ public final class MojangAssets {
                 JsonObject versionInfo = downloadJson(versionInfoUrl);
 
                 // Download jar
-                System.out.println("Downloading vanilla jar...");
+                Logger.info("Downloading vanilla jar...");
                 downloadJar(versionInfo, jar);
             }
 

@@ -1,7 +1,7 @@
 package net.minestom.vanilla.logging;
 
-import org.jetbrains.annotations.Nullable;
-
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.regex.Pattern;
 
@@ -9,9 +9,28 @@ record LoggerImpl(Level level) implements Logger {
 
     static final LoggerImpl DEFAULT = new LoggerImpl(Level.INFO);
     public static Level LOG_LEVEL = Level.INFO;
-    private static boolean isNewLine = true;
-    private static boolean isFreshLine = false;
+
     private static LoggerImpl lastLogger = DEFAULT;
+    /** true if this logger implementation was the last used to log a message. false if it was an external call to {@link System#out} */
+    private static boolean loggerWasLast = true;
+    private static boolean newLine = true;
+    private static final Object printLock = new Object();
+
+    private static final PrintStream sysOut = System.out;
+    static {
+        System.setOut(new PrintStream(new OutputStream() {
+            @Override
+            public void write(int b) {
+                synchronized (printLock) {
+                    if (loggerWasLast) {
+                        loggerWasLast = false;
+                        if (!newLine) lastLogger.newLine();
+                    }
+                    sysOut.write(b);
+                }
+            }
+        }, false));
+    }
 
     @Override
     public Logger level(Level level) {
@@ -20,48 +39,51 @@ record LoggerImpl(Level level) implements Logger {
     }
 
     private void consolePrint(String str) {
-        System.out.print(str);
+        sysOut.print(str);
+        loggerWasLast = true;
+        lastLogger = this;
     }
 
-    private void resetLine() {
-        consolePrint("\r" + preparePrefix());
-        isFreshLine = true;
-        isNewLine = false;
-        lastLogger = this;
+    private void newLine() {
+        consolePrint(System.lineSeparator());
+        newLine = true;
     }
 
     @Override
     public Logger print(String message) {
-        if (LOG_LEVEL.ordinal() < level.ordinal()) return this;
-        if (message.isEmpty()) return this;
-        if ((!isNewLine) && (!lastLogger.equals(this))) {
-            consolePrint(System.lineSeparator());
-            isNewLine = true;
-            isFreshLine = false;
-        }
-        if (isNewLine) resetLine();
-        String[] lines = message.split(Pattern.quote(System.lineSeparator()), -1);
-        if (lines.length == 1) {
-            if (message.contains("\r")) {
-                int lastIndex = message.lastIndexOf("\r");
-                message = message.substring(lastIndex + 1);
-                resetLine();
+        synchronized (printLock) {
+            if (LOG_LEVEL.ordinal() < level.ordinal()) return this;
+            if (loggerWasLast && !lastLogger.equals(this) && !newLine) {
+                newLine();
             }
-            consolePrint(message);
-            isFreshLine = false;
+            if (newLine) {
+                consolePrint(preparePrefix());
+                newLine = false;
+            }
+            String[] lines = message.split(Pattern.quote(System.lineSeparator()), -1);
+            if (lines.length == 1 && !message.equals(System.lineSeparator())) {
+                printNonNewLine(message);
+                return this;
+            }
+            for (int i = 0; i < lines.length; i++) {
+                String line = lines[i];
+                if (i != 0) newLine();
+                if (!line.isEmpty()) print(line);
+            }
             return this;
         }
-        for (int i = 0; i < lines.length; i++) {
-            String line = lines[i];
-            if (i != 0) {
-                consolePrint(System.lineSeparator());
-                isFreshLine = false;
-                isNewLine = true;
-                continue;
-            }
-            print(line);
+    }
+
+    private void printNonNewLine(String message) {
+        if (!message.contains("\r")) {
+            consolePrint(message);
+            return;
         }
-        return this;
+
+        String[] split = message.split(Pattern.quote("\r"), -1);
+        consolePrint("\r");
+        consolePrint(preparePrefix());
+        consolePrint(split[split.length - 1]);
     }
 
     private String preparePrefix() {
@@ -82,11 +104,11 @@ record LoggerImpl(Level level) implements Logger {
 
     @Override
     public Logger nextLine() {
-        if (LOG_LEVEL.ordinal() > level.ordinal()) return this;
-        if (isFreshLine) return this;
-        if (!isNewLine) consolePrint(System.lineSeparator());
-        resetLine();
-        return this;
+        synchronized (printLock) {
+            if (LOG_LEVEL.ordinal() > level.ordinal()) return this;
+            if (!newLine) consolePrint(System.lineSeparator());
+            return this;
+        }
     }
 
     private String prepareLevelPrefix() {

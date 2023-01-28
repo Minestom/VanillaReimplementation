@@ -44,14 +44,7 @@ public interface VanillaReimplementation {
      * @return the new instance
      */
     static @NotNull VanillaReimplementation hook(@NotNull ServerProcess process, Predicate<Feature> predicate) {
-        try {
-            Loading.level(Level.SETUP);
-            Loading.start("Initialising");
-            return VanillaReimplementationImpl.hook(process, predicate);
-        } finally {
-            Loading.finish();
-            Logger.setup().nextLine();
-        }
+        return VanillaReimplementationImpl.hook(process, predicate);
     }
 
     // Vri Methods

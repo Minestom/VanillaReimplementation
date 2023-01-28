@@ -16,6 +16,7 @@ import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.crafting.VanillaRecipe;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.instance.SetupVanillaInstanceEvent;
+import net.minestom.vanilla.logging.Level;
 import net.minestom.vanilla.logging.Loading;
 import net.minestom.vanilla.logging.Logger;
 import net.minestom.vanilla.logging.StatusUpdater;
@@ -52,12 +53,14 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
      * @return the new instance
      */
     public static @NotNull VanillaReimplementationImpl hook(@NotNull ServerProcess process, Predicate<Feature> predicate) {
+        Loading.level(Level.SETUP);
+        Loading.start("Initialising");
+
         Loading.start("Initialising Minestom Resources...");
         MinestomResources.initialize();
         Loading.finish();
 
         Loading.updater().progress(0.33);
-        Loading.updater().update();
 
         long start = System.currentTimeMillis();
 
@@ -66,14 +69,10 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
         Loading.finish();
 
         Loading.updater().progress(0.66);
-        Loading.updater().update();
-
         vri.INTERNAL_HOOK(predicate);
-
         Loading.updater().progress(1);
-        Loading.updater().update();
 
-        Logger.setup("Took %dms%n", System.currentTimeMillis() - start);
+        Loading.finish();
 
         return vri;
     }
@@ -239,7 +238,7 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
 
         for (Feature feature : sortedByDependencies) {
             if (!predicate.test(feature)) {
-                Logger.info("Skipping feature %s...", feature.namespaceId());
+                Logger.info("Skipping feature %s...%n", feature.namespaceId());
                 continue;
             }
 
@@ -257,13 +256,8 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
         try {
             Loading.start("" + feature.namespaceId());
 
-            long start = System.nanoTime();
-
             Feature.HookContext context = new HookContextImpl(this, registry, Loading.updater());
             feature.hook(context);
-
-            long end = System.nanoTime();
-            Logger.setup("took %d ms", (end - start) / 1000000);
         } catch (Exception e) {
             Logger.error(e, "Failed to load feature: %s%n", feature.namespaceId());
             throw new RuntimeException(e);

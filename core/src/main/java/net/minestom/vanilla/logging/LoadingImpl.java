@@ -8,15 +8,12 @@ class LoadingImpl implements Loading {
 
     private final @Nullable LoadingImpl parent;
     private final LoadingBar loadingBar;
+    private final long started = System.currentTimeMillis();
     private double progress = 0;
-    private Level level;
+    public Level level;
     private LoadingImpl(@Nullable LoadingImpl parent, @NotNull LoadingBar loadingBar, Level level) {
         this.parent = parent;
         this.loadingBar = loadingBar;
-        this.level = level;
-    }
-
-    public synchronized void setLevel(Level level) {
         this.level = level;
     }
 
@@ -35,7 +32,9 @@ class LoadingImpl implements Loading {
         if (parent == null) {
             throw new IllegalStateException("Cannot finish root task");
         }
-        parent.loadingBar.updater().progress(parent.progress);
+        loadingBar.updater().progress(1);
+        loadingBar.updater().update();
+        Logger.logger().level(parent.level).printf("took %dms%n", System.currentTimeMillis() - started);
         CURRENT = this.parent;
     }
 

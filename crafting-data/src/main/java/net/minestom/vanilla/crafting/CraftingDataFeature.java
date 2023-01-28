@@ -40,7 +40,7 @@ public class CraftingDataFeature implements VanillaReimplementation.Feature {
                 fileReader.close();
             });
             recipes.forEach(context.registry()::register);
-            Logger.info("Loaded %s recipes", recipes.size());
+            Logger.info("Loaded %s recipes%n", recipes.size());
         } catch (Throwable e) {
             Logger.warn(e, "Failed to load recipes from mojang-data/recipes, skipping crafting feature.");
         }

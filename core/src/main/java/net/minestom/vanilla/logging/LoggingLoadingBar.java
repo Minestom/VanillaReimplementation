@@ -4,6 +4,8 @@ import java.util.function.Consumer;
 
 class LoggingLoadingBar implements LoadingBar {
 
+    private static final double PROGRESS_BAR_WIDTH = Integer.parseInt(System.getProperty("vri.loadingBarWidth", "20"));
+
     private String message;
     private double progress;
     private final StatusUpdater updater;
@@ -33,13 +35,14 @@ class LoggingLoadingBar implements LoadingBar {
     private void renderThis() {
         out.accept("\r");
         render(message, progress, out);
+        out.accept("");
     }
 
     private static void render(String message, double progress, Consumer<String> out) {
         StringBuilder sb = new StringBuilder();
         sb.append(message);
         sb.append(" ");
-        accumulate(progress * 32.0, 32, sb);
+        accumulate(progress * PROGRESS_BAR_WIDTH, PROGRESS_BAR_WIDTH, sb);
         sb.append(" ");
         out.accept(sb.toString());
     }

@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 class VanillaServer {
@@ -102,22 +103,32 @@ class VanillaServer {
             connectionManager.removePlayer(player.getPlayerConnection());
         }));
 
-        // Preload 64x64 chunks
-        int width = 32;
-        //noinspection unchecked
-        CompletableFuture<Chunk>[] chunkFutures = new CompletableFuture[width * 2 * width * 2];
-        for (int x = -width; x < width; x++) {
-            for (int z = -width; z < width; z++) {
-                int index = (x + width) + (z + width) * width;
-                chunkFutures[index] = overworld.loadChunk(x, z);
+        // Preload 16x16 chunks
+        int radius = 16 / 2;
+        Loading.start("Preloading chunks");
+        CompletableFuture<?>[] chunkFutures = new CompletableFuture[radius * 2 * radius * 2];
+        AtomicInteger completed = new AtomicInteger(0);
+        for (int x = -radius; x < radius; x++) {
+            for (int z = -radius; z < radius; z++) {
+                int index = (x + radius) + (z + radius) * radius;
+                chunkFutures[index] = overworld.loadChunk(x, z)
+                        .thenRun(() -> {
+                            int completedCount = completed.incrementAndGet();
+                            Loading.updater().progress((double) completedCount / (double) chunkFutures.length);
+                            Loading.updater().update();
+                        });
             }
         }
-        Loading.process("Preloading chunks", chunkFutures);
+        for (CompletableFuture<?> future : chunkFutures) {
+            if (future != null) future.join();
+        }
+        Loading.finish();
+        Logger.setup("loaded %d chunks", radius * 2 * radius * 2);
 
         // Debug
         if (Arrays.asList(args).contains("-debug")) {
-            System.out.println("Debug mode enabled.");
-            System.out.println("To disable it, remove the -debug argument");
+            Logger.debug("Debug mode enabled.");
+            Logger.debug("To disable it, remove the -debug argument");
             VanillaDebug.hook(this);
         }
     }
