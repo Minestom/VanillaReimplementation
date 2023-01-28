@@ -1,5 +1,5 @@
 package net.minestom.vanilla.logging;
 
-enum Level {
-    DEBUG, INFO, SETUP, WARN, ERROR
+public enum Level {
+    DEBUG, SETUP, INFO, WARN, ERROR
 }

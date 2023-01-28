@@ -15,7 +15,7 @@ public class MojangDataFeature implements VanillaReimplementation.Feature {
     private final MojangAssets assets = new MojangAssets();
 
     @Override
-    public void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry) {
+    public void hook(@NotNull HookContext context) {
         assets.getAssets(LATEST).join();
     }
 

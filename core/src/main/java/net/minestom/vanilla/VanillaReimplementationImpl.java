@@ -16,7 +16,10 @@ import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.crafting.VanillaRecipe;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.instance.SetupVanillaInstanceEvent;
+import net.minestom.vanilla.logging.Level;
+import net.minestom.vanilla.logging.Loading;
 import net.minestom.vanilla.logging.Logger;
+import net.minestom.vanilla.logging.StatusUpdater;
 import net.minestom.vanilla.utils.DependencySorting;
 import net.minestom.vanilla.utils.MinestomResources;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +28,7 @@ import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -45,18 +49,29 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
      * Creates a new instance of {@link VanillaReimplementationImpl} and hooks into the server process.
      *
      * @param process   the server process
-     * @param predicate
+     * @param predicate a predicate to determine which features to enable
      * @return the new instance
      */
     public static @NotNull VanillaReimplementationImpl hook(@NotNull ServerProcess process, Predicate<Feature> predicate) {
-        Logger.info("Initialising Minestom Resources...");
-        MinestomResources.initialize();
+        Loading.start("Initialising");
 
-        Logger.info("Setting up VanillaReimplementation...");
+        Loading.start("Initialising Minestom Resources...");
+        MinestomResources.initialize();
+        Loading.finish();
+
+        Loading.updater().progress(0.33);
+
         long start = System.currentTimeMillis();
+
+        Loading.start("Instantiating vri");
         VanillaReimplementationImpl vri = new VanillaReimplementationImpl(process);
+        Loading.finish();
+
+        Loading.updater().progress(0.66);
         vri.INTERNAL_HOOK(predicate);
-        Logger.info("VanillaReimplementation has been setup! Took %dms%n", System.currentTimeMillis() - start);
+        Loading.updater().progress(1);
+
+        Loading.finish();
 
         return vri;
     }
@@ -191,16 +206,19 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
         VanillaRegistry registry = new VanillaRegistryImpl();
 
         // Hook this core library
+        Loading.start("Hooking Core Library");
         hookCoreLibrary();
+        Loading.finish();
 
         // Load all the features and hook them
-        Logger.info("Fetching features...");
+        Loading.start("Loading features from classpath");
         Set<Feature> features = ServiceLoader.load(Feature.class)
                 .stream()
                 .map(ServiceLoader.Provider::get)
                 .collect(Collectors.toUnmodifiableSet());
+        Loading.finish();
 
-        Logger.info("Validating dependencies...");
+        Loading.start("Validating dependencies");
         for (Feature feature : features) {
             try {
                 for (Class<? extends Feature> dependency : feature.dependencies()) {
@@ -211,29 +229,44 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
                 throw new RuntimeException(e);
             }
         }
+        Loading.finish();
 
-        Logger.info("Sorting features by dependencies...");
+        Loading.start("Sorting features by dependencies");
         List<Feature> sortedByDependencies = DependencySorting.sort(features);
+        Loading.finish();
 
-        Logger.info("Loading features...");
         for (Feature feature : sortedByDependencies) {
             if (!predicate.test(feature)) {
-                Logger.info("Skipping feature %s...", feature.namespaceId());
+                Logger.info("Skipping feature %s...%n", feature.namespaceId());
                 continue;
             }
 
             try {
-                Logger.debug("Hooking feature: %s...%n", feature.namespaceId());
-                long start = System.nanoTime();
-                feature.hook(this, registry);
-                long end = System.nanoTime();
-                Logger.info("Feature %s has been loaded in %d ms!%n", feature.namespaceId(), (end - start) / 1000000);
+                instructHook(feature, registry);
             } catch (Exception e) {
                 Logger.error("Failed to load feature: " + feature.namespaceId(), e);
+                throw new RuntimeException(e);
             }
         }
+    }
 
-        Logger.info("All features have been loaded!");
+    private void instructHook(Feature feature, VanillaRegistry registry) {
+        try {
+            Loading.start("" + feature.namespaceId());
+
+            Feature.HookContext context = new HookContextImpl(this, registry, Loading.updater());
+            feature.hook(context);
+        } catch (Exception e) {
+            Logger.error(e, "Failed to load feature: %s%n", feature.namespaceId());
+            throw new RuntimeException(e);
+        } finally {
+            Loading.finish();
+        }
+    }
+
+    private record HookContextImpl(VanillaReimplementation vri,
+                                       VanillaRegistry registry,
+                                       StatusUpdater status) implements Feature.HookContext {
     }
 
     private void hookCoreLibrary() {
