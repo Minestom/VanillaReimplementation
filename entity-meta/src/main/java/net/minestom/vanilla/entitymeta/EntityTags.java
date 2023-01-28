@@ -1,5 +1,6 @@
 package net.minestom.vanilla.entitymeta;
 
+import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;

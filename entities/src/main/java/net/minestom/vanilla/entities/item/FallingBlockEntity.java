@@ -1,4 +1,4 @@
-package net.minestom.vanilla.entities;
+package net.minestom.vanilla.entities.item;
 
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;

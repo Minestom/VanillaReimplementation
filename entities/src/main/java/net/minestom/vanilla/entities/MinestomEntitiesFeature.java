@@ -4,6 +4,8 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
+import net.minestom.vanilla.entities.item.FallingBlockEntity;
+import net.minestom.vanilla.entities.item.PrimedTNTEntity;
 import org.jetbrains.annotations.NotNull;
 
 public class MinestomEntitiesFeature implements VanillaReimplementation.Feature {

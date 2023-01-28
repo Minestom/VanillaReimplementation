@@ -24,7 +24,7 @@ public class ChestInventory extends Inventory {
     protected final Point pos;
 
     private ChestInventory(Instance instance, Point pos) {
-        super(InventoryType.CHEST_3_ROW, Component.text("chest"));
+        super(InventoryType.CHEST_3_ROW, Component.text("Chest"));
 
         this.instance = instance;
         this.pos = pos;

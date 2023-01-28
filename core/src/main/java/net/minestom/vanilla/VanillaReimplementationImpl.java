@@ -178,6 +178,11 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
         public void register(@NotNull String recipeId, @NotNull VanillaRecipe recipe) {
             id2Recipe.put(recipeId, recipe);
         }
+
+        @Override
+        public void register(Object aNew) {
+
+        }
     }
 
     private void INTERNAL_HOOK(Predicate<Feature> predicate) {

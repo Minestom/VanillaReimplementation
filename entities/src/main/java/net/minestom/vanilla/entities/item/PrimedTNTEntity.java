@@ -1,5 +1,7 @@
-package net.minestom.vanilla.entities;
+package net.minestom.vanilla.entities.item;
 
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.other.PrimedTntMeta;
@@ -13,6 +15,8 @@ import java.util.Objects;
 
 public class PrimedTNTEntity extends Entity {
 
+    Sound tntHiss = Sound.sound(Key.key("entity.tnt.primed"), Sound.Source.BLOCK, 1f, 1f);
+
     private int fuseTime;
 
     public PrimedTNTEntity(@NotNull VanillaRegistry.EntityContext context) {
@@ -24,7 +28,6 @@ public class PrimedTNTEntity extends Entity {
         setGravity(0.025f, getGravityAcceleration());
         setBoundingBox(0.98f, 0.98f, 0.98f);
         this.fuseTime = fuseTime;
-
         PrimedTntMeta meta = (PrimedTntMeta) this.getEntityMeta();
         meta.setFuseTime(fuseTime);
     }
@@ -44,6 +47,7 @@ public class PrimedTNTEntity extends Entity {
     @Override
     public void update(long time) {
         super.update(time);
+        if (fuseTime-- == 80) super.getViewersAsAudience().playSound(tntHiss);
         if (fuseTime-- <= 20) {
             explode();
         }

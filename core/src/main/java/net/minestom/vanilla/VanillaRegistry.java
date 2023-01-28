@@ -28,6 +28,8 @@ public sealed interface VanillaRegistry permits VanillaReimplementationImpl.Vani
      */
     void register(@NotNull String recipeId, @NotNull VanillaRecipe recipe);
 
+    void register(Object aNew);
+
     interface EntitySpawner {
         @NotNull Entity spawn(@NotNull VanillaRegistry.EntityContext context);
 
