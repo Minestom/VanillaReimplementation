@@ -115,8 +115,10 @@ class LoggingLoadingBar implements LoadingBar {
         private void printIndent(LoadingBar bar) {
             if (bar instanceof SubTaskLoadingBar sub) {
                 printIndent(sub.parent);
+            } else {
+                out.accept(Color.YELLOW_BRIGHT.toString());
             }
-            out.accept("    ");
+            out.accept("|   ");
         }
 
         private void renderThis() {
