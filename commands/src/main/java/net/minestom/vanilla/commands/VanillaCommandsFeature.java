@@ -11,8 +11,8 @@ import java.util.Set;
 public class VanillaCommandsFeature implements VanillaReimplementation.Feature {
 
     @Override
-    public void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry) {
-        new Logic().hook(vri);
+    public void hook(@NotNull HookContext context) {
+        new Logic().hook(context.vri());
     }
 
     @Override

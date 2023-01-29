@@ -1,25 +1,31 @@
 package net.minestom.vanilla.server;
 
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.CommandManager;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerLoginEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.VanillaReimplementation;
+import net.minestom.vanilla.logging.Level;
+import net.minestom.vanilla.logging.Loading;
+import net.minestom.vanilla.logging.Logger;
 import net.minestom.vanilla.system.RayFastManager;
 import net.minestom.vanilla.system.ServerProperties;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 class VanillaServer {
 
@@ -31,9 +37,14 @@ class VanillaServer {
     public static void main(String[] args) {
         // Use the static server process
         MinecraftServer server = MinecraftServer.init();
+
+        // Use SETUP logging level since this is a standalone server.
+        Loading.level(Level.SETUP);
+        Logger.info("Setting up vri...");
         VanillaReimplementation vri = VanillaReimplementation.hook(MinecraftServer.process());
 
         VanillaServer vanillaServer = new VanillaServer(server, vri, args);
+        Logger.info("vri is setup.");
         vanillaServer.start("0.0.0.0", 25565);
     }
 
@@ -96,10 +107,31 @@ class VanillaServer {
             connectionManager.removePlayer(player.getPlayerConnection());
         }));
 
+        // Preload 16x16 chunks
+        int radius = 16 / 2;
+        int total = radius * 2 * radius * 2;
+        Loading.start("Preloading " + total + " chunks");
+        CompletableFuture<?>[] chunkFutures = new CompletableFuture[total];
+        AtomicInteger completed = new AtomicInteger(0);
+        for (int x = -radius; x < radius; x++) {
+            for (int z = -radius; z < radius; z++) {
+                int index = (x + radius) + (z + radius) * radius;
+                chunkFutures[index] = overworld.loadChunk(x, z)
+                        .thenRun(() -> {
+                            int completedCount = completed.incrementAndGet();
+                            Loading.updater().progress((double) completedCount / (double) chunkFutures.length);
+                        });
+            }
+        }
+        for (CompletableFuture<?> future : chunkFutures) {
+            if (future != null) future.join();
+        }
+        Loading.finish();
+
         // Debug
         if (Arrays.asList(args).contains("-debug")) {
-            System.out.println("Debug mode enabled.");
-            System.out.println("To disable it, remove the -debug argument");
+            Logger.debug("Debug mode enabled.");
+            Logger.debug("To disable it, remove the -debug argument");
             VanillaDebug.hook(this);
         }
     }

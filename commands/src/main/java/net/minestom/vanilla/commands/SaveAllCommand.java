@@ -2,27 +2,28 @@ package net.minestom.vanilla.commands;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
+import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
-import org.jetbrains.annotations.NotNull;
+import net.minestom.vanilla.logging.Logger;
 
 /**
  * Save the server
  */
-public class SaveAllCommand extends VanillaCommand {
+public class SaveAllCommand extends Command {
     public SaveAllCommand() {
-        super("save-all", 3);
+        super("save-all");
+        setCondition(this::condition);
         setDefaultExecutor(this::execute);
     }
 
-    @Override
-    protected String usage() {
-        return "/save-all";
+    private boolean condition(CommandSender player, String commandName) {
+        return true; // TODO: permissions
     }
 
     private void execute(CommandSender player, CommandContext arguments) {
         MinecraftServer.getInstanceManager().getInstances().forEach(i -> {
             i.saveChunksToStorage();
-            System.out.println("Saved dimension " + i.getDimensionType().getName());
+            Logger.info("Saved dimension " + i.getDimensionType().getName());
         });
     }
 }

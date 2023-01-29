@@ -5,6 +5,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.github.pesto.files.ByteArray;
 import io.github.pesto.files.FileSystem;
+import net.minestom.vanilla.logging.Loading;
+import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -33,6 +35,7 @@ public final class MojangAssets {
 
     private FileSystem<ByteArray> downloadResources(@NotNull String version) {
         try {
+            Loading.start("Downloading vanilla jar...");
             // Check if source files already exist
             File jar = new File(ROOT, version + File.separator + "resources.jar");
             if (!jar.exists()) {
@@ -42,7 +45,6 @@ public final class MojangAssets {
                 JsonObject versionInfo = downloadJson(versionInfoUrl);
 
                 // Download jar
-                System.out.println("Downloading vanilla jar...");
                 downloadJar(versionInfo, jar);
             }
 
@@ -51,6 +53,8 @@ public final class MojangAssets {
 
         } catch (IOException e) {
             exitError(e.getMessage());
+        } finally {
+            Loading.finish();
         }
         return FileSystem.empty();
     }

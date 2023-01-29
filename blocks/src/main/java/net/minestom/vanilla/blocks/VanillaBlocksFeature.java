@@ -9,14 +9,18 @@ import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.BlockUpdateFeature;
 import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
+import net.minestom.vanilla.logging.Loading;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class VanillaBlocksFeature implements VanillaReimplementation.Feature {
+
     @Override
-    public void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry) {
+    public void hook(@NotNull HookContext context) {
+        VanillaReimplementation vri = context.vri();
+        VanillaRegistry registry = context.registry();
         VanillaBlocks.registerAll(vri, registry);
 
         vri.process().eventHandler().addListener(PlayerBlockPlaceEvent.class, event -> {

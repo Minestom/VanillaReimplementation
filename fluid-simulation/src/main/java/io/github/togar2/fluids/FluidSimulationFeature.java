@@ -11,9 +11,9 @@ import java.util.Set;
 public class FluidSimulationFeature implements VanillaReimplementation.Feature {
 
     @Override
-    public void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry) {
+    public void hook(@NotNull HookContext context) {
         // TODO: Use the block-update-system
-        MinestomFluids.init(vri.process());
+        MinestomFluids.init(context.vri().process());
     }
 
     @Override

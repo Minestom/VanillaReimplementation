@@ -27,6 +27,7 @@ import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.vanilla.generation.VanillaTestGenerator;
 import net.minestom.vanilla.instance.VanillaExplosion;
+import net.minestom.vanilla.logging.Logger;
 import net.minestom.vanilla.system.ServerProperties;
 
 public class VanillaEvents {
@@ -127,7 +128,7 @@ public class VanillaEvents {
             if (actualDisplacement - expectedDisplacement >= upperLimit) {
                 event.setCancelled(true);
                 player.teleport(player.getPosition()); // force teleport to previous position
-                System.out.println(player.getUsername() + " moved too fast! " + dx + " " + dy + " " + dz);
+                Logger.warn(player.getUsername() + " moved too fast! " + dx + " " + dy + " " + dz);
             }
         });
 

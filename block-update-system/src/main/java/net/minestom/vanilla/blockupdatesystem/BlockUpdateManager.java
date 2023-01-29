@@ -14,6 +14,7 @@ import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.randomticksystem.RandomTickManager;
 import net.minestom.vanilla.randomticksystem.RandomTickable;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +41,9 @@ public class BlockUpdateManager {
         }
     }
 
-    public static void init(EventNode<Event> eventNode) {
+    public static void init(@NotNull VanillaReimplementation.Feature.HookContext context) {
+        EventNode<Event> eventNode = context.vri().process().eventHandler();
+
         eventNode.addListener(InstanceTickEvent.class, BlockUpdateManager::instanceTick);
         eventNode.addListener(PlayerBlockBreakEvent.class, event ->
                 BlockUpdateManager.from(event.getPlayer().getInstance())
