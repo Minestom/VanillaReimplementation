@@ -30,7 +30,7 @@ subprojects {
     }
 
     tasks.withType<Jar> {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
 
     tasks.withType<Wrapper> {
