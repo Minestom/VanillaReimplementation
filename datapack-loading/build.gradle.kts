@@ -1,3 +1,4 @@
 dependencies {
-    implementation(project(":core"))
+    compileOnly(project(":core"))
+    compileOnly(project(":mojang-data"))
 }

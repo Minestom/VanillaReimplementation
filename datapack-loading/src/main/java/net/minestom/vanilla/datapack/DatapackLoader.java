@@ -1,10 +1,10 @@
 package net.minestom.vanilla.datapack;
 
 import com.google.gson.JsonElement;
+import io.github.pesto.files.ByteArray;
+import io.github.pesto.files.FileSystem;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.vanilla.datapack.files.FileSystem;
-import net.minestom.vanilla.datapack.files.FileSystemUtil;
 import net.minestom.vanilla.datapack.loot.ItemFunction;
 import net.minestom.vanilla.datapack.loot.ItemPredicate;
 import net.minestom.vanilla.datapack.number.NumberProvider;
@@ -18,14 +18,17 @@ import java.util.Map;
 public class DatapackLoader {
 
     private final String mcmeta;
-    private final byte[] pack_png;
+    private final ByteArray pack_png;
     final Map<NamespaceID, NamespacedData> namespace2data;
 
-    public DatapackLoader(FileSystem<InputStream> source) {
-        this.mcmeta = FileSystemUtil.toString(source).file("pack.mcmeta");
-        this.pack_png = FileSystemUtil.toBytes(source).file("pack.png");
+    public DatapackLoader(FileSystem<ByteArray> source) {
+        if (!source.hasFile("pack.mcmeta")) throw new IllegalArgumentException("pack.mcmeta is missing from " + source);
+        if (!source.hasFile("pack.png")) throw new IllegalArgumentException("pack.png is missing from " + source);
 
-        FileSystem<InputStream> dataFolder = source.folder("data");
+        this.mcmeta = source.map(ByteArray::toCharacterString).file("pack.mcmeta");
+        this.pack_png = source.file("pack.png");
+
+        FileSystem<ByteArray> dataFolder = source.folder("data");
         {
             Map<NamespaceID, NamespacedData> namespace2data = new HashMap<>();
             for (String namespace : dataFolder.folders()) {
@@ -42,12 +45,12 @@ public class DatapackLoader {
                           FileSystem<RecipeData> recipes,
                           FileSystem<StructureData> structures,
                           FileSystem<Tag> tags) {
-        public NamespacedData(FileSystem<InputStream> source) {
-            this(FileSystemUtil.toJson(source.folder("advancements")).map(AdvancementData::fromJson),
-                    FileSystemUtil.toJson(source.folder("loot_tables")).map(LootTableData::fromJson),
-                    FileSystemUtil.toJson(source.folder("recipes")).map(RecipeData::fromJson),
+        public NamespacedData(FileSystem<ByteArray> source) {
+            this(source.folder("advancements").map(FileSystem.BYTES_TO_JSON).map(AdvancementData::fromJson),
+                    source.folder("loot_tables").map(FileSystem.BYTES_TO_JSON).map(LootTableData::fromJson),
+                    source.folder("recipes").map(FileSystem.BYTES_TO_JSON).map(RecipeData::fromJson),
                     source.folder("structures").map(StructureData::fromInput),
-                    FileSystemUtil.toJson(source.folder("tags")).map(Tag::fromJson));
+                    source.folder("tags").map(FileSystem.BYTES_TO_JSON).map(Tag::fromJson));
         }
     }
 
@@ -106,7 +109,7 @@ public class DatapackLoader {
 
     }
     record StructureData() {
-        public static StructureData fromInput(InputStream content) {
+        public static StructureData fromInput(ByteArray content) {
             return null;
         }
 

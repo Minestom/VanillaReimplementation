@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface FileSystem<F> {
+public interface FileSystem<F> extends FileSystemMappers {
 
     /**
      * @return a map of file names (no directory prefix) to F objects
@@ -61,6 +61,7 @@ public interface FileSystem<F> {
     }
 
     default FileSystem<F> cache() {
+        if (this instanceof CacheFileSystem) return this;
         return new CacheFileSystem<>(this);
     }
 
@@ -79,4 +80,12 @@ public interface FileSystem<F> {
     static FileSystem<ByteArray> fromZipFile(File file, Predicate<String> pathFilter) {
         return FileSystemUtil.unzipIntoFileSystem(file, pathFilter);
     }
+
+    default boolean hasFile(String path) {
+        return readAll().containsKey(path);
+    }
+    default boolean hasFolder(String path) {
+        return folders().contains(path);
+    }
+
 }

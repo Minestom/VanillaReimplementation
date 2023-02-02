@@ -13,4 +13,5 @@ include 'server'
 include 'items'
 include 'crafting-data'
 include 'mojang-data'
+include 'datapack-loading'
 
