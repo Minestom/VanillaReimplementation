@@ -1,5 +1,5 @@
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":block-update-system"))
-    implementation(project(":entity-meta"))
+    compileOnly(project(":core"))
+    compileOnly(project(":block-update-system"))
+    compileOnly(project(":entity-meta"))
 }

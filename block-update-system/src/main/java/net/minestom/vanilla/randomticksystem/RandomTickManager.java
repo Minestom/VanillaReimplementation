@@ -33,9 +33,9 @@ public class RandomTickManager {
         return vri2managers.computeIfAbsent(vri, RandomTickManager::new);
     }
 
-    public static void init(VanillaReimplementation vri) {
-        RandomTickManager manager = create(vri);
-        vri.process().eventHandler().addListener(InstanceTickEvent.class, event -> {
+    public static void init(VanillaReimplementation.Feature.@NotNull HookContext context) {
+        RandomTickManager manager = create(context.vri());
+        context.vri().process().eventHandler().addListener(InstanceTickEvent.class, event -> {
             int randomTickCount = Integer.parseInt(System.getProperty(RANDOM_TICK_SYSTEM_PROPERTY, "3"));
             manager.handleInstanceTick(event, randomTickCount);
         });

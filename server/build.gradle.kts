@@ -1,14 +1,21 @@
+
+// Find all projects except for the root project and this project.
+val disallowed = setOf(project.name, project.parent!!.name)
+val includedProjects = project.parent?.allprojects?.filter { !disallowed.contains(it.name) } ?: emptyList()
+
 dependencies {
-    // Add all projects except for the root project and this project.
-    val disallowed = setOf(project.name, project.parent!!.name)
-    project.parent?.allprojects?.forEach {
-        if (disallowed.contains(it.name)) return@forEach
+    includedProjects.forEach {
         api(project(":" + it.name))
     }
 }
 
 tasks {
-    named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
+    withType(com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class.java) {
+        minimize {
+            includedProjects.forEach {
+                exclude(project(":" + it.name))
+            }
+        }
         manifest {
             attributes(
                 "Main-Class" to "net.minestom.vanilla.server.VanillaServer",

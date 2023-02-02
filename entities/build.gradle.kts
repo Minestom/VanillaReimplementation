@@ -1,4 +1,4 @@
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":entity-meta"))
+    compileOnly(project(":core"))
+    compileOnly(project(":entity-meta"))
 }

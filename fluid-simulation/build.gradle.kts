@@ -1,4 +1,4 @@
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":block-update-system"))
+    compileOnly(project(":core"))
+    compileOnly(project(":block-update-system"))
 }

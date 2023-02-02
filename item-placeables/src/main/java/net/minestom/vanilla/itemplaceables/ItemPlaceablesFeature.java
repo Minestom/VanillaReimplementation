@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ItemPlaceablesFeature implements VanillaReimplementation.Feature {
     @Override
-    public void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry) {
+    public void hook(@NotNull HookContext context) {
 
 
         // TODO: Flesh this out and make it configurable
@@ -24,7 +24,7 @@ public class ItemPlaceablesFeature implements VanillaReimplementation.Feature {
         itemPlaceables.put(Material.WATER_BUCKET, Block.WATER);
         itemPlaceables.put(Material.LAVA_BUCKET, Block.LAVA);
 
-        vri.process().eventHandler().addListener(PlayerUseItemOnBlockEvent.class, event -> {
+        context.vri().process().eventHandler().addListener(PlayerUseItemOnBlockEvent.class, event -> {
             Point position = event.getPosition();
             var face = event.getBlockFace();
             ItemStack item = event.getItemStack();
@@ -37,7 +37,7 @@ public class ItemPlaceablesFeature implements VanillaReimplementation.Feature {
     }
 
     @Override
-    public @NotNull NamespaceID namespaceID() {
+    public @NotNull NamespaceID namespaceId() {
         return NamespaceID.from("vri:item-placeables");
     }
 }

@@ -4,6 +4,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
+import net.minestom.vanilla.logging.Logger;
 
 /**
  * Save the server
@@ -22,7 +23,7 @@ public class SaveAllCommand extends Command {
     private void execute(CommandSender player, CommandContext arguments) {
         MinecraftServer.getInstanceManager().getInstances().forEach(i -> {
             i.saveChunksToStorage();
-            System.out.println("Saved dimension " + i.getDimensionType().getName());
+            Logger.info("Saved dimension " + i.getDimensionType().getName());
         });
     }
 }

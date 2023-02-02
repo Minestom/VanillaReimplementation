@@ -1,9 +1,5 @@
 package net.minestom.vanilla;
 
-import it.unimi.dsi.fastutil.shorts.Short2IntMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenCustomHashMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -12,7 +8,6 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
-import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import net.minestom.server.tag.TagWritable;
@@ -21,14 +16,22 @@ import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.crafting.VanillaRecipe;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.instance.SetupVanillaInstanceEvent;
+import net.minestom.vanilla.logging.Level;
+import net.minestom.vanilla.logging.Loading;
+import net.minestom.vanilla.logging.Logger;
+import net.minestom.vanilla.logging.StatusUpdater;
+import net.minestom.vanilla.utils.DependencySorting;
+import net.minestom.vanilla.utils.MinestomResources;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
-import org.tinylog.Logger;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 class VanillaReimplementationImpl implements VanillaReimplementation {
 
@@ -45,14 +48,31 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
     /**
      * Creates a new instance of {@link VanillaReimplementationImpl} and hooks into the server process.
      *
-     * @param process the server process
+     * @param process   the server process
+     * @param predicate a predicate to determine which features to enable
      * @return the new instance
      */
-    public static @NotNull VanillaReimplementationImpl hook(@NotNull ServerProcess process) {
-        Logger.info("Setting up VanillaReimplementation...");
+    public static @NotNull VanillaReimplementationImpl hook(@NotNull ServerProcess process, Predicate<Feature> predicate) {
+        Loading.start("Initialising");
+
+        Loading.start("Initialising Minestom Resources...");
+        MinestomResources.initialize();
+        Loading.finish();
+
+        Loading.updater().progress(0.33);
+
+        long start = System.currentTimeMillis();
+
+        Loading.start("Instantiating vri");
         VanillaReimplementationImpl vri = new VanillaReimplementationImpl(process);
-        vri.INTERNAL_HOOK();
-        Logger.info("VanillaReimplementation has been setup!");
+        Loading.finish();
+
+        Loading.updater().progress(0.66);
+        vri.INTERNAL_HOOK(predicate);
+        Loading.updater().progress(1);
+
+        Loading.finish();
+
         return vri;
     }
 
@@ -181,20 +201,72 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
         }
     }
 
-    private void INTERNAL_HOOK() {
+    private void INTERNAL_HOOK(Predicate<Feature> predicate) {
         // Create the registry
         VanillaRegistry registry = new VanillaRegistryImpl();
 
         // Hook this core library
+        Loading.start("Hooking Core Library");
         hookCoreLibrary();
+        Loading.finish();
 
         // Load all the features and hook them
-        Logger.info("Loading features...");
-        for (Feature feature : ServiceLoader.load(Feature.class)) {
-            Logger.info("Hooking feature: " + feature.namespaceID());
-            feature.hook(this, registry);
+        Loading.start("Loading features from classpath");
+        Set<Feature> features = ServiceLoader.load(Feature.class)
+                .stream()
+                .map(ServiceLoader.Provider::get)
+                .collect(Collectors.toUnmodifiableSet());
+        Loading.finish();
+
+        Loading.start("Validating dependencies");
+        for (Feature feature : features) {
+            try {
+                for (Class<? extends Feature> dependency : feature.dependencies()) {
+                    Objects.requireNonNull(dependency, "Dependency cannot be null!");
+                }
+            } catch (Exception e) {
+                Logger.error("Failed to load features! Does one of your features have a missing dependency feature?", e);
+                throw new RuntimeException(e);
+            }
         }
-        Logger.info("All features have been loaded!");
+        Loading.finish();
+
+        Loading.start("Sorting features by dependencies");
+        List<Feature> sortedByDependencies = DependencySorting.sort(features);
+        Loading.finish();
+
+        for (Feature feature : sortedByDependencies) {
+            if (!predicate.test(feature)) {
+                Logger.info("Skipping feature %s...%n", feature.namespaceId());
+                continue;
+            }
+
+            try {
+                instructHook(feature, registry);
+            } catch (Exception e) {
+                Logger.error("Failed to load feature: " + feature.namespaceId(), e);
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void instructHook(Feature feature, VanillaRegistry registry) {
+        try {
+            Loading.start("" + feature.namespaceId());
+
+            Feature.HookContext context = new HookContextImpl(this, registry, Loading.updater());
+            feature.hook(context);
+        } catch (Exception e) {
+            Logger.error(e, "Failed to load feature: %s%n", feature.namespaceId());
+            throw new RuntimeException(e);
+        } finally {
+            Loading.finish();
+        }
+    }
+
+    private record HookContextImpl(VanillaReimplementation vri,
+                                       VanillaRegistry registry,
+                                       StatusUpdater status) implements Feature.HookContext {
     }
 
     private void hookCoreLibrary() {
