@@ -39,6 +39,7 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
     private final Map<NamespaceID, Instance> worlds = new ConcurrentHashMap<>();
     private final Map<EntityType, VanillaRegistry.EntitySpawner> entity2Spawner = new ConcurrentHashMap<>();
     private final Map<String, VanillaRecipe> id2Recipe = new ConcurrentHashMap<>();
+    private final Map<Class<Feature>, Feature> class2Feature = new ConcurrentHashMap<>();
     private final Map<Object, Random> randoms = Collections.synchronizedMap(new WeakHashMap<>());
 
     private VanillaReimplementationImpl(@NotNull ServerProcess process) {
@@ -61,8 +62,6 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
 
         Loading.updater().progress(0.33);
 
-        long start = System.currentTimeMillis();
-
         Loading.start("Instantiating vri");
         VanillaReimplementationImpl vri = new VanillaReimplementationImpl(process);
         Loading.finish();
@@ -83,6 +82,12 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
      */
     public @NotNull ServerProcess process() {
         return process;
+    }
+
+    @Override
+    public <T extends Feature> @NotNull T feature(Class<T> clazz) {
+        //noinspection unchecked
+        return (T) Objects.requireNonNull(class2Feature.get(clazz), () -> "Feature " + clazz + " was not loaded correctly.");
     }
 
 
@@ -243,6 +248,8 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
 
             try {
                 instructHook(feature, registry);
+                //noinspection unchecked
+                class2Feature.put((Class<Feature>) feature.getClass(), feature);
             } catch (Exception e) {
                 Logger.error("Failed to load feature: " + feature.namespaceId(), e);
                 throw new RuntimeException(e);
@@ -253,7 +260,6 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
     private void instructHook(Feature feature, VanillaRegistry registry) {
         try {
             Loading.start("" + feature.namespaceId());
-
             Feature.HookContext context = new HookContextImpl(this, registry, Loading.updater());
             feature.hook(context);
         } catch (Exception e) {

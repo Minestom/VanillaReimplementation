@@ -55,6 +55,14 @@ public interface VanillaReimplementation {
     @NotNull ServerProcess process();
 
     /**
+     * Acquires the given {@link Feature} from this reimplementation.
+     * @param clazz the feature's class
+     * @param <T> the feature's type
+     * @return the feature
+     */
+    <T extends Feature> @NotNull T feature(Class<T> clazz);
+
+    /**
      * Creates an {@link net.minestom.vanilla.VanillaRegistry.EntityContext} for the given type and position
      *
      * @param type     the type of the entity
