@@ -38,7 +38,7 @@ public class DynamicFileSystem<F> implements FileSystem<F> {
     public Map<String, F> readAll() {
         return files.entrySet()
                 .stream()
-                .collect(Collectors.toMap(
+                .collect(Collectors.toUnmodifiableMap(
                         Map.Entry::getKey,
                         Map.Entry::getValue
                 ));

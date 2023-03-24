@@ -20,7 +20,7 @@ class PathFileSystem implements FileSystem<ByteArray> {
         try {
             return Files.walk(this.path, 0)
                     .filter(Files::isRegularFile)
-                    .collect(Collectors.toMap(
+                    .collect(Collectors.toUnmodifiableMap(
                             path -> path.getFileName().toString(),
                             path -> {
                                 try {

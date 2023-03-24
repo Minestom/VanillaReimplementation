@@ -175,7 +175,7 @@ public interface VanillaReimplementation {
         @NotNull NamespaceID namespaceId();
 
         /**
-         * @return a unique {@link NamespaceID} for this feature
+         * @return a unique {@link Class} for this feature
          */
         default @NotNull Class<? extends Feature> identity() {
             return getClass();

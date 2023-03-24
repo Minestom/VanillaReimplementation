@@ -4,16 +4,23 @@ import java.util.random.RandomGenerator;
 
 public interface NumberProvider {
 
+    Int asInt();
+    Double asDouble();
+
 
     interface Context {
         // TODO: Scoreboard query
         RandomGenerator random();
     }
 
-    interface Int {
+    interface Int extends NumberProvider {
+
         int apply(Context context);
         default Double asDouble() {
             return context -> (double) apply(context);
+        }
+        default Int asInt() {
+            return this;
         }
 
         static NumberProvider.Int constant(int value) {
@@ -29,10 +36,16 @@ public interface NumberProvider {
         }
     }
 
-    interface Double {
+    interface Double extends NumberProvider {
+
         double apply(Context context);
+
         default Int asInt() {
             return context -> (int) apply(context);
+        }
+
+        default Double asDouble() {
+            return this;
         }
 
         static NumberProvider.Double constant(double value) {

@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -48,6 +49,10 @@ public interface FileSystem<F> extends FileSystemMappers {
         return fs;
     }
 
+    default <T> FileSystem<T> folder(String path, Function<F, T> mapper) {
+        return folder(path).map(mapper);
+    }
+
     default FileSystem<F> folder(@NotNull String path, @NotNull String separator) {
         return folder(path.split(separator));
     }
@@ -57,6 +62,10 @@ public interface FileSystem<F> extends FileSystemMappers {
     }
 
     default <T> FileSystem<T> map(Function<F, T> mapper) {
+        return map((str, file) -> mapper.apply(file));
+    }
+
+    default <T> FileSystem<T> map(BiFunction<String, F, T> mapper) {
         return new MappedFileSystem<>(this, mapper);
     }
 

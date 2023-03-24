@@ -10,4 +10,8 @@ dependencies {
 
     // Annotations
     api("org.jetbrains:annotations:${project.property("annotations_version")}")
+
+    // Json
+    api("com.squareup.moshi:moshi:1.14.0")
+    api("com.squareup.moshi:moshi-adapters:1.14.0")
 }
