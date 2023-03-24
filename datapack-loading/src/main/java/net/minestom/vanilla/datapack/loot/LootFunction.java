@@ -16,6 +16,7 @@ public interface LootFunction extends InBuiltLootFunctions {
 
     /**
      * Applies the function to the item stack.
+     *
      * @param context the function context
      * @return the modified item stack
      */

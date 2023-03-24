@@ -42,6 +42,7 @@ interface InBuiltLootFunctions {
         }
 
         Enchantment enchantment();
+
         NamespaceID formula();
 
         record BinomialWithBonusCount(Enchantment enchantment, int extra, double probability) implements ApplyBonus {
@@ -134,6 +135,7 @@ interface InBuiltLootFunctions {
         sealed interface Source {
 
             String type();
+
             NBT nbt(LootFunction.Context context);
 
             record Context(LootContext.Trait<NBTCompound> target) implements Source {
@@ -167,10 +169,13 @@ interface InBuiltLootFunctions {
         sealed interface Operation {
 
             NBTPath source();
+
             NBTPath target();
+
             String op();
 
             NBT apply(NBT source, NBT target);
+
             default NBT applyOperation(NBT source, NBT itemStackNbt) {
                 NBT sourceNbt = source().get(source);
                 NBT targetNbt = target().get(itemStackNbt);
@@ -317,7 +322,8 @@ interface InBuiltLootFunctions {
     // If the origin is provided by loot context, converts an empty map into an explorer map leading to a nearby
     // generated structure.
     record ExplorationMap(@Nullable String destination, @Nullable String decoration, @Nullable Integer zoom,
-                          @Nullable Integer search_radius, @Nullable Boolean skip_existing_chunks) implements LootFunction {
+                          @Nullable Integer search_radius,
+                          @Nullable Boolean skip_existing_chunks) implements LootFunction {
 
         @Override
         public NamespaceID lootFunctionId() {
@@ -689,7 +695,8 @@ interface InBuiltLootFunctions {
     }
 
     // Modifies the item's enchantments. A book will convert to an enchanted book.
-    record SetEnchantments(Map<Enchantment, NumberProvider> enchantments, @Nullable Boolean add) implements LootFunction {
+    record SetEnchantments(Map<Enchantment, NumberProvider> enchantments,
+                           @Nullable Boolean add) implements LootFunction {
 
         @Override
         public NamespaceID lootFunctionId() {
@@ -706,7 +713,7 @@ interface InBuiltLootFunctions {
             for (var entry : enchantments.entrySet()) {
                 Enchantment enchantment = entry.getKey();
                 int count = entry.getValue().asInt().apply(context::random);
-                
+
                 if (add) {
                     int previousValue = previous.getOrDefault(enchantment, (short) 0);
                     int newValue = previousValue + count;

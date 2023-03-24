@@ -5,6 +5,7 @@ import java.util.random.RandomGenerator;
 public interface NumberProvider {
 
     Int asInt();
+
     Double asDouble();
 
 
@@ -16,9 +17,11 @@ public interface NumberProvider {
     interface Int extends NumberProvider {
 
         int apply(Context context);
+
         default Double asDouble() {
             return context -> (double) apply(context);
         }
+
         default Int asInt() {
             return this;
         }

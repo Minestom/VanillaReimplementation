@@ -7,9 +7,6 @@ import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 
-import java.util.Collection;
-import java.util.List;
-
 interface Traits {
     LootContext.Trait<Block> BLOCK_STATE = new TraitImpl<>("block_state", Block.class);
 

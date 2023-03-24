@@ -1,6 +1,5 @@
 package net.minestom.vanilla.datapack.loot.context;
 
-import net.minestom.vanilla.datapack.loot.context.LootContext;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -22,14 +21,17 @@ class Util {
         static <C extends LootContext> Builder<C> builder() {
             return new BuilderImpl<>();
         }
+
         interface Builder<C extends LootContext> {
             <T> Builder<C> put(LootContext.Trait<T> trait, Function<C, T> value);
+
             LootContextTraitMap<C> build();
         }
     }
 
     static class BuilderImpl<C extends LootContext> implements LootContextTraitMap.Builder<C> {
         private final Map<String, Function<C, ?>> map = new HashMap<>();
+
         @Override
         public <T> LootContextTraitMap.Builder<C> put(LootContext.Trait<T> trait, Function<C, T> value) {
             map.put(trait.id(), value);

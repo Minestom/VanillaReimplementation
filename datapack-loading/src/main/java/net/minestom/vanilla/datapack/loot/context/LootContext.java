@@ -6,7 +6,6 @@ import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
-import java.util.random.RandomGenerator;
 
 // Information Source: https://minecraft.fandom.com/wiki/Loot_table#Loot_context_types
 public interface LootContext extends Traits {
@@ -14,12 +13,16 @@ public interface LootContext extends Traits {
     // Traits
     interface Trait<T> {
         String id();
+
         Function<Object, @Nullable T> finder();
+
         default <N> Trait<N> map(Function<T, @Nullable N> mapper) {
             return new MappedTraitImpl<>(this, mapper);
         }
     }
+
     <T> @Nullable T get(Trait<T> trait);
+
     default <T> T getOrThrow(Trait<T> trait) {
         T value = get(trait);
         if (value == null) throw new IllegalStateException("LootContext does not have trait " + trait.id());
@@ -77,7 +80,8 @@ public interface LootContext extends Traits {
 
     //     Fishing.
     //    The command /loot … fish <loot_table>.
-    record Fishing(Point origin, ItemStack tool, @Nullable net.minestom.server.entity.Entity entity) implements LootContext {
+    record Fishing(Point origin, ItemStack tool,
+                   @Nullable net.minestom.server.entity.Entity entity) implements LootContext {
         private static final Util.LootContextTraitMap<Fishing> traitMap = Util.LootContextTraitMap.<Fishing>builder()
                 .put(ORIGIN, Fishing::origin)
                 .put(TOOL, Fishing::tool)
@@ -185,7 +189,8 @@ public interface LootContext extends Traits {
     //    The command /loot … mine <pos>.
     record Block(net.minestom.server.instance.block.Block blockState, Point origin, ItemStack tool,
                  @Nullable net.minestom.server.entity.Player entity,
-                 @Nullable net.minestom.server.instance.block.Block blockEntity, @Nullable Double explosionRadius) implements LootContext {
+                 @Nullable net.minestom.server.instance.block.Block blockEntity,
+                 @Nullable Double explosionRadius) implements LootContext {
         private static final Util.LootContextTraitMap<Block> traitMap = Util.LootContextTraitMap.<Block>builder()
                 .put(BLOCK_STATE, Block::blockState)
                 .put(ORIGIN, Block::origin)

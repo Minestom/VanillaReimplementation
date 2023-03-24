@@ -35,7 +35,8 @@ public final class MojangAssets {
 
     private FileSystem<ByteArray> downloadResources(@NotNull String version) {
         try {
-            Loading.start("Downloading vanilla jar...");
+            Loading.start("Downloading vanilla jar (" + version + ")...");
+
             // Check if source files already exist
             File jar = new File(ROOT, version + File.separator + "resources.jar");
             if (!jar.exists()) {

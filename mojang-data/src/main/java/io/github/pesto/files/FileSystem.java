@@ -50,7 +50,10 @@ public interface FileSystem<F> extends FileSystemMappers {
     }
 
     default <T> FileSystem<T> folder(String path, Function<F, T> mapper) {
-        return folder(path).map(mapper);
+        FileSystem<F> fs = folder(path);
+        if (fs == null)
+            return null;
+        return fs.map(mapper);
     }
 
     default FileSystem<F> folder(@NotNull String path, @NotNull String separator) {
@@ -74,7 +77,7 @@ public interface FileSystem<F> extends FileSystemMappers {
         return new CacheFileSystem<>(this);
     }
 
-    static FileSystem<ByteArray> empty() {
+    static <T> FileSystem<T> empty() {
         return new DynamicFileSystem<>();
     }
 

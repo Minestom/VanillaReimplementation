@@ -6,6 +6,7 @@ public interface NBTPath {
 
     /**
      * Indexes the given NBT using this path and returns the result.
+     *
      * @param nbt the NBT to index
      * @return the indexed NBT result
      */
@@ -13,8 +14,9 @@ public interface NBTPath {
 
     /**
      * Sets the given NBT using this path and returns the result.
+     *
      * @param container the NBT container to apply the path to
-     * @param nbt the NBT to set
+     * @param nbt       the NBT to set
      * @return the new NBT container
      */
     NBT set(NBT container, NBT nbt);
