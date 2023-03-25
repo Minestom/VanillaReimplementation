@@ -53,4 +53,9 @@ public class DynamicFileSystem<F> implements FileSystem<F> {
     public DynamicFileSystem<F> folder(@NotNull String path) {
         return folders.computeIfAbsent(path, ignored -> new DynamicFileSystem<>());
     }
+
+    @Override
+    public String toString() {
+        return FileSystem.toString(this);
+    }
 }

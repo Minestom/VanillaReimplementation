@@ -40,4 +40,9 @@ class CacheFileSystem<F> implements FileSystem<F> {
         }
         return subSources.get(path);
     }
+
+    @Override
+    public String toString() {
+        return FileSystem.toString(this);
+    }
 }

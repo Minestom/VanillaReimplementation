@@ -52,4 +52,9 @@ class PathFileSystem implements FileSystem<ByteArray> {
     public PathFileSystem folder(String path) {
         return new PathFileSystem(this.path.resolve(path));
     }
+
+    @Override
+    public String toString() {
+        return FileSystem.toString(this);
+    }
 }

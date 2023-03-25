@@ -27,6 +27,15 @@ public interface FileSystem<F> extends FileSystemMappers {
     Set<String> folders();
 
     /**
+     * Queries all the files in the given directory and returns a set of file names.
+     *
+     * @return a set of file names (no directory prefix)
+     */
+    default Set<String> files() {
+        return readAll().keySet();
+    }
+
+    /**
      * Navigates to the given subdirectory and returns a new FileSource for that directory.
      *
      * @param path the path to the subdirectory
@@ -100,4 +109,26 @@ public interface FileSystem<F> extends FileSystemMappers {
         return folders().contains(path);
     }
 
+
+    static String toString(FileSystem<?> fs) {
+        StringBuilder sb = new StringBuilder();
+        toString(fs, sb, 0);
+        return sb.toString();
+    }
+
+    static void toString(FileSystem<?> fs, StringBuilder sb, int depth) {
+        String prefix = "  ".repeat(depth);
+
+        String folderChar = "\uD83D\uDDC0";
+        String fileChar = "\uD83D\uDDCE";
+
+        for (String folder : fs.folders()) {
+            sb.append(prefix).append(folderChar).append(" ").append(folder).append("\n");
+            toString(fs.folder(folder), sb, depth + 1);
+        }
+
+        for (String file : fs.files()) {
+            sb.append(prefix).append(fileChar).append(" ").append(file).append("\n");
+        }
+    }
 }

@@ -15,8 +15,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface Datapack {
+
+    Map<NamespaceID, NamespacedData> namespacedData();
 
     static Datapack loadPrimitiveByteArray(FileSystem<byte[]> source) {
         return loadByteArray(source.map(ByteArray::wrap));
@@ -73,15 +76,15 @@ public interface Datapack {
                        Map<String, Reward> rewards) {
 
 
-        record Display(Icon icon, Component title, @Nullable String frame, String background,
+        public record Display(Icon icon, Component title, @Nullable String frame, String background,
                        Component description, @Nullable Boolean showToast, @Nullable Boolean announceToChat,
                        @Nullable Boolean hidden) {
-            record Icon(NamespaceID item, String nbt) {
+            public record Icon(NamespaceID item, String nbt) {
             }
         }
 
         // TODO: Conditions
-        record Criteria(String trigger, Map<String, Condition<?>> conditions) {
+        public record Criteria(String trigger, Map<String, Condition<?>> conditions) {
             interface Condition<P> {
                 P player();
 
@@ -89,7 +92,7 @@ public interface Datapack {
             }
         }
 
-        record Reward(List<String> recipes, List<String> loot, int experience, String function) {
+        public record Reward(List<String> recipes, List<String> loot, int experience, String function) {
         }
     }
 
@@ -100,7 +103,7 @@ public interface Datapack {
     }
 
     record LootTable(@Nullable String type, List<LootFunction> functions, List<Pool> pools) {
-        record Pool(List<Predicate> conditions,
+        public record Pool(List<Predicate> conditions,
                     List<LootFunction> functions,
                     NumberProvider rolls,
                     NumberProvider bonus_rolls,

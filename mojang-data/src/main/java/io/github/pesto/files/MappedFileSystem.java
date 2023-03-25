@@ -31,4 +31,9 @@ class MappedFileSystem<F, T> implements FileSystem<T> {
     public FileSystem<T> folder(String path) {
         return new MappedFileSystem<>(original.folder(path), mapper);
     }
+
+    @Override
+    public String toString() {
+        return FileSystem.toString(this);
+    }
 }

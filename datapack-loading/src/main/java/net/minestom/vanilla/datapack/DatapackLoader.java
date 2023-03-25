@@ -1,13 +1,20 @@
 package net.minestom.vanilla.datapack;
 
+import com.google.gson.JsonElement;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.JsonWriter;
 import com.squareup.moshi.Moshi;
 import io.github.pesto.files.ByteArray;
 import io.github.pesto.files.FileSystem;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.crafting.VanillaRecipe;
 import net.minestom.vanilla.datapack.loot.LootFunction;
 import net.minestom.vanilla.datapack.loot.Predicate;
+import net.minestom.vanilla.utils.JavaUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -21,7 +28,7 @@ public class DatapackLoader {
 
     private final McMeta mcmeta;
     private final @Nullable ByteArray pack_png;
-    private static final Moshi moshi = new Moshi.Builder().build();
+    private static final Moshi moshi = createMoshiWithAdaptors();
     final Map<NamespaceID, NamespacedData> namespace2data;
 
     public DatapackLoader(FileSystem<ByteArray> source) {
@@ -91,6 +98,28 @@ public class DatapackLoader {
     }
 
     public Datapack load() {
-        return null;
+        var copy = Map.copyOf(namespace2data);
+        copy.toString();
+        return () -> copy;
     }
+
+    private static Moshi createMoshiWithAdaptors() {
+        Moshi.Builder builder = new Moshi.Builder();
+
+        builder.add(Component.class, new JsonAdapter<Component>() {
+            @Override
+            public Component fromJson(JsonReader reader) throws IOException {
+                GsonComponentSerializer serializer = GsonComponentSerializer.gson();
+                return serializer.deserialize(reader.nextSource().readUtf8());
+            }
+
+            @Override
+            public void toJson(JsonWriter writer, Component value) throws IOException {
+                // TODO: Implement
+            }
+        });
+
+        return builder.build();
+    }
+
 }
