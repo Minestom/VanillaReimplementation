@@ -1,11 +1,13 @@
 package net.minestom.vanilla.datapack;
 
+import com.squareup.moshi.JsonReader;
 import io.github.pesto.files.ByteArray;
 import io.github.pesto.files.FileSystem;
-import net.kyori.adventure.text.Component;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.crafting.VanillaRecipe;
+import net.minestom.vanilla.datapack.advancement.Advancement;
+import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.loot.LootFunction;
 import net.minestom.vanilla.datapack.loot.Predicate;
 import net.minestom.vanilla.datapack.number.NumberProvider;
@@ -15,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public interface Datapack {
 
@@ -69,33 +70,6 @@ public interface Datapack {
                           WorldGen world_gen) {
     }
 
-    record Advancement(Display display,
-                       @Nullable String parent,
-                       @Nullable Criteria criteria,
-                       @Nullable List<List<String>> requirements,
-                       Map<String, Reward> rewards) {
-
-
-        public record Display(Icon icon, Component title, @Nullable String frame, String background,
-                       Component description, @Nullable Boolean showToast, @Nullable Boolean announceToChat,
-                       @Nullable Boolean hidden) {
-            public record Icon(NamespaceID item, String nbt) {
-            }
-        }
-
-        // TODO: Conditions
-        public record Criteria(String trigger, Map<String, Condition<?>> conditions) {
-            interface Condition<P> {
-                P player();
-
-                Map<String, Object> extraContents();
-            }
-        }
-
-        public record Reward(List<String> recipes, List<String> loot, int experience, String function) {
-        }
-    }
-
     record McFunction(String source) {
         public static McFunction fromString(String source) {
             return new McFunction(source);
@@ -113,6 +87,19 @@ public interface Datapack {
                 List<Predicate> conditions();
 
                 NamespaceID type();
+
+                static Entry fromJson(JsonReader reader) throws IOException {
+                    return JsonUtils.unionMapType(reader, "type", JsonReader::nextString, Map.of(
+                        "minecraft:item", DatapackLoader.moshi(Item.class),
+                        "minecraft:tag", DatapackLoader.moshi(Tag.class),
+                        "minecraft:loot_table", DatapackLoader.moshi(LootTableNested.class),
+                        "minecraft:dynamic", DatapackLoader.moshi(Dynamic.class),
+                        "minecraft:empty", DatapackLoader.moshi(Empty.class),
+                        "minecraft:group", DatapackLoader.moshi(Group.class),
+                        "minecraft:alternatives", DatapackLoader.moshi(Alternatives.class),
+                        "minecraft:sequence", DatapackLoader.moshi(Sequence.class)
+                    ));
+                }
 
                 /**
                  * item -> Provides a loot entry that drops a single item stack.

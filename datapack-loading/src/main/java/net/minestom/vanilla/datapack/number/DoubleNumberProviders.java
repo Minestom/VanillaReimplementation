@@ -2,7 +2,7 @@ package net.minestom.vanilla.datapack.number;
 
 import java.util.random.RandomGenerator;
 
-class DoubleNumberProviders {
+interface DoubleNumberProviders {
 
     record Constant(double value) implements NumberProvider.Double {
         @Override

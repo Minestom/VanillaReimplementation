@@ -1,10 +1,12 @@
 package net.minestom.vanilla.datapack.loot.context;
 
+import com.squareup.moshi.JsonReader;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.function.Function;
 
 // Information Source: https://minecraft.fandom.com/wiki/Loot_table#Loot_context_types
@@ -18,6 +20,12 @@ public interface LootContext extends Traits {
 
         default <N> Trait<N> map(Function<T, @Nullable N> mapper) {
             return new MappedTraitImpl<>(this, mapper);
+        }
+
+        static Trait<?> fromJson(JsonReader reader) throws IOException {
+            // traits are always just the string ids
+            String id = reader.nextString();
+            return Traits.fromId(id);
         }
     }
 

@@ -1,5 +1,11 @@
 package net.minestom.vanilla.datapack.number;
 
+import com.squareup.moshi.JsonReader;
+import net.minestom.vanilla.datapack.DatapackLoader;
+import net.minestom.vanilla.datapack.json.JsonUtils;
+
+import java.io.IOException;
+import java.util.Map;
 import java.util.random.RandomGenerator;
 
 public interface NumberProvider {
@@ -8,13 +14,12 @@ public interface NumberProvider {
 
     Double asDouble();
 
-
     interface Context {
         // TODO: Scoreboard query
         RandomGenerator random();
     }
 
-    interface Int extends NumberProvider {
+    interface Int extends NumberProvider, IntNumberProviders {
 
         int apply(Context context);
 
@@ -24,6 +29,17 @@ public interface NumberProvider {
 
         default Int asInt() {
             return this;
+        }
+
+        static NumberProvider.Int fromJson(JsonReader reader) throws IOException {
+            return JsonUtils.typeMap(reader, Map.of(
+                    JsonReader.Token.NUMBER, json -> constant(reader.nextInt()),
+                    JsonReader.Token.BEGIN_OBJECT, json -> JsonUtils.unionNamespaceStringType(json, "type", Map.of(
+                            "minecraft:constant", DatapackLoader.moshi(Constant.class),
+                            "minecraft:uniform", DatapackLoader.moshi(Uniform.class),
+                            "minecraft:binomial", DatapackLoader.moshi(Binomial.class)
+                    ))
+            ));
         }
 
         static NumberProvider.Int constant(int value) {
@@ -39,7 +55,7 @@ public interface NumberProvider {
         }
     }
 
-    interface Double extends NumberProvider {
+    interface Double extends NumberProvider, DoubleNumberProviders {
 
         double apply(Context context);
 
@@ -49,6 +65,17 @@ public interface NumberProvider {
 
         default Double asDouble() {
             return this;
+        }
+
+        static NumberProvider.Double fromJson(JsonReader reader) throws IOException {
+            return JsonUtils.typeMap(reader, Map.of(
+                    JsonReader.Token.NUMBER, json -> constant(reader.nextDouble()),
+                    JsonReader.Token.BEGIN_OBJECT, json -> JsonUtils.unionNamespaceStringType(json, "type", Map.of(
+                            "minecraft:constant", DatapackLoader.moshi(Constant.class),
+                            "minecraft:uniform", DatapackLoader.moshi(Uniform.class),
+                            "minecraft:binomial", DatapackLoader.moshi(Binomial.class)
+                    ))
+            ));
         }
 
         static NumberProvider.Double constant(double value) {

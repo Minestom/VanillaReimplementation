@@ -1,14 +1,20 @@
 package net.minestom.vanilla.datapack.loot;
 
+import com.squareup.moshi.JsonReader;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Enchantment;
 import net.minestom.server.item.ItemMeta;
+import net.minestom.vanilla.datapack.DatapackLoader;
+import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.loot.context.LootContext;
 import net.minestom.vanilla.datapack.number.NumberProvider;
+import net.minestom.vanilla.datapack.tags.ConditionsFor;
+import net.minestom.vanilla.utils.JavaUtils;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
@@ -47,7 +53,7 @@ interface InBuiltPredicates {
      * • min: The min value.
      * • max: The max value.
      */
-    record BlockStateProperty(Block block, @Nullable Map<Block, Property> properties) implements Predicate {
+    record BlockStateProperty(String block, @Nullable Map<String, Property> properties) implements Predicate {
         @Override
         public String condition() {
             return "block_state_property";
@@ -60,31 +66,42 @@ interface InBuiltPredicates {
             Block minedBlock = context.get(LootContext.BLOCK_STATE);
             if (minedBlock == null) return false;
 
-            Property property = properties.get(minedBlock);
-            if (property == null) return false;
+            for (var entry : properties.entrySet()) {
+                String key = entry.getKey();
+                Property property = entry.getValue();
+                String value = minedBlock.properties().get(key);
 
-            return property.test(minedBlock);
+                if (!property.test(minedBlock, value)) return false;
+            }
+
+            return true;
         }
 
         // if (properties == null) return false;
 
-        interface Property {
-            boolean test(Block block);
+        public interface Property {
+            boolean test(Block block, String value);
 
-            record Value(Block block) implements Property {
+            static Property fromJson(JsonReader reader) throws IOException {
+                return JsonUtils.typeMap(reader, Map.of(
+                        JsonReader.Token.STRING, (JsonUtils.IoFunction<JsonReader, Property>) json -> new Value(json.nextString()),
+                        JsonReader.Token.BEGIN_OBJECT, DatapackLoader.moshi(Range.class)
+                ));
+            }
+
+            record Value(String property) implements Property {
                 @Override
-                public boolean test(Block block) {
-                    return this.block.compare(block);
+                public boolean test(Block block, String value) {
+                    // TODO: Test this
+                    return property.equals(value);
                 }
             }
 
-            record Range(Block min, Block max) implements Property {
+            record Range(String min, String max) implements Property {
                 @Override
-                public boolean test(Block block) {
-                    short minStateId = min.stateId();
-                    short maxStateId = max.stateId();
-                    short blockStateId = block.stateId();
-                    return minStateId <= blockStateId && blockStateId < maxStateId;
+                public boolean test(Block block, String value) {
+                    // TODO: Implement this somehow... :(
+                    return false;
                 }
             }
         }
@@ -151,6 +168,13 @@ interface InBuiltPredicates {
 
         public sealed interface Score {
             boolean test();
+
+            static Score fromJson(JsonReader reader) throws IOException {
+                return JsonUtils.typeMap(reader, Map.of(
+                        JsonReader.Token.NUMBER, DatapackLoader.moshi(Value.class),
+                        JsonReader.Token.BEGIN_OBJECT, DatapackLoader.moshi(Range.class)
+                ));
+            }
 
             record Value(int value) implements Score {
                 @Override
@@ -225,7 +249,7 @@ interface InBuiltPredicates {
      * • predicate: Predicate applied to item, uses same structure as advancements.
      * - All possible conditions for items
      */
-    record MatchTool(Predicate predicate) implements Predicate {
+    record MatchTool(ConditionsFor.Item predicate) implements Predicate {
         @Override
         public String condition() {
             return "match_tool";
@@ -259,7 +283,7 @@ interface InBuiltPredicates {
      * • chance: Base success rate.
      * • looting_multiplier: Looting adjustment to the base success rate. Formula is chance + (looting_level * looting_multiplier).
      */
-    record RandomChanceWithLooting(float chance, float lootingMultiplier) implements Predicate {
+    record RandomChanceWithLooting(float chance, float looting_multiplier) implements Predicate {
         @Override
         public String condition() {
             return "random_chance_with_looting";
@@ -277,7 +301,7 @@ interface InBuiltPredicates {
                 looting = meta.getEnchantmentMap().getOrDefault(Enchantment.LOOTING, (short) 0);
             }
 
-            return random < chance + (looting * lootingMultiplier);
+            return random < chance + (looting * looting_multiplier);
         }
     }
 
@@ -354,6 +378,14 @@ interface InBuiltPredicates {
         }
 
         public sealed interface Value {
+
+            static Value fromJson(JsonReader reader) throws IOException {
+                return JsonUtils.typeMap(reader, Map.of(
+                        JsonReader.Token.NUMBER, DatapackLoader.moshi(Single.class),
+                        JsonReader.Token.BEGIN_OBJECT, DatapackLoader.moshi(MinMax.class)
+                ));
+            }
+
             record MinMax(NumberProvider min, NumberProvider max) implements Value {
             }
 
@@ -384,6 +416,13 @@ interface InBuiltPredicates {
         }
 
         public sealed interface Range {
+            static Range fromJson(JsonReader reader) throws IOException {
+                return JsonUtils.typeMap(reader, Map.of(
+                        JsonReader.Token.NUMBER, DatapackLoader.moshi(Single.class),
+                        JsonReader.Token.BEGIN_OBJECT, DatapackLoader.moshi(MinMax.class)
+                ));
+            }
+
             record MinMax(NumberProvider min, NumberProvider max) implements Range {
             }
 

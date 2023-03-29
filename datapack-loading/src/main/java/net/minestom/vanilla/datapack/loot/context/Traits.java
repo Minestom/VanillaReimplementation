@@ -16,7 +16,7 @@ interface Traits {
 
     LootContext.Trait<Entity> THIS = new TraitImpl<>("this", Entity.class);
 
-    LootContext.Trait<Entity> KILLER_ENTITY = new TraitImpl<>("killer_entity", Entity.class);
+    LootContext.Trait<Entity> KILLER_ENTITY = new TraitImpl<>("killer", Entity.class);
     LootContext.Trait<Player> KILLER_PLAYER = new TraitImpl<>("killer_player", Player.class);
     LootContext.Trait<Entity> DIRECT_KILLER = new TraitImpl<>("direct_killer_entity", Entity.class);
 
@@ -24,4 +24,20 @@ interface Traits {
 
     LootContext.Trait<Block> BLOCK_ENTITY = new TraitImpl<>("block_entity", Block.class);
     LootContext.Trait<Double> EXPLOSION_RADIUS = new TraitImpl<>("explosion_radius", Double.class);
+
+    static LootContext.Trait<?> fromId(String id) {
+        return switch (id) {
+            case "block_state" -> BLOCK_STATE;
+            case "origin" -> ORIGIN;
+            case "damage_source" -> DAMAGE_SOURCE;
+            case "this" -> THIS;
+            case "killer" -> KILLER_ENTITY;
+            case "killer_player" -> KILLER_PLAYER;
+            case "direct_killer_entity" -> DIRECT_KILLER;
+            case "tool" -> TOOL;
+            case "block_entity" -> BLOCK_ENTITY;
+            case "explosion_radius" -> EXPLOSION_RADIUS;
+            default -> throw new IllegalArgumentException("Unknown trait id: " + id);
+        };
+    }
 }
