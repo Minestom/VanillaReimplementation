@@ -1,9 +1,0 @@
-[submodule "vanilla_worldgen_example"]
-	path = vanilla_worldgen_example
-	url = https://github.com/slicedlime/examples/
-[submodule "prismarine-minecraft-data"]
-    path = prismarine-minecraft-data
-    url = https://github.com/PrismarineJS/minecraft-data
-[submodule "Minestom"]
-	path = Minestom
-	url = https://github.com/Minestom/Minestom
