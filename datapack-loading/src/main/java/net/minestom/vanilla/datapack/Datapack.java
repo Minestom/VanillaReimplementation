@@ -5,12 +5,12 @@ import io.github.pesto.files.ByteArray;
 import io.github.pesto.files.FileSystem;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
-import net.minestom.vanilla.crafting.VanillaRecipe;
 import net.minestom.vanilla.datapack.advancement.Advancement;
 import net.minestom.vanilla.datapack.json.JsonUtils;
-import net.minestom.vanilla.datapack.loot.LootFunction;
-import net.minestom.vanilla.datapack.loot.Predicate;
+import net.minestom.vanilla.datapack.loot.function.LootFunction;
+import net.minestom.vanilla.datapack.loot.function.Predicate;
 import net.minestom.vanilla.datapack.number.NumberProvider;
+import net.minestom.vanilla.datapack.recipe.Recipe;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -60,7 +60,7 @@ public interface Datapack {
                           FileSystem<LootFunction> item_modifiers,
                           FileSystem<LootTable> loot_tables,
                           FileSystem<Predicate> predicates,
-                          FileSystem<VanillaRecipe> recipes,
+                          FileSystem<Recipe> recipes,
                           FileSystem<Structure> structures,
                           FileSystem<ChatType> chat_type,
                           FileSystem<DamageType> damage_type,
@@ -249,9 +249,8 @@ public interface Datapack {
 
     record Structure() {
         public static Structure fromInput(ByteArray content) {
-            return null;
+            return new Structure();
         }
-
     }
 
     record ChatType() {
@@ -265,7 +264,7 @@ public interface Datapack {
     record Tags(@Nullable Boolean replace, List<TagValue> values) {
 
         public static Tags from(FileSystem<String> tags) {
-            return null;
+            return new Tags(null, List.of());
         }
 
         sealed interface ReferenceTag extends TagValue {
@@ -289,7 +288,7 @@ public interface Datapack {
 
     record WorldGen() {
         public static WorldGen from(FileSystem<String> worldgen) {
-            return null;
+            return new WorldGen();
         }
     }
 }

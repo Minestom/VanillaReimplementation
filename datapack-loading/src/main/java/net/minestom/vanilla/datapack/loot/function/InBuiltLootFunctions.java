@@ -1,4 +1,4 @@
-package net.minestom.vanilla.datapack.loot;
+package net.minestom.vanilla.datapack.loot.function;
 
 import com.squareup.moshi.JsonReader;
 import net.kyori.adventure.text.Component;
@@ -20,6 +20,7 @@ import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
+import net.minestom.vanilla.datapack.loot.NBTPath;
 import net.minestom.vanilla.datapack.loot.context.LootContext;
 import net.minestom.vanilla.datapack.number.NumberProvider;
 import net.minestom.vanilla.tag.VanillaTags;
@@ -51,6 +52,7 @@ interface InBuiltLootFunctions {
         NamespaceID formula();
 
         static ApplyBonus fromJson(JsonReader reader) throws IOException {
+            String json = reader.peekJson().nextSource().readUtf8();
             return JsonUtils.unionNamespaceStringType(reader, "formula", Map.of(
                     "minecraft:binomial_with_bonus_count", DatapackLoader.moshi(BinomialWithBonusCount.class),
                     "minecraft:ore_drops", DatapackLoader.moshi(OreDrops.class),
@@ -58,21 +60,24 @@ interface InBuiltLootFunctions {
             ));
         }
 
-        record BinomialWithBonusCount(Enchantment enchantment, int extra, double probability) implements ApplyBonus {
+        record BinomialWithBonusCount(Enchantment enchantment, Parameters parameters) implements ApplyBonus {
             @Override
             public NamespaceID formula() {
                 return NamespaceID.from("minecraft:binomial_with_bonus_count");
             }
 
+            public record Parameters(int extra, double probability) {
+            }
+
             @Override
             public ItemStack apply(Context context) {
                 int enchantLevel = context.itemStack().meta().getEnchantmentMap().get(enchantment);
-                double n = enchantLevel + extra;
+                double n = enchantLevel + parameters().extra();
 
                 RandomGenerator random = context.random();
                 double sum = 0;
                 for (int i = 0; i < n; i++) {
-                    if (random.nextDouble() < probability) {
+                    if (random.nextDouble() < parameters().probability()) {
                         sum++;
                     }
                 }
@@ -80,17 +85,20 @@ interface InBuiltLootFunctions {
             }
         }
 
-        record UniformBonusCount(Enchantment enchantment, double bonusMultiplier) implements ApplyBonus {
+        record UniformBonusCount(Enchantment enchantment, Parameters parameters) implements ApplyBonus {
 
             @Override
             public NamespaceID formula() {
                 return NamespaceID.from("minecraft:uniform_bonus_count");
             }
 
+            public record Parameters(double bonusMultiplier) {
+            }
+
             @Override
             public ItemStack apply(Context context) {
                 int enchantLevel = context.itemStack().meta().getEnchantmentMap().get(enchantment);
-                double n = enchantLevel * bonusMultiplier;
+                double n = enchantLevel * parameters.bonusMultiplier();
                 int count = (int) context.random().nextDouble(n);
                 return context.itemStack().withAmount(count);
             }

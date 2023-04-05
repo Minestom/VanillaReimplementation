@@ -7,37 +7,28 @@ import java.util.stream.Collectors;
 
 class CacheFileSystem<F> implements FileSystem<F> {
 
-    private final FileSystem<F> original;
-    private Map<String, F> allFiles = null;
-    private Map<String, FileSystem<F>> subSources = null;
+    private final Map<String, F> allFiles;
+    private final Map<String, FileSystem<F>> subSources;
 
     protected CacheFileSystem(FileSystem<F> original) {
-        this.original = original;
+        this.allFiles = Map.copyOf(original.readAll());
+        this.subSources = original.folders().stream()
+                .collect(Collectors.toUnmodifiableMap(Function.identity(),
+                        name -> new CacheFileSystem<>(original.folder(name))));
     }
 
     @Override
     public Map<String, F> readAll() {
-        if (allFiles == null) {
-            allFiles = original.readAll();
-        }
         return allFiles;
     }
 
     @Override
     public Set<String> folders() {
-        if (subSources == null) {
-            subSources = original.folders().stream()
-                    .collect(Collectors.toConcurrentMap(Function.identity(),
-                            name -> new CacheFileSystem<>(original.folder(name))));
-        }
         return subSources.keySet();
     }
 
     @Override
     public FileSystem<F> folder(String path) {
-        if (subSources == null) {
-            folders();
-        }
         return subSources.get(path);
     }
 

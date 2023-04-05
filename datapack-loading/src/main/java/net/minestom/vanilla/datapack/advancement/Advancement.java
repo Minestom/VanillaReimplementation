@@ -6,7 +6,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.json.Optional;
-import net.minestom.vanilla.datapack.loot.Predicate;
+import net.minestom.vanilla.datapack.loot.function.Predicate;
 import net.minestom.vanilla.datapack.tags.ConditionsFor;
 import org.jetbrains.annotations.Nullable;
 

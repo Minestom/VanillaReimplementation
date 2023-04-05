@@ -1,4 +1,4 @@
-package net.minestom.vanilla.datapack.loot;
+package net.minestom.vanilla.datapack.loot.function;
 
 import com.squareup.moshi.JsonReader;
 import net.minestom.server.entity.Entity;
@@ -8,10 +8,10 @@ import net.minestom.server.item.Enchantment;
 import net.minestom.server.item.ItemMeta;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
+import net.minestom.vanilla.datapack.json.Optional;
 import net.minestom.vanilla.datapack.loot.context.LootContext;
 import net.minestom.vanilla.datapack.number.NumberProvider;
 import net.minestom.vanilla.datapack.tags.ConditionsFor;
-import net.minestom.vanilla.utils.JavaUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -231,7 +231,8 @@ interface InBuiltPredicates {
      * • predicate: Predicate applied to location, uses same structure as advancements.
      * - Tags common to all locations
      */
-    record LocationCheck(int offsetX, int offsetY, int offsetZ, Predicate predicate) implements Predicate {
+    record LocationCheck(@Optional Integer offsetX, @Optional Integer offsetY, @Optional Integer offsetZ,
+                         ConditionsFor.Location predicate) implements Predicate {
         @Override
         public String condition() {
             return "location_check";

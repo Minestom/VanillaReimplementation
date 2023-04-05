@@ -2,21 +2,43 @@ package net.minestom.vanilla.datapack.json;
 
 import com.squareup.moshi.JsonReader;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.vanilla.datapack.DatapackLoader;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class JsonUtils {
 
     public interface ObjectOrList<O, E> {
         boolean isObject();
-        O asObject();
+        O asObject() throws IllegalStateException;
 
         boolean isList();
         List<E> asList();
+    }
 
-        record Object<O>(O object) implements ObjectOrList<O, Void> {
+    public interface SingleOrList<T> extends ObjectOrList<T, T>, ListLike<T> {
+        static <T> SingleOrList<T> fromJson(Type elementType, JsonReader reader) throws IOException {
+            JsonReader.Token peek = reader.peek();
+
+            if (peek != JsonReader.Token.BEGIN_ARRAY) {
+                return new Single<>(DatapackLoader.<T>moshi(elementType).apply(reader));
+            }
+
+            Stream.Builder<T> builder = Stream.builder();
+            reader.beginArray();
+            while (reader.hasNext()) {
+                builder.add(DatapackLoader.<T>moshi(elementType).apply(reader));
+            }
+            reader.endArray();
+            return new List<>(builder.build().toList());
+        }
+
+        record Single<O>(O object) implements SingleOrList<O> {
             @Override
             public boolean isObject() {
                 return true;
@@ -33,19 +55,24 @@ public class JsonUtils {
             }
 
             @Override
-            public List<Void> asList() {
+            public java.util.List<O> asList() {
                 throw new IllegalStateException("Not a list");
+            }
+
+            @Override
+            public java.util.List<O> list() {
+                return java.util.List.of(object);
             }
         }
 
-        record List<L>(List<L> list) implements ObjectOrList<Void, L> {
+        record List<L>(java.util.List<L> list) implements SingleOrList<L> {
             @Override
             public boolean isObject() {
                 return false;
             }
 
             @Override
-            public Void asObject() {
+            public L asObject() {
                 throw new IllegalStateException("Not an object");
             }
 
@@ -55,7 +82,12 @@ public class JsonUtils {
             }
 
             @Override
-            public List<L> asList() {
+            public java.util.List<L> asList() {
+                return list;
+            }
+
+            @Override
+            public java.util.List<L> list() {
                 return list;
             }
         }
@@ -99,13 +131,28 @@ public class JsonUtils {
     }
 
     public static <T> @Nullable T findProperty(JsonReader reader, String property, IoFunction<JsonReader, T> read) throws IOException {
-        while (reader.selectName(JsonReader.Options.of(property)) == -1) {
-            if (reader.peek() == JsonReader.Token.END_OBJECT)
-                return null;
-            reader.skipName();
-            reader.skipValue();
+        while (reader.hasNext() && reader.peek() != JsonReader.Token.END_OBJECT) {
+            String name = reader.nextName();
+            if (name.equals(property)) {
+                return read.apply(reader);
+            } else {
+                reader.skipValue();
+            }
         }
-        return read.apply(reader);
+        return null;
+    }
+
+    public static boolean hasProperty(JsonReader reader, String property) throws IOException {
+        JsonReader peek = reader.peekJson();
+        while (peek.hasNext() && peek.peek() != JsonReader.Token.END_OBJECT) {
+            String name = peek.nextName();
+            if (name.equals(property)) {
+                return true;
+            } else {
+                peek.skipValue();
+            }
+        }
+        return false;
     }
 
 

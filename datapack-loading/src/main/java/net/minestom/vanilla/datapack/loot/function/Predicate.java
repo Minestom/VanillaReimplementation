@@ -1,4 +1,4 @@
-package net.minestom.vanilla.datapack.loot;
+package net.minestom.vanilla.datapack.loot.function;
 
 import com.squareup.moshi.JsonReader;
 import net.minestom.vanilla.datapack.DatapackLoader;

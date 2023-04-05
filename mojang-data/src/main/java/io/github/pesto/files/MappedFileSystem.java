@@ -18,7 +18,8 @@ class MappedFileSystem<F, T> implements FileSystem<T> {
 
     @Override
     public Map<String, T> readAll() {
-        return original.readAll().entrySet().stream()
+        return original.readAll().entrySet()
+                .stream()
                 .collect(Collectors.toConcurrentMap(Map.Entry::getKey, e -> mapper.apply(e.getKey(), e.getValue())));
     }
 

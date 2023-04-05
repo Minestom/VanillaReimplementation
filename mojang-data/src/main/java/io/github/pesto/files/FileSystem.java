@@ -86,6 +86,11 @@ public interface FileSystem<F> extends FileSystemMappers {
         return new CacheFileSystem<>(this);
     }
 
+    default FileSystem<F> inMemory() {
+        if (this instanceof DynamicFileSystem<F>) return this;
+        return DynamicFileSystem.from(this);
+    }
+
     static <T> FileSystem<T> empty() {
         return new DynamicFileSystem<>();
     }

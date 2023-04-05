@@ -4,7 +4,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.tag.TagReadable;
-import net.minestom.vanilla.crafting.VanillaRecipe;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -19,14 +18,6 @@ public sealed interface VanillaRegistry permits VanillaReimplementationImpl.Vani
      * @param supplier the entity spawner of the entity
      */
     void register(@NotNull EntityType type, @NotNull EntitySpawner supplier);
-
-    /**
-     * Registers a recipe id to its recipe.
-     *
-     * @param recipeId the recipe id
-     * @param recipe   the recipe
-     */
-    void register(@NotNull String recipeId, @NotNull VanillaRecipe recipe);
 
     interface EntitySpawner {
         @NotNull Entity spawn(@NotNull VanillaRegistry.EntityContext context);
