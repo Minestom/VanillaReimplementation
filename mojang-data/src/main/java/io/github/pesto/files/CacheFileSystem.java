@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 class CacheFileSystem<F> implements FileSystem<F> {
 
+    static final CacheFileSystem<?> EMPTY = new CacheFileSystem<>(new DynamicFileSystem<>());
+
     private final Map<String, F> allFiles;
     private final Map<String, FileSystem<F>> subSources;
 

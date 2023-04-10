@@ -8,13 +8,14 @@ import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.logging.Loading;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Objects;
 import java.util.Set;
 
 public class DatapackFeature implements VanillaReimplementation.Feature {
 
-    private @Nullable Datapack datapack;
+    private @UnknownNullability Datapack datapack;
 
     @Override
     public void hook(@NotNull HookContext context) {
@@ -29,7 +30,7 @@ public class DatapackFeature implements VanillaReimplementation.Feature {
         Loading.finish();
     }
 
-    public Datapack vanilla() {
+    public @NotNull Datapack vanilla() {
         Objects.requireNonNull(datapack, "Datapack not loaded yet");
         return datapack;
     }

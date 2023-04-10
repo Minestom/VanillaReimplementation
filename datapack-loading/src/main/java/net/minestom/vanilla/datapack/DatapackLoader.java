@@ -1,6 +1,5 @@
 package net.minestom.vanilla.datapack;
 
-import com.google.gson.reflect.TypeToken;
 import com.squareup.moshi.*;
 import io.github.pesto.files.ByteArray;
 import io.github.pesto.files.FileSystem;
@@ -14,12 +13,13 @@ import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.datapack.advancement.Advancement;
 import net.minestom.vanilla.datapack.json.JsonUtils;
-import net.minestom.vanilla.datapack.json.Optional;
+import net.minestom.vanilla.datapack.loot.LootTable;
+import net.minestom.vanilla.datapack.loot.context.LootContext;
 import net.minestom.vanilla.datapack.loot.function.LootFunction;
 import net.minestom.vanilla.datapack.loot.function.Predicate;
-import net.minestom.vanilla.datapack.loot.context.LootContext;
 import net.minestom.vanilla.datapack.number.NumberProvider;
 import net.minestom.vanilla.datapack.recipe.Recipe;
+import net.minestom.vanilla.datapack.worldgen.Structure;
 import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTException;
@@ -31,6 +31,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static net.minestom.vanilla.datapack.Datapack.*;
 
@@ -41,7 +42,7 @@ public class DatapackLoader {
     private static final Moshi moshi = createMoshiWithAdaptors();
     final Map<NamespaceID, NamespacedData> namespace2data;
 
-    public DatapackLoader(FileSystem<ByteArray> source) {
+    DatapackLoader(FileSystem<ByteArray> source) {
         if (source.hasFile("pack.mcmeta")) {
             this.mcmeta = source.map(FileSystem.BYTES_TO_STRING).map(recordJson(McMeta.class)).file("pack.mcmeta");
         } else {
@@ -86,13 +87,6 @@ public class DatapackLoader {
     private static Moshi createMoshiWithAdaptors() {
         Moshi.Builder builder = new Moshi.Builder();
 
-        register(builder, Component.class, reader -> {
-            GsonComponentSerializer serializer = GsonComponentSerializer.gson();
-            return serializer.deserialize(reader.nextSource().readUtf8());
-        });
-
-        register(builder, NamespaceID.class, reader -> NamespaceID.from(reader.nextString()));
-
         // Native
         register(builder, UUID.class, DatapackLoader::uuidFromJson);
 
@@ -118,6 +112,11 @@ public class DatapackLoader {
         register(builder, Enchantment.class, DatapackLoader::enchantmentFromJson);
         register(builder, EntityType.class, DatapackLoader::entityTypeFromJson);
         register(builder, Material.class, DatapackLoader::materialFromJson);
+        register(builder, Component.class, reader -> {
+            GsonComponentSerializer serializer = GsonComponentSerializer.gson();
+            return serializer.deserialize(reader.nextSource().readUtf8());
+        });
+        register(builder, NamespaceID.class, reader -> NamespaceID.from(reader.nextString()));
 
         // TODO: Implement all of these readers
         register(builder, Advancement.Trigger.class, Advancement.Trigger::fromJson);
@@ -131,7 +130,7 @@ public class DatapackLoader {
         register(builder, NumberProvider.class, NumberProvider.Double::fromJson);
         register(builder, NumberProvider.Double.class, NumberProvider.Double::fromJson);
         register(builder, NumberProvider.Int.class, NumberProvider.Int::fromJson);
-        register(builder, Datapack.LootTable.Pool.Entry.class, Datapack.LootTable.Pool.Entry::fromJson);
+        register(builder, LootTable.Pool.Entry.class, LootTable.Pool.Entry::fromJson);
         register(builder, LootFunction.ApplyBonus.class, LootFunction.ApplyBonus::fromJson);
         register(builder, LootFunction.CopyNbt.Source.class, LootFunction.CopyNbt.Source::fromJson);
         register(builder, LootFunction.CopyNbt.Operation.class, LootFunction.CopyNbt.Operation::fromJson);
@@ -146,7 +145,7 @@ public class DatapackLoader {
     private static <T> FileSystem<T> parseJsonFolder(FileSystem<ByteArray> source, String path, Function<String, T> converter) {
         return source.hasFolder(path) ?
                 source.folder(path, FileSystem.BYTES_TO_STRING).map(converter) :
-                FileSystem.<T>empty().cache();
+                FileSystem.empty();
     }
 
     private static <T> Function<String, T> adaptor(Class<T> clazz) {
@@ -170,9 +169,22 @@ public class DatapackLoader {
     }
 
     public Datapack load() {
-        var copy = Map.copyOf(namespace2data);
-        copy.toString();
-        return () -> copy;
+        var copy = namespace2data.entrySet().stream()
+                .map(entry -> Map.entry(entry.getKey(), entry.getValue().cache()))
+                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+        return new Datapack() {
+            @Override
+            public Map<NamespaceID, NamespacedData> namespacedData() {
+                return copy;
+            }
+
+            @Override
+            public String toString() {
+                return "Datapack{" +
+                        "namespace2data=" + copy +
+                        '}';
+            }
+        };
     }
 
     private static <T> void register(Moshi.Builder builder, Class<T> clazz, JsonAdapter<T> adapter) {

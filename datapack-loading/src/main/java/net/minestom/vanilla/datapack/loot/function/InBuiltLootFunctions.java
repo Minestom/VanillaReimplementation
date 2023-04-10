@@ -17,8 +17,8 @@ import net.minestom.server.item.attribute.ItemAttribute;
 import net.minestom.server.item.metadata.PlayerHeadMeta;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackLoader;
+import net.minestom.vanilla.datapack.loot.LootTable;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.loot.NBTPath;
 import net.minestom.vanilla.datapack.loot.context.LootContext;
@@ -673,7 +673,7 @@ interface InBuiltLootFunctions {
     }
 
     // Sets the contents of a container block item to a list of entries.
-    record SetContents(List<Datapack.LootTable.Pool.Entry> entries, EntityType type) implements LootFunction {
+    record SetContents(List<LootTable.Pool.Entry> entries, EntityType type) implements LootFunction {
 
         @Override
         public NamespaceID function() {

@@ -92,7 +92,8 @@ public interface FileSystem<F> extends FileSystemMappers {
     }
 
     static <T> FileSystem<T> empty() {
-        return new DynamicFileSystem<>();
+        //noinspection unchecked
+        return (FileSystem<T>) CacheFileSystem.EMPTY;
     }
 
     static FileSystem<ByteArray> fileSystem(Path path) {
