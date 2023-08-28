@@ -3,10 +3,9 @@ package io.github.pesto;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import io.github.pesto.files.ByteArray;
-import io.github.pesto.files.FileSystem;
+import net.minestom.vanilla.files.ByteArray;
+import net.minestom.vanilla.files.FileSystem;
 import net.minestom.vanilla.logging.Loading;
-import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;

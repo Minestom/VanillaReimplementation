@@ -1,21 +1,29 @@
 package net.minestom.vanilla.generation;
 
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
-import net.minestom.vanilla.generation.biome.BiomeSource;
-import net.minestom.vanilla.generation.noise.NoiseGeneratorSettings;
+import net.minestom.vanilla.datapack.Datapack;
+import net.minestom.vanilla.datapack.DatapackLoadingFeature;
+import net.minestom.vanilla.datapack.worldgen.NoiseChunkGenerator;
 import net.minestom.vanilla.instance.SetupVanillaInstanceEvent;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Set;
 
 public class VanillaWorldGenerationFeature implements VanillaReimplementation.Feature {
 
     @Override
-    public void hook(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry) {
-        vri.process().eventHandler().addListener(SetupVanillaInstanceEvent.class, event -> {
+    public void hook(@NotNull HookContext context) {
+        context.vri().process().eventHandler().addListener(SetupVanillaInstanceEvent.class, event -> {
 
             NamespaceID plains = NamespaceID.from("minecraft:plains");
-            NoiseGeneratorSettings settings = WorldgenRegistries.NOISE_SETTINGS.getOrThrow(NamespaceID.from("minecraft:overworld"));
+            DatapackLoadingFeature datapackLoading = context.vri().feature(DatapackLoadingFeature.class);
+            Datapack datapack = datapackLoading.vanilla();
+
+            Datapack.NamespacedData data = datapack.namespacedData().get(NamespaceID.from("minecraft"));
+            if (data == null) throw new IllegalStateException("minecraft namespace not found");
+
+            NoiseSettings settings = data.world_gen().noise_settings().file("overworld.json");
 //            BiomeSource.fromJson()
 
             NoiseChunkGenerator generator = new NoiseChunkGenerator((x, y, z, sampler) -> plains, settings, event.getInstance().getDimensionType());
@@ -24,7 +32,12 @@ public class VanillaWorldGenerationFeature implements VanillaReimplementation.Fe
     }
 
     @Override
-    public @NotNull NamespaceID namespaceID() {
+    public @NotNull NamespaceID namespaceId() {
         return NamespaceID.from("vri:worldgeneration");
+    }
+
+    @Override
+    public @NotNull Set<Class<? extends VanillaReimplementation.Feature>> dependencies() {
+        return Set.of(DatapackLoadingFeature.class);
     }
 }

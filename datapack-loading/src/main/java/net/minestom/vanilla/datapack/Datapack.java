@@ -1,24 +1,24 @@
 package net.minestom.vanilla.datapack;
 
-import io.github.pesto.files.ByteArray;
-import io.github.pesto.files.FileSystem;
-import net.minestom.server.instance.block.Block;
+import net.minestom.vanilla.files.ByteArray;
+import net.minestom.vanilla.files.FileSystem;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.server.utils.math.FloatRange;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.datapack.advancement.Advancement;
-import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.loot.LootTable;
 import net.minestom.vanilla.datapack.loot.function.LootFunction;
 import net.minestom.vanilla.datapack.loot.function.Predicate;
 import net.minestom.vanilla.datapack.recipe.Recipe;
-import net.minestom.vanilla.datapack.worldgen.BlockState;
+import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
 import net.minestom.vanilla.datapack.worldgen.Structure;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+
+import static net.minestom.vanilla.datapack.DatapackLoader.parseJsonFolder;
+import static net.minestom.vanilla.datapack.DatapackLoader.recordJson;
 
 public interface Datapack {
 
@@ -128,9 +128,11 @@ public interface Datapack {
 
     }
 
-    record WorldGen() {
-        public static WorldGen from(FileSystem<String> worldgen) {
-            return new WorldGen();
+    record WorldGen(FileSystem<NoiseSettings> noise_settings) {
+        public static WorldGen from(FileSystem<ByteArray> worldgen) {
+            return new WorldGen(
+                    parseJsonFolder(worldgen, "noise_settings", recordJson(NoiseSettings.class))
+            );
         }
     }
 }

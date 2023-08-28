@@ -1,8 +1,9 @@
 package net.minestom.vanilla.datapack;
 
 import com.squareup.moshi.*;
-import io.github.pesto.files.ByteArray;
-import io.github.pesto.files.FileSystem;
+import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
+import net.minestom.vanilla.files.ByteArray;
+import net.minestom.vanilla.files.FileSystem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minestom.server.entity.EntityType;
@@ -55,6 +56,9 @@ public class DatapackLoader {
             this.pack_png = null;
         }
 
+        // Refresh the loadingRandom, so that datapack loads are deterministic
+        DatapackLoader.loadingRandom = WorldgenRandom.standard(0);
+
         {
             Map<NamespaceID, NamespacedData> namespace2data = new HashMap<>();
 
@@ -74,7 +78,7 @@ public class DatapackLoader {
                 Tags tags = Tags.from(source.folder("tags", FileSystem.BYTES_TO_STRING));
                 FileSystem<Dimension> dimensions = parseJsonFolder(dataFolder, "dimension", recordJson(Dimension.class));
                 FileSystem<DimensionType> dimension_type = parseJsonFolder(dataFolder, "dimension_type", adaptor(DimensionType.class));
-                WorldGen world_gen = WorldGen.from(source.folder("worldgen", FileSystem.BYTES_TO_STRING));
+                Datapack.WorldGen world_gen = Datapack.WorldGen.from(source.folder("worldgen"));
 
                 NamespacedData data = new NamespacedData(advancements, functions, item_modifiers, loot_tables, predicates, recipes, structures, chat_type, damage_type, tags, dimensions, dimension_type, world_gen);
                 namespace2data.put(namespaceID, data);
@@ -142,7 +146,7 @@ public class DatapackLoader {
         return builder.build();
     }
 
-    private static <T> FileSystem<T> parseJsonFolder(FileSystem<ByteArray> source, String path, Function<String, T> converter) {
+    static <T> FileSystem<T> parseJsonFolder(FileSystem<ByteArray> source, String path, Function<String, T> converter) {
         return source.hasFolder(path) ?
                 source.folder(path, FileSystem.BYTES_TO_STRING).map(converter) :
                 FileSystem.empty();
@@ -158,7 +162,7 @@ public class DatapackLoader {
         };
     }
 
-    private static <T extends Record> Function<String, T> recordJson(Class<T> clazz) {
+    static <T extends Record> Function<String, T> recordJson(Class<T> clazz) {
         return str -> {
             try {
                 return moshi.adapter(clazz).fromJson(str);
@@ -166,6 +170,12 @@ public class DatapackLoader {
                 throw new RuntimeException(e);
             }
         };
+    }
+
+    private static WorldgenRandom loadingRandom = WorldgenRandom.standard(0);
+
+    public static WorldgenRandom loadingRandom() {
+        return loadingRandom;
     }
 
     public Datapack load() {

@@ -1,6 +1,6 @@
 package net.minestom.vanilla.datapack.worldgen;
 
-import io.github.pesto.files.ByteArray;
+import net.minestom.vanilla.files.ByteArray;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.Nullable;
@@ -55,7 +55,6 @@ public record Structure(int DataVersion, @Nullable String author, Point size,
         try (NBTReader reader = new NBTReader(content.toStream())) {
 
             NBTCompound root = (NBTCompound) reader.read();
-            String str = root.toSNBT();
             Objects.requireNonNull(root);
 
             int DataVersion = Objects.requireNonNull(root.getInt("DataVersion"));

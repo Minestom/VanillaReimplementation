@@ -1,10 +1,16 @@
 package net.minestom.vanilla.datapack.json;
 
+import com.squareup.moshi.Json;
 import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.Moshi;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.DatapackLoader;
+import okio.Buffer;
+import okio.BufferedSource;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -12,6 +18,12 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class JsonUtils {
+
+    public static JsonReader jsonReader(String source) {
+        try (Buffer buffer = new Buffer().writeUtf8(source)) {
+            return JsonReader.of(buffer);
+        }
+    }
 
     public interface ObjectOrList<O, E> {
         boolean isObject();
