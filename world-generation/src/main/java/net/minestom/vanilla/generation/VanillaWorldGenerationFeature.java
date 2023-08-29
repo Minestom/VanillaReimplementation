@@ -5,6 +5,7 @@ import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackLoadingFeature;
 import net.minestom.vanilla.datapack.worldgen.NoiseChunkGenerator;
+import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
 import net.minestom.vanilla.instance.SetupVanillaInstanceEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +27,7 @@ public class VanillaWorldGenerationFeature implements VanillaReimplementation.Fe
             NoiseSettings settings = data.world_gen().noise_settings().file("overworld.json");
 //            BiomeSource.fromJson()
 
-            NoiseChunkGenerator generator = new NoiseChunkGenerator((x, y, z, sampler) -> plains, settings, event.getInstance().getDimensionType());
+            NoiseChunkGenerator generator = new NoiseChunkGenerator(datapack, (x, y, z, sampler) -> plains, settings, event.getInstance().getDimensionType());
             event.getInstance().setChunkGenerator(generator);
         });
     }

@@ -3,11 +3,13 @@ package net.minestom.vanilla.datapack.worldgen;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.math.FloatRange;
+import net.minestom.vanilla.datapack.worldgen.noise.NormalNoise;
+import net.minestom.vanilla.datapack.worldgen.noise.SurfaceContext;
+import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 
-import java.util.List;
+import java.util.*;
 
 public record NoiseSettings(
         int sea_level,
@@ -22,6 +24,19 @@ public record NoiseSettings(
         NoiseRouter noiseRouter,
         SurfaceRule surfaceRule
 ) {
+
+    public static int cellHeight(NoiseSettings settings) {
+        return settings.noise().size_vertical() << 2;
+    }
+    public static int cellWidth(NoiseSettings settings) {
+        return settings.noise().size_horizontal() << 2;
+    }
+    public static double cellCountY(NoiseSettings settings) {
+        return (double) settings.noise().height() / cellHeight(settings);
+    }
+    public static double minCellY(NoiseSettings settings) {
+        return (double) settings.noise().min_y() / cellHeight(settings);
+    }
 
     // Noise parameter for biome
     public record SpawnTarget(FloatRange temperature,
@@ -115,6 +130,13 @@ public record NoiseSettings(
             DensityFunction depth,
             DensityFunction ridges
     ) {
+        static final Map<String, NormalNoise> noiseCache = Collections.synchronizedMap(new WeakHashMap<>());
+
+        static NormalNoise instantiate(WorldgenRandom.Positional random, NormalNoise.NoiseParameters params) {
+            var randomKey = random.seedKey();
+            var cacheMapKey = Objects.hash(randomKey[0], randomKey[1]) + "|" + params.hashCode();
+            return noiseCache.computeIfAbsent(cacheMapKey, k -> new NormalNoise(random.fromSeed(params.hashCode()), params));
+        }
     }
 
 
@@ -203,10 +225,17 @@ public record NoiseSettings(
         interface SurfaceRuleCondition {
             NamespaceID type();
 
+            boolean test(SurfaceContext context);
+
             record Biome(List<NamespaceID> biome_is) implements SurfaceRuleCondition {
                 @Override
                 public NamespaceID type() {
                     return NamespaceID.from("biome");
+                }
+
+                @Override
+                public boolean test(SurfaceContext context) {
+                    return biome_is.contains(context.fetchBiome.get());
                 }
             }
 
@@ -214,6 +243,12 @@ public record NoiseSettings(
                 @Override
                 public NamespaceID type() {
                     return NamespaceID.from("noise_threshold");
+                }
+
+                @Override
+                public boolean test(SurfaceContext context) {
+                    // TODO: Implement this
+                    throw new UnsupportedOperationException("Not implemented yet");
                 }
             }
 

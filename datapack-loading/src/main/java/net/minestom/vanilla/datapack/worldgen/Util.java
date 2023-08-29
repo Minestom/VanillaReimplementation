@@ -77,7 +77,7 @@ public class Util {
     }
 
     public static double smoothstep(double x) {
-        return x * x * x * (x * (x * 6 - 15) + 10);
+        return x * x * x * (x * (x * 6.0 - 15.0) + 10.0);
     }
 
     public static double map(double a, double b, double c, double d, double e) {

@@ -1,6 +1,7 @@
 package net.minestom.vanilla.datapack;
 
 import com.squareup.moshi.*;
+import net.minestom.vanilla.datapack.loot.NBTPath;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 import net.minestom.vanilla.files.ByteArray;
 import net.minestom.vanilla.files.FileSystem;
@@ -122,7 +123,7 @@ public class DatapackLoader {
         });
         register(builder, NamespaceID.class, reader -> NamespaceID.from(reader.nextString()));
 
-        // TODO: Implement all of these readers
+        // VRI Datapack
         register(builder, Advancement.Trigger.class, Advancement.Trigger::fromJson);
         register(builder, LootContext.Trait.class, LootContext.Trait::fromJson);
         register(builder, LootFunction.class, LootFunction::fromJson);
@@ -142,6 +143,8 @@ public class DatapackLoader {
         register(builder, Recipe.class, Recipe::fromJson);
         register(builder, Recipe.Ingredient.class, Recipe.Ingredient::fromJson);
         register(builder, Recipe.Ingredient.Single.class, Recipe.Ingredient.Single::fromJson);
+        register(builder, NBTPath.class, NBTPath::fromJson);
+        register(builder, NBTPath.Single.class, NBTPath.Single::fromJson);
 
         return builder.build();
     }
@@ -162,7 +165,7 @@ public class DatapackLoader {
         };
     }
 
-    static <T extends Record> Function<String, T> recordJson(Class<T> clazz) {
+    public static <T extends Record> Function<String, T> recordJson(Class<T> clazz) {
         return str -> {
             try {
                 return moshi.adapter(clazz).fromJson(str);
@@ -250,7 +253,7 @@ public class DatapackLoader {
     }
 
     private static UUID uuidFromJson(JsonReader reader) throws IOException {
-        return null;
+        return null; // TODO: UUID from json
     }
 
     private static Block blockFromJson(JsonReader reader) throws IOException {

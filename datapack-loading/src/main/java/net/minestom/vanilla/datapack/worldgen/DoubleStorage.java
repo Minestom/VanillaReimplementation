@@ -1,7 +1,5 @@
 package net.minestom.vanilla.datapack.worldgen;
 
-import net.minestom.vanilla.generation.DensityFunction;
-import net.minestom.vanilla.generation.DensityFunctions;
 import org.jetbrains.annotations.NotNull;
 
 public interface DoubleStorage {

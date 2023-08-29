@@ -1,6 +1,6 @@
 package net.minestom.vanilla.datapack.worldgen.random;
 
-import net.minestom.vanilla.generation.Util;
+import Util;
 
 public class LegacyRandom implements WorldgenRandom {
     private static final int MODULUS_BITS = 48;
@@ -127,14 +127,14 @@ public class LegacyRandom implements WorldgenRandom {
             this.seed = seed;
         }
 
-        public WorldgenRandom at(int x, int y, int z) {
-            long seed = Util.getSeed(x, y, z);
-            return new LegacyRandom(seed ^ this.seed);
-        }
-
         public WorldgenRandom fromHashOf(String name) {
             byte[] hash = Util.md5(name);
             long seed = Util.longfromBytes(hash[0], hash[1], hash[2], hash[3], hash[4], hash[5], hash[6], hash[7]);
+            return fromSeed(seed);
+        }
+
+        @Override
+        public WorldgenRandom fromSeed(long seed) {
             return new LegacyRandom(seed ^ this.seed);
         }
 

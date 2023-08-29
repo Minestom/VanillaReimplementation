@@ -6,10 +6,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import it.unimi.dsi.fastutil.doubles.Double2DoubleFunction;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.vanilla.VanillaReimplementation;
+import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackLoader;
+import net.minestom.vanilla.datapack.DatapackLoadingFeature;
+import net.minestom.vanilla.datapack.worldgen.math.CubicSpline;
 import net.minestom.vanilla.datapack.worldgen.noise.BlendedNoise;
 import net.minestom.vanilla.datapack.worldgen.noise.NormalNoise;
-import net.minestom.vanilla.datapack.worldgen.math.CubicSpline;
 import net.minestom.vanilla.datapack.worldgen.noise.SimplexNoise;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 import org.jetbrains.annotations.Nullable;
@@ -25,11 +28,12 @@ public interface DensityFunctions {
         Function<DensityFunction, DensityFunction> map();
     }
 
-    static DensityFunction.Context context(double x, double y, double z) {
+    static DensityFunction.Context context(double x, double y, double z, Datapack datapack) {
         ContextImpl context = new ContextImpl();
         context.x = x;
         context.y = y;
         context.z = z;
+        context.datapack = datapack;
         return context;
     }
 
@@ -37,6 +41,7 @@ public interface DensityFunctions {
         public double x;
         public double y;
         public double z;
+        public Datapack datapack;
 
         @Override
         public double x() {
@@ -52,21 +57,22 @@ public interface DensityFunctions {
         public double z() {
             return z;
         }
+
+        @Override
+        public Datapack datapack() {
+            return datapack;
+        }
     }
 
-    static DensityFunction fromJson(Object obj, Function<Object, DensityFunction> inputParser) {
-        if (inputParser == null) {
-            inputParser = DensityFunctions::fromJson;
-        }
+    Function<Object, NormalNoise.NoiseParameters> NOISE_PARSER = NormalNoise.NoiseParameters::fromJson;
+
+    static DensityFunction fromJson(Object obj) {
         if (obj instanceof String str) {
             Double strDouble = Util.parseDouble(str);
             if (strDouble != null) {
                 return new Constant(strDouble);
             }
-            if (WorldgenRegistries.DENSITY_FUNCTION.get(NamespaceID.from(str)) != null) {
-                return WorldgenRegistries.DENSITY_FUNCTION.get(NamespaceID.from(str));
-            }
-            return fromJson(Util.jsonObject(str));
+            return new DatapackDefined(NamespaceID.from(str));
         }
         if (obj instanceof Number number) {
             return new Constant(number.doubleValue());
@@ -79,8 +85,7 @@ public interface DensityFunctions {
             if (element instanceof JsonObject json) {
                 root = json;
             } else if (Util.jsonIsString(element)) {
-                return new HolderHolder(Holder.reference(WorldgenRegistries.DENSITY_FUNCTION,
-                        NamespaceID.from(Util.jsonToString(element))));
+                return new DatapackDefined(NamespaceID.from(Util.jsonToString(element)));
             } else if (element.isJsonPrimitive()) {
                 JsonPrimitive primitive = element.getAsJsonPrimitive();
                 if (primitive.isNumber()) {
@@ -105,19 +110,8 @@ public interface DensityFunctions {
 
 //        switch (type) {
         return switch (type) {
-//            case 'blend_alpha': return new ConstantMinMax(1, 0, 1)
             case "blend_alpha" -> new ConstantMinMax(1, 0, 1);
-//            case 'blend_offset': return new ConstantMinMax(0, -Infinity, Infinity)
-            case "blend_offset" -> new ConstantMinMax(0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-//            case 'beardifier': return new ConstantMinMax(0, -Infinity, Infinity)
-            case "beardifier" -> new ConstantMinMax(0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-//            case 'old_blended_noise': return new OldBlendedNoise(
-//                    Json.readNumber(root.xz_scale) ?? 1,
-//            Json.readNumber(root.y_scale) ?? 1,
-//                    Json.readNumber(root.xz_factor) ?? 80,
-//                    Json.readNumber(root.y_factor) ?? 160,
-//                    Json.readNumber(root.smear_scale_multiplier) ?? 8
-//			)
+            case "blend_offset", "beardifier" -> new ConstantMinMax(0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
             case "old_blended_noise" -> new OldBlendedNoise(
                     root.get("xz_scale") == null ? 1 : root.get("xz_scale").getAsDouble(),
                     root.get("y_scale") == null ? 1 : root.get("y_scale").getAsDouble(),
@@ -125,129 +119,82 @@ public interface DensityFunctions {
                     root.get("y_factor") == null ? 160 : root.get("y_factor").getAsDouble(),
                     root.get("smear_scale_multiplier") == null ? 8 : root.get("smear_scale_multiplier").getAsDouble()
             );
-//            case 'flat_cache': return new FlatCache(inputParser(root.argument))
-            case "flat_cache" -> new FlatCache(inputParser.apply(root.get("argument")));
-//            case 'interpolated': return new Interpolated(inputParser(root.argument))
-            case "interpolated" -> new Interpolated(inputParser.apply(root.get("argument")));
-//            case 'cache_2d': return new Cache2D(inputParser(root.argument))
-            case "cache_2d" -> new Cache2D(inputParser.apply(root.get("argument")));
-//            case 'cache_once': return new CacheOnce(inputParser(root.argument))
-            case "cache_once" -> new CacheOnce(inputParser.apply(root.get("argument")));
-//            case 'cache_all_in_cell': return new CacheAllInCell(inputParser(root.argument))
-            case "cache_all_in_cell" -> new CacheAllInCell(inputParser.apply(root.get("argument")));
-//            case 'noise': return new Noise(
-//                    Json.readNumber(root.xz_scale) ?? 1,
-//            Json.readNumber(root.y_scale) ?? 1,
-//                    NoiseParser(root.noise),
-//			)
-            case "noise" -> new Noise(
-                    root.get("xz_scale") == null ? 1 : root.get("xz_scale").getAsDouble(),
-                    root.get("y_scale") == null ? 1 : root.get("y_scale").getAsDouble(),
-                    NoiseParser.apply(root.get("noise"))
-            );
-//            case 'end_islands': return new EndIslands()
+            case "flat_cache" -> new FlatCache(DensityFunctions.fromJson(root.get("argument")));
+            case "interpolated" -> new Interpolated(DensityFunctions.fromJson(root.get("argument")));
+            case "cache_2d" -> new Cache2D(DensityFunctions.fromJson(root.get("argument")));
+            case "cache_once" -> new CacheOnce(DensityFunctions.fromJson(root.get("argument")));
+            case "cache_all_in_cell" -> new CacheAllInCell(DensityFunctions.fromJson(root.get("argument")));
+            case "noise" -> {
+                JsonElement noise = root.get("noise");
+                yield new Noise(
+                        root.get("xz_scale") == null ? 1 : root.get("xz_scale").getAsDouble(),
+                        root.get("y_scale") == null ? 1 : root.get("y_scale").getAsDouble(),
+                        NOISE_PARSER.apply(noise)
+                );
+            }
             case "end_islands" -> new EndIslands();
-//            case 'weird_scaled_sampler': return new WeirdScaledSampler(
-//                    inputParser(root.input),
-//                    Json.readEnum(root.rarity_value_mapper, RarityValueMapper),
-//                    NoiseParser(root.noise),
-//                    )
-            case "weird_scaled_sampler" -> new WeirdScaledSampler(
-                    inputParser.apply(root.get("input")),
-                    root.get("rarity_value_mapper").getAsString(),
-                    NoiseParser.apply(root.get("noise"))
-            );
-//            case 'shifted_noise': return new ShiftedNoise(
-//                    inputParser(root.shift_x),
-//                    inputParser(root.shift_y),
-//                    inputParser(root.shift_z),
-//                    Json.readNumber(root.xz_scale) ?? 1,
-//            Json.readNumber(root.y_scale) ?? 1,
-//                    NoiseParser(root.noise),
-//			)
-            case "shifted_noise" -> new ShiftedNoise(
-                    inputParser.apply(root.get("shift_x")),
-                    inputParser.apply(root.get("shift_y")),
-                    inputParser.apply(root.get("shift_z")),
-                    root.get("xz_scale") == null ? 1 : root.get("xz_scale").getAsDouble(),
-                    root.get("y_scale") == null ? 1 : root.get("y_scale").getAsDouble(),
-                    NoiseParser.apply(root.get("noise")),
-                    null
-            );
-//            case 'range_choice': return new RangeChoice(
-//                    inputParser(root.input),
-//                    Json.readNumber(root.min_inclusive) ?? 0,
-//            Json.readNumber(root.max_exclusive) ?? 1,
-//                    inputParser(root.when_in_range),
-//                    inputParser(root.when_out_of_range),
-//			)
+            case "weird_scaled_sampler" -> {
+                JsonElement noise = root.get("noise");
+                yield new WeirdScaledSampler(
+                        DensityFunctions.fromJson(root.get("input")),
+                        root.get("rarity_value_mapper").getAsString(),
+                        NOISE_PARSER.apply(noise)
+                );
+            }
+            case "shifted_noise" -> {
+                JsonElement noise = root.get("noise");
+                yield new ShiftedNoise(
+                        DensityFunctions.fromJson(root.get("shift_x")),
+                        DensityFunctions.fromJson(root.get("shift_y")),
+                        DensityFunctions.fromJson(root.get("shift_z")),
+                        root.get("xz_scale") == null ? 1 : root.get("xz_scale").getAsDouble(),
+                        root.get("y_scale") == null ? 1 : root.get("y_scale").getAsDouble(),
+                        NOISE_PARSER.apply(noise),
+                        null
+                );
+            }
             case "range_choice" -> new RangeChoice(
-                    inputParser.apply(root.get("input")),
+                    DensityFunctions.fromJson(root.get("input")),
                     root.get("min_inclusive") == null ? 0 : root.get("min_inclusive").getAsDouble(),
                     root.get("max_exclusive") == null ? 1 : root.get("max_exclusive").getAsDouble(),
-                    inputParser.apply(root.get("when_in_range")),
-                    inputParser.apply(root.get("when_out_of_range"))
+                    DensityFunctions.fromJson(root.get("when_in_range")),
+                    DensityFunctions.fromJson(root.get("when_out_of_range"))
             );
-//            case 'shift_a': return new ShiftA(NoiseParser(root.argument))
-            case "shift_a" -> new ShiftA(NoiseParser.apply(root.get("argument")));
-//            case 'shift_b': return new ShiftB(NoiseParser(root.argument))
-            case "shift_b" -> new ShiftB(NoiseParser.apply(root.get("argument")));
-//            case 'shift': return new Shift(NoiseParser(root.argument))
-//            case 'blend_density': return new BlendDensity(inputParser(root.argument))
-            case "blend_density" -> new BlendDensity(inputParser.apply(root.get("argument")));
-//            case 'clamp': return new Clamp(
-//                    inputParser(root.input),
-//                    Json.readNumber(root.min) ?? 0,
-//            Json.readNumber(root.max) ?? 1,
-//			)
+            case "shift_a" -> {
+                JsonElement noise = root.get("argument");
+                yield new ShiftA(NOISE_PARSER.apply(noise));
+            }
+            case "shift_b" -> {
+                JsonElement noise = root.get("argument");
+                yield new ShiftB(NOISE_PARSER.apply(noise));
+            }
+            case "shift" -> {
+                JsonElement noise = root.get("argument");
+                yield new Shift(NOISE_PARSER.apply(noise));
+            }
+            case "blend_density" -> new BlendDensity(DensityFunctions.fromJson(root.get("argument")));
             case "clamp" -> new Clamp(
-                    inputParser.apply(root.get("input")),
+                    DensityFunctions.fromJson(root.get("input")),
                     root.get("min") == null ? 0 : root.get("min").getAsDouble(),
                     root.get("max") == null ? 1 : root.get("max").getAsDouble()
             );
-//            case 'abs':
-//            case 'square':
-//            case 'cube':
-//            case 'half_negative':
-//            case 'quarter_negative':
-//            case 'squeeze':
-//                return new Mapped(type, inputParser(root.argument))
             case "abs", "square", "cube", "half_negative", "quarter_negative", "squeeze" ->
-                    new Mapped(type, inputParser.apply(root.get("argument")));
-//            case 'add':
-//            case 'mul':
-//            case 'min':
-//            case 'max': return new Ap2(
-//                    Json.readEnum(type, Ap2Type),
-//                    inputParser(root.argument1),
-//                    inputParser(root.argument2),
-//                    )
+                    new Mapped(type, DensityFunctions.fromJson(root.get("argument")));
             case "add", "mul", "min", "max" -> new Ap2(
                     type,
-                    inputParser.apply(root.get("argument1")),
-                    inputParser.apply(root.get("argument2"))
+                    DensityFunctions.fromJson(root.get("argument1")),
+                    DensityFunctions.fromJson(root.get("argument2"))
             );
-//            case 'spline': return new Spline(
-//                    CubicSpline.fromJson(root.spline, inputParser)
-//            )
             case "spline" -> new Spline(
-                    CubicSpline.fromJson(root.get("spline"), inputParser::apply)
+                    CubicSpline.fromJson(root.get("spline"), DensityFunctions::fromJson)
             );
-//            case 'constant': return new Constant(Json.readNumber(root.argument) ?? 0)
             case "constant" -> new Constant(root.get("argument") == null ? 0 : root.get("argument").getAsDouble());
-//            case 'y_clamped_gradient': return new YClampedGradient(
-//                    Json.readInt(root.from_y) ?? -4064,
-//            Json.readInt(root.to_y) ?? 4062,
-//                    Json.readNumber(root.from_value) ?? -4064,
-//                    Json.readNumber(root.to_value) ?? 4062,
-//			)
             case "y_clamped_gradient" -> new YClampedGradient(
                     root.get("from_y") == null ? -4064 : root.get("from_y").getAsInt(),
                     root.get("to_y") == null ? 4062 : root.get("to_y").getAsInt(),
                     root.get("from_value") == null ? -4064 : root.get("from_value").getAsDouble(),
                     root.get("to_value") == null ? 4062 : root.get("to_value").getAsDouble()
             );
-//          return Constant.ZERO
             default -> Constant.ZERO;
         };
     }
@@ -373,7 +320,7 @@ public interface DensityFunctions {
             int quartX = context.blockX() >> 2;
             int quartZ = context.blockZ() >> 2;
             if (this.lastQuartX != quartX || this.lastQuartZ != quartZ) {
-                this.lastValue = this.wrapped.compute(DensityFunctions.context(quartX << 2, 0, quartZ << 2));
+                this.lastValue = this.wrapped.compute(DensityFunctions.context(quartX << 2, 0, quartZ << 2, context.datapack()));
                 this.lastQuartX = quartX;
                 this.lastQuartZ = quartZ;
             }
@@ -382,6 +329,11 @@ public interface DensityFunctions {
 
         public DensityFunction mapAll(Visitor visitor) {
             return visitor.map().apply(new FlatCache(this.wrapped.mapAll(visitor)));
+        }
+
+        @Override
+        public DensityFunction wrapped() {
+            return wrapped;
         }
     }
 
@@ -423,10 +375,6 @@ public interface DensityFunctions {
         @Override
         public DensityFunction mapAll(Visitor visitor) {
             return visitor.map().apply(new Interpolated(this.wrapped.mapAll(visitor)));
-        }
-
-        public DensityFunction withCellSize(int cellWidth, int cellHeight) {
-            return new Interpolated(this.wrapped, cellWidth, cellHeight);
         }
     }
 
@@ -514,13 +462,13 @@ public interface DensityFunctions {
     //                    root.get("y_scale") == null ? 1 : root.get("y_scale").getAsDouble(),
     //                    NoiseParser.apply(root.get("noise"))
     //            );
-    record Noise(double xzScale, double yScale, Holder<NormalNoise.NoiseParameters> noiseData, NormalNoise noise) implements DensityFunction {
+    record Noise(double xzScale, double yScale, NormalNoise.NoiseParameters noiseData, NormalNoise noise) implements DensityFunction {
 
-        public Noise(double xzScale, double yScale, Holder<NormalNoise.NoiseParameters> noiseData) {
+        public Noise(double xzScale, double yScale, NormalNoise.NoiseParameters noiseData) {
             this(xzScale, yScale, noiseData, null);
         }
 
-        public Noise(double xzScale, double yScale, Holder<NormalNoise.NoiseParameters> noiseData, @Nullable NormalNoise noise) {
+        public Noise(double xzScale, double yScale, NormalNoise.NoiseParameters noiseData, @Nullable NormalNoise noise) {
             this.noiseData = noiseData;
             this.xzScale = xzScale;
             this.yScale = yScale;
@@ -600,13 +548,12 @@ public interface DensityFunctions {
     //                    root.get("rarity_value_mapper").getAsString(),
     //                    NoiseParser.apply(root.get("noise"))
     //            );
-    record WeirdScaledSampler(DensityFunction input, String rarity_value_mapper,
-                              Holder<NormalNoise.NoiseParameters> noiseData) implements DensityFunction {
-        private static final Map<String, Double2DoubleFunction> ValueMapper = new HashMap<>();
+    record WeirdScaledSampler(DensityFunction input, String rarity_value_mapper, NormalNoise.NoiseParameters noiseData) implements DensityFunction {
+        private static final Map<String, Double2DoubleFunction> VALUE_MAPPER = new HashMap<>();
 
         static {
-            ValueMapper.put("type_1", WeirdScaledSampler::rarityValueMapper1);
-            ValueMapper.put("type_2", WeirdScaledSampler::rarityValueMapper2);
+            VALUE_MAPPER.put("type_1", WeirdScaledSampler::rarityValueMapper1);
+            VALUE_MAPPER.put("type_2", WeirdScaledSampler::rarityValueMapper2);
         }
 
         @Override
@@ -697,19 +644,20 @@ public interface DensityFunctions {
         }
     }
 
-    record HolderHolder(Holder<DensityFunction> holder) implements DensityFunction {
+    record DatapackDefined(NamespaceID namespaceID) implements DensityFunction {
         public double compute(Context context) {
-            return this.holder().value().compute(context);
+            // TODO: Implement this
+            throw new UnsupportedOperationException("Not implemented yet");
         }
 
         @Override
         public double minValue() {
-            return this.holder().value().minValue();
+            return 0;
         }
 
         @Override
         public double maxValue() {
-            return this.holder().value().maxValue();
+            return 1;
         }
     }
 
@@ -753,88 +701,6 @@ public interface DensityFunctions {
         }
     }
 
-//    public class OldBlendedNoise implements DensityFunction {
-//        constructor(
-//                public readonly xzScale: number,
-//                public readonly yScale: number,
-//                public readonly xzFactor: number,
-//                public readonly yFactor: number,
-//                public readonly smearScaleMultiplier: number,
-//                private readonly blendedNoise?: BlendedNoise
-//        ) {
-//            super()
-//        }
-//        public compute(context: Context) {
-//            return this.blendedNoise?.sample(context.x, context.y, context.z) ?? 0
-//        }
-//        public maxValue() {
-//            return this.blendedNoise?.maxValue ?? 0
-//        }
-//    }
-
-    class OldBlendedNoise implements DensityFunction {
-
-        final double xzScale;
-
-        public double xzScale() {
-            return xzScale;
-        }
-
-        final double yScale;
-
-        public double yScale() {
-            return yScale;
-        }
-
-        final double xzFactor;
-
-        public double xzFactor() {
-            return xzFactor;
-        }
-
-        final double yFactor;
-
-        public double yFactor() {
-            return yFactor;
-        }
-
-        final double smearScaleMultiplier;
-
-        public double smearScaleMultiplier() {
-            return smearScaleMultiplier;
-        }
-
-        final BlendedNoise blendedNoise;
-
-        public BlendedNoise blendedNoise() {
-            return blendedNoise;
-        }
-
-        public OldBlendedNoise(double xzScale, double yScale, double xzFactor, double yFactor, double smearScaleMultiplier) {
-            this(xzScale, yScale, xzFactor, yFactor, smearScaleMultiplier, null);
-        }
-
-        public OldBlendedNoise(double xzScale, double yScale, double xzFactor, double yFactor, double smearScaleMultiplier, @Nullable BlendedNoise blendedNoise) {
-            this.xzScale = xzScale;
-            this.yScale = yScale;
-            this.xzFactor = xzFactor;
-            this.yFactor = yFactor;
-            this.smearScaleMultiplier = smearScaleMultiplier;
-            this.blendedNoise = blendedNoise;
-        }
-
-        @Override
-        public double compute(Context context) {
-            return this.blendedNoise.sample(context.x(), context.y(), context.z());
-        }
-
-        @Override
-        public double maxValue() {
-            return this.blendedNoise.maxValue;
-        }
-    }
-
-
 //    abstract class Wrapper implements DensityFunction {
 //        constructor(
 //                protected readonly wrapped: DensityFunction,
@@ -867,448 +733,45 @@ public interface DensityFunctions {
         }
     }
 
-//    public class FlatCache extends Wrapper {
-//        private lastQuartX?: number
-//        private lastQuartZ?: number
-//        private lastValue: number = 0
-//        constructor(wrapped: DensityFunction) {
-//            super(wrapped)
-//        }
-//        public compute(context: Context): number {
-//			const quartX = context.x >> 2
-//			const quartZ = context.z >> 2
-//            if (this.lastQuartX !== quartX || this.lastQuartZ !== quartZ) {
-//                this.lastValue = this.wrapped.compute(DensityFunction.context(quartX << 2, 0, quartZ << 2))
-//                this.lastQuartX = quartX
-//                this.lastQuartZ = quartZ
-//            }
-//            return this.lastValue
-//        }
-//        public mapAll(visitor: Visitor) {
-//            return visitor.map(new FlatCache(this.wrapped.mapAll(visitor)))
-//        }
-//    }
-
-    class FlatCache extends Wrapper {
-        private int lastQuartX = 0;
-        private int lastQuartZ = 0;
-        private double lastValue = 0;
-
-        public FlatCache(DensityFunction wrapped) {
-            super(wrapped);
-        }
-
-        public double compute(Context context) {
-            int quartX = context.blockX() >> 2;
-            int quartZ = context.blockZ() >> 2;
-            if (this.lastQuartX != quartX || this.lastQuartZ != quartZ) {
-                this.lastValue = this.wrapped.compute(DensityFunctions.context(quartX << 2, 0, quartZ << 2));
-                this.lastQuartX = quartX;
-                this.lastQuartZ = quartZ;
-            }
-            return this.lastValue;
-        }
-
-        public DensityFunction mapAll(Visitor visitor) {
-            return visitor.map().apply(new FlatCache(this.wrapped.mapAll(visitor)));
-        }
-    }
-
-//    public class CacheAllInCell extends Wrapper {
-//        constructor(wrapped: DensityFunction) {
-//            super(wrapped)
-//        }
-//        public compute(context: Context) {
-//            return this.wrapped.compute(context)
-//        }
-//        public mapAll(visitor: Visitor) {
-//            return visitor.map(new CacheAllInCell(this.wrapped.mapAll(visitor)))
-//        }
-//    }
-
-    class CacheAllInCell extends Wrapper {
-        public CacheAllInCell(DensityFunction wrapped) {
-            super(wrapped);
-        }
-
-        public double compute(Context context) {
-            return this.wrapped.compute(context);
-        }
-
-        public DensityFunction mapAll(Visitor visitor) {
-            return visitor.map().apply(new CacheAllInCell(this.wrapped.mapAll(visitor)));
-        }
-    }
-
-//    public class Cache2D extends Wrapper {
-//        private lastBlockX?: number
-//        private lastBlockZ?: number
-//        private lastValue: number = 0
-//        constructor(wrapped: DensityFunction) {
-//            super(wrapped)
-//        }
-//        public compute(context: Context) {
-//			const blockX = context.x
-//			const blockZ = context.z
-//            if (this.lastBlockX !== blockX || this.lastBlockZ !== blockZ) {
-//                this.lastValue = this.wrapped.compute(context)
-//                this.lastBlockX = blockX
-//                this.lastBlockZ = blockZ
-//            }
-//            return this.lastValue
-//        }
-//        public mapAll(visitor: Visitor) {
-//            return visitor.map(new Cache2D(this.wrapped.mapAll(visitor)))
-//        }
-//    }
-
-    class Cache2D extends Wrapper {
-        private int lastBlockX = 0;
-        private int lastBlockZ = 0;
-        private double lastValue = 0;
-
-        public Cache2D(DensityFunction wrapped) {
-            super(wrapped);
-        }
-
-        public double compute(Context context) {
-            int blockX = context.blockX();
-            int blockZ = context.blockZ();
-            if (this.lastBlockX != blockX || this.lastBlockZ != blockZ) {
-                this.lastValue = this.wrapped.compute(context);
-                this.lastBlockX = blockX;
-                this.lastBlockZ = blockZ;
-            }
-            return this.lastValue;
-        }
-
-        public DensityFunction mapAll(Visitor visitor) {
-            return visitor.map().apply(new Cache2D(this.wrapped.mapAll(visitor)));
-        }
-    }
-
-//    public class CacheOnce extends Wrapper {
-//        private lastBlockX?: number
-//        private lastBlockY?: number
-//        private lastBlockZ?: number
-//        private lastValue: number = 0
-//        constructor(wrapped: DensityFunction) {
-//            super(wrapped)
-//        }
-//        public compute(context: DensityFunction.Context) {
-//			const blockX = context.x
-//			const blockY = context.y
-//			const blockZ = context.z
-//            if (this.lastBlockX !== blockX || this.lastBlockY !== blockY || this.lastBlockZ !== blockZ) {
-//                this.lastValue = this.wrapped.compute(context)
-//                this.lastBlockX = blockX
-//                this.lastBlockY = blockY
-//                this.lastBlockZ = blockZ
-//            }
-//            return this.lastValue
-//        }
-//        public mapAll(visitor: Visitor) {
-//            return visitor.map(new CacheOnce(this.wrapped.mapAll(visitor)))
-//        }
-//    }
-
-    class CacheOnce extends Wrapper {
-        private int lastBlockX = 0;
-        private int lastBlockY = 0;
-        private int lastBlockZ = 0;
-        private double lastValue = 0;
-
-        public CacheOnce(DensityFunction wrapped) {
-            super(wrapped);
-        }
-
-        public double compute(Context context) {
-            int blockX = context.blockX();
-            int blockY = context.blockY();
-            int blockZ = context.blockZ();
-            if (this.lastBlockX != blockX || this.lastBlockY != blockY || this.lastBlockZ != blockZ) {
-                this.lastValue = this.wrapped.compute(context);
-                this.lastBlockX = blockX;
-                this.lastBlockY = blockY;
-                this.lastBlockZ = blockZ;
-            }
-            return this.lastValue;
-        }
-
-        public DensityFunction mapAll(Visitor visitor) {
-            return visitor.map().apply(new CacheOnce(this.wrapped.mapAll(visitor)));
-        }
-    }
-
-//    public class Interpolated extends Wrapper {
-//        private readonly values: Map<string, number>
-//        constructor(
-//                        wrapped: DensityFunction,
-//                        private readonly cellWidth: number = 4,
-//                        private readonly cellHeight: number = 4,
-//                        ) {
-//            super(wrapped)
-//            this.values = new Map()
-//        }
-//        public compute({ x: blockX, y: blockY, z: blockZ }: DensityFunction.Context) {
-//			const w = this.cellWidth
-//			const h = this.cellHeight
-//			const x = ((blockX % w + w) % w) / w
-//			const y = ((blockY % h + h) % h) / h
-//			const z = ((blockZ % w + w) % w) / w
-//			const firstX = Math.floor(blockX / w) * w
-//			const firstY = Math.floor(blockY / h) * h
-//			const firstZ = Math.floor(blockZ / w) * w
-//			const noise000 = () => this.computeCorner(firstX, firstY, firstZ)
-//			const noise001 = () => this.computeCorner(firstX, firstY, firstZ + w)
-//			const noise010 = () => this.computeCorner(firstX, firstY + h, firstZ)
-//			const noise011 = () => this.computeCorner(firstX, firstY + h, firstZ + w)
-//			const noise100 = () => this.computeCorner(firstX + w, firstY, firstZ)
-//			const noise101 = () => this.computeCorner(firstX + w, firstY, firstZ + w)
-//			const noise110 = () => this.computeCorner(firstX + w, firstY + h, firstZ)
-//			const noise111 = () => this.computeCorner(firstX + w, firstY + h, firstZ + w)
-//            return lazyLerp3(x, y, z, noise000, noise100, noise010, noise110, noise001, noise101, noise011, noise111)
-//        }
-//        private computeCorner(x: number, y: number, z: number) {
-//            return computeIfAbsent(this.values, `${x} ${y} ${z}`, () => {
-//                return this.wrapped.compute(DensityFunction.context(x, y, z))
-//            })
-//        }
-//        public mapAll(visitor: Visitor) {
-//            return visitor.map(new Interpolated(this.wrapped.mapAll(visitor)))
-//        }
-//        public withCellSize(cellWidth: number, cellHeight: number) {
-//            return new Interpolated(this.wrapped, cellWidth, cellHeight)
-//        }
-//    }
-
-    class Interpolated extends Wrapper {
-
-        private final DoubleStorage storage;
-        private final int cellWidth;
-        private final int cellHeight;
-
-        public Interpolated(DensityFunction wrapped) {
-            this(wrapped, 4, 4);
-        }
-
-        public Interpolated(DensityFunction wrapped, int cellWidth, int cellHeight) {
-            super(wrapped);
-            this.storage = DoubleStorage.exactCache(DoubleStorage.from(wrapped));
-            this.cellWidth = cellWidth;
-            this.cellHeight = cellHeight;
-        }
-
-        @Override
-        public double compute(Context context) {
-            int blockX = context.blockX();
-            int blockY = context.blockY();
-            int blockZ = context.blockZ();
-            int w = this.cellWidth;
-            int h = this.cellHeight;
-            double x = ((blockX % w + w) % w) / (double) w;
-            double y = ((blockY % h + h) % h) / (double) h;
-            double z = ((blockZ % w + w) % w) / (double) w;
-            int firstX = Math.floorDiv(blockX, w) * w;
-            int firstY = Math.floorDiv(blockY, h) * h;
-            int firstZ = Math.floorDiv(blockZ, w) * w;
-            DoubleSupplier noise000 = () -> this.computeCorner(firstX, firstY, firstZ);
-            DoubleSupplier noise001 = () -> this.computeCorner(firstX, firstY, firstZ + w);
-            DoubleSupplier noise010 = () -> this.computeCorner(firstX, firstY + h, firstZ);
-            DoubleSupplier noise011 = () -> this.computeCorner(firstX, firstY + h, firstZ + w);
-            DoubleSupplier noise100 = () -> this.computeCorner(firstX + w, firstY, firstZ);
-            DoubleSupplier noise101 = () -> this.computeCorner(firstX + w, firstY, firstZ + w);
-            DoubleSupplier noise110 = () -> this.computeCorner(firstX + w, firstY + h, firstZ);
-            DoubleSupplier noise111 = () -> this.computeCorner(firstX + w, firstY + h, firstZ + w);
-            return Util.lazyLerp3(x, y, z, noise000, noise100, noise010, noise110, noise001, noise101, noise011, noise111);
-        }
-
-        private double computeCorner(int x, int y, int z) {
-            return storage.obtain(x, y, z);
-        }
-
-        @Override
-        public DensityFunction mapAll(Visitor visitor) {
-            return visitor.map().apply(new Interpolated(this.wrapped.mapAll(visitor), this.cellWidth, this.cellHeight));
-        }
-
-        public DensityFunction withCellSize(int cellWidth, int cellHeight) {
-            return new Interpolated(this.wrapped, cellWidth, cellHeight);
-        }
-    }
-
-
-//    public class Noise implements DensityFunction {
-//        constructor(
-//                public readonly xzScale: number,
-//                public readonly yScale: number,
-//                public readonly noiseData: Holder<NoiseParameters>,
-//                public readonly noise?: NormalNoise,
-//                ) {
-//            super()
-//        }
-//        public compute(context: Context) {
-//            return this.noise?.sample(context.x * this.xzScale, context.y * this.yScale, context.z * this.xzScale) ?? 0
-//        }
-//        public maxValue() {
-//            return this.noise?.maxValue ?? 2
-//        }
-//    }
-
-    class Noise implements DensityFunction {
+    class NoiseRoot implements DensityFunction {
         public final double xzScale;
-
         public double xzScale() {
             return this.xzScale;
         }
-
         public final double yScale;
-
         public double yScale() {
             return this.yScale;
         }
-
-        public final Holder<NormalNoise.NoiseParameters> noiseData;
-
-        public Holder<NormalNoise.NoiseParameters> noiseData() {
+        public final NormalNoise.NoiseParameters noiseData;
+        public NormalNoise.NoiseParameters noiseData() {
             return this.noiseData;
         }
-
         public final NormalNoise noise;
 
         public NormalNoise noise() {
             return this.noise;
         }
-
-        public Noise(double xzScale, double yScale, Holder<NormalNoise.NoiseParameters> noiseData) {
+        public NoiseRoot(double xzScale, double yScale, NormalNoise.NoiseParameters noiseData) {
             this(xzScale, yScale, noiseData, null);
         }
-
-        public Noise(double xzScale, double yScale, Holder<NormalNoise.NoiseParameters> noiseData, @Nullable NormalNoise noise) {
+        public NoiseRoot(double xzScale, double yScale, NormalNoise.NoiseParameters noiseData, @Nullable NormalNoise noise) {
             this.noiseData = noiseData;
             this.xzScale = xzScale;
             this.yScale = yScale;
             this.noise = noise;
         }
-
         @Override
         public double compute(Context context) {
             if (this.noise == null) return 0;
             return this.noise.sample(context.x() * this.xzScale, context.y() * this.yScale, context.z() * this.xzScale);
         }
-
         @Override
         public double maxValue() {
             return this.noise == null ? 2 : this.noise.maxValue;
         }
     }
 
-//    public class EndIslands implements DensityFunction {
-//        private readonly islandNoise: SimplexNoise
-//        constructor(seed?: bigint) {
-//            super()
-//			const random = new LegacyRandom(seed ?? BigInt(0))
-//            random.consume(17292)
-//            this.islandNoise = new SimplexNoise(random)
-//        }
-//        private getHeightValue(x: number, z: number) {
-//			const x0 = Math.floor(x / 2)
-//			const z0 = Math.floor(z / 2)
-//			const x1 = x % 2
-//			const z1 = z % 2
-//            let f = clamp(100 - Math.sqrt(x * x + z * z), -100, 80)
-//
-//            for (let i = -12; i <= 12; i += 1) {
-//                for (let j = -12; j <= 12; j += 1) {
-//					const x2 = x0 + i
-//					const z2 = z0 + j
-//                    if (x2 * x2 + z2 * z2 <= 4096 || this.islandNoise.sample2D(x2, z2) >= -0.9) {
-//                        continue
-//                    }
-//					const f1 = (Math.abs(x2) * 3439 + Math.abs(z2) * 147) % 13 + 9
-//					const x3 = x1 + i * 2
-//					const z3 = z1 + j * 2
-//					const f2 = 100 - Math.sqrt(x3 * x3 + z3 * z3) * f1
-//					const f3 = clamp(f2, -100, 80)
-//                    f = Math.max(f, f3)
-//                }
-//            }
-//
-//            return f
-//        }
-//        public compute({ x, y, z }: DensityFunction.Context) {
-//            return (this.getHeightValue(Math.floor(x / 8), Math.floor(z / 8)) - 8) / 128
-//        }
-//        public minValue() {
-//            return -0.84375
-//        }
-//        public maxValue() {
-//            return 0.5625
-//        }
-//    }
-
-    //	const RarityValueMapper = ['type_1', 'type_2'] as const
-    String[] RarityValueMapper = new String[]{"type_1", "type_2"};
-
-    //    public class WeirdScaledSampler extends Transformer {
-//        private static readonly ValueMapper: Record<typeof RarityValueMapper[number], (value: number) => number> = {
-//            type_1: WeirdScaledSampler.rarityValueMapper1,
-//                    type_2: WeirdScaledSampler.rarityValueMapper2,
-//        }
-//        private readonly mapper: (value: number) => number
-//        constructor(
-//                        input: DensityFunction,
-//                        public readonly rarityValueMapper: typeof RarityValueMapper[number],
-//                        public readonly noiseData: Holder<NoiseParameters>,
-//                        public readonly noise?: NormalNoise,
-//                        ) {
-//            super(input)
-//            this.mapper = WeirdScaledSampler.ValueMapper[this.rarityValueMapper]
-//        }
-//        public transform(context: Context, density: number) {
-//            if (!this.noise) {
-//                return 0
-//            }
-//			const rarity = this.mapper(density)
-//            return rarity * Math.abs(this.noise.sample(context.x / rarity, context.y / rarity, context.z / rarity))
-//        }
-//        public mapAll(visitor: Visitor) {
-//            return visitor.map(new WeirdScaledSampler(this.input.mapAll(visitor), this.rarityValueMapper, this.noiseData, this.noise))
-//        }
-//        public minValue(): number {
-//            return 0
-//        }
-//        public maxValue(): number {
-//            return this.rarityValueMapper === 'type_1' ? 2 : 3
-//        }
-//        public static rarityValueMapper1(value: number) {
-//            if (value < -0.5) {
-//                return 0.75
-//            } else if (value < 0) {
-//                return 1
-//            } else if (value < 0.5) {
-//                return 1.5
-//            } else {
-//                return 2
-//            }
-//        }
-//        public static rarityValueMapper2(value: number) {
-//            if (value < -0.75) {
-//                return 0.5
-//            } else if (value < -0.5) {
-//                return 0.75
-//            } else if (value < 0.5) {
-//                return 1
-//            } else if (value < 0.75) {
-//                return 2
-//            } else {
-//                return 3
-//            }
-//        }
-//    }
-
-
-    class ShiftedNoise extends Noise {
+    class ShiftedNoise extends NoiseRoot {
 
         public final DensityFunction shiftX;
 
@@ -1331,7 +794,7 @@ public interface DensityFunctions {
         public ShiftedNoise(
                 DensityFunction shiftX, DensityFunction shiftY, DensityFunction shiftZ,
                 double xzScale, double yScale,
-                Holder<NormalNoise.NoiseParameters> noiseData, @Nullable NormalNoise noise) {
+                NormalNoise.NoiseParameters noiseData, @Nullable NormalNoise noise) {
             super(xzScale, yScale, noiseData, noise);
             this.shiftX = shiftX;
             this.shiftY = shiftY;
@@ -1410,9 +873,9 @@ public interface DensityFunctions {
     }
 
     abstract class ShiftNoise implements DensityFunction {
-        public final Holder<NormalNoise.NoiseParameters> noiseData;
+        public final NormalNoise.NoiseParameters noiseData;
 
-        public Holder<NormalNoise.NoiseParameters> noiseData() {
+        public NormalNoise.NoiseParameters noiseData() {
             return noiseData;
         }
 
@@ -1423,7 +886,7 @@ public interface DensityFunctions {
         }
 
         ShiftNoise(
-                Holder<NormalNoise.NoiseParameters> noiseData,
+                NormalNoise.NoiseParameters noiseData,
                 @Nullable NormalNoise offsetNoise) {
             this.noiseData = noiseData;
             this.offsetNoise = offsetNoise;
@@ -1449,11 +912,11 @@ public interface DensityFunctions {
 
     class ShiftA extends ShiftNoise {
 
-        ShiftA(Holder<NormalNoise.NoiseParameters> noiseData, @Nullable NormalNoise offsetNoise) {
+        ShiftA(NormalNoise.NoiseParameters noiseData, @Nullable NormalNoise offsetNoise) {
             super(noiseData, offsetNoise);
         }
 
-        ShiftA(Holder<NormalNoise.NoiseParameters> noiseData) {
+        ShiftA(NormalNoise.NoiseParameters noiseData) {
             super(noiseData, null);
         }
 
@@ -1461,7 +924,7 @@ public interface DensityFunctions {
 //            return super.compute(DensityFunction.context(context.x, 0, context.z))
 //        }
         public double compute(Context context) {
-            return super.compute(DensityFunctions.context(context.x(), 0, context.z()));
+            return super.compute(DensityFunctions.context(context.x(), 0, context.z(), context.datapack()));
         }
 
         //        public withNewNoise(newNoise: NormalNoise) {
@@ -1487,16 +950,16 @@ public interface DensityFunctions {
 //        }
 //    }
     class ShiftB extends ShiftNoise {
-        ShiftB(Holder<NormalNoise.NoiseParameters> noiseData, NormalNoise offsetNoise) {
+        ShiftB(NormalNoise.NoiseParameters noiseData, NormalNoise offsetNoise) {
             super(noiseData, offsetNoise);
         }
 
-        ShiftB(Holder<NormalNoise.NoiseParameters> noiseData) {
+        ShiftB(NormalNoise.NoiseParameters noiseData) {
             super(noiseData, null);
         }
 
         public double compute(Context context) {
-            return super.compute(DensityFunctions.context(context.z(), context.x(), 0));
+            return super.compute(DensityFunctions.context(context.z(), context.x(), 0, context.datapack()));
         }
 
         public ShiftNoise withNewNoise(NormalNoise newNoise) {
@@ -1516,16 +979,34 @@ public interface DensityFunctions {
 //        }
 //    }
     class Shift extends ShiftNoise {
-        Shift(Holder<NormalNoise.NoiseParameters> noiseData, NormalNoise offsetNoise) {
+        Shift(NormalNoise.NoiseParameters noiseData, NormalNoise offsetNoise) {
             super(noiseData, offsetNoise);
         }
 
-        Shift(Holder<NormalNoise.NoiseParameters> noiseData) {
+        Shift(NormalNoise.NoiseParameters noiseData) {
             super(noiseData, null);
         }
 
         public ShiftNoise withNewNoise(NormalNoise newNoise) {
             return new Shift(this.noiseData, newNoise);
+        }
+    }
+
+    abstract class Transformer implements DensityFunction {
+        protected final DensityFunction input;
+
+        public DensityFunction input() {
+            return input;
+        }
+
+        protected Transformer(DensityFunction input) {
+            this.input = input;
+        }
+
+        abstract double transform(DensityFunction.Context context, double density);
+
+        public double compute(DensityFunction.Context context) {
+            return this.transform(context, input.compute(context));
         }
     }
 

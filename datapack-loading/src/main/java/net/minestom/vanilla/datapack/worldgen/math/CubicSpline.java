@@ -3,7 +3,7 @@ package net.minestom.vanilla.datapack.worldgen.math;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minestom.vanilla.generation.Util;
+import Util;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;

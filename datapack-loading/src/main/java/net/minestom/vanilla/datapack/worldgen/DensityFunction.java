@@ -1,13 +1,15 @@
 package net.minestom.vanilla.datapack.worldgen;
 
 import com.squareup.moshi.JsonReader;
+import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
+import net.minestom.vanilla.datapack.worldgen.math.NumberFunction;
 
 import java.io.IOException;
 import java.util.Map;
 
-public interface DensityFunction extends DensityFunctions /*NumberFunction<DensityFunction.Context>*/ {
+public interface DensityFunction extends DensityFunctions, NumberFunction<DensityFunction.Context> {
     double compute(Context context);
 
     default double minValue() {
@@ -75,5 +77,7 @@ public interface DensityFunction extends DensityFunctions /*NumberFunction<Densi
         default int blockZ() {
             return (int) Math.floor(z());
         }
+
+        Datapack datapack();
     }
 }

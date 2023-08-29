@@ -1,6 +1,6 @@
 package net.minestom.vanilla.datapack.worldgen.noise;
 
-import net.minestom.vanilla.datapack.worldgen.Util;
+import Util;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 import org.jetbrains.annotations.Nullable;
 

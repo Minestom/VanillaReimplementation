@@ -1,5 +1,7 @@
 package net.minestom.vanilla.datapack.worldgen.random;
 
+import Util;
+
 import java.util.Random;
 
 public interface WorldgenRandom {
@@ -30,9 +32,12 @@ public interface WorldgenRandom {
 
     interface Positional {
 
-        WorldgenRandom at(int x, int y, int z);
+        default WorldgenRandom at(int x, int y, int z) {
+            return fromSeed(Util.getSeed(x, y, z));
+        }
 
         WorldgenRandom fromHashOf(String name);
+        WorldgenRandom fromSeed(long seed);
 
         long[] seedKey();
     }

@@ -52,7 +52,6 @@ interface InBuiltLootFunctions {
         NamespaceID formula();
 
         static ApplyBonus fromJson(JsonReader reader) throws IOException {
-            String json = reader.peekJson().nextSource().readUtf8();
             return JsonUtils.unionNamespaceStringType(reader, "formula", Map.of(
                     "minecraft:binomial_with_bonus_count", DatapackLoader.moshi(BinomialWithBonusCount.class),
                     "minecraft:ore_drops", DatapackLoader.moshi(OreDrops.class),
@@ -200,17 +199,17 @@ interface InBuiltLootFunctions {
 
         public sealed interface Operation {
 
-            NBTPath source();
+            NBTPath.Single source();
 
-            NBTPath target();
+            NBTPath.Single target();
 
             String op();
 
             NBT apply(NBT source, NBT target);
 
             default NBT applyOperation(NBT source, NBT itemStackNbt) {
-                NBT sourceNbt = source().get(source);
-                NBT targetNbt = target().get(itemStackNbt);
+                NBT sourceNbt = source().getSingle(source);
+                NBT targetNbt = target().getSingle(itemStackNbt);
                 NBT newNbt = apply(sourceNbt, targetNbt);
                 return target().set(itemStackNbt, newNbt);
             }
@@ -223,7 +222,7 @@ interface InBuiltLootFunctions {
                 ));
             }
 
-            record Replace(NBTPath source, NBTPath target) implements Operation {
+            record Replace(NBTPath.Single source, NBTPath.Single target) implements Operation {
                 @Override
                 public String op() {
                     return "replace";
@@ -235,7 +234,7 @@ interface InBuiltLootFunctions {
                 }
             }
 
-            record Merge(NBTPath source, NBTPath target) implements Operation {
+            record Merge(NBTPath.Single source, NBTPath.Single target) implements Operation {
                 @Override
                 public String op() {
                     return "merge";
@@ -251,7 +250,7 @@ interface InBuiltLootFunctions {
                 }
             }
 
-            record Append(NBTPath source, NBTPath target) implements Operation {
+            record Append(NBTPath.Single source, NBTPath.Single target) implements Operation {
                 @Override
                 public String op() {
                     return "append";

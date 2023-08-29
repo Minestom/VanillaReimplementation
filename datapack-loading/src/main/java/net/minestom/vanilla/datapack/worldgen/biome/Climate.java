@@ -3,10 +3,10 @@ package net.minestom.vanilla.datapack.worldgen.biome;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minestom.vanilla.generation.DensityFunction;
-import net.minestom.vanilla.generation.DensityFunctions;
-import net.minestom.vanilla.generation.Util;
-import net.minestom.vanilla.generation.noise.NoiseRouter;
+import net.minestom.vanilla.datapack.worldgen.DensityFunction;
+import net.minestom.vanilla.datapack.worldgen.DensityFunctions;
+import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
+import Util;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -264,7 +264,7 @@ public class Climate {
 //}
     public record Sampler(DensityFunction temperature, DensityFunction humidity, DensityFunction continentalness,
                           DensityFunction erosion, DensityFunction depth, DensityFunction weirdness) {
-        public static Sampler fromRouter(NoiseRouter router) {
+        public static Sampler fromRouter(NoiseSettings.NoiseRouter router) {
             return new Sampler(router.temperature(), router.vegetation(), router.continents(), router.erosion(), router.depth(), router.ridges());
         }
 

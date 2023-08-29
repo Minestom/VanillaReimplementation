@@ -10,10 +10,9 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.world.DimensionType;
+import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.worldgen.biome.BiomeSource;
 import net.minestom.vanilla.datapack.worldgen.noise.NoiseChunk;
-import net.minestom.vanilla.generation.noise.NoiseGeneratorSettings;
-import net.minestom.vanilla.generation.noise.NoiseSettings;
 import net.minestom.vanilla.datapack.worldgen.noise.VerticalAnchor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,6 +42,7 @@ public class NoiseChunkGenerator implements ChunkGenerator {
 //        }
 //    }
 
+    private final @NotNull Datapack datapack;
     private final @NotNull BiomeSource biomeSource;
     private final @NotNull NoiseSettings settings;
 
@@ -50,15 +50,16 @@ public class NoiseChunkGenerator implements ChunkGenerator {
     // Minestom
     private final DimensionType dimensionType;
 
-    public NoiseChunkGenerator(@NotNull BiomeSource biomeSource, @NotNull NoiseSettings settings, DimensionType dimensionType) {
+    public NoiseChunkGenerator(Datapack datapack, @NotNull BiomeSource biomeSource, @NotNull NoiseSettings settings, DimensionType dimensionType) {
+        this.datapack = datapack;
         this.biomeSource = biomeSource;
         this.settings = settings;
         this.dimensionType = dimensionType;
 
         Aquifer.FluidStatus lavaFluid = new Aquifer.FluidStatus(-54, Block.LAVA);
-        Aquifer.FluidStatus defaultFluid = new Aquifer.FluidStatus(settings.seaLevel(), settings.defaultFluid());
+        Aquifer.FluidStatus defaultFluid = new Aquifer.FluidStatus(settings.sea_level(), settings.default_fluid().toMinestom());
         this.globalFluidPicker = (x, y, z) -> {
-            if (y < Math.min(-54, settings.seaLevel())) {
+            if (y < Math.min(-54, settings.sea_level())) {
                 return lavaFluid;
             }
             return defaultFluid;
@@ -81,50 +82,22 @@ public class NoiseChunkGenerator implements ChunkGenerator {
 //
 //        const noiseChunk = this.getOrCreateNoiseChunk(randomState, chunk)
 
-    public void fill(RandomState randomState, TargetChunk chunk) {
-        fill(randomState, chunk, false);
+    public void fill(Datapack datapack, RandomState randomState, TargetChunk chunk) {
+        fill(datapack, randomState, chunk, false);
     }
 
-    public void fill(RandomState randomState, TargetChunk chunk, boolean onlyFirstZ) {
-        int minY = Math.max(chunk.minY(), this.settings.noise().minY());
-        int maxY = Math.min(chunk.maxY(), this.settings.noise().minY() + this.settings.noise().height());
+    public void fill(Datapack datapack, RandomState randomState, TargetChunk chunk, boolean onlyFirstZ) {
+        int minY = Math.max(chunk.minY(), this.settings.noise().min_y());
+        int maxY = Math.min(chunk.maxY(), this.settings.noise().min_y() + this.settings.noise().height());
 
-        int cellWidth = NoiseSettings.cellWidth(this.settings.noise());
-        int cellHeight = NoiseSettings.cellHeight(this.settings.noise());
+        int cellWidth = NoiseSettings.cellWidth(this.settings);
+        int cellHeight = NoiseSettings.cellHeight(this.settings);
         int cellCountXZ = Math.floorDiv(16, cellWidth);
 
         int minCellY = Math.floorDiv(minY, cellHeight);
         int cellCountY = Math.floorDiv(maxY - minY, cellHeight);
 
         NoiseChunk noiseChunk = this.getOrCreateNoiseChunk(randomState, chunk);
-
-//
-//        for (let cellX = 0; cellX < cellCountXZ; cellX += 1) {
-//            for (let cellZ = 0; cellZ < (onlyFirstZ ? 1 : cellCountXZ); cellZ += 1) {
-//                let section = chunk.getOrCreateSection(chunk.sectionsCount - 1)
-//                for (let cellY = cellCountY - 1; cellY >= 0; cellY -= 1) {
-//                    for (let offY = cellHeight - 1; offY >= 0; offY -= 1) {
-//                    const blockY = (minCellY + cellY) * cellHeight + offY
-//                    const sectionY = blockY & 0xF
-//                    const sectionIndex = chunk.getSectionIndex(blockY)
-//                        if (chunk.getSectionIndex(section.minBlockY) !== sectionIndex) {
-//                            section = chunk.getOrCreateSection(sectionIndex)
-//                        }
-//                        for (let offX = 0; offX < cellWidth; offX += 1) {
-//                        const blockX = minX + cellX * cellWidth + offX
-//                        const sectionX = blockX & 0xF
-//                            for (let offZ = 0; offZ < (onlyFirstZ ? 1 : cellWidth); offZ += 1) {
-//                            const blockZ = minZ + cellZ * cellWidth + offZ
-//                            const sectionZ = blockZ & 0xF
-//                            const state = noiseChunk.getFinalState(blockX, blockY, blockZ) ?? this.settings.defaultBlock
-//                                section.setBlockState(sectionX, sectionY, sectionZ, state)
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
 
         for (int cellX = 0; cellX < cellCountXZ; cellX += 1) {
             for (int cellZ = 0; cellZ < (onlyFirstZ ? 1 : cellCountXZ); cellZ += 1) {
@@ -141,9 +114,9 @@ public class NoiseChunkGenerator implements ChunkGenerator {
                                 int blockZ = chunk.minZ() + cellZ * cellWidth + offZ;
                                 int sectionZ = blockZ & 0xF;
 
-                                Block state = noiseChunk.getFinalState(blockX, blockY, blockZ);
+                                Block state = noiseChunk.getFinalState(datapack, blockX, blockY, blockZ);
                                 if (state == null) {
-                                    state = this.settings.defaultBlock();
+                                    state = this.settings.default_block().toMinestom();
                                 }
                                 chunk.setBlock(blockX, blockY, blockZ, state);
                             }
@@ -159,9 +132,9 @@ public class NoiseChunkGenerator implements ChunkGenerator {
 //        const context = WorldgenContext.create(this.settings.noise.minY, this.settings.noise.height)
 //        randomState.surfaceSystem.buildSurface(chunk, noiseChunk, context, () => biome)
 //    }
-    public void buildSurface(RandomState randomState, TargetChunk chunk, String biome) {
+    public void buildSurface(Datapack datapack, RandomState randomState, TargetChunk chunk, NamespaceID biome) {
         NoiseChunk noiseChunk = this.getOrCreateNoiseChunk(randomState, chunk);
-        VerticalAnchor.WorldgenContext context = VerticalAnchor.WorldgenContext.create(this.settings.noise().minY(), this.settings.noise().height());
+        VerticalAnchor.WorldgenContext context = VerticalAnchor.WorldgenContext.create(this.settings.noise().min_y(), this.settings.noise().height(), datapack);
         randomState.surfaceSystem.buildSurface(chunk, noiseChunk, context, point -> biome);
     }
 
@@ -187,11 +160,11 @@ public class NoiseChunkGenerator implements ChunkGenerator {
 //            const minZ = ChunkPos.minBlockZ(chunk.pos)
 //
 //            return new NoiseChunk(cellCountXZ, cellCountY, minCellY, randomState, minX, minZ, this.settings.noise, this.settings.aquifersEnabled, this.globalFluidPicker)
-            int minY = Math.max(chunk.minY(), this.settings.noise().minY());
-            int maxY = Math.min(chunk.maxY(), this.settings.noise().minY() + this.settings.noise().height());
+            int minY = Math.max(chunk.minY(), this.settings.noise().min_y());
+            int maxY = Math.min(chunk.maxY(), this.settings.noise().min_y() + this.settings.noise().height());
 
-            int cellWidth = NoiseSettings.cellWidth(this.settings.noise());
-            int cellHeight = NoiseSettings.cellHeight(this.settings.noise());
+            int cellWidth = NoiseSettings.cellWidth(this.settings);
+            int cellHeight = NoiseSettings.cellHeight(this.settings);
             int cellCountXZ = Math.floorDiv(Chunk.CHUNK_SECTION_SIZE, cellWidth);
 
             int minCellY = Math.floorDiv(minY, cellHeight);
@@ -199,7 +172,7 @@ public class NoiseChunkGenerator implements ChunkGenerator {
             int minX = chunk.minX();
             int minZ = chunk.minZ();
 
-            return new NoiseChunk(cellCountXZ, cellCountY, minCellY, randomState, minX, minZ, this.settings.noise(), this.settings.aquifersEnabled(), this.globalFluidPicker);
+            return new NoiseChunk(cellCountXZ, cellCountY, minCellY, randomState, minX, minZ, this.settings, this.settings.aquifers_enabled(), this.globalFluidPicker);
         });
     }
 
@@ -210,7 +183,7 @@ public class NoiseChunkGenerator implements ChunkGenerator {
                 dimensionType.getMinY() / Chunk.CHUNK_SECTION_SIZE,
                 dimensionType.getMaxY() / Chunk.CHUNK_SECTION_SIZE);
         RandomState randomState = new RandomState(settings, 125);
-        fill(randomState, chunk);
+        fill(this.datapack, randomState, chunk);
     }
 
     private static class TargetChunkImpl implements TargetChunk {

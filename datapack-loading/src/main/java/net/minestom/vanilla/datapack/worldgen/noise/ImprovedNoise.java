@@ -1,6 +1,6 @@
 package net.minestom.vanilla.datapack.worldgen.noise;
 
-import net.minestom.vanilla.generation.Util;
+import Util;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 
 public class ImprovedNoise implements Noise {

@@ -3,7 +3,7 @@ package net.minestom.vanilla.datapack.worldgen.noise;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
-import net.minestom.vanilla.datapack.worldgen.Util;
+import Util;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 
 public class NormalNoise implements Noise {

@@ -2,8 +2,9 @@ package net.minestom.vanilla.datapack.worldgen.noise;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.vanilla.generation.NoiseChunkGenerator;
-import net.minestom.vanilla.generation.Util;
+import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.world.biomes.Biome;
+import net.minestom.vanilla.datapack.worldgen.*;
 
 import java.util.function.Function;
 import java.util.function.IntSupplier;
@@ -18,7 +19,7 @@ public class SurfaceContext {
     public int surfaceDepth;
     public int waterHeight;
 
-    public Supplier<String> biome = () -> "";
+    public Supplier<NamespaceID> fetchBiome = Biome.PLAINS::name;
     public IntSupplier surfaceSecondary = () -> 0;
     public IntSupplier minSurfaceLevel = () -> 0;
 
@@ -26,10 +27,10 @@ public class SurfaceContext {
     public final NoiseChunkGenerator.TargetChunk chunk;
     public final NoiseChunk noiseChunk;
     public final VerticalAnchor.WorldgenContext context;
-    private final Function<Point, String> getBiome;
+    private final Function<Point, NamespaceID> getBiome;
 
-    SurfaceContext(SurfaceSystem system, NoiseChunkGenerator.TargetChunk chunk, NoiseChunk noiseChunk, VerticalAnchor.WorldgenContext context,
-                   Function<Point, String> getBiome) {
+    public SurfaceContext(SurfaceSystem system, NoiseChunkGenerator.TargetChunk chunk, NoiseChunk noiseChunk, VerticalAnchor.WorldgenContext context,
+                   Function<Point, NamespaceID> getBiome) {
         this.system = system;
         this.chunk = chunk;
         this.noiseChunk = noiseChunk;
@@ -50,17 +51,22 @@ public class SurfaceContext {
         this.stoneDepthAbove = stoneDepthAbove;
         this.stoneDepthBelow = stoneDepthBelow;
         this.waterHeight = waterHeight;
-        this.biome = Util.lazy(() -> this.getBiome.apply(new Vec(this.blockX, this.blockY, this.blockZ)));
+        this.fetchBiome = Util.lazy(() -> this.getBiome.apply(new Vec(this.blockX, this.blockY, this.blockZ)));
     }
 
     private int calculateMinSurfaceLevel(int x, int z) {
         int cellX = x >> 4;
         int cellZ = z >> 4;
-        int level00 = this.noiseChunk.getPreliminarySurfaceLevel(cellX << 4, cellZ << 4);
-        int level10 = this.noiseChunk.getPreliminarySurfaceLevel((cellX + 1) << 4, cellZ << 4);
-        int level01 = this.noiseChunk.getPreliminarySurfaceLevel(cellX << 4, (cellZ + 1) << 4);
-        int level11 = this.noiseChunk.getPreliminarySurfaceLevel((cellX + 1) << 4, (cellZ + 1) << 4);
-        int level = (int) Math.floor(Util.lerp2((x & 0xF) / 16, (z & 0xF) / 16, level00, level10, level01, level11));
+        DensityFunction.Context dfContext = this.densityFunctionContext();
+        int level00 = this.noiseChunk.getPreliminarySurfaceLevel(dfContext, cellX << 4, cellZ << 4);
+        int level10 = this.noiseChunk.getPreliminarySurfaceLevel(dfContext, (cellX + 1) << 4, cellZ << 4);
+        int level01 = this.noiseChunk.getPreliminarySurfaceLevel(dfContext, cellX << 4, (cellZ + 1) << 4);
+        int level11 = this.noiseChunk.getPreliminarySurfaceLevel(dfContext, (cellX + 1) << 4, (cellZ + 1) << 4);
+        int level = (int) Math.floor(Util.lerp2((double) (x & 0xF) / 16, (double) (z & 0xF) / 16, level00, level10, level01, level11));
         return level + this.surfaceDepth - 8;
+    }
+
+    private DensityFunction.Context densityFunctionContext() {
+        return DensityFunctions.context(this.blockX, this.blockY, this.blockZ, this.context.datapack());
     }
 }

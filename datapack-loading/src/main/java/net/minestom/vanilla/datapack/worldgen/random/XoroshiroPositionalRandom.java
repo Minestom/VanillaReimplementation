@@ -1,18 +1,11 @@
 package net.minestom.vanilla.datapack.worldgen.random;
 
-import net.minestom.vanilla.generation.Util;
+import Util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 record XoroshiroPositionalRandom(long seedLow, long seedHigh) implements WorldgenRandom.Positional {
-
-    @Override
-    public WorldgenRandom at(int x, int y, int z) {
-        long seed = Util.getSeed(x, y, z);
-        long seedLow = this.seedLow ^ seed;
-        return new XoroshiroRandom(seedLow, seedHigh);
-    }
 
     @Override
     public WorldgenRandom fromHashOf(String name) {
@@ -26,6 +19,11 @@ record XoroshiroPositionalRandom(long seedLow, long seedHigh) implements Worldge
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public WorldgenRandom fromSeed(long seed) {
+        return new XoroshiroRandom(seed ^ seedLow, seedHigh);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package net.minestom.vanilla.datapack.worldgen.noise;
 
 import com.google.gson.JsonObject;
+import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.generation.Util;
 
 public interface VerticalAnchor {
@@ -64,7 +65,9 @@ public interface VerticalAnchor {
 
         int maxY();
 
-        static WorldgenContext create(int minY, int height) {
+        Datapack datapack();
+
+        static WorldgenContext create(int minY, int height, Datapack datapack) {
             return new WorldgenContext() {
                 @Override
                 public int minY() {
@@ -79,6 +82,11 @@ public interface VerticalAnchor {
                 @Override
                 public int maxY() {
                     return minY + height - 1;
+                }
+
+                @Override
+                public Datapack datapack() {
+                    return datapack;
                 }
             };
         }

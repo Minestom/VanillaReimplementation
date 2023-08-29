@@ -6,7 +6,11 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.block.Block;
-import net.minestom.vanilla.generation.WorldgenRegistries;
+import net.minestom.server.utils.NamespaceID;
+import net.minestom.vanilla.datapack.worldgen.noise.NoiseChunk;
+import net.minestom.vanilla.datapack.worldgen.noise.NormalNoise;
+import net.minestom.vanilla.datapack.worldgen.noise.SurfaceContext;
+import net.minestom.vanilla.datapack.worldgen.noise.VerticalAnchor;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 import net.minestom.vanilla.datapack.worldgen.random.XoroshiroRandom;
 
@@ -24,14 +28,14 @@ public class SurfaceSystem {
 
     public SurfaceSystem(SurfaceRule rule, Block defaultBlock, long seed) {
         this.random = XoroshiroRandom.create(seed).forkPositional();
-        this.surfaceNoise = NoiseRouter.instantiate(this.random, WorldgenRegistries.SURFACE_NOISE);
-        this.surfaceSecondaryNoise = NoiseRouter.instantiate(this.random, WorldgenRegistries.SURFACE_SECONDARY_NOISE);
+        this.surfaceNoise = NoiseSettings.NoiseRouter.instantiate(this.random, WorldgenRegistries.SURFACE_NOISE);
+        this.surfaceSecondaryNoise = NoiseSettings.NoiseRouter.instantiate(this.random, WorldgenRegistries.SURFACE_SECONDARY_NOISE);
         this.positionalRandoms = new HashMap<>();
         this.rule = rule;
         this.defaultBlock = defaultBlock;
     }
 
-    public void buildSurface(NoiseChunkGenerator.TargetChunk chunk, NoiseChunk noiseChunk, VerticalAnchor.WorldgenContext worldgenContext, Function<Point, String> getBiome) {
+    public void buildSurface(NoiseChunkGenerator.TargetChunk chunk, NoiseChunk noiseChunk, VerticalAnchor.WorldgenContext worldgenContext, Function<Point, NamespaceID> getBiome) {
         int minX = chunk.minX();
         int minZ = chunk.minZ();
         int minY = chunk.minY();
@@ -124,15 +128,15 @@ public class SurfaceSystem {
 //        }
 
         static SurfaceRule fromJson(Object obj) {
-            JsonObject root = net.minestom.vanilla.datapack.worldgen.Util.jsonObject(obj);
-            String type = net.minestom.vanilla.datapack.worldgen.Util.jsonElse(root, "type", "", JsonElement::getAsString).replace("minecraft:", "");
+            JsonObject root = Util.jsonObject(obj);
+            String type = Util.jsonElse(root, "type", "", JsonElement::getAsString).replace("minecraft:", "");
             return switch (type) {
-                case "block" -> block(net.minestom.vanilla.datapack.worldgen.Util.jsonRequire(root, "result_state", net.minestom.vanilla.datapack.worldgen.Util.jsonVanillaBlock()));
+                case "block" -> block(Util.jsonRequire(root, "result_state", Util.jsonVanillaBlock()));
                 case "sequence" ->
-                        sequence(net.minestom.vanilla.datapack.worldgen.Util.jsonRequire(root, "sequence", net.minestom.vanilla.datapack.worldgen.Util.jsonReadArray(SurfaceRule::fromJson)));
+                        sequence(Util.jsonRequire(root, "sequence", Util.jsonReadArray(SurfaceRule::fromJson)));
                 case "condition" ->
-                        condition(SurfaceCondition.fromJson(net.minestom.vanilla.datapack.worldgen.Util.jsonRequire(root, "if_true", JsonElement::getAsJsonObject)),
-                                fromJson(net.minestom.vanilla.datapack.worldgen.Util.jsonRequire(root, "then_run", JsonElement::getAsJsonObject)));
+                        condition(SurfaceCondition.fromJson(Util.jsonRequire(root, "if_true", JsonElement::getAsJsonObject)),
+                                fromJson(Util.jsonRequire(root, "then_run", JsonElement::getAsJsonObject)));
                 default -> NOOP;
             };
         }
@@ -235,33 +239,33 @@ public class SurfaceSystem {
 //        }
 
         static SurfaceCondition fromJson(Object obj) {
-            JsonObject root = net.minestom.vanilla.datapack.worldgen.Util.jsonObject(obj);
-            String type = net.minestom.vanilla.datapack.worldgen.Util.jsonElse(root, "type", "", JsonElement::getAsString).replace("minecraft:", "");
+            JsonObject root = Util.jsonObject(obj);
+            String type = Util.jsonElse(root, "type", "", JsonElement::getAsString).replace("minecraft:", "");
             return switch (type) {
                 case "above_preliminary_surface" -> abovePreliminarySurface();
-                case "biome" -> biome(net.minestom.vanilla.datapack.worldgen.Util.jsonRequire(root, "biome_is", net.minestom.vanilla.datapack.worldgen.Util.jsonReadArray(JsonElement::getAsString)));
+                case "biome" -> biome(Util.jsonRequire(root, "biome_is", Util.jsonReadArray(JsonElement::getAsString)));
                 case "not" ->
-                        SurfaceCondition.not(fromJson(net.minestom.vanilla.datapack.worldgen.Util.jsonRequire(root, "invert", JsonElement::getAsJsonObject)));
+                        SurfaceCondition.not(fromJson(Util.jsonRequire(root, "invert", JsonElement::getAsJsonObject)));
                 case "stone_depth" -> stoneDepth(
-                        net.minestom.vanilla.datapack.worldgen.Util.jsonElse(root, "offset", 0, JsonElement::getAsInt),
-                        net.minestom.vanilla.datapack.worldgen.Util.jsonElse(root, "add_surface_depth", false, JsonElement::getAsBoolean),
-                        net.minestom.vanilla.datapack.worldgen.Util.jsonElse(root, "secondary_depth_range", 0, JsonElement::getAsInt),
-                        net.minestom.vanilla.datapack.worldgen.Util.jsonElse(root, "surface_type", "", JsonElement::getAsString).equals("ceiling")
+                        Util.jsonElse(root, "offset", 0, JsonElement::getAsInt),
+                        Util.jsonElse(root, "add_surface_depth", false, JsonElement::getAsBoolean),
+                        Util.jsonElse(root, "secondary_depth_range", 0, JsonElement::getAsInt),
+                        Util.jsonElse(root, "surface_type", "", JsonElement::getAsString).equals("ceiling")
                 );
                 case "vertical_gradient" -> verticalGradient(
-                        net.minestom.vanilla.datapack.worldgen.Util.jsonElse(root, "random_name", "", JsonElement::getAsString),
-                        VerticalAnchor.fromJson(net.minestom.vanilla.datapack.worldgen.Util.jsonRequire(root, "true_at_and_below", JsonElement::getAsJsonObject)),
-                        VerticalAnchor.fromJson(net.minestom.vanilla.datapack.worldgen.Util.jsonRequire(root, "false_at_and_above", JsonElement::getAsJsonObject))
+                        Util.jsonElse(root, "random_name", "", JsonElement::getAsString),
+                        VerticalAnchor.fromJson(Util.jsonRequire(root, "true_at_and_below", JsonElement::getAsJsonObject)),
+                        VerticalAnchor.fromJson(Util.jsonRequire(root, "false_at_and_above", JsonElement::getAsJsonObject))
                 );
                 case "water" -> water(
-                        net.minestom.vanilla.datapack.worldgen.Util.jsonElse(root, "offset", 0, JsonElement::getAsInt),
-                        net.minestom.vanilla.datapack.worldgen.Util.jsonElse(root, "surface_depth_multiplier", 0, JsonElement::getAsInt),
-                        net.minestom.vanilla.datapack.worldgen.Util.jsonElse(root, "add_surface_depth", false, JsonElement::getAsBoolean)
+                        Util.jsonElse(root, "offset", 0, JsonElement::getAsInt),
+                        Util.jsonElse(root, "surface_depth_multiplier", 0, JsonElement::getAsInt),
+                        Util.jsonElse(root, "add_surface_depth", false, JsonElement::getAsBoolean)
                 );
                 case "y_above" -> yAbove(
-                        VerticalAnchor.fromJson(net.minestom.vanilla.datapack.worldgen.Util.jsonRequire(root, "anchor", JsonElement::getAsJsonObject)),
-                        net.minestom.vanilla.datapack.worldgen.Util.jsonElse(root, "surface_depth_multiplier", 0, JsonElement::getAsInt),
-                        net.minestom.vanilla.datapack.worldgen.Util.jsonElse(root, "add_surface_depth", false, JsonElement::getAsBoolean)
+                        VerticalAnchor.fromJson(Util.jsonRequire(root, "anchor", JsonElement::getAsJsonObject)),
+                        Util.jsonElse(root, "surface_depth_multiplier", 0, JsonElement::getAsInt),
+                        Util.jsonElse(root, "add_surface_depth", false, JsonElement::getAsBoolean)
                 );
                 default -> FALSE;
             };
@@ -277,7 +281,7 @@ public class SurfaceSystem {
 
         static SurfaceCondition biome(List<String> biomes) {
             Set<String> biomeSet = new HashSet<>(biomes);
-            return context -> biomeSet.contains(context.biome);
+            return context -> biomeSet.contains(context.fetchBiome);
         }
 
 //        export function not(invert: SurfaceCondition): SurfaceCondition {
@@ -301,7 +305,7 @@ public class SurfaceSystem {
             return context -> {
                 int depth = ceiling ? context.stoneDepthBelow : context.stoneDepthAbove;
                 int surfaceDepth = addSurfaceDepth ? context.surfaceDepth : 0;
-                int secondaryDepth = secondaryDepthRange == 0 ? 0 : (int) net.minestom.vanilla.datapack.worldgen.Util.map(context.surfaceSecondary.getAsInt(), -1, 1, 0, secondaryDepthRange);
+                int secondaryDepth = secondaryDepthRange == 0 ? 0 : (int) Util.map(context.surfaceSecondary.getAsInt(), -1, 1, 0, secondaryDepthRange);
                 return depth <= 1 + offset + surfaceDepth + secondaryDepth;
             };
         }
