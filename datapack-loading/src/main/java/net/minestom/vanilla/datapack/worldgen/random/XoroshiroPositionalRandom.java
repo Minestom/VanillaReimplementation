@@ -1,6 +1,6 @@
 package net.minestom.vanilla.datapack.worldgen.random;
 
-import Util;
+import net.minestom.vanilla.datapack.worldgen.Util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

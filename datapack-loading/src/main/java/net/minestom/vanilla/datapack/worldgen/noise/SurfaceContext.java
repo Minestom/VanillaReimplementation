@@ -57,16 +57,15 @@ public class SurfaceContext {
     private int calculateMinSurfaceLevel(int x, int z) {
         int cellX = x >> 4;
         int cellZ = z >> 4;
-        DensityFunction.Context dfContext = this.densityFunctionContext();
-        int level00 = this.noiseChunk.getPreliminarySurfaceLevel(dfContext, cellX << 4, cellZ << 4);
-        int level10 = this.noiseChunk.getPreliminarySurfaceLevel(dfContext, (cellX + 1) << 4, cellZ << 4);
-        int level01 = this.noiseChunk.getPreliminarySurfaceLevel(dfContext, cellX << 4, (cellZ + 1) << 4);
-        int level11 = this.noiseChunk.getPreliminarySurfaceLevel(dfContext, (cellX + 1) << 4, (cellZ + 1) << 4);
+        int level00 = this.noiseChunk.getPreliminarySurfaceLevel(cellX << 4, cellZ << 4);
+        int level10 = this.noiseChunk.getPreliminarySurfaceLevel((cellX + 1) << 4, cellZ << 4);
+        int level01 = this.noiseChunk.getPreliminarySurfaceLevel(cellX << 4, (cellZ + 1) << 4);
+        int level11 = this.noiseChunk.getPreliminarySurfaceLevel((cellX + 1) << 4, (cellZ + 1) << 4);
         int level = (int) Math.floor(Util.lerp2((double) (x & 0xF) / 16, (double) (z & 0xF) / 16, level00, level10, level01, level11));
         return level + this.surfaceDepth - 8;
     }
 
-    private DensityFunction.Context densityFunctionContext() {
-        return DensityFunctions.context(this.blockX, this.blockY, this.blockZ, this.context.datapack());
+    private DensityFunction.Context asDFContext() {
+        return DensityFunction.context(this.blockX, this.blockY, this.blockZ);
     }
 }

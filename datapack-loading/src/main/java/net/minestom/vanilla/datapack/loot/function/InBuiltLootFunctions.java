@@ -52,10 +52,10 @@ interface InBuiltLootFunctions {
         NamespaceID formula();
 
         static ApplyBonus fromJson(JsonReader reader) throws IOException {
-            return JsonUtils.unionNamespaceStringType(reader, "formula", Map.of(
-                    "minecraft:binomial_with_bonus_count", DatapackLoader.moshi(BinomialWithBonusCount.class),
-                    "minecraft:ore_drops", DatapackLoader.moshi(OreDrops.class),
-                    "minecraft:uniform_bonus_count", DatapackLoader.moshi(UniformBonusCount.class)
+            return JsonUtils.unionNamespaceStringTypeAdapted(reader, "formula", Map.of(
+                    "minecraft:binomial_with_bonus_count", BinomialWithBonusCount.class,
+                    "minecraft:ore_drops", OreDrops.class,
+                    "minecraft:uniform_bonus_count", UniformBonusCount.class
             ));
         }
 

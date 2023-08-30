@@ -34,10 +34,10 @@ public interface NumberProvider {
         static NumberProvider.Int fromJson(JsonReader reader) throws IOException {
             return JsonUtils.typeMap(reader, Map.of(
                     JsonReader.Token.NUMBER, json -> constant(reader.nextInt()),
-                    JsonReader.Token.BEGIN_OBJECT, json -> JsonUtils.unionNamespaceStringType(json, "type", Map.of(
-                            "minecraft:constant", DatapackLoader.moshi(Constant.class),
-                            "minecraft:uniform", DatapackLoader.moshi(Uniform.class),
-                            "minecraft:binomial", DatapackLoader.moshi(Binomial.class)
+                    JsonReader.Token.BEGIN_OBJECT, json -> JsonUtils.unionNamespaceStringTypeAdapted(json, "type", Map.of(
+                            "minecraft:constant", Constant.class,
+                            "minecraft:uniform", Uniform.class,
+                            "minecraft:binomial", Binomial.class
                     ))
             ));
         }
@@ -70,10 +70,10 @@ public interface NumberProvider {
         static NumberProvider.Double fromJson(JsonReader reader) throws IOException {
             return JsonUtils.typeMap(reader, Map.of(
                     JsonReader.Token.NUMBER, json -> constant(reader.nextDouble()),
-                    JsonReader.Token.BEGIN_OBJECT, json -> JsonUtils.unionNamespaceStringType(json, "type", Map.of(
-                            "minecraft:constant", DatapackLoader.moshi(Constant.class),
-                            "minecraft:uniform", DatapackLoader.moshi(Uniform.class),
-                            "minecraft:binomial", DatapackLoader.moshi(Binomial.class)
+                    JsonReader.Token.BEGIN_OBJECT, json -> JsonUtils.unionNamespaceStringTypeAdapted(json, "type", Map.of(
+                            "minecraft:constant", Constant.class,
+                            "minecraft:uniform", Uniform.class,
+                            "minecraft:binomial", Binomial.class
                     ))
             ));
         }

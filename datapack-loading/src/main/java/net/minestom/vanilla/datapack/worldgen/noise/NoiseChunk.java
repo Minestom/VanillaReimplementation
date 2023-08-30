@@ -67,15 +67,15 @@ public class NoiseChunk {
     }
 
     public @Nullable Block getFinalState(Datapack datapack, int x, int y, int z) {
-        return this.materialRule.compute(DensityFunctions.context(x, y, z, datapack));
+        return this.materialRule.compute(DensityFunction.context(x, y, z));
     }
 
-    public int getPreliminarySurfaceLevel(DensityFunction.Context context, int quartX, int quartZ) {
+    public int getPreliminarySurfaceLevel(int quartX, int quartZ) {
         return preliminarySurfaceLevel.computeIfAbsent(ChunkUtils.getChunkIndex(quartX, quartZ), (key) -> {
             int x = quartX << 2;
             int z = quartZ << 2;
             for (int y = this.settings.noise().min_y() + this.settings.noise().height(); y >= this.settings.noise().min_y(); y -= this.cellHeight) {
-                double density = this.initialDensity.compute(DensityFunctions.context(x, y, z, context.datapack()));
+                double density = this.initialDensity.compute(DensityFunction.context(x, y, z));
                 if (density > 0.390625) {
                     return y;
                 }

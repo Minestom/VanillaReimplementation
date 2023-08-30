@@ -2,6 +2,8 @@ package net.minestom.vanilla.datapack;
 
 import com.squareup.moshi.*;
 import net.minestom.vanilla.datapack.loot.NBTPath;
+import net.minestom.vanilla.datapack.worldgen.DensityFunction;
+import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 import net.minestom.vanilla.files.ByteArray;
 import net.minestom.vanilla.files.FileSystem;
@@ -79,7 +81,7 @@ public class DatapackLoader {
                 Tags tags = Tags.from(source.folder("tags", FileSystem.BYTES_TO_STRING));
                 FileSystem<Dimension> dimensions = parseJsonFolder(dataFolder, "dimension", recordJson(Dimension.class));
                 FileSystem<DimensionType> dimension_type = parseJsonFolder(dataFolder, "dimension_type", adaptor(DimensionType.class));
-                Datapack.WorldGen world_gen = Datapack.WorldGen.from(source.folder("worldgen"));
+                Datapack.WorldGen world_gen = Datapack.WorldGen.from(dataFolder.folder("worldgen"));
 
                 NamespacedData data = new NamespacedData(advancements, functions, item_modifiers, loot_tables, predicates, recipes, structures, chat_type, damage_type, tags, dimensions, dimension_type, world_gen);
                 namespace2data.put(namespaceID, data);
@@ -145,6 +147,9 @@ public class DatapackLoader {
         register(builder, Recipe.Ingredient.Single.class, Recipe.Ingredient.Single::fromJson);
         register(builder, NBTPath.class, NBTPath::fromJson);
         register(builder, NBTPath.Single.class, NBTPath.Single::fromJson);
+        register(builder, DensityFunction.class, DensityFunction::fromJson);
+        // NoiseSettings$SurfaceRule
+        register(builder, NoiseSettings.SurfaceRule.class, NoiseSettings.SurfaceRule::fromJson);
 
         return builder.build();
     }
@@ -155,7 +160,7 @@ public class DatapackLoader {
                 FileSystem.empty();
     }
 
-    private static <T> Function<String, T> adaptor(Class<T> clazz) {
+    static <T> Function<String, T> adaptor(Class<T> clazz) {
         return str -> {
             try {
                 return moshi.adapter(clazz).fromJson(str);

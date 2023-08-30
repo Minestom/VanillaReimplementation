@@ -138,7 +138,7 @@ public interface Aquifer {
                 if (status1.at(y).compare(Block.WATER) && this.globalFluidPicker.pickFluid(x, y - 1, z).at(y - 1).compare(Block.LAVA)) {
                     pressure = 1;
                 } else if (similarity12 > -1) {
-                    DoubleSupplier barrier = Util.lazyDouble(() -> this.router.barrier().compute(DensityFunctions.context(x, y * 0.5, z, context.datapack())));
+                    DoubleSupplier barrier = Util.lazyDouble(() -> this.router.barrier().compute(DensityFunction.context(x, y * 0.5, z)));
                     double pressure12 = this.calculatePressure(y, status1, status2, barrier);
                     double pressure13 = this.calculatePressure(y, status1, status3, barrier);
                     double pressure23 = this.calculatePressure(y, status2, status3, barrier);
@@ -223,7 +223,7 @@ public interface Aquifer {
             }
 
             double allowedFloodedness = isAquifer ? Util.clampedMap(minPreliminarySurface + 8 - y, 0, 64, 1, 0) : 0;
-            double floodedness = Util.clamp(this.router.fluid_level_floodedness().compute(DensityFunctions.context(x, y * 0.67, z, context.datapack())), -1, 1);
+            double floodedness = Util.clamp(this.router.fluid_level_floodedness().compute(DensityFunction.context(x, y * 0.67, z)), -1, 1);
             if (floodedness > Util.map(allowedFloodedness, 1, 0, -0.3, 0.8)) {
                 return globalStatus;
             }
@@ -232,7 +232,7 @@ public interface Aquifer {
             }
 
             int gridY = (int) Math.floor(y / 40);
-            double spread = this.router.fluid_level_spread().compute(DensityFunctions.context(Math.floor(x / 16), gridY, Math.floor(z / 16), context.datapack()));
+            double spread = this.router.fluid_level_spread().compute(DensityFunction.context(Math.floor(x / 16), gridY, Math.floor(z / 16)));
             int level = gridY * 40 + 20 + (int) Math.floor(spread / 3) * 3;
             int statusLevel = Math.min(minPreliminarySurface, level);
             Block fluid = this.getFluidType(context, x, y, z, globalStatus.type, level);
@@ -241,7 +241,7 @@ public interface Aquifer {
 
         private Block getFluidType(DensityFunction.Context context, double x, double y, double z, Block global, int level) {
             if (level <= -10) {
-                double lava = this.router.lava().compute(DensityFunctions.context(Math.floor(x / 64), Math.floor(y / 40), Math.floor(z / 64), context.datapack()));
+                double lava = this.router.lava().compute(DensityFunction.context(Math.floor(x / 64), Math.floor(y / 40), Math.floor(z / 64)));
                 if (Math.abs(lava) > 0.3) {
                     return Block.LAVA;
                 }

@@ -7,7 +7,7 @@ public interface DoubleStorage {
     double obtain(int x, int y, int z);
 
     static DoubleStorage from(DensityFunction densityFunction) {
-        return (x, y, z) -> densityFunction.compute(DensityFunctions.context(x, y, z));
+        return (x, y, z) -> densityFunction.compute(DensityFunction.context(x, y, z));
     }
 
     /**
@@ -15,7 +15,7 @@ public interface DoubleStorage {
      * @param original the original storage to cache
      * @return a new storage that caches the original
      */
-    static @NotNull DoubleStorage exactCache(DoubleStorage original) {
+    static DoubleStorage exactCache(DoubleStorage original) {
         return new DoubleStorageExactImpl(original);
     }
 }

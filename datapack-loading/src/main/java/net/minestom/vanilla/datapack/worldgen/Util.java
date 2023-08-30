@@ -28,6 +28,10 @@ public class Util {
         return x * x;
     }
 
+    public static double cube(double x) {
+        return x * x * x;
+    }
+
     public static double clamp(double x, double min, double max) {
         return Math.max(min, Math.min(max, x));
     }

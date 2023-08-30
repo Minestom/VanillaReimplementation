@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public interface FileSystem<F> extends FileSystemMappers {
 
@@ -117,24 +119,32 @@ public interface FileSystem<F> extends FileSystemMappers {
 
 
     static String toString(FileSystem<?> fs) {
-        StringBuilder sb = new StringBuilder();
-        toString(fs, sb, 0);
-        return sb.toString();
+        Stream.Builder<String> builder = Stream.builder();
+        toString(fs, builder, 0);
+        return builder.build().collect(Collectors.joining());
     }
 
-    static void toString(FileSystem<?> fs, StringBuilder sb, int depth) {
+    static void toString(FileSystem<?> fs, Stream.Builder<String> builder, int depth) {
         String prefix = "  ".repeat(depth);
 
         String folderChar = "\uD83D\uDDC0";
         String fileChar = "\uD83D\uDDCE";
 
         for (String folder : fs.folders()) {
-            sb.append(prefix).append(folderChar).append(" ").append(folder).append("\n");
-            toString(fs.folder(folder), sb, depth + 1);
+            builder.add(prefix);
+            builder.add(folderChar);
+            builder.add(" ");
+            builder.add(folder);
+            builder.add("\n");
+            toString(fs.folder(folder), builder, depth + 1);
         }
 
         for (String file : fs.files()) {
-            sb.append(prefix).append(fileChar).append(" ").append(file).append("\n");
+            builder.add(prefix);
+            builder.add(fileChar);
+            builder.add(" ");
+            builder.add(file);
+            builder.add("\n");
         }
     }
 }

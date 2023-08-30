@@ -20,14 +20,13 @@ public interface DensityFunction extends DensityFunctions, NumberFunction<Densit
 
     static DensityFunction fromJson(JsonReader reader) throws IOException {
         return JsonUtils.unionNamespaceStringType(reader, "type", Map.ofEntries(
-
                 Map.entry("minecraft:blend_alpha", DatapackLoader.moshi(BlendAlpha.class)),
                 Map.entry("minecraft:blend_offset", DatapackLoader.moshi(BlendOffset.class)),
                 Map.entry("minecraft:beardifier", DatapackLoader.moshi(Beardifier.class)),
                 Map.entry("minecraft:old_blended_noise", DatapackLoader.moshi(OldBlendedNoise.class)),
                 Map.entry("minecraft:flat_cache", DatapackLoader.moshi(FlatCache.class)),
                 Map.entry("minecraft:interpolated", DatapackLoader.moshi(Interpolated.class)),
-                Map.entry("minecraft:cache_2d", DatapackLoader.moshi(Cache2d.class)),
+                Map.entry("minecraft:cache_2d", DatapackLoader.moshi(Cache2D.class)),
                 Map.entry("minecraft:cache_once", DatapackLoader.moshi(CacheOnce.class)),
                 Map.entry("minecraft:cache_all_in_cell", DatapackLoader.moshi(CacheAllInCell.class)),
                 Map.entry("minecraft:noise", DatapackLoader.moshi(Noise.class)),
@@ -55,8 +54,12 @@ public interface DensityFunction extends DensityFunctions, NumberFunction<Densit
         ));
     }
 
-    default DensityFunction mapAll(Visitor visitor) {
-        return visitor.map().apply(this);
+    static DensityFunction.Context context(double x, double y, double z) {
+        ContextImpl context = new ContextImpl();
+        context.x = x;
+        context.y = y;
+        context.z = z;
+        return context;
     }
 
     interface Context {
@@ -77,7 +80,5 @@ public interface DensityFunction extends DensityFunctions, NumberFunction<Densit
         default int blockZ() {
             return (int) Math.floor(z());
         }
-
-        Datapack datapack();
     }
 }

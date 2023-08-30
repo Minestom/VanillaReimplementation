@@ -1,6 +1,6 @@
 package net.minestom.vanilla.datapack.worldgen.random;
 
-import Util;
+import net.minestom.vanilla.datapack.worldgen.Util;
 
 public class LegacyRandom implements WorldgenRandom {
     private static final int MODULUS_BITS = 48;

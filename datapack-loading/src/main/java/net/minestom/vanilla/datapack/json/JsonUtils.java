@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class JsonUtils {
@@ -115,6 +116,17 @@ public class JsonUtils {
             if (value == null) return null;
             return NamespaceID.from(value).toString();
         }, map);
+    }
+
+    public static <T> T unionNamespaceStringTypeAdapted(JsonReader reader, String key, Map<String, Class<? extends T>> map) throws IOException {
+        Map<String, IoFunction<JsonReader, T>> adaptedMap = map.entrySet().stream()
+                .map(entry -> {
+                    var entryKey = entry.getKey();
+                    var value = entry.getValue();
+                    return Map.entry(entryKey, DatapackLoader.<T>moshi(value));
+                })
+                .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
+        return unionNamespaceStringType(reader, key, adaptedMap);
     }
 
     public static <V, T> T unionMapType(JsonReader reader, String key, IoFunction<JsonReader, V> read, Map<V, IoFunction<JsonReader, T>> map) throws IOException {

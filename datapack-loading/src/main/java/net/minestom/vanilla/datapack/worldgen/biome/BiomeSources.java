@@ -4,9 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.vanilla.generation.DensityFunction;
-import net.minestom.vanilla.generation.DensityFunctions;
-import net.minestom.vanilla.generation.Util;
+import net.minestom.vanilla.datapack.worldgen.DensityFunction;
+import net.minestom.vanilla.datapack.worldgen.Util;
 
 import java.util.List;
 import java.util.Map;
@@ -110,7 +109,7 @@ interface BiomeSources {
                 return END;
             }
 
-            DensityFunction.Context context = DensityFunctions.context((sectionX * 2 + 1) * 8, blockY, (sectionZ * 2 + 1) * 8);
+            DensityFunction.Context context = DensityFunction.context((sectionX * 2 + 1) * 8, blockY, (sectionZ * 2 + 1) * 8);
             double erosion = climateSampler.erosion().compute(context);
 
             if (erosion > 0.25) {

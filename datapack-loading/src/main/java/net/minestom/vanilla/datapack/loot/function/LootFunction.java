@@ -29,32 +29,32 @@ public interface LootFunction extends InBuiltLootFunctions {
     ItemStack apply(Context context);
 
     static LootFunction fromJson(JsonReader reader) throws IOException {
-        return JsonUtils.unionNamespaceStringType(reader, "function", Map.ofEntries(
-                Map.entry("minecraft:apply_bonus", DatapackLoader.moshi(ApplyBonus.class)),
-                Map.entry("minecraft:copy_name", DatapackLoader.moshi(CopyName.class)),
-                Map.entry("minecraft:copy_nbt", DatapackLoader.moshi(CopyNbt.class)),
-                Map.entry("minecraft:copy_state", DatapackLoader.moshi(CopyState.class)),
-                Map.entry("minecraft:enchant_randomly", DatapackLoader.moshi(EnchantRandomly.class)),
-                Map.entry("minecraft:enchant_with_levels", DatapackLoader.moshi(EnchantWithLevels.class)),
-                Map.entry("minecraft:exploration_map", DatapackLoader.moshi(ExplorationMap.class)),
-                Map.entry("minecraft:explosion_decay", DatapackLoader.moshi(ExplosionDecay.class)),
-                Map.entry("minecraft:fill_player_head", DatapackLoader.moshi(FillPlayerHead.class)),
-                Map.entry("minecraft:furnace_smelt", DatapackLoader.moshi(FurnaceSmelt.class)),
-                Map.entry("minecraft:limit_count", DatapackLoader.moshi(LimitCount.class)),
-                Map.entry("minecraft:looting_enchant", DatapackLoader.moshi(LootingEnchant.class)),
-                Map.entry("minecraft:set_attributes", DatapackLoader.moshi(SetAttributes.class)),
-                Map.entry("minecraft:set_banner_pattern", DatapackLoader.moshi(SetBannerPattern.class)),
-                Map.entry("minecraft:set_contents", DatapackLoader.moshi(SetContents.class)),
-                Map.entry("minecraft:set_count", DatapackLoader.moshi(SetCount.class)),
-                Map.entry("minecraft:set_damage", DatapackLoader.moshi(SetDamage.class)),
-                Map.entry("minecraft:set_enchantments", DatapackLoader.moshi(SetEnchantments.class)),
-                Map.entry("minecraft:set_instrument", DatapackLoader.moshi(SetInstrument.class)),
-                Map.entry("minecraft:set_loot_table", DatapackLoader.moshi(SetLootTable.class)),
-                Map.entry("minecraft:set_lore", DatapackLoader.moshi(SetLore.class)),
-                Map.entry("minecraft:set_name", DatapackLoader.moshi(SetName.class)),
-                Map.entry("minecraft:set_nbt", DatapackLoader.moshi(SetNBT.class)),
-                Map.entry("minecraft:set_potion", DatapackLoader.moshi(SetPotion.class)),
-                Map.entry("minecraft:set_stew_effect", DatapackLoader.moshi(SetStewEffect.class))
+        return JsonUtils.unionNamespaceStringTypeAdapted(reader, "function", Map.ofEntries(
+                Map.entry("minecraft:apply_bonus", ApplyBonus.class),
+                Map.entry("minecraft:copy_name", CopyName.class),
+                Map.entry("minecraft:copy_nbt", CopyNbt.class),
+                Map.entry("minecraft:copy_state", CopyState.class),
+                Map.entry("minecraft:enchant_randomly", EnchantRandomly.class),
+                Map.entry("minecraft:enchant_with_levels", EnchantWithLevels.class),
+                Map.entry("minecraft:exploration_map", ExplorationMap.class),
+                Map.entry("minecraft:explosion_decay", ExplosionDecay.class),
+                Map.entry("minecraft:fill_player_head", FillPlayerHead.class),
+                Map.entry("minecraft:furnace_smelt", FurnaceSmelt.class),
+                Map.entry("minecraft:limit_count", LimitCount.class),
+                Map.entry("minecraft:looting_enchant", LootingEnchant.class),
+                Map.entry("minecraft:set_attributes", SetAttributes.class),
+                Map.entry("minecraft:set_banner_pattern", SetBannerPattern.class),
+                Map.entry("minecraft:set_contents", SetContents.class),
+                Map.entry("minecraft:set_count", SetCount.class),
+                Map.entry("minecraft:set_damage", SetDamage.class),
+                Map.entry("minecraft:set_enchantments", SetEnchantments.class),
+                Map.entry("minecraft:set_instrument", SetInstrument.class),
+                Map.entry("minecraft:set_loot_table", SetLootTable.class),
+                Map.entry("minecraft:set_lore", SetLore.class),
+                Map.entry("minecraft:set_name", SetName.class),
+                Map.entry("minecraft:set_nbt", SetNBT.class),
+                Map.entry("minecraft:set_potion", SetPotion.class),
+                Map.entry("minecraft:set_stew_effect", SetStewEffect.class)
         ));
     }
 

@@ -3,11 +3,14 @@ package net.minestom.vanilla.datapack.worldgen;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.math.FloatRange;
 import net.minestom.vanilla.datapack.worldgen.noise.NormalNoise;
 import net.minestom.vanilla.datapack.worldgen.noise.SurfaceContext;
+import net.minestom.vanilla.datapack.worldgen.noise.VerticalAnchor;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -130,7 +133,7 @@ public record NoiseSettings(
             DensityFunction depth,
             DensityFunction ridges
     ) {
-        static final Map<String, NormalNoise> noiseCache = Collections.synchronizedMap(new WeakHashMap<>());
+        static final Map<String, NormalNoise> noiseCache = Collections.synchronizedMap(new HashMap<>());
 
         static NormalNoise instantiate(WorldgenRandom.Positional random, NormalNoise.NoiseParameters params) {
             var randomKey = random.seedKey();
@@ -156,10 +159,22 @@ public record NoiseSettings(
     public interface SurfaceRule {
         NamespaceID type();
 
+        Pos2Block apply(SurfaceContext context);
+
+        interface Pos2Block {
+            @Nullable Block apply(int x, int y, int z);
+        }
+
         record Bandlands() implements SurfaceRule {
             @Override
             public NamespaceID type() {
                 return NamespaceID.from("bandlands");
+            }
+
+            @Override
+            public Pos2Block apply(SurfaceContext context) {
+                // TODO: implement
+                return (x, y, z) -> Block.AIR;
             }
         }
 
@@ -168,6 +183,11 @@ public record NoiseSettings(
             public NamespaceID type() {
                 return NamespaceID.from("blocks");
             }
+
+            @Override
+            public Pos2Block apply(SurfaceContext context) {
+                return (x, y, z) -> result_state().toMinestom();
+            }
         }
 
         record Sequence(List<SurfaceRule> sequence) implements SurfaceRule {
@@ -175,12 +195,36 @@ public record NoiseSettings(
             public NamespaceID type() {
                 return NamespaceID.from("sequence");
             }
+
+            @Override
+            public Pos2Block apply(SurfaceContext context) {
+                List<Pos2Block> rulesWithContext = sequence().stream()
+                        .map(rule -> rule.apply(context))
+                        .toList();
+                return (x, y, z) -> {
+                    for (Pos2Block rule : rulesWithContext) {
+                        Block result = rule.apply(x, y, z);
+                        if (result != null) return result;
+                    }
+                    return null;
+                };
+            }
         }
 
         record Condition(SurfaceRuleCondition if_true, SurfaceRule then_run) implements SurfaceRule {
             @Override
             public NamespaceID type() {
                 return NamespaceID.from("condition");
+            }
+
+            @Override
+            public Pos2Block apply(SurfaceContext context) {
+                return (x, y, z) -> {
+                    if (if_true().test(context)) {
+                        return then_run().apply(context).apply(x, y, z);
+                    }
+                    return null;
+                };
             }
         }
 
@@ -257,16 +301,50 @@ public record NoiseSettings(
                 public NamespaceID type() {
                     return NamespaceID.from("vertical_gradient");
                 }
+
+                @Override
+                public boolean test(SurfaceContext context) {
+                    VerticalAnchor.Context vaContext = new VerticalAnchor.Context(context.context.minY(), context.context.maxY());
+                    int trueAtAndBelowY = true_at_and_below().apply(vaContext);
+                    int falseAtAndAboveY = false_at_and_above().apply(vaContext);
+                    if (context.blockY <= trueAtAndBelowY) {
+                        return true;
+                    }
+                    if (context.blockY >= falseAtAndAboveY) {
+                        return false;
+                    }
+                    WorldgenRandom random = context.system.getRandom(random_name().toString());
+                    double chance = Util.map(context.blockY, trueAtAndBelowY, falseAtAndAboveY, 1, 0);
+                    return random.nextFloat() < chance;
+                }
             }
 
             sealed interface VerticalAnchor {
+
+                record Context(int minY, int maxY) {
+                }
+
+                int apply(Context context);
+
                 record Absolute(int value) implements VerticalAnchor {
+                    @Override
+                    public int apply(Context context) {
+                        return value;
+                    }
                 }
 
                 record AboveBottom(int offset) implements VerticalAnchor {
+                    @Override
+                    public int apply(Context context) {
+                        return context.minY() + offset;
+                    }
                 }
 
                 record BelowTop(int offset) implements VerticalAnchor {
+                    @Override
+                    public int apply(Context context) {
+                        return context.maxY() - offset;
+                    }
                 }
             }
 
@@ -275,12 +353,28 @@ public record NoiseSettings(
                 public NamespaceID type() {
                     return NamespaceID.from("y_above");
                 }
+
+                @Override
+                public boolean test(SurfaceContext context) {
+                    VerticalAnchor.Context vaContext = new VerticalAnchor.Context(context.context.minY(), context.context.maxY());
+                    int stoneDepth = add_stone_depth() ? context.stoneDepthAbove : 0;
+                    return context.blockY + stoneDepth >= anchor.apply(vaContext) + context.surfaceDepth * surface_depth_multiplier();
+                }
             }
 
             record Water(int offset, int surface_depth_multiplier, boolean add_stone_depth) implements SurfaceRuleCondition {
                 @Override
                 public NamespaceID type() {
                     return NamespaceID.from("water");
+                }
+
+                @Override
+                public boolean test(SurfaceContext context) {
+                    if (context.waterHeight == Integer.MIN_VALUE) {
+                        return true;
+                    }
+                    int stoneDepth = add_stone_depth() ? context.stoneDepthAbove : 0;
+                    return context.blockY + stoneDepth >= context.waterHeight + offset() + context.surfaceDepth * surface_depth_multiplier();
                 }
             }
 
@@ -289,12 +383,24 @@ public record NoiseSettings(
                 public NamespaceID type() {
                     return NamespaceID.from("temperature");
                 }
+
+                @Override
+                public boolean test(SurfaceContext context) {
+                    // TODO: Implement this
+                    throw new UnsupportedOperationException("Not implemented yet");
+                }
             }
 
             record Steep() implements SurfaceRuleCondition {
                 @Override
                 public NamespaceID type() {
                     return NamespaceID.from("steep");
+                }
+
+                @Override
+                public boolean test(SurfaceContext context) {
+                    // TODO: Implement this
+                    throw new UnsupportedOperationException("Not implemented yet");
                 }
             }
 
@@ -303,12 +409,23 @@ public record NoiseSettings(
                 public NamespaceID type() {
                     return NamespaceID.from("not");
                 }
+
+                @Override
+                public boolean test(SurfaceContext context) {
+                    return !invert.test(context);
+                }
             }
 
             record Hole() implements SurfaceRuleCondition {
                 @Override
                 public NamespaceID type() {
                     return NamespaceID.from("hole");
+                }
+
+                @Override
+                public boolean test(SurfaceContext context) {
+                    // TODO: Implement this
+                    throw new UnsupportedOperationException("Not implemented yet");
                 }
             }
 
@@ -317,12 +434,28 @@ public record NoiseSettings(
                 public NamespaceID type() {
                     return NamespaceID.from("above_preliminary_surface");
                 }
+
+                @Override
+                public boolean test(SurfaceContext context) {
+                    return context.blockY >= context.minSurfaceLevel.getAsInt();
+                }
             }
 
             record StoneDepth(int offset, boolean add_surface_depth, int secondary_depth_range, SurfaceType surface_type) implements SurfaceRuleCondition {
                 @Override
                 public NamespaceID type() {
                     return NamespaceID.from("stone_depth");
+                }
+
+                @Override
+                public boolean test(SurfaceContext context) {
+                    int depth = switch (surface_type()) {
+                        case ceiling -> context.stoneDepthBelow;
+                        case floor -> context.stoneDepthAbove;
+                    };
+                    int surfaceDepth = add_surface_depth() ? context.surfaceDepth : 0;
+                    int secondaryDepth = secondary_depth_range() == 0 ? 0 : (int) Util.map(context.surfaceSecondary.getAsInt(), -1, 1, 0, secondary_depth_range());
+                    return depth <= 1 + offset + surfaceDepth + secondaryDepth;
                 }
 
                 enum SurfaceType {

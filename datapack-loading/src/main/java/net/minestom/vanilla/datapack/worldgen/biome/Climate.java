@@ -4,9 +4,8 @@ package net.minestom.vanilla.datapack.worldgen.biome;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minestom.vanilla.datapack.worldgen.DensityFunction;
-import net.minestom.vanilla.datapack.worldgen.DensityFunctions;
 import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
-import Util;
+import net.minestom.vanilla.datapack.worldgen.Util;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -269,7 +268,7 @@ public class Climate {
         }
 
         public TargetPoint sample(int x, int y, int z) {
-            DensityFunction.Context context = DensityFunctions.context(x << 2, y << 2, z << 2);
+            DensityFunction.Context context = DensityFunction.context(x << 2, y << 2, z << 2);
             return Climate.target(this.temperature().compute(context), this.humidity().compute(context), this.continentalness().compute(context), this.erosion().compute(context), this.depth().compute(context), this.weirdness().compute(context));
         }
     }

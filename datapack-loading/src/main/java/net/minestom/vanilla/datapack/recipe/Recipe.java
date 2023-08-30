@@ -21,28 +21,28 @@ public interface Recipe {
 
     static Recipe fromJson(JsonReader reader) throws IOException {
         String src = reader.peekJson().nextSource().readUtf8();
-        return JsonUtils.unionNamespaceStringType(reader, "type", Map.ofEntries(
-            Map.entry("minecraft:blasting", DatapackLoader.moshi(Blasting.class)),
-            Map.entry("minecraft:campfire_cooking", DatapackLoader.moshi(CampfireCooking.class)),
-            Map.entry("minecraft:crafting_shaped", DatapackLoader.moshi(Shaped.class)),
-            Map.entry("minecraft:crafting_shapeless", DatapackLoader.moshi(Shapeless.class)),
-            Map.entry("minecraft:crafting_special_armordye", DatapackLoader.moshi(Special.ArmorDye.class)),
-            Map.entry("minecraft:crafting_special_bannerduplicate", DatapackLoader.moshi(Special.BannerDuplicate.class)),
-            Map.entry("minecraft:crafting_special_bookcloning", DatapackLoader.moshi(Special.BookCloning.class)),
-            Map.entry("minecraft:crafting_special_firework_rocket", DatapackLoader.moshi(Special.FireworkRocket.class)),
-            Map.entry("minecraft:crafting_special_firework_star", DatapackLoader.moshi(Special.FireworkStar.class)),
-            Map.entry("minecraft:crafting_special_firework_star_fade", DatapackLoader.moshi(Special.FireworkStarFade.class)),
-            Map.entry("minecraft:crafting_special_mapcloning", DatapackLoader.moshi(Special.MapCloning.class)),
-            Map.entry("minecraft:crafting_special_mapextending", DatapackLoader.moshi(Special.MapExtending.class)),
-            Map.entry("minecraft:crafting_special_repairitem", DatapackLoader.moshi(Special.RepairItem.class)),
-            Map.entry("minecraft:crafting_special_shielddecoration", DatapackLoader.moshi(Special.ShieldDecoration.class)),
-            Map.entry("minecraft:crafting_special_shulkerboxcoloring", DatapackLoader.moshi(Special.ShulkerBoxColoring.class)),
-            Map.entry("minecraft:crafting_special_tippedarrow", DatapackLoader.moshi(Special.TippedArrow.class)),
-            Map.entry("minecraft:crafting_special_suspiciousstew", DatapackLoader.moshi(Special.SuspiciousStew.class)),
-            Map.entry("minecraft:smelting", DatapackLoader.moshi(Smelting.class)),
-            Map.entry("minecraft:smithing", DatapackLoader.moshi(Smithing.class)),
-            Map.entry("minecraft:smoking", DatapackLoader.moshi(Smoking.class)),
-            Map.entry("minecraft:stonecutting", DatapackLoader.moshi(Stonecutting.class))
+        return JsonUtils.unionNamespaceStringTypeAdapted(reader, "type", Map.ofEntries(
+            Map.entry("minecraft:blasting", Blasting.class),
+            Map.entry("minecraft:campfire_cooking", CampfireCooking.class),
+            Map.entry("minecraft:crafting_shaped", Shaped.class),
+            Map.entry("minecraft:crafting_shapeless", Shapeless.class),
+            Map.entry("minecraft:crafting_special_armordye", Special.ArmorDye.class),
+            Map.entry("minecraft:crafting_special_bannerduplicate", Special.BannerDuplicate.class),
+            Map.entry("minecraft:crafting_special_bookcloning", Special.BookCloning.class),
+            Map.entry("minecraft:crafting_special_firework_rocket", Special.FireworkRocket.class),
+            Map.entry("minecraft:crafting_special_firework_star", Special.FireworkStar.class),
+            Map.entry("minecraft:crafting_special_firework_star_fade", Special.FireworkStarFade.class),
+            Map.entry("minecraft:crafting_special_mapcloning", Special.MapCloning.class),
+            Map.entry("minecraft:crafting_special_mapextending", Special.MapExtending.class),
+            Map.entry("minecraft:crafting_special_repairitem", Special.RepairItem.class),
+            Map.entry("minecraft:crafting_special_shielddecoration", Special.ShieldDecoration.class),
+            Map.entry("minecraft:crafting_special_shulkerboxcoloring", Special.ShulkerBoxColoring.class),
+            Map.entry("minecraft:crafting_special_tippedarrow", Special.TippedArrow.class),
+            Map.entry("minecraft:crafting_special_suspiciousstew", Special.SuspiciousStew.class),
+            Map.entry("minecraft:smelting", Smelting.class),
+            Map.entry("minecraft:smithing", Smithing.class),
+            Map.entry("minecraft:smoking", Smoking.class),
+            Map.entry("minecraft:stonecutting", Stonecutting.class)
         ));
     }
 

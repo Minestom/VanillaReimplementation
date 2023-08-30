@@ -1,5 +1,6 @@
 package net.minestom.vanilla.datapack;
 
+import net.minestom.vanilla.datapack.worldgen.DensityFunction;
 import net.minestom.vanilla.files.ByteArray;
 import net.minestom.vanilla.files.FileSystem;
 import net.minestom.server.utils.NamespaceID;
@@ -16,9 +17,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-
-import static net.minestom.vanilla.datapack.DatapackLoader.parseJsonFolder;
-import static net.minestom.vanilla.datapack.DatapackLoader.recordJson;
 
 public interface Datapack {
 
@@ -128,10 +126,11 @@ public interface Datapack {
 
     }
 
-    record WorldGen(FileSystem<NoiseSettings> noise_settings) {
+    record WorldGen(FileSystem<NoiseSettings> noise_settings, FileSystem<DensityFunction> density_function) {
         public static WorldGen from(FileSystem<ByteArray> worldgen) {
             return new WorldGen(
-                    parseJsonFolder(worldgen, "noise_settings", recordJson(NoiseSettings.class))
+                    DatapackLoader.parseJsonFolder(worldgen, "noise_settings", DatapackLoader.recordJson(NoiseSettings.class)),
+                    DatapackLoader.parseJsonFolder(worldgen, "density_function", DatapackLoader.adaptor(DensityFunction.class))
             );
         }
     }

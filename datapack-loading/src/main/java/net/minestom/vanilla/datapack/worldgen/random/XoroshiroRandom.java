@@ -137,7 +137,8 @@ public class XoroshiroRandom extends Random implements WorldgenRandom {
         long t = nextLong();
         final long nMinus1 = n - 1;
         // Rejection-based algorithm to get uniform integers in the general case
-        for (long u = t >>> 1; u + nMinus1 - (t = u % n) < 0; u = nextLong() >>> 1) ;
+        long u = t >>> 1;
+        while (u + nMinus1 - (t = u % n) < 0) u = nextLong() >>> 1;
         return t;
     }
 
