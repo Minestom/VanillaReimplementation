@@ -51,6 +51,16 @@ public class PerlinNoise implements Noise {
         return sample(x, y, z, 0, 0, false);
     }
 
+    @Override
+    public double minValue() {
+        return 0;
+    }
+
+    @Override
+    public double maxValue() {
+        return this.maxValue;
+    }
+
     public double sample(double x, double y, double z, double yScale, double yLimit, boolean fixY) {
         var value = 0.0;
         double inputF = this.lowestFreqInputFactor;

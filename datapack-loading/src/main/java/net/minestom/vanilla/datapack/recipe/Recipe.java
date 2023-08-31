@@ -21,7 +21,7 @@ public interface Recipe {
 
     static Recipe fromJson(JsonReader reader) throws IOException {
         String src = reader.peekJson().nextSource().readUtf8();
-        return JsonUtils.unionNamespaceStringTypeAdapted(reader, "type", Map.ofEntries(
+        return JsonUtils.unionStringTypeMapAdapted(reader, "type", Map.ofEntries(
             Map.entry("minecraft:blasting", Blasting.class),
             Map.entry("minecraft:campfire_cooking", CampfireCooking.class),
             Map.entry("minecraft:crafting_shaped", Shaped.class),
@@ -55,7 +55,7 @@ public interface Recipe {
 
     interface Ingredient {
         static Ingredient fromJson(JsonReader reader) throws IOException {
-            return JsonUtils.<Ingredient>typeMap(reader, Map.of(
+            return JsonUtils.<Ingredient>typeMapMapped(reader, Map.of(
                     JsonReader.Token.BEGIN_ARRAY, json -> {
                         Stream.Builder<Single> items = Stream.builder();
                         json.beginArray();

@@ -52,7 +52,7 @@ interface InBuiltLootFunctions {
         NamespaceID formula();
 
         static ApplyBonus fromJson(JsonReader reader) throws IOException {
-            return JsonUtils.unionNamespaceStringTypeAdapted(reader, "formula", Map.of(
+            return JsonUtils.unionStringTypeMapAdapted(reader, "formula", Map.of(
                     "minecraft:binomial_with_bonus_count", BinomialWithBonusCount.class,
                     "minecraft:ore_drops", OreDrops.class,
                     "minecraft:uniform_bonus_count", UniformBonusCount.class
@@ -159,14 +159,16 @@ interface InBuiltLootFunctions {
             NBT nbt(LootFunction.Context context);
 
             static Source fromJson(JsonReader reader) throws IOException {
-                //noinspection unchecked
-                return JsonUtils.typeMap(reader, Map.of(
-                        JsonReader.Token.STRING, json -> new Context(DatapackLoader.moshi(LootContext.Trait.class).apply(json)),
-                        JsonReader.Token.BEGIN_OBJECT, json -> JsonUtils.unionMapType(json, "type", JsonReader::nextString, Map.of(
-                                "storage", DatapackLoader.moshi(Storage.class),
-                                "context", DatapackLoader.moshi(Context.class)
-                        ))
-                ));
+                return JsonUtils.<Source>typeMap(reader, token -> switch (token) {
+                    case STRING -> //noinspection unchecked
+                            json -> new Context(DatapackLoader.moshi(LootContext.Trait.class).apply(json));
+                    case BEGIN_OBJECT -> json -> JsonUtils.unionStringTypeAdapted(json, "type", type -> switch(type) {
+                        case "storage" -> Storage.class;
+                        case "context" -> Context.class;
+                        default -> null;
+                    });
+                    default -> null;
+                });
             }
 
             record Context(LootContext.Trait<NBTCompound> target) implements Source {
@@ -215,11 +217,12 @@ interface InBuiltLootFunctions {
             }
 
             static Operation fromJson(JsonReader reader) throws IOException {
-                return JsonUtils.unionMapType(reader, "op", JsonReader::nextString, Map.of(
-                        "replace", DatapackLoader.moshi(Replace.class),
-                        "merge", DatapackLoader.moshi(Merge.class),
-                        "append", DatapackLoader.moshi(Append.class)
-                ));
+                return JsonUtils.unionStringTypeAdapted(reader, "op", key -> switch(key) {
+                    case "replace" -> Replace.class;
+                    case "merge" -> Merge.class;
+                    case "append" -> Append.class;
+                    default -> null;
+                });
             }
 
             record Replace(NBTPath.Single source, NBTPath.Single target) implements Operation {
@@ -479,7 +482,7 @@ interface InBuiltLootFunctions {
             ItemStack limit(LootFunction.Context context);
 
             static Limit fromJson(JsonReader reader) throws IOException {
-                return JsonUtils.typeMap(reader, Map.of(
+                return JsonUtils.typeMapMapped(reader, Map.of(
                         JsonReader.Token.NUMBER, DatapackLoader.moshi(Constant.class),
                         JsonReader.Token.BEGIN_OBJECT, DatapackLoader.moshi(MinMax.class)
                 ));

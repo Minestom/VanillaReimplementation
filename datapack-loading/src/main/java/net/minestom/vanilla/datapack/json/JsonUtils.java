@@ -1,20 +1,18 @@
 package net.minestom.vanilla.datapack.json;
 
-import com.squareup.moshi.Json;
 import com.squareup.moshi.JsonReader;
-import com.squareup.moshi.Moshi;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import okio.Buffer;
-import okio.BufferedSource;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -110,15 +108,23 @@ public class JsonUtils {
         R apply(T t) throws IOException;
     }
 
-    public static <T> T unionNamespaceStringType(JsonReader reader, String key, Map<String, IoFunction<JsonReader, T>> map) throws IOException {
+    public static <T> T unionStringType(JsonReader reader, String key, Function<String, IoFunction<JsonReader, T>> findReader) throws IOException {
         return unionMapType(reader, key, json -> {
             String value = json.nextString();
             if (value == null) return null;
             return NamespaceID.from(value).toString();
-        }, map);
+        }, findReader);
     }
 
-    public static <T> T unionNamespaceStringTypeAdapted(JsonReader reader, String key, Map<String, Class<? extends T>> map) throws IOException {
+    public static <T> T unionStringTypeAdapted(JsonReader reader, String key, Function<String, Class<? extends T>> findReader) throws IOException {
+        return unionStringType(reader, key, findReader.andThen(DatapackLoader::moshi));
+    }
+
+    public static <T> T unionStringTypeMap(JsonReader reader, String key, Map<String, IoFunction<JsonReader, T>> map) throws IOException {
+        return unionStringType(reader, key, map::get);
+    }
+
+    public static <T> T unionStringTypeMapAdapted(JsonReader reader, String key, Map<String, Class<? extends T>> map) throws IOException {
         Map<String, IoFunction<JsonReader, T>> adaptedMap = map.entrySet().stream()
                 .map(entry -> {
                     var entryKey = entry.getKey();
@@ -126,10 +132,10 @@ public class JsonUtils {
                     return Map.entry(entryKey, DatapackLoader.<T>moshi(value));
                 })
                 .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
-        return unionNamespaceStringType(reader, key, adaptedMap);
+        return unionStringTypeMap(reader, key, adaptedMap);
     }
 
-    public static <V, T> T unionMapType(JsonReader reader, String key, IoFunction<JsonReader, V> read, Map<V, IoFunction<JsonReader, T>> map) throws IOException {
+    public static <V, T> T unionMapType(JsonReader reader, String key, IoFunction<JsonReader, V> read, Function<V, IoFunction<JsonReader, T>> findReader) throws IOException {
         // Fetch the property
         V property;
         try (JsonReader peek = reader.peekJson()) {
@@ -142,14 +148,18 @@ public class JsonUtils {
 
 
         // Find the correct handler, and call it
-        IoFunction<JsonReader, T> readFunction = map.get(property);
+        IoFunction<JsonReader, T> readFunction = findReader.apply(property);
         if (readFunction == null) throw new IOException("Unknown type: " + property);
         return readFunction.apply(reader);
     }
 
-    public static <T> T typeMap(JsonReader reader, Map<JsonReader.Token, IoFunction<JsonReader, T>> type2readFunction) throws IOException {
+    public static <T> T typeMapMapped(JsonReader reader, Map<JsonReader.Token, IoFunction<JsonReader, T>> type2readFunction) throws IOException {
+        return typeMap(reader, type2readFunction::get);
+    }
+
+    public static <T> T typeMap(JsonReader reader, IoFunction<JsonReader.Token, IoFunction<JsonReader, T>> type2readFunction) throws IOException {
         JsonReader.Token token = reader.peek();
-        IoFunction<JsonReader, T> readFunction = type2readFunction.get(token);
+        IoFunction<JsonReader, T> readFunction = type2readFunction.apply(token);
         if (readFunction == null) throw new IllegalStateException("Unknown token type: " + token);
         return readFunction.apply(reader);
     }
@@ -179,5 +189,15 @@ public class JsonUtils {
         return false;
     }
 
-
+    public static <T> Map<String, T> readObjectToMap(JsonReader reader, IoFunction<JsonReader, T> readValue) throws IOException {
+        Map<String, T> map = new HashMap<>();
+        reader.beginObject();
+        while (reader.hasNext() && reader.peek() != JsonReader.Token.END_OBJECT) {
+            String key = reader.nextName();
+            T value = readValue.apply(reader);
+            map.put(key, value);
+        }
+        reader.endObject();
+        return Collections.unmodifiableMap(map);
+    }
 }

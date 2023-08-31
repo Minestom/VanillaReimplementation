@@ -1,7 +1,6 @@
 package net.minestom.vanilla.datapack.loot.function;
 
 import com.squareup.moshi.JsonReader;
-import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.loot.context.LootContext;
 
@@ -15,7 +14,7 @@ public interface Predicate extends InBuiltPredicates {
     boolean test(LootContext context);
 
     static Predicate fromJson(JsonReader reader) throws IOException {
-        return JsonUtils.unionNamespaceStringTypeAdapted(reader, "condition", Map.ofEntries(
+        return JsonUtils.unionStringTypeMapAdapted(reader, "condition", Map.ofEntries(
                 Map.entry("minecraft:alternative", Alternative.class),
                 Map.entry("minecraft:block_state_property", BlockStateProperty.class),
                 Map.entry("minecraft:damage_source_properties", DamageSourceProperties.class),

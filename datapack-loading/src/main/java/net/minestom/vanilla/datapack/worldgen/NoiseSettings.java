@@ -3,15 +3,17 @@ package net.minestom.vanilla.datapack.worldgen;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.squareup.moshi.JsonReader;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.math.FloatRange;
+import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.worldgen.noise.NormalNoise;
 import net.minestom.vanilla.datapack.worldgen.noise.SurfaceContext;
-import net.minestom.vanilla.datapack.worldgen.noise.VerticalAnchor;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.*;
 
 public record NoiseSettings(
@@ -22,10 +24,10 @@ public record NoiseSettings(
         boolean legacy_random_source,
         BlockState default_block,
         BlockState default_fluid,
-        SpawnTarget spawn_target,
+        List<SpawnTarget> spawn_target,
         Noise noise,
-        NoiseRouter noiseRouter,
-        SurfaceRule surfaceRule
+        NoiseRouter noise_router,
+        SurfaceRule surface_rule
 ) {
 
     public static int cellHeight(NoiseSettings settings) {
@@ -165,6 +167,16 @@ public record NoiseSettings(
             @Nullable Block apply(int x, int y, int z);
         }
 
+        static SurfaceRule fromJson(JsonReader reader) throws IOException {
+            return JsonUtils.unionStringTypeAdapted(reader, "type", type -> switch (type) {
+                case "bandlands" -> Bandlands.class;
+                case "blocks" -> Blocks.class;
+                case "sequence" -> Sequence.class;
+                case "condition" -> Condition.class;
+                default -> null;
+            });
+        }
+
         record Bandlands() implements SurfaceRule {
             @Override
             public NamespaceID type() {
@@ -174,7 +186,7 @@ public record NoiseSettings(
             @Override
             public Pos2Block apply(SurfaceContext context) {
                 // TODO: implement
-                return (x, y, z) -> Block.AIR;
+                throw new UnsupportedOperationException("Not implemented");
             }
         }
 

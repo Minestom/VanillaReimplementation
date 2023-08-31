@@ -31,6 +31,16 @@ public class ImprovedNoise implements Noise {
         return this.sample(x, y, z, 0, 0);
     }
 
+    @Override
+    public double minValue() {
+        return -1;
+    }
+
+    @Override
+    public double maxValue() {
+        return 1;
+    }
+
     public double sample(double x, double y, double z, double yScale, double yLimit) {
         double x2 = x + this.xo;
         double y2 = y + this.yo;

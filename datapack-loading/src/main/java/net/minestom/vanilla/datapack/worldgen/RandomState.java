@@ -22,8 +22,8 @@ public class RandomState {
         this.random = (settings.legacy_random_source() ? new LegacyRandom(seed) : XoroshiroRandom.create(seed)).forkPositional();
         this.aquiferRandom = this.random.fromHashOf(NamespaceID.from("aquifer").toString()).forkPositional();
         this.oreRandom = this.random.fromHashOf(NamespaceID.from("ore").toString()).forkPositional();
-        this.surfaceSystem = new SurfaceSystem(settings.surfaceRule(), settings.default_block().toMinestom(), seed);
-        this.router = settings.noiseRouter();
+        this.surfaceSystem = new SurfaceSystem(settings.surface_rule(), settings.default_block().toMinestom(), seed);
+        this.router = settings.noise_router();
         this.sampler = Climate.Sampler.fromRouter(this.router);
     }
 }

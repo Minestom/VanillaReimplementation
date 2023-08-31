@@ -1,6 +1,7 @@
 package net.minestom.vanilla.datapack;
 
 import net.minestom.vanilla.datapack.worldgen.DensityFunction;
+import net.minestom.vanilla.datapack.worldgen.noise.Noise;
 import net.minestom.vanilla.files.ByteArray;
 import net.minestom.vanilla.files.FileSystem;
 import net.minestom.server.utils.NamespaceID;
@@ -16,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.*;
 
 public interface Datapack {
@@ -37,7 +39,7 @@ public interface Datapack {
     }
 
     static Datapack loadByteArray(FileSystem<ByteArray> source) {
-        return new DatapackLoader(source.cache()).load();
+        return new DatapackLoader().load(source.cache());
     }
 
     record McMeta(Pack pack, Filter filter) {
@@ -126,11 +128,38 @@ public interface Datapack {
 
     }
 
-    record WorldGen(FileSystem<NoiseSettings> noise_settings, FileSystem<DensityFunction> density_function) {
+    record WorldGen(
+            FileSystem<ByteArray> biome,
+            FileSystem<ByteArray> configured_carver,
+            FileSystem<ByteArray> configured_feature,
+            FileSystem<DensityFunction> density_function,
+            FileSystem<ByteArray> flat_level_generator_preset,
+            FileSystem<ByteArray> multi_noise_biome_source_parameter_list,
+            FileSystem<Noise> noise,
+            FileSystem<NoiseSettings> noise_settings,
+            FileSystem<ByteArray> placed_feature,
+            FileSystem<ByteArray> processor_list,
+            FileSystem<ByteArray> structure,
+            FileSystem<ByteArray> structure_set,
+            FileSystem<ByteArray> template_pool,
+            FileSystem<ByteArray> world_preset
+            ) {
         public static WorldGen from(FileSystem<ByteArray> worldgen) {
             return new WorldGen(
-                    DatapackLoader.parseJsonFolder(worldgen, "noise_settings", DatapackLoader.recordJson(NoiseSettings.class)),
-                    DatapackLoader.parseJsonFolder(worldgen, "density_function", DatapackLoader.adaptor(DensityFunction.class))
+                    worldgen.folder("biome"),
+                    worldgen.folder("configured_carver"),
+                    worldgen.folder("configured_feature"),
+                    DatapackLoader.parseJsonFolder(worldgen, "density_function", DatapackLoader.adaptor(DensityFunction.class)),
+                    worldgen.folder("flat_level_generator_preset"),
+                    worldgen.folder("multi_noise_biome_source_parameter_list"),
+                    DatapackLoader.parseJsonFolder(worldgen, "noise", DatapackLoader.adaptor(Noise.class)),
+                    DatapackLoader.parseJsonFolder(worldgen, "noise_settings", DatapackLoader.adaptor(NoiseSettings.class)),
+                    worldgen.folder("placed_feature"),
+                    worldgen.folder("processor_list"),
+                    worldgen.folder("structure"),
+                    worldgen.folder("structure_set"),
+                    worldgen.folder("template_pool"),
+                    worldgen.folder("world_preset")
             );
         }
     }

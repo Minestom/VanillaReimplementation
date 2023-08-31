@@ -1,9 +1,12 @@
 package net.minestom.vanilla.datapack;
 
 import com.squareup.moshi.*;
+import net.minestom.server.utils.math.FloatRange;
 import net.minestom.vanilla.datapack.loot.NBTPath;
+import net.minestom.vanilla.datapack.worldgen.BlockState;
 import net.minestom.vanilla.datapack.worldgen.DensityFunction;
 import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
+import net.minestom.vanilla.datapack.worldgen.noise.Noise;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 import net.minestom.vanilla.files.ByteArray;
 import net.minestom.vanilla.files.FileSystem;
@@ -33,6 +36,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -41,54 +45,9 @@ import static net.minestom.vanilla.datapack.Datapack.*;
 
 public class DatapackLoader {
 
-    private final McMeta mcmeta;
-    private final @Nullable ByteArray pack_png;
     private static final Moshi moshi = createMoshiWithAdaptors();
-    final Map<NamespaceID, NamespacedData> namespace2data;
 
-    DatapackLoader(FileSystem<ByteArray> source) {
-        if (source.hasFile("pack.mcmeta")) {
-            this.mcmeta = source.map(FileSystem.BYTES_TO_STRING).map(recordJson(McMeta.class)).file("pack.mcmeta");
-        } else {
-            // Default
-            this.mcmeta = new McMeta();
-        }
-        if (source.hasFile("pack.png")) {
-            this.pack_png = source.file("pack.png");
-        } else {
-            this.pack_png = null;
-        }
-
-        // Refresh the loadingRandom, so that datapack loads are deterministic
-        DatapackLoader.loadingRandom = WorldgenRandom.standard(0);
-
-        {
-            Map<NamespaceID, NamespacedData> namespace2data = new HashMap<>();
-
-            for (String namespace : source.folders()) {
-                FileSystem<ByteArray> dataFolder = source.folder(namespace).inMemory();
-                NamespaceID namespaceID = NamespaceID.from(namespace);
-
-                FileSystem<Advancement> advancements = parseJsonFolder(dataFolder, "advancements", recordJson(Advancement.class));
-                FileSystem<McFunction> functions = parseJsonFolder(dataFolder, "functions", McFunction::fromString);
-                FileSystem<LootFunction> item_modifiers = parseJsonFolder(dataFolder, "item_modifiers", adaptor(LootFunction.class));
-                FileSystem<LootTable> loot_tables = parseJsonFolder(dataFolder, "loot_tables", recordJson(LootTable.class));
-                FileSystem<Predicate> predicates = parseJsonFolder(dataFolder, "predicates", adaptor(Predicate.class));
-                FileSystem<Recipe> recipes = parseJsonFolder(dataFolder, "recipes", adaptor(Recipe.class));
-                FileSystem<Structure> structures = dataFolder.folder("structures").map(Structure::fromInput);
-                FileSystem<ChatType> chat_type = parseJsonFolder(dataFolder, "chat_type", recordJson(ChatType.class));
-                FileSystem<DamageType> damage_type = parseJsonFolder(dataFolder, "damage_type", recordJson(DamageType.class));
-                Tags tags = Tags.from(source.folder("tags", FileSystem.BYTES_TO_STRING));
-                FileSystem<Dimension> dimensions = parseJsonFolder(dataFolder, "dimension", recordJson(Dimension.class));
-                FileSystem<DimensionType> dimension_type = parseJsonFolder(dataFolder, "dimension_type", adaptor(DimensionType.class));
-                Datapack.WorldGen world_gen = Datapack.WorldGen.from(dataFolder.folder("worldgen"));
-
-                NamespacedData data = new NamespacedData(advancements, functions, item_modifiers, loot_tables, predicates, recipes, structures, chat_type, damage_type, tags, dimensions, dimension_type, world_gen);
-                namespace2data.put(namespaceID, data);
-            }
-
-            this.namespace2data = Map.copyOf(namespace2data);
-        }
+    DatapackLoader() {
     }
 
     private static Moshi createMoshiWithAdaptors() {
@@ -124,9 +83,11 @@ public class DatapackLoader {
             return serializer.deserialize(reader.nextSource().readUtf8());
         });
         register(builder, NamespaceID.class, reader -> NamespaceID.from(reader.nextString()));
+        register(builder, FloatRange.class, DatapackLoader::floatRangeFromJson);
 
         // VRI Datapack
         register(builder, Advancement.Trigger.class, Advancement.Trigger::fromJson);
+        register(builder, BlockState.class, BlockState::fromJson);
         register(builder, LootContext.Trait.class, LootContext.Trait::fromJson);
         register(builder, LootFunction.class, LootFunction::fromJson);
         register(builder, Predicate.class, Predicate::fromJson);
@@ -148,7 +109,7 @@ public class DatapackLoader {
         register(builder, NBTPath.class, NBTPath::fromJson);
         register(builder, NBTPath.Single.class, NBTPath.Single::fromJson);
         register(builder, DensityFunction.class, DensityFunction::fromJson);
-        // NoiseSettings$SurfaceRule
+        register(builder, Noise.class, Noise::fromJson);
         register(builder, NoiseSettings.SurfaceRule.class, NoiseSettings.SurfaceRule::fromJson);
 
         return builder.build();
@@ -170,23 +131,76 @@ public class DatapackLoader {
         };
     }
 
-    public static <T extends Record> Function<String, T> recordJson(Class<T> clazz) {
-        return str -> {
-            try {
-                return moshi.adapter(clazz).fromJson(str);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+    private static ThreadLocal<LoadingContext> contextPool = new ThreadLocal<>();
+
+    public static LoadingContext loading() {
+        return contextPool.get();
+    }
+
+    public interface LoadingContext {
+        WorldgenRandom random();
+
+        /**
+         * @return the fully loaded datapack, or throws a runtime exception if the datapack is not fully loaded yet
+         */
+        Datapack acquire();
+    }
+
+    public Datapack load(FileSystem<ByteArray> source) {
+
+        // Default
+        McMeta mcmeta;
+        mcmeta = !source.hasFile("pack.mcmeta") ? new McMeta() : source.map(FileSystem.BYTES_TO_STRING).map(adaptor(McMeta.class)).file("pack.mcmeta");
+        @Nullable ByteArray pack_png = !source.hasFile("pack.png") ? null : source.file("pack.png");
+//        ImageIO.read(pack_png.toStream());
+
+        // Load this datapack on this thread, so that we can use the thread-local contextPool
+        WorldgenRandom loading = WorldgenRandom.standard(0);
+        AtomicReference<Datapack> datapackRef = new AtomicReference<>();
+        LoadingContext context = new LoadingContext() {
+            @Override
+            public WorldgenRandom random() {
+                return loading;
+            }
+
+            @Override
+            public Datapack acquire() {
+                Datapack datapack = datapackRef.get();
+                if (datapack == null) {
+                    throw new IllegalStateException("Datapack not loaded yet");
+                }
+                return datapack;
             }
         };
-    }
+        contextPool.set(context);
 
-    private static WorldgenRandom loadingRandom = WorldgenRandom.standard(0);
+        Map<NamespaceID, NamespacedData> namespace2data;
+        {
+            namespace2data = new HashMap<>();
 
-    public static WorldgenRandom loadingRandom() {
-        return loadingRandom;
-    }
+            for (String namespace : source.folders()) {
+                FileSystem<ByteArray> dataFolder = source.folder(namespace).inMemory();
+                NamespaceID namespaceID = NamespaceID.from(namespace);
 
-    public Datapack load() {
+                FileSystem<Advancement> advancements = parseJsonFolder(dataFolder, "advancements", adaptor(Advancement.class));
+                FileSystem<McFunction> functions = parseJsonFolder(dataFolder, "functions", McFunction::fromString);
+                FileSystem<LootFunction> item_modifiers = parseJsonFolder(dataFolder, "item_modifiers", adaptor(LootFunction.class));
+                FileSystem<LootTable> loot_tables = parseJsonFolder(dataFolder, "loot_tables", adaptor(LootTable.class));
+                FileSystem<Predicate> predicates = parseJsonFolder(dataFolder, "predicates", adaptor(Predicate.class));
+                FileSystem<Recipe> recipes = parseJsonFolder(dataFolder, "recipes", adaptor(Recipe.class));
+                FileSystem<Structure> structures = dataFolder.folder("structures").map(Structure::fromInput);
+                FileSystem<ChatType> chat_type = parseJsonFolder(dataFolder, "chat_type", adaptor(ChatType.class));
+                FileSystem<DamageType> damage_type = parseJsonFolder(dataFolder, "damage_type", adaptor(DamageType.class));
+                Tags tags = Tags.from(source.folder("tags", FileSystem.BYTES_TO_STRING));
+                FileSystem<Dimension> dimensions = parseJsonFolder(dataFolder, "dimension", adaptor(Dimension.class));
+                FileSystem<DimensionType> dimension_type = parseJsonFolder(dataFolder, "dimension_type", adaptor(DimensionType.class));
+                Datapack.WorldGen world_gen = Datapack.WorldGen.from(dataFolder.folder("worldgen"));
+
+                NamespacedData data = new NamespacedData(advancements, functions, item_modifiers, loot_tables, predicates, recipes, structures, chat_type, damage_type, tags, dimensions, dimension_type, world_gen);
+                namespace2data.put(namespaceID, data);
+            }
+        }
+
         var copy = namespace2data.entrySet().stream()
                 .map(entry -> Map.entry(entry.getKey(), entry.getValue().cache()))
                 .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -262,7 +276,7 @@ public class DatapackLoader {
     }
 
     private static Block blockFromJson(JsonReader reader) throws IOException {
-        return JsonUtils.typeMap(reader, Map.of(
+        return JsonUtils.typeMapMapped(reader, Map.of(
                 JsonReader.Token.STRING, json -> Block.fromNamespaceId(json.nextString())
                 // TODO: Add support for block states?
         ));
@@ -278,6 +292,19 @@ public class DatapackLoader {
 
     private static Material materialFromJson(JsonReader reader) throws IOException {
         return Material.fromNamespaceId(Objects.requireNonNull(namespaceFromJson(reader)));
+    }
+
+    private static FloatRange floatRangeFromJson(JsonReader reader) throws IOException {
+        return JsonUtils.typeMap(reader, token -> switch (token) {
+            case BEGIN_ARRAY -> json -> {
+                    json.beginArray();
+                    var range = new FloatRange((float) json.nextDouble(), (float) json.nextDouble());
+                    json.endArray();
+                    return range;
+                };
+            case NUMBER -> json -> new FloatRange((float) json.nextDouble());
+            default -> null;
+        });
     }
 
     private static final Pattern GENERICS = Pattern.compile("<.*>");

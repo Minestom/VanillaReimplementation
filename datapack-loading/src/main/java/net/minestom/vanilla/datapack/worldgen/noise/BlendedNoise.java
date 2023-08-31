@@ -76,4 +76,14 @@ public class BlendedNoise implements Noise {
 
         return Util.clampedLerp(min / 512, max / 512, value) / 128;
     }
+
+    @Override
+    public double minValue() {
+        return 0;
+    }
+
+    @Override
+    public double maxValue() {
+        return 1;
+    }
 }

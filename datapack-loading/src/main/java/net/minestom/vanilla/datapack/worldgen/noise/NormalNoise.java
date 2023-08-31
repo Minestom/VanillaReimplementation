@@ -60,4 +60,14 @@ public class NormalNoise implements Noise {
         double z2 = z * NormalNoise.INPUT_FACTOR;
         return (this.first.sample(x, y, z) + this.second.sample(x2, y2, z2)) * this.valueFactor;
     }
+
+    @Override
+    public double minValue() {
+        return 0;
+    }
+
+    @Override
+    public double maxValue() {
+        return this.maxValue;
+    }
 }

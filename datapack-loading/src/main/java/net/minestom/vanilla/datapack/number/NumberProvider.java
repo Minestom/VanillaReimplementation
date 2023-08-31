@@ -1,7 +1,6 @@
 package net.minestom.vanilla.datapack.number;
 
 import com.squareup.moshi.JsonReader;
-import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 
 import java.io.IOException;
@@ -32,9 +31,9 @@ public interface NumberProvider {
         }
 
         static NumberProvider.Int fromJson(JsonReader reader) throws IOException {
-            return JsonUtils.typeMap(reader, Map.of(
+            return JsonUtils.typeMapMapped(reader, Map.of(
                     JsonReader.Token.NUMBER, json -> constant(reader.nextInt()),
-                    JsonReader.Token.BEGIN_OBJECT, json -> JsonUtils.unionNamespaceStringTypeAdapted(json, "type", Map.of(
+                    JsonReader.Token.BEGIN_OBJECT, json -> JsonUtils.unionStringTypeMapAdapted(json, "type", Map.of(
                             "minecraft:constant", Constant.class,
                             "minecraft:uniform", Uniform.class,
                             "minecraft:binomial", Binomial.class
@@ -68,9 +67,9 @@ public interface NumberProvider {
         }
 
         static NumberProvider.Double fromJson(JsonReader reader) throws IOException {
-            return JsonUtils.typeMap(reader, Map.of(
+            return JsonUtils.typeMapMapped(reader, Map.of(
                     JsonReader.Token.NUMBER, json -> constant(reader.nextDouble()),
-                    JsonReader.Token.BEGIN_OBJECT, json -> JsonUtils.unionNamespaceStringTypeAdapted(json, "type", Map.of(
+                    JsonReader.Token.BEGIN_OBJECT, json -> JsonUtils.unionStringTypeMapAdapted(json, "type", Map.of(
                             "minecraft:constant", Constant.class,
                             "minecraft:uniform", Uniform.class,
                             "minecraft:binomial", Binomial.class

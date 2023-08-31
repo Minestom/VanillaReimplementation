@@ -8,13 +8,6 @@ public interface WorldgenRandom {
     static WorldgenRandom standard(long seed) {
         return new StdLibRandom(new Random(seed));
     }
-//    consume(count: number): void
-//    nextInt(max?: number): number
-//    nextLong(): bigint
-//    nextFloat(): number
-//    nextDouble(): number
-//    fork(): Random
-//    forkPositional(): PositionalRandom
 
     void consume(int count);
 

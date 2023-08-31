@@ -3,7 +3,6 @@ package net.minestom.vanilla.datapack.loot.function;
 import com.squareup.moshi.JsonReader;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.loot.context.LootContext;
 
@@ -29,7 +28,7 @@ public interface LootFunction extends InBuiltLootFunctions {
     ItemStack apply(Context context);
 
     static LootFunction fromJson(JsonReader reader) throws IOException {
-        return JsonUtils.unionNamespaceStringTypeAdapted(reader, "function", Map.ofEntries(
+        return JsonUtils.unionStringTypeMapAdapted(reader, "function", Map.ofEntries(
                 Map.entry("minecraft:apply_bonus", ApplyBonus.class),
                 Map.entry("minecraft:copy_name", CopyName.class),
                 Map.entry("minecraft:copy_nbt", CopyNbt.class),

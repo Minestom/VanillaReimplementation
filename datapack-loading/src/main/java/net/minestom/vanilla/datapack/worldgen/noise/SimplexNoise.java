@@ -147,6 +147,16 @@ public class SimplexNoise implements Noise {
         return 32.0 * (k + l + m + n);
     }
 
+    @Override
+    public double minValue() {
+        return 0;
+    }
+
+    @Override
+    public double maxValue() {
+        return 1;
+    }
+
     private int P(int i) {
         return this.p[i & 0xFF];
     }

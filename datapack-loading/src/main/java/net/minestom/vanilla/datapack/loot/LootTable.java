@@ -26,16 +26,17 @@ public record LootTable(@Nullable String type, List<LootFunction> functions, Lis
             NamespaceID type();
 
             static Pool.Entry fromJson(JsonReader reader) throws IOException {
-                return JsonUtils.unionMapType(reader, "type", JsonReader::nextString, Map.of(
-                        "minecraft:item", DatapackLoader.moshi(Pool.Entry.Item.class),
-                        "minecraft:tag", DatapackLoader.moshi(Pool.Entry.Tag.class),
-                        "minecraft:loot_table", DatapackLoader.moshi(Pool.Entry.LootTableNested.class),
-                        "minecraft:dynamic", DatapackLoader.moshi(Pool.Entry.Dynamic.class),
-                        "minecraft:empty", DatapackLoader.moshi(Pool.Entry.Empty.class),
-                        "minecraft:group", DatapackLoader.moshi(Pool.Entry.Group.class),
-                        "minecraft:alternatives", DatapackLoader.moshi(Pool.Entry.Alternatives.class),
-                        "minecraft:sequence", DatapackLoader.moshi(Pool.Entry.Sequence.class)
-                ));
+                return JsonUtils.unionStringTypeAdapted(reader, "type", type -> switch(type) {
+                    case "minecraft:item" -> Pool.Entry.Item.class;
+                    case "minecraft:tag" -> Pool.Entry.Tag.class;
+                    case "minecraft:loot_table" -> Pool.Entry.LootTableNested.class;
+                    case "minecraft:dynamic" -> Pool.Entry.Dynamic.class;
+                    case "minecraft:empty" -> Pool.Entry.Empty.class;
+                    case "minecraft:group" -> Pool.Entry.Group.class;
+                    case "minecraft:alternatives" -> Pool.Entry.Alternatives.class;
+                    case "minecraft:sequence" -> Pool.Entry.Sequence.class;
+                    default -> null;
+                });
             }
 
             /**
