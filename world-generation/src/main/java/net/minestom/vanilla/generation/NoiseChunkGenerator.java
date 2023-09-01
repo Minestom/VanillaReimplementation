@@ -1,4 +1,4 @@
-package net.minestom.vanilla.datapack.worldgen;
+package net.minestom.vanilla.generation;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -11,9 +11,9 @@ import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.datapack.Datapack;
+import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
+import net.minestom.vanilla.datapack.worldgen.WorldgenContext;
 import net.minestom.vanilla.datapack.worldgen.biome.BiomeSource;
-import net.minestom.vanilla.datapack.worldgen.noise.NoiseChunk;
-import net.minestom.vanilla.datapack.worldgen.noise.VerticalAnchor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -134,13 +134,10 @@ public class NoiseChunkGenerator implements ChunkGenerator {
 //    }
     public void buildSurface(Datapack datapack, RandomState randomState, TargetChunk chunk, NamespaceID biome) {
         NoiseChunk noiseChunk = this.getOrCreateNoiseChunk(randomState, chunk);
-        VerticalAnchor.WorldgenContext context = VerticalAnchor.WorldgenContext.create(this.settings.noise().min_y(), this.settings.noise().height(), datapack);
+        WorldgenContext context = WorldgenContext.create(this.dimensionType);
         randomState.surfaceSystem.buildSurface(chunk, noiseChunk, context, point -> biome);
     }
 
-    //    public computeBiome(randomState: RandomState, quartX: number, quartY: number, quartZ: number) {
-//        return this.biomeSource.getBiome(quartX, quartY, quartZ, randomState.sampler)
-//    }
     public NamespaceID computeBiome(RandomState randomState, int quartX, int quartY, int quartZ) {
         return this.biomeSource.getBiome(quartX, quartY, quartZ, randomState.sampler);
     }

@@ -1,29 +1,11 @@
 package net.minestom.vanilla.datapack.worldgen.noise;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
-import net.minestom.vanilla.datapack.worldgen.Util;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 
 public class NormalNoise implements Noise {
 
     public record NoiseParameters(double firstOctave, DoubleList amplitudes) {
-
-        public NoiseParameters(double firstOctave, double... amplitudes) {
-            this(firstOctave, DoubleList.of(amplitudes));
-        }
-
-        public static NoiseParameters create(double firstOctave, double[] amplitudes) {
-            return new NoiseParameters(firstOctave, DoubleList.of(amplitudes));
-        }
-
-        public static NoiseParameters fromJson(Object json) {
-            JsonObject root = Util.jsonObject(json);
-            double firstOctave = root.get("firstOctave").isJsonNull() ? 0 : root.get("firstOctave").getAsDouble();
-            double[] amplitudes = root.get("amplitudes").isJsonNull() ? new double[0] : new Gson().fromJson(root.get("amplitudes"), double[].class);
-            return new NoiseParameters(firstOctave, DoubleList.of(amplitudes));
-        }
     }
 
     private static final double INPUT_FACTOR = 1.0181268882175227;

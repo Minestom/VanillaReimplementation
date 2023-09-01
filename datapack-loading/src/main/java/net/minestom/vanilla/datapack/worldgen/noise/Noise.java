@@ -3,6 +3,7 @@ package net.minestom.vanilla.datapack.worldgen.noise;
 import com.squareup.moshi.JsonReader;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.DatapackUtils;
+import net.minestom.vanilla.datapack.json.JsonUtils;
 
 import java.io.IOException;
 
@@ -14,7 +15,16 @@ public interface Noise {
 
     static Noise fromJson(JsonReader reader) throws IOException {
         var context = DatapackLoader.loading();
-        String type = reader.nextString();
-        FutureNoise future = new FutureNoise(() -> DatapackUtils.findNoise(context.acquire()));
+        return JsonUtils.typeMap(reader, token -> switch (token) {
+            case STRING -> json -> { // string means use a json-defined noise. This will need to be lazily loaded.
+                String id = json.nextString();
+                return new LazyLoadedNoise(id, context);
+            };
+            case BEGIN_OBJECT -> json -> {
+                NormalNoise.NoiseParameters params = DatapackLoader.moshi(NormalNoise.NoiseParameters.class).apply(json);
+                return new NormalNoise(context.random(), params);
+            };
+            default -> null;
+        });
     }
 }

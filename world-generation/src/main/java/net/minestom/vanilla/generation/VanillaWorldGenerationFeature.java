@@ -1,14 +1,18 @@
 package net.minestom.vanilla.generation;
 
+import net.minestom.server.instance.ChunkGenerator;
+import net.minestom.server.instance.ChunkPopulator;
+import net.minestom.server.instance.batch.ChunkBatch;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackLoadingFeature;
-import net.minestom.vanilla.datapack.worldgen.NoiseChunkGenerator;
 import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
 import net.minestom.vanilla.instance.SetupVanillaInstanceEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Set;
 
 public class VanillaWorldGenerationFeature implements VanillaReimplementation.Feature {
@@ -21,14 +25,26 @@ public class VanillaWorldGenerationFeature implements VanillaReimplementation.Fe
             DatapackLoadingFeature datapackLoading = context.vri().feature(DatapackLoadingFeature.class);
             Datapack datapack = datapackLoading.vanilla();
 
-            Datapack.NamespacedData data = datapack.namespacedData().get(NamespaceID.from("minecraft"));
-            if (data == null) throw new IllegalStateException("minecraft namespace not found");
+            Datapack.NamespacedData data = datapack.namespacedData().get("minecraft");
+            if (data == null) {
+                throw new IllegalStateException("minecraft namespace not found");
+            }
 
             NoiseSettings settings = data.world_gen().noise_settings().file("overworld.json");
 //            BiomeSource.fromJson()
 
-            NoiseChunkGenerator generator = new NoiseChunkGenerator(datapack, (x, y, z, sampler) -> plains, settings, event.getInstance().getDimensionType());
-            event.getInstance().setChunkGenerator(generator);
+            ThreadLocal<NoiseChunkGenerator> generators = ThreadLocal.withInitial(() -> new NoiseChunkGenerator(datapack, (x, y, z, sampler) -> plains, settings, event.getInstance().getDimensionType()));
+            event.getInstance().setChunkGenerator(new ChunkGenerator() {
+                @Override
+                public void generateChunkData(@NotNull ChunkBatch batch, int chunkX, int chunkZ) {
+                    generators.get().generateChunkData(batch, chunkX, chunkZ);
+                }
+
+                @Override
+                public @Nullable List<ChunkPopulator> getPopulators() {
+                    return null;
+                }
+            });
         });
     }
 

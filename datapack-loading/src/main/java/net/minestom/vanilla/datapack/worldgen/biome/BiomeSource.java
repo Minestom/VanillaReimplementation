@@ -3,7 +3,7 @@ package net.minestom.vanilla.datapack.worldgen.biome;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.vanilla.datapack.worldgen.Util;
+import net.minestom.vanilla.datapack.worldgen.util.Util;
 
 public interface BiomeSource extends BiomeSources {
 //    export interface BiomeSource {

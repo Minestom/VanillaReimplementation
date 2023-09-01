@@ -1,6 +1,7 @@
-package net.minestom.vanilla.datapack.worldgen;
+package net.minestom.vanilla.generation;
 
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
 import net.minestom.vanilla.datapack.worldgen.biome.Climate;
 import net.minestom.vanilla.datapack.worldgen.random.LegacyRandom;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;

@@ -84,12 +84,14 @@ public interface FileSystem<F> extends FileSystemMappers {
     }
 
     default FileSystem<F> cache() {
-        if (this instanceof CacheFileSystem) return this;
         return new CacheFileSystem<>(this);
     }
 
+    default FileSystem<F> lazy() {
+        return new LazyFileSystem<>(this);
+    }
+
     default FileSystem<F> inMemory() {
-        if (this instanceof DynamicFileSystem<F>) return this;
         return DynamicFileSystem.from(this);
     }
 

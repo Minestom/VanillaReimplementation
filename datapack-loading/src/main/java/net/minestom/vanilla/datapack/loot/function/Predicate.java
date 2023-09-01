@@ -14,24 +14,27 @@ public interface Predicate extends InBuiltPredicates {
     boolean test(LootContext context);
 
     static Predicate fromJson(JsonReader reader) throws IOException {
-        return JsonUtils.unionStringTypeMapAdapted(reader, "condition", Map.ofEntries(
-                Map.entry("minecraft:alternative", Alternative.class),
-                Map.entry("minecraft:block_state_property", BlockStateProperty.class),
-                Map.entry("minecraft:damage_source_properties", DamageSourceProperties.class),
-                Map.entry("minecraft:entity_properties", EntityProperties.class),
-                Map.entry("minecraft:entity_scores", EntityScores.class),
-                Map.entry("minecraft:inverted", Inverted.class),
-                Map.entry("minecraft:killed_by_player", KilledByPlayer.class),
-                Map.entry("minecraft:location_check", LocationCheck.class),
-                Map.entry("minecraft:match_tool", MatchTool.class),
-                Map.entry("minecraft:random_chance", RandomChance.class),
-                Map.entry("minecraft:random_chance_with_looting", RandomChanceWithLooting.class),
-                Map.entry("minecraft:reference", Reference.class),
-                Map.entry("minecraft:survives_explosion", SurvivesExplosion.class),
-                Map.entry("minecraft:table_bonus", TableBonus.class),
-                Map.entry("minecraft:time_check", TimeCheck.class),
-                Map.entry("minecraft:value_check", ValueCheck.class),
-                Map.entry("minecraft:weather_check", WeatherCheck.class)
-        ));
+        return JsonUtils.unionStringTypeAdapted(reader, "condition", condition -> switch (condition) {
+            case "minecraft:alternative" -> Alternative.class;
+            case "minecraft:block_state_property" -> BlockStateProperty.class;
+            case "minecraft:damage_source_properties" -> DamageSourceProperties.class;
+            case "minecraft:entity_properties" -> EntityProperties.class;
+            case "minecraft:entity_scores" -> EntityScores.class;
+            case "minecraft:inverted" -> Inverted.class;
+            case "minecraft:killed_by_player" -> KilledByPlayer.class;
+            case "minecraft:location_check" -> LocationCheck.class;
+            case "minecraft:match_tool" -> MatchTool.class;
+            case "minecraft:random_chance" -> RandomChance.class;
+            case "minecraft:random_chance_with_looting" -> RandomChanceWithLooting.class;
+            case "minecraft:reference" -> Reference.class;
+            case "minecraft:survives_explosion" -> SurvivesExplosion.class;
+            case "minecraft:table_bonus" -> TableBonus.class;
+            case "minecraft:time_check" -> TimeCheck.class;
+            case "minecraft:value_check" -> ValueCheck.class;
+            case "minecraft:weather_check" -> WeatherCheck.class;
+            case "minecraft:any_of" -> AnyOf.class;
+            case "minecraft:all_of" -> AllOf.class;
+            default -> null;
+        });
     }
 }

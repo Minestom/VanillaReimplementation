@@ -449,4 +449,37 @@ interface InBuiltPredicates {
             return false;
         }
     }
+
+    /**
+     * all_of- Evaluates a list of predicates and passes if all of them pass. Invokable from any context.
+     * • terms: The list of predicates to evaluate. A predicate within this array must be an object.
+     */
+    record AllOf(List<Predicate> terms) implements Predicate {
+        @Override
+        public String condition() {
+            return "all_of";
+        }
+
+        @Override
+        public boolean test(LootContext context) {
+            return terms.stream().allMatch(predicate -> predicate.test(context));
+        }
+    }
+
+    /**
+     * any_of—Evaluates a list of predicates and passes if any of them pass. Invokable from any context.
+     * • terms: The list of predicates to evaluate. A predicate within this array must be an object.
+     */
+    record AnyOf(List<Predicate> terms) implements Predicate {
+        @Override
+        public String condition() {
+            return "any_of";
+        }
+
+        @Override
+        public boolean test(LootContext context) {
+            return terms.stream().anyMatch(predicate -> predicate.test(context));
+        }
+    }
+
 }

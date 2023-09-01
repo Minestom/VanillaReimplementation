@@ -117,7 +117,11 @@ public class JsonUtils {
     }
 
     public static <T> T unionStringTypeAdapted(JsonReader reader, String key, Function<String, Class<? extends T>> findReader) throws IOException {
-        return unionStringType(reader, key, findReader.andThen(DatapackLoader::moshi));
+        return unionStringType(reader, key, str -> {
+            Class<? extends T> clazz = findReader.apply(str);
+            if (clazz == null) return null;
+            return DatapackLoader.moshi(clazz);
+        });
     }
 
     public static <T> T unionStringTypeMap(JsonReader reader, String key, Map<String, IoFunction<JsonReader, T>> map) throws IOException {
@@ -149,7 +153,8 @@ public class JsonUtils {
 
         // Find the correct handler, and call it
         IoFunction<JsonReader, T> readFunction = findReader.apply(property);
-        if (readFunction == null) throw new IOException("Unknown type: " + property);
+        if (readFunction == null)
+            throw new IOException("Unknown type: " + property);
         return readFunction.apply(reader);
     }
 

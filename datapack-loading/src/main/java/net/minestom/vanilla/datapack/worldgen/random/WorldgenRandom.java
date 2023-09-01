@@ -1,12 +1,10 @@
 package net.minestom.vanilla.datapack.worldgen.random;
 
-import net.minestom.vanilla.datapack.worldgen.Util;
-
-import java.util.Random;
+import net.minestom.vanilla.datapack.worldgen.util.Util;
 
 public interface WorldgenRandom {
     static WorldgenRandom standard(long seed) {
-        return new StdLibRandom(new Random(seed));
+        return new XoroshiroRandom(seed);
     }
 
     void consume(int count);

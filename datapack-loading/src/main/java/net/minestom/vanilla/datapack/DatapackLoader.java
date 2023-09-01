@@ -1,11 +1,13 @@
 package net.minestom.vanilla.datapack;
 
 import com.squareup.moshi.*;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleList;
+import it.unimi.dsi.fastutil.doubles.DoubleLists;
 import net.minestom.server.utils.math.FloatRange;
 import net.minestom.vanilla.datapack.loot.NBTPath;
-import net.minestom.vanilla.datapack.worldgen.BlockState;
-import net.minestom.vanilla.datapack.worldgen.DensityFunction;
-import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
+import net.minestom.vanilla.datapack.worldgen.*;
+import net.minestom.vanilla.datapack.worldgen.math.CubicSpline;
 import net.minestom.vanilla.datapack.worldgen.noise.Noise;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 import net.minestom.vanilla.files.ByteArray;
@@ -26,7 +28,6 @@ import net.minestom.vanilla.datapack.loot.function.LootFunction;
 import net.minestom.vanilla.datapack.loot.function.Predicate;
 import net.minestom.vanilla.datapack.number.NumberProvider;
 import net.minestom.vanilla.datapack.recipe.Recipe;
-import net.minestom.vanilla.datapack.worldgen.Structure;
 import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTException;
@@ -34,12 +35,16 @@ import org.jglrxavpok.hephaistos.parser.SNBTParser;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.lang.ref.Cleaner;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static net.minestom.vanilla.datapack.Datapack.*;
 
@@ -85,6 +90,9 @@ public class DatapackLoader {
         register(builder, NamespaceID.class, reader -> NamespaceID.from(reader.nextString()));
         register(builder, FloatRange.class, DatapackLoader::floatRangeFromJson);
 
+        // Misc
+        register(builder, DoubleList.class, DatapackLoader::doubleListFromJson);
+
         // VRI Datapack
         register(builder, Advancement.Trigger.class, Advancement.Trigger::fromJson);
         register(builder, BlockState.class, BlockState::fromJson);
@@ -111,6 +119,10 @@ public class DatapackLoader {
         register(builder, DensityFunction.class, DensityFunction::fromJson);
         register(builder, Noise.class, Noise::fromJson);
         register(builder, NoiseSettings.SurfaceRule.class, NoiseSettings.SurfaceRule::fromJson);
+        register(builder, NoiseSettings.SurfaceRule.SurfaceRuleCondition.class, NoiseSettings.SurfaceRule.SurfaceRuleCondition::fromJson);
+        register(builder, NoiseSettings.SurfaceRule.SurfaceRuleCondition.VerticalAnchor.class, NoiseSettings.SurfaceRule.SurfaceRuleCondition.VerticalAnchor::fromJson);
+        register(builder, CubicSpline.class, CubicSpline::fromJson);
+        register(builder, DensityFunction.OldBlendedNoise.class, DensityFunction.OldBlendedNoise::fromJson);
 
         return builder.build();
     }
@@ -131,19 +143,24 @@ public class DatapackLoader {
         };
     }
 
-    private static ThreadLocal<LoadingContext> contextPool = new ThreadLocal<>();
+    private static final ThreadLocal<LoadingContext> contextPool = new ThreadLocal<>();
 
     public static LoadingContext loading() {
-        return contextPool.get();
+        LoadingContext context = contextPool.get();
+        if (context == null) {
+            throw new RuntimeException(new IllegalAccessException("Not in a datapack loading context"));
+        }
+        return context;
     }
 
     public interface LoadingContext {
         WorldgenRandom random();
 
-        /**
-         * @return the fully loaded datapack, or throws a runtime exception if the datapack is not fully loaded yet
-         */
-        Datapack acquire();
+        void whenFinished(Consumer<DatapackFinisher> finishAction);
+    }
+
+    public interface DatapackFinisher {
+        Datapack datapack();
     }
 
     public Datapack load(FileSystem<ByteArray> source) {
@@ -156,7 +173,7 @@ public class DatapackLoader {
 
         // Load this datapack on this thread, so that we can use the thread-local contextPool
         WorldgenRandom loading = WorldgenRandom.standard(0);
-        AtomicReference<Datapack> datapackRef = new AtomicReference<>();
+        Queue<Consumer<DatapackFinisher>> finishers = new ArrayDeque<>();
         LoadingContext context = new LoadingContext() {
             @Override
             public WorldgenRandom random() {
@@ -164,23 +181,18 @@ public class DatapackLoader {
             }
 
             @Override
-            public Datapack acquire() {
-                Datapack datapack = datapackRef.get();
-                if (datapack == null) {
-                    throw new IllegalStateException("Datapack not loaded yet");
-                }
-                return datapack;
+            public void whenFinished(Consumer<DatapackFinisher> finishAction) {
+                finishers.add(finishAction);
             }
         };
         contextPool.set(context);
 
-        Map<NamespaceID, NamespacedData> namespace2data;
+        Map<String, NamespacedData> namespace2data;
         {
             namespace2data = new HashMap<>();
 
             for (String namespace : source.folders()) {
                 FileSystem<ByteArray> dataFolder = source.folder(namespace).inMemory();
-                NamespaceID namespaceID = NamespaceID.from(namespace);
 
                 FileSystem<Advancement> advancements = parseJsonFolder(dataFolder, "advancements", adaptor(Advancement.class));
                 FileSystem<McFunction> functions = parseJsonFolder(dataFolder, "functions", McFunction::fromString);
@@ -197,16 +209,16 @@ public class DatapackLoader {
                 Datapack.WorldGen world_gen = Datapack.WorldGen.from(dataFolder.folder("worldgen"));
 
                 NamespacedData data = new NamespacedData(advancements, functions, item_modifiers, loot_tables, predicates, recipes, structures, chat_type, damage_type, tags, dimensions, dimension_type, world_gen);
-                namespace2data.put(namespaceID, data);
+                namespace2data.put(namespace, data);
             }
         }
 
         var copy = namespace2data.entrySet().stream()
                 .map(entry -> Map.entry(entry.getKey(), entry.getValue().cache()))
                 .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
-        return new Datapack() {
+        Datapack datapack = new Datapack() {
             @Override
-            public Map<NamespaceID, NamespacedData> namespacedData() {
+            public Map<String, NamespacedData> namespacedData() {
                 return copy;
             }
 
@@ -217,6 +229,13 @@ public class DatapackLoader {
                         '}';
             }
         };
+
+        // new we can finish the datapack
+        while (!finishers.isEmpty()) {
+            finishers.poll().accept(() -> datapack);
+        }
+        contextPool.remove();
+        return datapack;
     }
 
     private static <T> void register(Moshi.Builder builder, Class<T> clazz, JsonAdapter<T> adapter) {
@@ -303,6 +322,21 @@ public class DatapackLoader {
                     return range;
                 };
             case NUMBER -> json -> new FloatRange((float) json.nextDouble());
+            default -> null;
+        });
+    }
+
+    private static DoubleList doubleListFromJson(JsonReader reader) throws IOException {
+        return JsonUtils.typeMap(reader, token -> switch (token) {
+            case BEGIN_ARRAY -> json -> {
+                    json.beginArray();
+                    DoubleList list = new DoubleArrayList();
+                    while (json.peek() == JsonReader.Token.NUMBER) {
+                        list.add(json.nextDouble());
+                    }
+                    json.endArray();
+                    return DoubleLists.unmodifiable(list);
+                };
             default -> null;
         });
     }

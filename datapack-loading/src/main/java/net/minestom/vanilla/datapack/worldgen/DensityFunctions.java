@@ -1,14 +1,22 @@
 package net.minestom.vanilla.datapack.worldgen;
 
+import com.squareup.moshi.Json;
+import com.squareup.moshi.JsonReader;
 import it.unimi.dsi.fastutil.doubles.Double2DoubleFunction;
+import it.unimi.dsi.fastutil.longs.Long2DoubleMap;
+import it.unimi.dsi.fastutil.longs.Long2DoubleOpenHashMap;
+import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.worldgen.math.CubicSpline;
 import net.minestom.vanilla.datapack.worldgen.noise.BlendedNoise;
 import net.minestom.vanilla.datapack.worldgen.noise.Noise;
-import net.minestom.vanilla.datapack.worldgen.noise.NormalNoise;
 import net.minestom.vanilla.datapack.worldgen.noise.SimplexNoise;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
+import net.minestom.vanilla.datapack.worldgen.storage.DoubleStorage;
+import net.minestom.vanilla.datapack.worldgen.util.Util;
+import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.function.DoubleSupplier;
 
@@ -89,15 +97,20 @@ interface DensityFunctions {
         }
     }
 
-    record OldBlendedNoise(BlendedNoise noise) implements DensityFunction {
+    class OldBlendedNoise implements DensityFunction {
 
-        // TODO: Do we need this?
-        public OldBlendedNoise(double xz_scale,
-                               double y_scale,
-                               double xz_factor,
-                               double y_factor,
-                               double smear_scale_multiplier) {
-            this(new BlendedNoise(DatapackLoader.loading().random(), xz_scale, y_scale, xz_factor, y_factor, smear_scale_multiplier));
+        private final BlendedNoise noise;
+
+        private OldBlendedNoise(Params params) {
+            this.noise = new BlendedNoise(DatapackLoader.loading().random(), params.xz_scale(), params.y_scale(), params.xz_factor(), params.y_factor(), params.smear_scale_multiplier());
+        }
+
+        public record Params(double xz_scale, double y_scale, double xz_factor, double y_factor, double smear_scale_multiplier) {
+        }
+
+        public static OldBlendedNoise fromJson(JsonReader reader) throws IOException {
+            Params params = DatapackLoader.moshi(Params.class).apply(reader);
+            return new OldBlendedNoise(params);
         }
 
         @Override
@@ -107,12 +120,12 @@ interface DensityFunctions {
 
         @Override
         public double maxValue() {
-            return Double.POSITIVE_INFINITY;
+            return noise.minValue();
         }
 
         @Override
         public double minValue() {
-            return Double.NEGATIVE_INFINITY;
+            return noise.maxValue();
         }
     }
 
@@ -132,21 +145,21 @@ interface DensityFunctions {
 
     class FlatCache implements Wrapped {
 
-        private final DensityFunction wrapped;
+        private final DensityFunction argument;
 
         private int lastQuartX = 0;
         private int lastQuartZ = 0;
         private double lastValue = 0;
 
         public FlatCache(DensityFunction argument) {
-            this.wrapped = argument;
+            this.argument = argument;
         }
 
         public double compute(Context context) {
             int quartX = context.blockX() >> 2;
             int quartZ = context.blockZ() >> 2;
             if (this.lastQuartX != quartX || this.lastQuartZ != quartZ) {
-                this.lastValue = this.wrapped.compute(DensityFunction.context(quartX << 2, 0, quartZ << 2));
+                this.lastValue = this.argument.compute(DensityFunction.context(quartX << 2, 0, quartZ << 2));
                 this.lastQuartX = quartX;
                 this.lastQuartZ = quartZ;
             }
@@ -155,21 +168,30 @@ interface DensityFunctions {
 
         @Override
         public DensityFunction wrapped() {
-            return wrapped;
+            return argument;
         }
     }
 
-    // TODO: Add double storage optimization back in
-    record Interpolated(DensityFunction argument/*, DoubleStorage storage */) implements Wrapped {
+    class Interpolated implements Wrapped {
+        private final DensityFunction argument;
 
-//        public Interpolated(DensityFunction wrapped) {
-//            this(wrapped, DoubleStorage.exactCache(DoubleStorage.from(wrapped)));
-//        }
+        @Json(ignore = true)
+        private @Nullable DoubleStorage cache;
 
+        public Interpolated(DensityFunction argument) {
+            this.argument = argument;
+        }
 
         @Override
         public DensityFunction wrapped() {
             return argument();
+        }
+
+        private DoubleStorage cache() {
+            if (cache == null) {
+                cache = DoubleStorage.threadLocal(() -> DoubleStorage.from(argument).exactCache());
+            }
+            return cache;
         }
 
         @Override
@@ -197,52 +219,55 @@ interface DensityFunctions {
         }
 
         private double computeCorner(int x, int y, int z) {
-//            return storage.obtain(x, y, z);
-            return wrapped().compute(DensityFunction.context(x, y, z));
+            return cache().obtain(x, y, z);
         }
 
+        public DensityFunction argument() {
+            return argument;
+        }
     }
 
     class Cache2D implements Wrapped {
         // Only computes the input density once per horizonal position.
-        // TODO: Use a deep cache instead of a shallow (only caches the last value) cache.
 
-        private final DensityFunction wrapped;
+        private final DensityFunction argument;
 
-        private int lastBlockX = 0;
-        private int lastBlockZ = 0;
-        private double lastValue = 0;
+        @Json(ignore = true)
+        private DoubleStorage cache;
 
-        public Cache2D(DensityFunction wrapped) {
-            this.wrapped = wrapped;
+        public Cache2D(DensityFunction argument) {
+            this.argument = argument;
+        }
+
+        private DoubleStorage cache() {
+            if (cache == null) {
+                cache = DoubleStorage.threadLocal(() -> DoubleStorage.from(argument).exactCache2d());
+            }
+            return cache;
         }
 
         public double compute(Context context) {
             int blockX = context.blockX();
+            int blockY = context.blockY();
             int blockZ = context.blockZ();
-            if (this.lastBlockX != blockX || this.lastBlockZ != blockZ) {
-                this.lastValue = this.wrapped.compute(context);
-                this.lastBlockX = blockX;
-                this.lastBlockZ = blockZ;
-            }
-            return this.lastValue;
+            return cache().obtain(blockX, blockY, blockZ);
         }
 
         @Override
         public DensityFunction wrapped() {
-            return wrapped;
+            return argument;
         }
     }
 
     class CacheOnce implements Wrapped {
 
-        private final DensityFunction wrapped;
+        private final DensityFunction argument;
 
         private int lastHash = 0;
         private double lastValue = 0;
 
-        public CacheOnce(DensityFunction wrapped) {
-            this.wrapped = wrapped;
+        public CacheOnce(DensityFunction argument) {
+            this.argument = argument;
         }
 
         public double compute(Context context) {
@@ -251,7 +276,7 @@ interface DensityFunctions {
             int blockZ = context.blockZ();
             int hash = Objects.hash(blockX, blockY, blockZ);
             if (this.lastHash != hash) {
-                this.lastValue = this.wrapped.compute(context);
+                this.lastValue = this.argument.compute(context);
                 this.lastHash = hash;
             }
             return this.lastValue;
@@ -259,7 +284,7 @@ interface DensityFunctions {
 
         @Override
         public DensityFunction wrapped() {
-            return wrapped;
+            return argument;
         }
     }
 
@@ -429,36 +454,41 @@ interface DensityFunctions {
         }
     }
 
-    record ShiftedNoise(double xz_scale, double y_scale, DensityFunction shiftX, DensityFunction shiftY, DensityFunction shiftZ, NormalNoise noise) implements DensityFunction {
+    record ShiftedNoise(double xz_scale, double y_scale, DensityFunction shift_x, DensityFunction shift_y, DensityFunction shift_z, Noise noise) implements DensityFunction {
         public double compute(Context context) {
             return this.noise.sample(
-                    context.x() * this.xz_scale() + this.shiftX.compute(context),
-                    context.y() * this.y_scale() + this.shiftY.compute(context),
-                    context.z() * this.xz_scale() + this.shiftZ.compute(context)
+                    context.x() * this.xz_scale() + this.shift_x.compute(context),
+                    context.y() * this.y_scale() + this.shift_y.compute(context),
+                    context.z() * this.xz_scale() + this.shift_z.compute(context)
             );
         }
 
         @Override
         public double maxValue() {
-            return noise().maxValue;
+            return noise().maxValue();
+        }
+
+        @Override
+        public double minValue() {
+            return noise().minValue();
         }
     }
 
-    record RangeChoice(DensityFunction input, double minInclusive, double maxExclusive, DensityFunction whenInRange,
-                       DensityFunction whenOutOfRange) implements DensityFunction {
+    record RangeChoice(DensityFunction input, double min_inclusive, double max_exclusive, DensityFunction when_in_range,
+                       DensityFunction when_out_of_range) implements DensityFunction {
 
         public double compute(Context context) {
-            return this.input.compute(context) >= this.minInclusive && this.input.compute(context) < this.maxExclusive
-                    ? this.whenInRange.compute(context)
-                    : this.whenOutOfRange.compute(context);
+            return this.input.compute(context) >= this.min_inclusive && this.input.compute(context) < this.max_exclusive
+                    ? this.when_in_range.compute(context)
+                    : this.when_out_of_range.compute(context);
         }
 
         public double minValue() {
-            return Math.min(this.whenInRange.minValue(), this.whenOutOfRange.minValue());
+            return Math.min(this.when_in_range.minValue(), this.when_out_of_range.minValue());
         }
 
         public double maxValue() {
-            return Math.max(this.whenInRange.maxValue(), this.whenOutOfRange.maxValue());
+            return Math.max(this.when_in_range.maxValue(), this.when_out_of_range.maxValue());
         }
     }
 
@@ -521,19 +551,19 @@ interface DensityFunctions {
         }
     }
 
-    record BlendDensity(DensityFunction input) implements DensityFunction {
+    record BlendDensity(DensityFunction argument) implements DensityFunction {
         @Override
         public double compute(Context context) {
-            // TODO: Not implemented
-            throw new UnsupportedOperationException("Not implemented");
+            // TODO: Actually implement this.
+            return argument.compute(context);
         }
 
         public double minValue() {
-            return -Double.MAX_VALUE;
+            return argument.minValue();
         }
 
         public double maxValue() {
-            return Double.MAX_VALUE;
+            return argument.maxValue();
         }
     }
 
@@ -553,104 +583,104 @@ interface DensityFunctions {
         }
     }
 
-    record Abs(DensityFunction input) implements DensityFunction {
+    record Abs(DensityFunction argument) implements DensityFunction {
 
         public double compute(Context context) {
-            double density = this.input.compute(context);
+            double density = this.argument.compute(context);
             return Math.abs(density);
         }
 
         public double minValue() {
             // the min value may be higher than 0 if the input's range doesn't include 0
-            if (this.input.minValue() <= 0 && this.input.maxValue() >= 0) {
+            if (this.argument.minValue() <= 0 && this.argument.maxValue() >= 0) {
                 return 0;
             }
-            return Math.min(Math.abs(this.input.minValue()), Math.abs(this.input.maxValue()));
+            return Math.min(Math.abs(this.argument.minValue()), Math.abs(this.argument.maxValue()));
         }
 
         public double maxValue() {
-            return Math.max(Math.abs(this.input.minValue()), Math.abs(this.input.maxValue()));
+            return Math.max(Math.abs(this.argument.minValue()), Math.abs(this.argument.maxValue()));
         }
     }
 
-    record Square(DensityFunction input) implements DensityFunction {
+    record Square(DensityFunction argument) implements DensityFunction {
 
         public double compute(Context context) {
-            double density = this.input.compute(context);
+            double density = this.argument.compute(context);
             return Util.square(density);
         }
 
         public double minValue() {
-            return Util.square(this.input.minValue());
+            return Util.square(this.argument.minValue());
         }
 
         public double maxValue() {
-            return Util.square(this.input.maxValue());
+            return Util.square(this.argument.maxValue());
         }
     }
 
-    record Cube(DensityFunction input) implements DensityFunction {
+    record Cube(DensityFunction argument) implements DensityFunction {
 
         public double compute(Context context) {
-            double density = this.input.compute(context);
+            double density = this.argument.compute(context);
             return Util.cube(density);
         }
 
         public double minValue() {
-            return Util.cube(this.input.minValue());
+            return Util.cube(this.argument.minValue());
         }
 
         public double maxValue() {
-            return Util.cube(this.input.maxValue());
+            return Util.cube(this.argument.maxValue());
         }
     }
 
-    record HalfNegative(DensityFunction input) implements DensityFunction {
+    record HalfNegative(DensityFunction argument) implements DensityFunction {
 
         public double compute(Context context) {
-            double density = this.input.compute(context);
+            double density = this.argument.compute(context);
             return density > 0 ? density : density * 0.5;
         }
 
         public double minValue() {
-            return this.input.minValue() * 0.5;
+            return this.argument.minValue() * 0.5;
         }
 
         public double maxValue() {
-            return this.input.maxValue();
+            return this.argument.maxValue() * 0.5;
         }
     }
 
-    record QuarterNegative(DensityFunction input) implements DensityFunction {
+    record QuarterNegative(DensityFunction argument) implements DensityFunction {
 
         public double compute(Context context) {
-            double density = this.input.compute(context);
+            double density = this.argument.compute(context);
             return density > 0 ? density : density * 0.25;
         }
 
         public double minValue() {
-            return this.input.minValue() * 0.25;
+            return this.argument.minValue() * 0.25;
         }
 
         public double maxValue() {
-            return this.input.maxValue();
+            return this.argument.maxValue();
         }
     }
 
-    record Squeeze(DensityFunction input) implements DensityFunction {
+    record Squeeze(DensityFunction argument) implements DensityFunction {
 
         public double compute(Context context) {
-            double density = this.input.compute(context);
+            double density = this.argument.compute(context);
             double c = Util.clamp(density, -1, 1);
             return c / 2.0 - c * c * c / 24.0;
         }
 
         public double minValue() {
-            return this.input.minValue() / 2.0 - this.input.maxValue() * this.input.maxValue() * this.input.maxValue() / 24.0;
+            return this.argument.minValue() / 2.0 - this.argument.maxValue() * this.argument.maxValue() * this.argument.maxValue() / 24.0;
         }
 
         public double maxValue() {
-            return this.input.maxValue() / 2.0 - this.input.minValue() * this.input.minValue() * this.input.minValue() / 24.0;
+            return this.argument.maxValue() / 2.0 - this.argument.minValue() * this.argument.minValue() * this.argument.minValue() / 24.0;
         }
     }
 
@@ -722,7 +752,7 @@ interface DensityFunctions {
         }
     }
 
-    record Spline(CubicSpline<Context> spline) implements DensityFunction {
+    record Spline(CubicSpline spline) implements DensityFunction {
         public double compute(Context context) {
             return this.spline.compute(context);
         }
@@ -736,18 +766,18 @@ interface DensityFunctions {
         }
     }
 
-    record YClampedGradient(double fromY, double toY, double fromValue, double toValue) implements DensityFunction {
+    record YClampedGradient(double from_y, double to_y, double from_value, double to_value) implements DensityFunction {
 
         public double compute(Context context) {
-            return Util.clampedMap(context.y(), this.fromY, this.toY, this.fromValue, this.toValue);
+            return Util.clampedMap(context.y(), this.from_y, this.to_y, this.from_value, this.to_value);
         }
 
         public double minValue() {
-            return Math.min(this.fromValue, this.toValue);
+            return Math.min(this.from_value, this.to_value);
         }
 
         public double maxValue() {
-            return Math.max(this.fromValue, this.toValue);
+            return Math.max(this.from_value, this.to_value);
         }
     }
 }

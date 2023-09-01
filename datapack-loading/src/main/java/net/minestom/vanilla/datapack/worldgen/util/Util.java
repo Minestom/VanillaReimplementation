@@ -1,4 +1,4 @@
-package net.minestom.vanilla.datapack.worldgen;
+package net.minestom.vanilla.datapack.worldgen.util;
 
 import com.google.gson.*;
 import net.minestom.server.coordinate.Point;
@@ -92,19 +92,20 @@ public class Util {
         return clampedLerp(d, e, inverseLerp(a, b, c));
     }
 
-    public static int binarySearch(int n, int n2, IntPredicate predicate) {
-        int n3 = n2 - n;
-        while (n3 > 0) {
-            int n4 = (int) Math.floor(n3 / 2.0);
-            int n5 = n + n4;
-            if (predicate.test(n5)) {
-                n3 = n4;
-                continue;
+    /**
+     * Finds the index of the first value that matches the predicate
+     * @param min inclusive
+     * @param max exclusive
+     */
+    public static int binarySearch(int min, int max, IntPredicate predicate) {
+        // TODO: Make this an actual binary search
+        // slow version
+        for (int i = min; i < max; i++) {
+            if (predicate.test(i)) {
+                return i;
             }
-            n = n5 + 1;
-            n3 -= n4 + 1;
         }
-        return n;
+        return -1;
     }
 
     public static long getSeed(long x, long y, long z) {

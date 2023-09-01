@@ -1,14 +1,14 @@
-package net.minestom.vanilla.datapack.worldgen;
+package net.minestom.vanilla.generation;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.vanilla.datapack.worldgen.noise.NoiseChunk;
+import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
+import net.minestom.vanilla.datapack.worldgen.WorldgenContext;
+import net.minestom.vanilla.datapack.worldgen.WorldgenRegistries;
 import net.minestom.vanilla.datapack.worldgen.noise.NormalNoise;
-import net.minestom.vanilla.datapack.worldgen.noise.SurfaceContext;
-import net.minestom.vanilla.datapack.worldgen.noise.VerticalAnchor;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 import net.minestom.vanilla.datapack.worldgen.random.XoroshiroRandom;
 
@@ -34,12 +34,12 @@ public class SurfaceSystem {
         this.defaultBlock = defaultBlock;
     }
 
-    public void buildSurface(NoiseChunkGenerator.TargetChunk chunk, NoiseChunk noiseChunk, VerticalAnchor.WorldgenContext worldgenContext, Function<Point, NamespaceID> getBiome) {
+    public void buildSurface(NoiseChunkGenerator.TargetChunk chunk, NoiseChunk noiseChunk, WorldgenContext context, Function<Point, NamespaceID> getBiome) {
         int minX = chunk.minX();
         int minZ = chunk.minZ();
         int minY = chunk.minY();
         int maxY = chunk.maxY();
-        SurfaceContext surfaceContext = new SurfaceContext(this, chunk, noiseChunk, worldgenContext, getBiome);
+        SurfaceContext surfaceContext = new SurfaceContext(this, chunk, noiseChunk, context, getBiome);
         var ruleWithContext = this.rule.apply(surfaceContext);
 
         for (int x = 0; x < Chunk.CHUNK_SIZE_X; x += 1) {

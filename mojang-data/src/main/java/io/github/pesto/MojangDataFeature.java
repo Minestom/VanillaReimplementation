@@ -10,7 +10,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class MojangDataFeature implements VanillaReimplementation.Feature {
 
-    private static final String LATEST = "1.19.2";
+    private static final String LATEST = "1.20.1";
     private final MojangAssets assets = new MojangAssets();
 
     @Override

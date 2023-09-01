@@ -71,4 +71,9 @@ public class DynamicFileSystem<F> implements FileSystem<F> {
     public String toString() {
         return FileSystem.toString(this);
     }
+
+    @Override
+    public FileSystem<F> inMemory() {
+        return this;
+    }
 }

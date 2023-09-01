@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.worldgen.DensityFunction;
-import net.minestom.vanilla.datapack.worldgen.Util;
+import net.minestom.vanilla.datapack.worldgen.util.Util;
 
 import java.util.List;
 import java.util.Map;

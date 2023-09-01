@@ -22,7 +22,7 @@ import java.util.*;
 
 public interface Datapack {
 
-    Map<NamespaceID, NamespacedData> namespacedData();
+    Map<String, NamespacedData> namespacedData();
 
     static Datapack loadPrimitiveByteArray(FileSystem<byte[]> source) {
         return loadByteArray(source.map(ByteArray::wrap));
@@ -71,6 +71,10 @@ public interface Datapack {
                           FileSystem<DimensionType> dimension_type,
                           WorldGen world_gen) {
 
+        /**
+         * Performs a deep cache on all of the data.
+         * This helps us load all density functions while in the loading context.
+         */
         NamespacedData cache() {
             return new NamespacedData(
                     advancements.cache(),
@@ -79,13 +83,13 @@ public interface Datapack {
                     loot_tables.cache(),
                     predicates.cache(),
                     recipes.cache(),
-                    structures.cache(),
+                    structures.lazy(), // structures may be large, so we don't want to cache them immediately
                     chat_type.cache(),
                     damage_type.cache(),
-                    tags,
+                    tags.cache(),
                     dimensions.cache(),
                     dimension_type.cache(),
-                    world_gen
+                    world_gen.cache()
             );
         }
     }
@@ -107,6 +111,10 @@ public interface Datapack {
 
         public static Tags from(FileSystem<String> tags) {
             return new Tags(null, List.of());
+        }
+
+        public Tags cache() {
+            return new Tags(replace, values);
         }
 
         sealed interface ReferenceTag extends TagValue {
@@ -160,6 +168,25 @@ public interface Datapack {
                     worldgen.folder("structure_set"),
                     worldgen.folder("template_pool"),
                     worldgen.folder("world_preset")
+            );
+        }
+
+        public WorldGen cache() {
+            return new WorldGen(
+                    biome.cache(),
+                    configured_carver.cache(),
+                    configured_feature.cache(),
+                    density_function.cache(),
+                    flat_level_generator_preset.cache(),
+                    multi_noise_biome_source_parameter_list.cache(),
+                    noise.cache(),
+                    noise_settings.cache(),
+                    placed_feature.cache(),
+                    processor_list.cache(),
+                    structure.cache(),
+                    structure_set.cache(),
+                    template_pool.cache(),
+                    world_preset.cache()
             );
         }
     }

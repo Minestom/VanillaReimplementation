@@ -1,6 +1,7 @@
 package net.minestom.vanilla.datapack.worldgen;
 
 import com.squareup.moshi.JsonReader;
+import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.worldgen.math.NumberFunction;
 
@@ -16,8 +17,9 @@ public interface DensityFunction extends DensityFunctions, NumberFunction<Densit
     double maxValue();
 
     static DensityFunction fromJson(JsonReader reader) throws IOException {
-        return JsonUtils.<DensityFunction>typeMap(reader, token -> switch (token) {
+        return JsonUtils.typeMap(reader, token -> switch (token) {
             case NUMBER -> json -> new Constant(json.nextDouble());
+            case STRING -> json -> new LazyLoadedDensityFunction(json.nextString(), DatapackLoader.loading());
             case BEGIN_OBJECT -> json -> JsonUtils.unionStringTypeAdapted(json, "type", type -> switch (type) {
                 case "minecraft:blend_alpha" -> BlendAlpha.class;
                 case "minecraft:blend_offset" -> BlendOffset.class;

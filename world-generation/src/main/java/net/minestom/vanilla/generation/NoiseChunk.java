@@ -1,4 +1,4 @@
-package net.minestom.vanilla.datapack.worldgen.noise;
+package net.minestom.vanilla.generation;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;

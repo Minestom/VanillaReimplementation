@@ -1,9 +1,11 @@
-package net.minestom.vanilla.datapack.worldgen;
+package net.minestom.vanilla.generation;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
-import net.minestom.vanilla.datapack.worldgen.noise.NoiseChunk;
+import net.minestom.vanilla.datapack.worldgen.DensityFunction;
+import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
+import net.minestom.vanilla.datapack.worldgen.util.Util;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 import org.jetbrains.annotations.Nullable;
 

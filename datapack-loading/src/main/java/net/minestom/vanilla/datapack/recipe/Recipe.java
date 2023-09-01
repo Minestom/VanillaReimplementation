@@ -20,30 +20,33 @@ public interface Recipe {
     @Nullable String group();
 
     static Recipe fromJson(JsonReader reader) throws IOException {
-        String src = reader.peekJson().nextSource().readUtf8();
-        return JsonUtils.unionStringTypeMapAdapted(reader, "type", Map.ofEntries(
-            Map.entry("minecraft:blasting", Blasting.class),
-            Map.entry("minecraft:campfire_cooking", CampfireCooking.class),
-            Map.entry("minecraft:crafting_shaped", Shaped.class),
-            Map.entry("minecraft:crafting_shapeless", Shapeless.class),
-            Map.entry("minecraft:crafting_special_armordye", Special.ArmorDye.class),
-            Map.entry("minecraft:crafting_special_bannerduplicate", Special.BannerDuplicate.class),
-            Map.entry("minecraft:crafting_special_bookcloning", Special.BookCloning.class),
-            Map.entry("minecraft:crafting_special_firework_rocket", Special.FireworkRocket.class),
-            Map.entry("minecraft:crafting_special_firework_star", Special.FireworkStar.class),
-            Map.entry("minecraft:crafting_special_firework_star_fade", Special.FireworkStarFade.class),
-            Map.entry("minecraft:crafting_special_mapcloning", Special.MapCloning.class),
-            Map.entry("minecraft:crafting_special_mapextending", Special.MapExtending.class),
-            Map.entry("minecraft:crafting_special_repairitem", Special.RepairItem.class),
-            Map.entry("minecraft:crafting_special_shielddecoration", Special.ShieldDecoration.class),
-            Map.entry("minecraft:crafting_special_shulkerboxcoloring", Special.ShulkerBoxColoring.class),
-            Map.entry("minecraft:crafting_special_tippedarrow", Special.TippedArrow.class),
-            Map.entry("minecraft:crafting_special_suspiciousstew", Special.SuspiciousStew.class),
-            Map.entry("minecraft:smelting", Smelting.class),
-            Map.entry("minecraft:smithing", Smithing.class),
-            Map.entry("minecraft:smoking", Smoking.class),
-            Map.entry("minecraft:stonecutting", Stonecutting.class)
-        ));
+        return JsonUtils.unionStringTypeAdapted(reader, "type", type -> switch(type) {
+            case "minecraft:blasting" -> Blasting.class;
+            case "minecraft:campfire_cooking" -> CampfireCooking.class;
+            case "minecraft:crafting_shaped" -> Shaped.class;
+            case "minecraft:crafting_shapeless" -> Shapeless.class;
+            case "minecraft:crafting_special_armordye" -> Special.ArmorDye.class;
+            case "minecraft:crafting_special_bannerduplicate" -> Special.BannerDuplicate.class;
+            case "minecraft:crafting_special_bookcloning" -> Special.BookCloning.class;
+            case "minecraft:crafting_special_firework_rocket" -> Special.FireworkRocket.class;
+            case "minecraft:crafting_special_firework_star" -> Special.FireworkStar.class;
+            case "minecraft:crafting_special_firework_star_fade" -> Special.FireworkStarFade.class;
+            case "minecraft:crafting_special_mapcloning" -> Special.MapCloning.class;
+            case "minecraft:crafting_special_mapextending" -> Special.MapExtending.class;
+            case "minecraft:crafting_special_repairitem" -> Special.RepairItem.class;
+            case "minecraft:crafting_special_shielddecoration" -> Special.ShieldDecoration.class;
+            case "minecraft:crafting_special_shulkerboxcoloring" -> Special.ShulkerBoxColoring.class;
+            case "minecraft:crafting_special_tippedarrow" -> Special.TippedArrow.class;
+            case "minecraft:crafting_special_suspiciousstew" -> Special.SuspiciousStew.class;
+            case "minecraft:crafting_decorated_pot" -> DecoratedPot.class;
+            case "minecraft:smelting" -> Smelting.class;
+            case "minecraft:smithing" -> Smithing.class;
+            case "minecraft:smoking" -> Smoking.class;
+            case "minecraft:stonecutting" -> Stonecutting.class;
+            case "minecraft:smithing_trim" -> SmithingTrim.class;
+            case "minecraft:smithing_transform" -> SmithingTransform.class;
+            default -> null;
+        });
     }
 
     interface CookingRecipe extends Recipe {
@@ -224,6 +227,14 @@ public interface Recipe {
         }
     }
 
+
+    record DecoratedPot(String group, String category) implements Recipe {
+        @Override
+        public @NotNull NamespaceID type() {
+            return NamespaceID.from("minecraft:decorated_pot");
+        }
+    }
+
     record Smelting(String group,
                     JsonUtils.SingleOrList<Ingredient> ingredient, Material result, double experience, @Optional Integer cookingTime) implements CookingRecipe {
         @Override
@@ -253,6 +264,20 @@ public interface Recipe {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:stonecutting");
+        }
+    }
+
+    record SmithingTrim(String group, Ingredient.Single base, Ingredient.Single addition, Ingredient.Single result, Ingredient.Single template) implements Recipe {
+        @Override
+        public @NotNull NamespaceID type() {
+            return NamespaceID.from("minecraft:smithing_trim");
+        }
+    }
+
+    record SmithingTransform(String group, Ingredient.Single base, Ingredient.Single addition, Ingredient.Single result, Ingredient.Single template) implements Recipe {
+        @Override
+        public @NotNull NamespaceID type() {
+            return NamespaceID.from("minecraft:smithing_transform");
         }
     }
 }
