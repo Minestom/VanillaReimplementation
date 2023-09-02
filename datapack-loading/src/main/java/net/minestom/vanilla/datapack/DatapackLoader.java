@@ -35,16 +35,12 @@ import org.jglrxavpok.hephaistos.parser.SNBTParser;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.lang.ref.Cleaner;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static net.minestom.vanilla.datapack.Datapack.*;
 
@@ -133,7 +129,7 @@ public class DatapackLoader {
                 FileSystem.empty();
     }
 
-    static <T> Function<String, T> adaptor(Class<T> clazz) {
+    public static <T> Function<String, T> adaptor(Class<T> clazz) {
         return str -> {
             try {
                 return moshi.adapter(clazz).fromJson(str);
@@ -172,7 +168,7 @@ public class DatapackLoader {
 //        ImageIO.read(pack_png.toStream());
 
         // Load this datapack on this thread, so that we can use the thread-local contextPool
-        WorldgenRandom loading = WorldgenRandom.standard(0);
+        WorldgenRandom loading = WorldgenRandom.xoroshiro(0);
         Queue<Consumer<DatapackFinisher>> finishers = new ArrayDeque<>();
         LoadingContext context = new LoadingContext() {
             @Override

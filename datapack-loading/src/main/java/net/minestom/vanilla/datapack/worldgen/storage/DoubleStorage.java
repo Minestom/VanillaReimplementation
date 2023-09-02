@@ -16,16 +16,16 @@ public interface DoubleStorage {
      * A storage that caches an exact, unique value for each 3d coordinate once.
      * @return a new storage that caches the original
      */
-    default DoubleStorage exactCache() {
-        return new DoubleStorageExactImpl(this);
+    default DoubleStorage cache() {
+        return new DoubleStorageCache(this);
     }
 
     /**
      * A storage that caches an exact, unique value for the 2d coordinate (x, z) once.
      * @return a new storage that caches the original
      */
-    default DoubleStorage exactCache2d() {
-        return new DoubleStorageExact2dImpl(this);
+    default DoubleStorage cache2d() {
+        return new DoubleStorageCache2d(this);
     }
 
     static DoubleStorage threadLocal(Supplier<DoubleStorage> supplier) {

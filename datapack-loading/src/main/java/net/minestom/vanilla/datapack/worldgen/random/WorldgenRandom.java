@@ -2,20 +2,24 @@ package net.minestom.vanilla.datapack.worldgen.random;
 
 import net.minestom.vanilla.datapack.worldgen.util.Util;
 
-public interface WorldgenRandom {
-    static WorldgenRandom standard(long seed) {
+import java.util.random.RandomGenerator;
+
+public interface WorldgenRandom extends RandomGenerator {
+    static WorldgenRandom xoroshiro(long seed) {
         return new XoroshiroRandom(seed);
     }
 
-    void consume(int count);
-
-    int nextInt(int max);
+    static WorldgenRandom legacy(long i) {
+        return new LegacyRandom(i);
+    }
 
     long nextLong();
 
-    float nextFloat();
-
-    double nextDouble();
+    default void consumeInt(int i) {
+        for (int j = 0; j < i; j++) {
+            nextInt();
+        }
+    }
 
     WorldgenRandom fork();
 

@@ -2,16 +2,14 @@ package net.minestom.vanilla.datapack.worldgen.storage;
 
 import it.unimi.dsi.fastutil.longs.Long2DoubleMap;
 import it.unimi.dsi.fastutil.longs.Long2DoubleOpenHashMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import space.vectrix.flare.fastutil.Long2ObjectSyncMap;
 
-class DoubleStorageExactImpl implements DoubleStorage {
+class DoubleStorageCache implements DoubleStorage {
 
     private final DoubleStorage original;
 
     // The storage
     private final Long2DoubleMap storage = new Long2DoubleOpenHashMap();
-    public DoubleStorageExactImpl(DoubleStorage original) {
+    public DoubleStorageCache(DoubleStorage original) {
         this.original = original;
     }
 

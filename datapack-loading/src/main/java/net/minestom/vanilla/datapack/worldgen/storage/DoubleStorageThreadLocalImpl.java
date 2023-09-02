@@ -2,7 +2,7 @@ package net.minestom.vanilla.datapack.worldgen.storage;
 
 import java.util.function.Supplier;
 
-public class DoubleStorageThreadLocalImpl implements DoubleStorage {
+class DoubleStorageThreadLocalImpl implements DoubleStorage {
 
     private final ThreadLocal<DoubleStorage> threadLocal;
     public DoubleStorageThreadLocalImpl(Supplier<DoubleStorage> supplier) {

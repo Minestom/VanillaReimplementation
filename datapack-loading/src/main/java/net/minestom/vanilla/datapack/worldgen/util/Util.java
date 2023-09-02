@@ -108,10 +108,10 @@ public class Util {
         return -1;
     }
 
-    public static long getSeed(long x, long y, long z) {
-        long seed = (x * 3129871L) ^ z * 116129781L ^ y;
+    public static long getSeed(int x, int y, int z) {
+        long seed = (x * 3129871L) ^ (long) z * 116129781L ^ (long) y;
         seed = seed * seed * 42317861L + seed * 11L;
-        return seed >> 16L;
+        return seed >> 16;
     }
 
     public static long longfromBytes(byte a, byte b, byte c, byte d, byte e, byte f, byte g, byte h) {

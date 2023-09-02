@@ -3,9 +3,6 @@ package net.minestom.vanilla.datapack.worldgen;
 import com.squareup.moshi.Json;
 import com.squareup.moshi.JsonReader;
 import it.unimi.dsi.fastutil.doubles.Double2DoubleFunction;
-import it.unimi.dsi.fastutil.longs.Long2DoubleMap;
-import it.unimi.dsi.fastutil.longs.Long2DoubleOpenHashMap;
-import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.worldgen.math.CubicSpline;
 import net.minestom.vanilla.datapack.worldgen.noise.BlendedNoise;
@@ -43,6 +40,7 @@ interface DensityFunctions {
         }
     }
 
+    // blend_alpha goes from 0 ("use old terrain") to 1 ("use new terrain")
     record BlendAlpha() implements DensityFunction {
 
         @Override
@@ -61,6 +59,7 @@ interface DensityFunctions {
         }
     }
 
+    // blend_offset and blend_density are the offset and density values to use for the old terrain.
     record BlendOffset() implements DensityFunction {
 
         @Override
@@ -189,7 +188,7 @@ interface DensityFunctions {
 
         private DoubleStorage cache() {
             if (cache == null) {
-                cache = DoubleStorage.threadLocal(() -> DoubleStorage.from(argument).exactCache());
+                cache = DoubleStorage.threadLocal(() -> DoubleStorage.from(argument).cache());
             }
             return cache;
         }
@@ -241,7 +240,7 @@ interface DensityFunctions {
 
         private DoubleStorage cache() {
             if (cache == null) {
-                cache = DoubleStorage.threadLocal(() -> DoubleStorage.from(argument).exactCache2d());
+                cache = DoubleStorage.threadLocal(() -> DoubleStorage.from(argument).cache2d());
             }
             return cache;
         }
@@ -323,8 +322,8 @@ interface DensityFunctions {
         }
 
         public EndIslands(long seed) {
-            WorldgenRandom random = WorldgenRandom.standard(seed);
-            random.consume(17292);
+            WorldgenRandom random = WorldgenRandom.legacy(seed);
+            random.consumeInt(17292);
             this.islandNoise = new SimplexNoise(random);
         }
 

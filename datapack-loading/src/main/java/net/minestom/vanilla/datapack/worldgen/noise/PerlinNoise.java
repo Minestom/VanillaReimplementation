@@ -38,7 +38,7 @@ public class PerlinNoise implements Noise {
                 if (i < amplitudes.size() && amplitudes.getDouble(i) != 0) {
                     this.noiseLevels[i] = new ImprovedNoise(random);
                 } else {
-                    random.consume(262);
+                    random.consumeInt(262);
                 }
             }
         }

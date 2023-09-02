@@ -111,13 +111,6 @@ public class XoroshiroRandom extends Random implements WorldgenRandom {
     }
 
     @Override
-    public void consume(int count) {
-        for (int i = 0; i < count; i++) {
-            nextLong();
-        }
-    }
-
-    @Override
     public int nextInt(final int n) {
         return (int) nextLong(n);
     }
