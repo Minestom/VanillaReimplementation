@@ -71,20 +71,25 @@ public class ImprovedNoise implements Noise {
 
         // import { lerp3, smoothstep } from '../Util.js'
 
-        double n = SimplexNoise.gradDot(this.P(j + c), d, e, f);
-        double o = SimplexNoise.gradDot(this.P(l + c), d - 1.0, e, f);
-        double p = SimplexNoise.gradDot(this.P(k + c), d, e - 1.0, f);
-        double q = SimplexNoise.gradDot(this.P(m + c), d - 1.0, e - 1.0, f);
-        double r = SimplexNoise.gradDot(this.P(j + c + 1), d, e, f - 1.0);
-        double s = SimplexNoise.gradDot(this.P(l + c + 1), d - 1.0, e, f - 1.0);
-        double t = SimplexNoise.gradDot(this.P(k + c + 1), d, e - 1.0, f - 1.0);
-        double u = SimplexNoise.gradDot(this.P(m + c + 1), d - 1.0, e - 1.0, f - 1.0);
+        double n = gradDot(this.P(j + c), d, e, f);
+        double o = gradDot(this.P(l + c), d - 1.0, e, f);
+        double p = gradDot(this.P(k + c), d, e - 1.0, f);
+        double q = gradDot(this.P(m + c), d - 1.0, e - 1.0, f);
+        double r = gradDot(this.P(j + c + 1), d, e, f - 1.0);
+        double s = gradDot(this.P(l + c + 1), d - 1.0, e, f - 1.0);
+        double t = gradDot(this.P(k + c + 1), d, e - 1.0, f - 1.0);
+        double u = gradDot(this.P(m + c + 1), d - 1.0, e - 1.0, f - 1.0);
 
         double v = Util.smoothstep(d);
         double w = Util.smoothstep(g);
         double x = Util.smoothstep(f);
 
         return Util.lerp3(v, w, x, n, o, p, q, r, s, t, u);
+    }
+
+    public static double gradDot(int a, double b, double c, double d) {
+        var grad = SimplexNoise.GRADIENT[a & 15];
+        return grad[0] * b + grad[1] * c + grad[2] * d;
     }
 
     private int P(int i) {

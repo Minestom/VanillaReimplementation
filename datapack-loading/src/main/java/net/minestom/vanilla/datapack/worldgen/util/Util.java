@@ -33,7 +33,7 @@ public class Util {
     }
 
     public static double clamp(double x, double min, double max) {
-        return Math.max(min, Math.min(max, x));
+        return x < min ? min : Math.min(x, max);
     }
 
     public static double lerp(double a, double b, double c) {

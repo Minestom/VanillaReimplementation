@@ -23,6 +23,35 @@ public class LegacyRandom implements WorldgenRandom {
     }
 
     @Override
+    public int nextInt(int bound) {
+        if (bound <= 0) {
+            throw new IllegalArgumentException("Bound must be positive");
+        }
+
+        if ((bound & bound - 1) == 0) {
+            return (int) ((long) bound * (long) this.next(31) >> 31);
+        }
+
+        int prev;
+        int out;
+        prev = this.next(31);
+        out = prev % bound;
+        while (prev - out + (bound - 1) < 0) {
+            prev = this.next(31);
+            out = prev % bound;
+        }
+        return out;
+    }
+
+    @Override
+    public double nextDouble() {
+        int high = this.next(26);
+        int low = this.next(27);
+        long compose = ((long) high << 27) + (long) low;
+        return (double) compose * 1.1102230246251565E-16;
+    }
+
+    @Override
     public WorldgenRandom fork() {
         return new LegacyRandom(this.nextLong());
     }

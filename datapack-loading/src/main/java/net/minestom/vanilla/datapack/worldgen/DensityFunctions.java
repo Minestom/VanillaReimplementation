@@ -327,26 +327,24 @@ interface DensityFunctions {
             this.islandNoise = new SimplexNoise(random);
         }
 
-        private double getHeightValue(int x, int z) {
-            int x0 = Math.floorDiv(x, 2);
-            int z0 = Math.floorDiv(z, 2);
+        private double calculateHeightScale(int x, int z) {
+            int x0 = x / 2;
+            int z0 = z / 2;
             int x1 = x % 2;
             int z1 = z % 2;
-            double f = Util.clamp(100 - Math.sqrt(x * x + z * z), -100, 80);
+            double f = Util.clamp(100.0 - Math.sqrt((x * x + z * z)) * 8.0, -100.0, 80.0);
 
             for (int i = -12; i <= 12; ++i) {
                 for (int j = -12; j <= 12; ++j) {
-                    int x2 = x0 + i;
-                    int z2 = z0 + j;
-                    if (x2 * x2 + z2 * z2 <= 4096 || this.islandNoise.sample2D(x2, z2) >= -0.9) {
-                        continue;
+                    double x2 = x0 + i;
+                    double z2 = z0 + j;
+                    if (x2 * x2 + z2 * z2 > 4096L && this.islandNoise.sample2D(x2, z2) < -0.8999999761581421) {
+                        double f1 = (Math.abs((float) x2) * 3439F + Math.abs((float) z2) * 147F) % 13F + 9F; // we need to use floats here to match vanilla's float overflow
+                        double x3 = x1 - i * 2;
+                        double z3 = z1 - j * 2;
+                        double f2 = Util.clamp(100.0 - Math.sqrt(x3 * x3 + z3 * z3) * f1, -100.0, 80.0);
+                        f = Math.max(f, f2);
                     }
-                    int f1 = (Math.abs(x2) * 3439 + Math.abs(z2) * 147) % 13 + 9;
-                    int x3 = x1 + i * 2;
-                    int z3 = z1 + j * 2;
-                    double f2 = 100.0 - Math.sqrt(x3 * x3 + z3 * z3) * f1;
-                    double f3 = Util.clamp(f2, -100.0, 80.0);
-                    f = Math.max(f, f3);
                 }
             }
 
@@ -355,7 +353,7 @@ interface DensityFunctions {
 
         @Override
         public double compute(Context context) {
-            return (this.getHeightValue(Math.floorDiv(context.blockX(), 8), Math.floorDiv(context.blockZ(), 8)) - 8) / 128;
+            return (calculateHeightScale(context.blockX() / 8, context.blockZ() / 8) - 8.0) / 128.0;
         }
 
         @Override

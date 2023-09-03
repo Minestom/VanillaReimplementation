@@ -4,27 +4,29 @@ import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 
 public class SimplexNoise implements Noise {
 
-    private static final int[][] GRADIENT = new int[][]{{1, 1, 0}, {-1, 1, 0}, {1, -1, 0}, {-1, -1, 0}, {1, 0, 1},
+    static final int[][] GRADIENT = new int[][]{{1, 1, 0}, {-1, 1, 0}, {1, -1, 0}, {-1, -1, 0}, {1, 0, 1},
             {-1, 0, 1}, {1, 0, -1}, {-1, 0, -1}, {0, 1, 1}, {0, -1, 1}, {0, 1, -1}, {0, -1, -1}, {1, 1, 0}, {0, -1, 1},
             {-1, 1, 0}, {0, -1, -1}};
     private static final double F2 = 0.5 * (Math.sqrt(3.0) - 1.0);
     private static final double G2 = (3.0 - Math.sqrt(3.0)) / 6.0;
 
-    public final int[] p;
+    public final int[] p = new int[512];
     public final double xo;
     public final double yo;
     public final double zo;
 
     public SimplexNoise(WorldgenRandom random) {
-        this.xo = random.nextDouble() * 256;
-        this.yo = random.nextDouble() * 256;
-        this.zo = random.nextDouble() * 256;
-        this.p = new int[256];
+        this.xo = random.nextDouble() * 256.0;
+        this.yo = random.nextDouble() * 256.0;
+        this.zo = random.nextDouble() * 256.0;
 
-        for (int i = 0; i < 256; i += 1) {
-            this.p[i] = i;
+        {
+            int i = 0;
+            while (i < 256) {
+                this.p[i] = i++;
+            }
         }
-        for (int i = 0; i < 256; i += 1) {
+        for (int i = 0; i < 256; ++i) {
             int j = random.nextInt(256 - i);
             int b = this.p[i];
             this.p[i] = this.p[i + j];
@@ -32,119 +34,130 @@ public class SimplexNoise implements Noise {
         }
     }
 
-    public double sample2D(double d, double d2) {
-        double d3;
-        int n3;
-        double d4;
-        var d6 = (d + d2) * SimplexNoise.F2;
-        int n4 = (int) Math.floor(d + d6);
-        double d7 = n4 - (d3 = (n4 + (n3 = (int) Math.floor(d2 + d6))) * SimplexNoise.G2);
-        double d8 = d - d7;
-        int a;
-        int b;
-        if (d8 > (d4 = d2 - (n3 - d3))) {
-            a = 1;
-            b = 0;
+    public double sample2D(double x, double z) {
+        double offset = (x + z) * F2;
+        int offsetA = floor(x + offset);
+        int offsetB = floor(z + offset);
+        double diff = (double) (offsetA + offsetB) * G2;
+        double diffA = (double) offsetA - diff;
+        double diffB = (double) offsetB - diff;
+        double adjustedA = x - diffA;
+        double adjustedB = z - diffB;
+        byte aIsLarger;
+        byte bIsLarger;
+        if (adjustedA > adjustedB) {
+            aIsLarger = 1;
+            bIsLarger = 0;
         } else {
-            a = 0;
-            b = 1;
+            aIsLarger = 0;
+            bIsLarger = 1;
         }
-        double d9 = d8 - a + SimplexNoise.G2;
-        double d10 = d4 - b + SimplexNoise.G2;
-        double d11 = d8 - 1.0 + 2.0 * SimplexNoise.G2;
-        double d12 = d4 - 1.0 + 2.0 * SimplexNoise.G2;
-        int n5 = n4 & 0xFF;
-        int n6 = n3 & 0xFF;
-        int n7 = this.P(n5 + this.P(n6)) % 12;
-        int n8 = this.P(n5 + a + this.P(n6 + b)) % 12;
-        int n9 = this.P(n5 + 1 + this.P(n6 + 1)) % 12;
-        double d13 = this.getCornerNoise3D(n7, d8, d4, 0.0, 0.5);
-        double d14 = this.getCornerNoise3D(n8, d9, d10, 0.0, 0.5);
-        double d15 = this.getCornerNoise3D(n9, d11, d12, 0.0, 0.5);
-        return 70.0 * (d13 + d14 + d15);
+
+        double a1 = adjustedA - (double) aIsLarger + G2;
+        double b1 = adjustedB - (double) bIsLarger + G2;
+        double a2 = adjustedA - 1.0 + 2.0 * G2;
+        double b2 = adjustedB - 1.0 + 2.0 * G2;
+        int a3 = offsetA & 255;
+        int b3 = offsetB & 255;
+        int x1 = this.get(a3 + this.get(b3)) % 12;
+        int y1 = this.get(a3 + aIsLarger + this.get(b3 + bIsLarger)) % 12;
+        int z1 = this.get(a3 + 1 + this.get(b3 + 1)) % 12;
+        double x2 = this.getCornerNoise3D(x1, adjustedA, adjustedB, 0.0, 0.5);
+        double y2 = this.getCornerNoise3D(y1, a1, b1, 0.0, 0.5);
+        double z2 = this.getCornerNoise3D(z1, a2, b2, 0.0, 0.5);
+        return 70.0 * (x2 + y2 + z2);
+    }
+
+    private static int floor(double x) {
+        int intX = (int) x;
+        return x < (double) intX ? intX - 1 : intX;
     }
 
     public double sample(double x, double y, double z) {
-        var d5 = (x + y + z) * 0.3333333333333333;
-        int x2 = (int) Math.floor(x + d5);
-        int y2 = (int) Math.floor(y + d5);
-        int z2 = (int) Math.floor(z + d5);
-        var d7 = (x2 + y2 + z2) * 0.16666666666666666;
-        var x3 = x - (x2 - d7);
-        var y3 = y - (y2 - d7);
-        var z3 = z - (z2 - d7);
-        int a;
-        int b;
-        int c;
-        int d;
-        int e;
-        int f;
+        double offset = (x + y + z) * 0.3333333333333333;
+        int x1 = floor(x + offset);
+        int y1 = floor(y + offset);
+        int z1 = floor(z + offset);
+        double diff = (double) (x1 + y1 + z1) * 0.16666666666666666;
+        double x2 = (double) x1 - diff;
+        double y2 = (double) y1 - diff;
+        double z2 = (double) z1 - diff;
+        double x3 = x - x2;
+        double y3 = y - y2;
+        double z3 = z - z2;
+        byte x4;
+        byte y4;
+        byte z4;
+        byte x5;
+        byte y5;
+        byte z5;
         if (x3 >= y3) {
             if (y3 >= z3) {
-                a = 1;
-                b = 0;
-                c = 0;
-                d = 1;
-                e = 1;
-                f = 0;
+                x4 = 1;
+                y4 = 0;
+                z4 = 0;
+                x5 = 1;
+                y5 = 1;
+                z5 = 0;
             } else if (x3 >= z3) {
-                a = 1;
-                b = 0;
-                c = 0;
-                d = 1;
-                e = 0;
-                f = 1;
+                x4 = 1;
+                y4 = 0;
+                z4 = 0;
+                x5 = 1;
+                y5 = 0;
+                z5 = 1;
             } else {
-                a = 0;
-                b = 0;
-                c = 1;
-                d = 1;
-                e = 0;
-                f = 1;
+                x4 = 0;
+                y4 = 0;
+                z4 = 1;
+                x5 = 1;
+                y5 = 0;
+                z5 = 1;
             }
         } else if (y3 < z3) {
-            a = 0;
-            b = 0;
-            c = 1;
-            d = 0;
-            e = 1;
-            f = 1;
+            x4 = 0;
+            y4 = 0;
+            z4 = 1;
+            x5 = 0;
+            y5 = 1;
+            z5 = 1;
         } else if (x3 < z3) {
-            a = 0;
-            b = 1;
-            c = 0;
-            d = 0;
-            e = 1;
-            f = 1;
+            x4 = 0;
+            y4 = 1;
+            z4 = 0;
+            x5 = 0;
+            y5 = 1;
+            z5 = 1;
         } else {
-            a = 0;
-            b = 1;
-            c = 0;
-            d = 1;
-            e = 1;
-            f = 0;
+            x4 = 0;
+            y4 = 1;
+            z4 = 0;
+            x5 = 1;
+            y5 = 1;
+            z5 = 0;
         }
-        double x4 = x3 - a + 0.16666666666666666;
-        double y4 = y3 - b + 0.16666666666666666;
-        double z4 = z3 - c + 0.16666666666666666;
-        double x5 = x3 - d + 0.3333333333333333;
-        double y5 = y3 - e + 0.3333333333333333;
-        double z5 = z3 - f + 0.3333333333333333;
-        double x6 = x3 - 0.5;
-        double y6 = y3 - 0.5;
-        double z6 = z3 - 0.5;
-        int x7 = x2 & 0xFF;
-        int y7 = y2 & 0xFF;
-        int z7 = z2 & 0xFF;
-        var g = this.P(x7 + this.P(y7 + this.P(z7))) % 12;
-        var h = this.P(x7 + a + this.P(y7 + b + this.P(z7 + c))) % 12;
-        var i = this.P(x7 + d + this.P(y7 + e + this.P(z7 + f))) % 12;
-        var j = this.P(x7 + 1 + this.P(y7 + 1 + this.P(z7 + 1))) % 12;
-        var k = this.getCornerNoise3D(g, x3, y3, z3, 0.6);
-        var l = this.getCornerNoise3D(h, x4, y4, z4, 0.6);
-        var m = this.getCornerNoise3D(i, x5, y5, z5, 0.6);
-        var n = this.getCornerNoise3D(j, x6, y6, z6, 0.6);
-        return 32.0 * (k + l + m + n);
+
+        double x6 = x3 - (double) x4 + 0.16666666666666666;
+        double y6 = y3 - (double) y4 + 0.16666666666666666;
+        double z6 = z3 - (double) z4 + 0.16666666666666666;
+        double x7 = x3 - (double) x5 + 0.3333333333333333;
+        double y7 = y3 - (double) y5 + 0.3333333333333333;
+        double z7 = z3 - (double) z5 + 0.3333333333333333;
+        double x8 = x3 - 1.0 + 0.5;
+        double y8 = y3 - 1.0 + 0.5;
+        double z8 = z3 - 1.0 + 0.5;
+        int x9 = x1 & 255;
+        int y9 = y1 & 255;
+        int z9 = z1 & 255;
+        int a = this.get(x9 + this.get(y9 + this.get(z9))) % 12;
+        int b = this.get(x9 + x4 + this.get(y9 + y4 + this.get(z9 + z4))) % 12;
+        int c = this.get(x9 + x5 + this.get(y9 + y5 + this.get(z9 + z5))) % 12;
+        int d = this.get(x9 + 1 + this.get(y9 + 1 + this.get(z9 + 1))) % 12;
+        double e = this.getCornerNoise3D(a, x3, y3, z3, 0.6);
+        double f = this.getCornerNoise3D(b, x6, y6, z6, 0.6);
+        double g = this.getCornerNoise3D(c, x7, y7, z7, 0.6);
+        double h = this.getCornerNoise3D(d, x8, y8, z8, 0.6);
+        return 32.0 * (e + f + g + h);
     }
 
     @Override
@@ -157,24 +170,23 @@ public class SimplexNoise implements Noise {
         return 1;
     }
 
-    private int P(int i) {
-        return this.p[i & 0xFF];
+    private int get(int i) {
+        return this.p[i & 255];
     }
 
     private double getCornerNoise3D(int i, double a, double b, double c, double d) {
+        double e = d - a * a - b * b - c * c;
         double f;
-        var e = d - a * a - b * b - c * c;
         if (e < 0.0) {
             f = 0.0;
         } else {
             e *= e;
-            f = e * e * SimplexNoise.gradDot(i, a, b, c);
+            f = e * e * dot(GRADIENT[i], a, b, c);
         }
         return f;
     }
 
-    public static double gradDot(int a, double b, double c, double d) {
-        var grad = SimplexNoise.GRADIENT[a & 15];
-        return grad[0] * b + grad[1] * c + grad[2] * d;
+    protected static double dot(int[] grad, double a, double b, double c) {
+        return (double) grad[0] * a + (double) grad[1] * b + (double) grad[2] * c;
     }
 }

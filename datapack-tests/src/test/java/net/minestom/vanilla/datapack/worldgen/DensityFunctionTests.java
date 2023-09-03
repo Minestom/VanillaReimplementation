@@ -2,7 +2,6 @@ package net.minestom.vanilla.datapack.worldgen;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
@@ -11,13 +10,14 @@ import net.minestom.vanilla.datapack.DatapackLoader;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DensityFunctionUnitTests {
+public class DensityFunctionTests {
+
+    private static final double DELTA = 0.0000001;
 
     @BeforeAll
     public static void prepare() {
@@ -25,39 +25,36 @@ public class DensityFunctionUnitTests {
         Bootstrap.bootStrap();
     }
 
+
+    // End islands are used in many other tests. So test them first.
+    private final String END_ISLANDS_STRING = """
+            {
+              "type": "minecraft:end_islands"
+            }
+            """;
+
+    private final DF vanillaEndIslands = vanilla(END_ISLANDS_STRING);
+    private final DF vriEndIslands = vri(END_ISLANDS_STRING);
+    @Test
+    public void testEndIslands() {
+        assertExact(vanillaEndIslands, vriEndIslands, DELTA);
+    }
+
     @Test
     public void testConstant() {
         assertExact("1.0");
+        assertExact("0.0");
+        assertExact("-1.0");
+        assertExact("0.5");
+        assertExact("1");
+        assertExact("0");
     }
 
-    @Test
-    public void testEndIslands() {
-        assertExact("""
-                {
-                  "type": "minecraft:end_islands"
-                }
-                """);
-    }
 
-//    @Test
-//    public void testSpline() {
-//        assertExact("""
-//                {
-//                    "type": "minecraft:clamp",
-//                    "source": {
-//                        "type": "minecraft:constant",
-//                        "value": 1.0
-//                    },
-//                    "min": 0.0,
-//                    "max": 2.0
-//                }
-//                """);
-//    }
-
-    private static final Set<Vec> testPositions;
+    private static final List<Vec> testPositions;
 
     static {
-        Set<Vec> tests = new HashSet<>();
+        List<Vec> tests = new ArrayList<>();
 
         double dist = 0.0001;
 
@@ -71,7 +68,7 @@ public class DensityFunctionUnitTests {
             tests.add(new Vec(x, y, z));
         }
 
-        testPositions = Set.copyOf(tests);
+        testPositions = List.copyOf(tests);
     }
 
     private interface DF {
@@ -79,19 +76,21 @@ public class DensityFunctionUnitTests {
     }
 
     private void assertExact(String source) {
-        assertExact(vanilla(source), vri(source));
+        assertExact(vanilla(source), vri(source), DELTA);
     }
 
-    private void assertExact(DF vanilla, DF vri) {
-        for (Vec pos : testPositions) {
+    private void assertExact(DF vanilla, DF vri, double delta) {
+        for (int i = 0; i < testPositions.size(); i++) {
+            Vec pos = testPositions.get(i);
             var result = compare(vanilla, vri, pos.blockX(), pos.blockY(), pos.blockZ());
-            result.assertEqual(0.0);
+            int finalI = i;
+            result.assertEqual(delta, () -> "Failed at " + pos + " (index " + finalI + ")");
         }
     }
 
     private record Result(double vanilla, double vri) {
-        public void assertEqual(double delta) {
-            assertEquals(vanilla, vri, delta);
+        public void assertEqual(double delta, Supplier<String> message) {
+            assertEquals(vanilla, vri, delta, message);
         }
     }
 
@@ -101,19 +100,33 @@ public class DensityFunctionUnitTests {
         return new Result(vanillaRes, vriRes);
     }
 
-    private DF vanilla(String source) {
+    private record VanillaDF(net.minecraft.world.level.levelgen.DensityFunction df) implements DF {
+        @Override
+        public double compute(int x, int y, int z) {
+            return df.compute(createFunctionContext(x, y, z));
+        }
+    }
+
+    private static DF vanilla(String source) {
         JsonElement element = new Gson().fromJson(source, JsonElement.class);
         var result = net.minecraft.world.level.levelgen.DensityFunction.HOLDER_HELPER_CODEC.parse(JsonOps.INSTANCE, element);
         var df = result.getOrThrow(false, error -> { throw new RuntimeException(error); });
-        return (x, y, z) -> df.compute(createFunctionContext(x, y, z));
+        return new VanillaDF(df);
     }
 
-    private DF vri(String source) {
+    private record VriDF(DensityFunction df) implements DF {
+        @Override
+        public double compute(int x, int y, int z) {
+            return df.compute(DensityFunction.context(x, y, z));
+        }
+    }
+
+    private static DF vri(String source) {
         DensityFunction df = DatapackLoader.adaptor(DensityFunction.class).apply(source);
-        return (x, y, z) -> df.compute(DensityFunction.context(x, y, z));
+        return new VriDF(df);
     }
 
-    private net.minecraft.world.level.levelgen.DensityFunction.FunctionContext createFunctionContext(int x, int y, int z) {
+    private static net.minecraft.world.level.levelgen.DensityFunction.FunctionContext createFunctionContext(int x, int y, int z) {
         return new net.minecraft.world.level.levelgen.DensityFunction.FunctionContext() {
             @Override
             public int blockX() {
