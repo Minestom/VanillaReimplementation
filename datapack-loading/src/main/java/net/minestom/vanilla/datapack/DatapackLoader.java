@@ -144,7 +144,7 @@ public class DatapackLoader {
     public static LoadingContext loading() {
         LoadingContext context = contextPool.get();
         if (context == null) {
-            throw new RuntimeException(new IllegalAccessException("Not in a datapack loading context"));
+            return STATIC_CONTEXT;
         }
         return context;
     }
@@ -153,7 +153,28 @@ public class DatapackLoader {
         WorldgenRandom random();
 
         void whenFinished(Consumer<DatapackFinisher> finishAction);
+
+        default boolean isStatic() {
+            return false;
+        }
     }
+
+    private static final LoadingContext STATIC_CONTEXT = new LoadingContext() {
+        @Override
+        public WorldgenRandom random() {
+            return WorldgenRandom.xoroshiro(0);
+        }
+
+        @Override
+        public void whenFinished(Consumer<DatapackFinisher> finishAction) {
+            throw new RuntimeException(new IllegalAccessException("Not in a datapack loading context"));
+        }
+
+        @Override
+        public boolean isStatic() {
+            return true;
+        }
+    };
 
     public interface DatapackFinisher {
         Datapack datapack();

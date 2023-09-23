@@ -365,4 +365,25 @@ public class Util {
     public static long hash(int x, int y, int z) {
         return cantor(x, cantor(y, z));
     }
+
+    public record Seed(long low, long high) {
+        public Seed mixed() {
+            return new Seed(staffordMix13(low), staffordMix13(high));
+        }
+    }
+
+    public static Seed extract128Seed(long $$0) {
+        long $$1 = $$0 ^ 0x6a09e667f3bcc909L;
+        long $$2 = $$1 - 0x61c8864680b583ebL;
+        return new Seed($$1, $$2);
+    }
+
+
+    /* David Stafford's (http://zimbry.blogspot.com/2011/09/better-bit-mixing-improving-on.html)
+     * "Mix13" variant of the 64-bit finalizer in Austin Appleby's MurmurHash3 algorithm. */
+    public static long staffordMix13(long z) {
+        z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9L;
+        z = (z ^ (z >>> 27)) * 0x94D049BB133111EBL;
+        return z ^ (z >>> 31);
+    }
 }

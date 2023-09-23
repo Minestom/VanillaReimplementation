@@ -21,6 +21,12 @@ public interface WorldgenRandom extends RandomGenerator {
         }
     }
 
+    default void consumeLong(int i) {
+        for (int j = 0; j < i; j++) {
+            nextLong();
+        }
+    }
+
     WorldgenRandom fork();
 
     Positional forkPositional();

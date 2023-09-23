@@ -5,7 +5,7 @@ import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 
 public class NormalNoise implements Noise {
 
-    public record NoiseParameters(double firstOctave, DoubleList amplitudes) {
+    public record Config(double firstOctave, DoubleList amplitudes) {
     }
 
     private static final double INPUT_FACTOR = 1.0181268882175227;
@@ -15,9 +15,9 @@ public class NormalNoise implements Noise {
     public final PerlinNoise second;
     public final double maxValue;
 
-    public NormalNoise(WorldgenRandom random, NoiseParameters parameters) {
-        double firstOctave = parameters.firstOctave();
-        DoubleList amplitudes = parameters.amplitudes();
+    public NormalNoise(WorldgenRandom random, Config config) {
+        double firstOctave = config.firstOctave();
+        DoubleList amplitudes = config.amplitudes();
         this.first = new PerlinNoise(random, firstOctave, amplitudes);
         this.second = new PerlinNoise(random, firstOctave, amplitudes);
 

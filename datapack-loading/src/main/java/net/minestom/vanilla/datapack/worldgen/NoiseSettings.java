@@ -137,7 +137,7 @@ public record NoiseSettings(
     ) {
         static final Map<String, NormalNoise> noiseCache = Collections.synchronizedMap(new HashMap<>());
 
-        public static NormalNoise instantiate(WorldgenRandom.Positional random, NormalNoise.NoiseParameters params) {
+        public static NormalNoise instantiate(WorldgenRandom.Positional random, NormalNoise.Config params) {
             var randomKey = random.seedKey();
             var cacheMapKey = Objects.hash(randomKey[0], randomKey[1]) + "|" + params.hashCode();
             return noiseCache.computeIfAbsent(cacheMapKey, k -> new NormalNoise(random.fromSeed(params.hashCode()), params));

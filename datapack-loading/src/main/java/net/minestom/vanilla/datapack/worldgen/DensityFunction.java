@@ -25,13 +25,16 @@ public interface DensityFunction extends DensityFunctions, NumberFunction<Densit
                 case "minecraft:blend_offset" -> BlendOffset.class;
                 case "minecraft:beardifier" -> Beardifier.class;
                 case "minecraft:old_blended_noise" -> OldBlendedNoise.class;
+
                 case "minecraft:flat_cache" -> FlatCache.class;
                 case "minecraft:interpolated" -> Interpolated.class;
                 case "minecraft:cache_2d" -> Cache2D.class;
                 case "minecraft:cache_once" -> CacheOnce.class;
                 case "minecraft:cache_all_in_cell" -> CacheAllInCell.class;
+
                 case "minecraft:noise" -> NoiseRoot.class;
                 case "minecraft:end_islands" -> EndIslands.class;
+
                 case "minecraft:weird_scaled_sampler" -> WeirdScaledSampler.class;
                 case "minecraft:shifted_noise" -> ShiftedNoise.class;
                 case "minecraft:range_choice" -> RangeChoice.class;
@@ -39,6 +42,7 @@ public interface DensityFunction extends DensityFunctions, NumberFunction<Densit
                 case "minecraft:shift_b" -> ShiftB.class;
                 case "minecraft:shift" -> Shift.class;
                 case "minecraft:blend_density" -> BlendDensity.class;
+
                 case "minecraft:clamp" -> Clamp.class;
                 case "minecraft:abs" -> Abs.class;
                 case "minecraft:square" -> Square.class;
@@ -50,6 +54,7 @@ public interface DensityFunction extends DensityFunctions, NumberFunction<Densit
                 case "minecraft:mul" -> Mul.class;
                 case "minecraft:min" -> Min.class;
                 case "minecraft:max" -> Max.class;
+
                 case "minecraft:spline" -> Spline.class;
                 case "minecraft:constant" -> Constant.class;
                 case "minecraft:y_clamped_gradient" -> YClampedGradient.class;
