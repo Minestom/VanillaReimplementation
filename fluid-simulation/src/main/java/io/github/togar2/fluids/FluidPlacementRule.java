@@ -7,6 +7,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class FluidPlacementRule extends BlockPlacementRule {
 
@@ -15,19 +16,10 @@ public class FluidPlacementRule extends BlockPlacementRule {
     }
 
     @Override
-    public @NotNull Block blockUpdate(@NotNull Instance instance, @NotNull Point blockPosition,
-                                      @NotNull Block currentBlock) {
-        MinestomFluids.scheduleTick(instance, blockPosition, currentBlock);
-        return currentBlock;
-    }
-
-    @Override
-    public @NotNull Block blockPlace(@NotNull Instance instance, @NotNull Block block,
-                                     @NotNull BlockFace blockFace, @NotNull Point blockPosition,
-                                     @NotNull Player pl) {
-        Point point = blockPosition.relative(blockFace);
-        MinestomFluids.scheduleTick(instance, point, block);
-
-        return block;
+    public @Nullable Block blockPlace(@NotNull PlacementState placementState) {
+        if (placementState.instance() instanceof Instance instance) {
+            MinestomFluids.scheduleTick(instance, placementState.placePosition(), placementState.block());
+        }
+        return placementState.block();
     }
 }

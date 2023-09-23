@@ -1,6 +1,6 @@
 dependencies {
     // Minestom
-    api("com.github.Minestom:Minestom:${project.property("minestom_version")}")
+    api("dev.hollowcube:minestom-ce:${project.property("minestom_version")}")
 
     // Raycasting
     api("com.github.EmortalMC:Rayfast:${project.property("rayfast_version")}")
