@@ -1,7 +1,7 @@
 
 // Find all projects except for the root project and this project.
 val disallowed = setOf(project.name, project.parent!!.name)
-val includedProjects = project.parent?.allprojects?.filter { !disallowed.contains(it.name) } ?: emptyList()
+val includedProjects = (project.parent?.allprojects ?: emptyList()).filter { !disallowed.contains(it.name) }
 
 dependencies {
     includedProjects.forEach {
