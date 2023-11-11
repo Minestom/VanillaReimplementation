@@ -18,9 +18,9 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-interface NBTPathImpl<T extends NBTPathImpl.Selector<?>> extends NBTPath {
+interface NBTPathImpl extends NBTPath {
 
-    static NBTPathImpl<?> readPath(StringReader reader) throws IOException {
+    static NBTPathImpl readPath(StringReader reader) throws IOException {
         return Reader.readPath(reader);
     }
 
@@ -78,7 +78,7 @@ interface NBTPathImpl<T extends NBTPathImpl.Selector<?>> extends NBTPath {
     }
 }
 
-record NBTPathMultiImpl(@NotNull List<NBTPathImpl.Selector<?>> selectors) implements NBTPathImpl<NBTPathImpl.Selector<?>> {
+record NBTPathMultiImpl(@NotNull List<NBTPathImpl.Selector<?>> selectors) implements NBTPathImpl {
 
     public @NotNull Map<Single, NBT> get(@NotNull NBT source) {
         Map<List<NBTPathImpl.SingleSelector<?>>, NBT> references = Map.of(List.of(), source);
@@ -115,7 +115,7 @@ record NBTPathMultiImpl(@NotNull List<NBTPathImpl.Selector<?>> selectors) implem
     }
 }
 
-record NBTPathSingleImpl(List<NBTPathImpl.SingleSelector<?>> selectors) implements NBTPathImpl<NBTPathImpl.SingleSelector<?>>, NBTPath.Single {
+record NBTPathSingleImpl(List<NBTPathImpl.SingleSelector<?>> selectors) implements NBTPathImpl, NBTPath.Single {
 
     @Override
     public @Nullable NBT getSingle(NBT nbt) {
@@ -313,7 +313,7 @@ record ListIndex(int index) implements NBTPathImpl.SingleSelector<NBTList<?>> {
 record ListFilter(@NotNull NBTCompound filter) implements NBTPathImpl.Selector<NBTList<?>> {
 
     @Override
-    public void get(@NotNull NBTList<?> source, NBTPathImpl.NbtPathCollector<NBTList<?>> selectedElements) {
+    public void get(@NotNull NBTList<?> source, NBTPathImpl.@NotNull NbtPathCollector<NBTList<?>> selectedElements) {
         IntStream.range(0, source.getSize())
                 .mapToObj(i -> Map.entry(i, source.get(i)))
                 .filter(entry -> NBTUtils.compareNBT(filter, entry.getValue(), false))
@@ -341,7 +341,7 @@ record ListFilter(@NotNull NBTCompound filter) implements NBTPathImpl.Selector<N
 record EntireList() implements NBTPathImpl.Selector<NBTList<?>> {
 
     @Override
-    public void get(@NotNull NBTList<?> source, NBTPathImpl.NbtPathCollector<NBTList<?>> selectedElements) {
+    public void get(@NotNull NBTList<?> source, NBTPathImpl.@NotNull NbtPathCollector<NBTList<?>> selectedElements) {
         IntStream.range(0, source.getSize())
                 .mapToObj(i -> Map.entry(i, source.get(i)))
                 .forEach(entry -> {
@@ -370,7 +370,7 @@ interface Reader {
     @NotNull IntSet VALID_INTEGER_CHARACTERS = IntSet.of('-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
     @NotNull IntSet INVALID_UNQUOTED_CHARACTERS = IntSet.of(-1, '.', '\'', '\"', '{', '}', '[', ']');
 
-    static @NotNull NBTPathImpl<?> readPath(@NotNull StringReader reader) throws IOException {
+    static @NotNull NBTPathImpl readPath(@NotNull StringReader reader) throws IOException {
         List<NBTPathImpl.Selector<?>> selectors = new ArrayList<>();
 
         if (!VALID_SELECTOR_STARTERS.contains(peek(reader))) {
