@@ -26,7 +26,7 @@ public class SurfaceSystem {
     private final Block defaultBlock;
 
     public SurfaceSystem(NoiseSettings.SurfaceRule rule, Block defaultBlock, long seed) {
-        this.random = XoroshiroRandom.create(seed).forkPositional();
+        this.random = new XoroshiroRandom(seed).forkPositional();
         this.surfaceNoise = NoiseSettings.NoiseRouter.instantiate(this.random, WorldgenRegistries.SURFACE_NOISE);
         this.surfaceSecondaryNoise = NoiseSettings.NoiseRouter.instantiate(this.random, WorldgenRegistries.SURFACE_SECONDARY_NOISE);
         this.positionalRandoms = new HashMap<>();

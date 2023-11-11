@@ -20,7 +20,7 @@ public class RandomState {
 
     public RandomState(NoiseSettings settings, long seed) {
         this.seed = seed;
-        this.random = (settings.legacy_random_source() ? new LegacyRandom(seed) : XoroshiroRandom.create(seed)).forkPositional();
+        this.random = (settings.legacy_random_source() ? new LegacyRandom(seed) : new XoroshiroRandom(seed)).forkPositional();
         this.aquiferRandom = this.random.fromHashOf(NamespaceID.from("aquifer").toString()).forkPositional();
         this.oreRandom = this.random.fromHashOf(NamespaceID.from("ore").toString()).forkPositional();
         this.surfaceSystem = new SurfaceSystem(settings.surface_rule(), settings.default_block().toMinestom(), seed);
