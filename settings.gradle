@@ -12,5 +12,6 @@ include 'entity-meta'
 include 'server'
 include 'items'
 include 'crafting-data'
+include 'crafting'
 include 'mojang-data'
 

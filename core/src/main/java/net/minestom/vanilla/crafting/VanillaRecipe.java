@@ -15,7 +15,8 @@ public sealed interface VanillaRecipe {
 
     @NotNull Type type();
 
-    @Nullable String group();
+    /** @return the group of this recipe, or an empty string if it has no group */
+    @NotNull String group();
 
     /**
      * Represents a recipe in a blast furnace.
@@ -126,15 +127,19 @@ public sealed interface VanillaRecipe {
         }
     }
 
-    /**
-     * Represents a recipe in a smithing table.
-     * The resulting item copies the NBT tags of the base item.
-     */
-    record Smithing(Ingredient base, Ingredient addition, Result result, String group) implements VanillaRecipe {
+    record SmithingTransform(Ingredient template, Ingredient base, Ingredient addition, Result result, String group) implements VanillaRecipe {
 
         @Override
         public @NotNull Type type() {
-            return Type.SMITHING;
+            return Type.SMITHING_TRANSFORM;
+        }
+    }
+
+    record SmithingTrim(Ingredient template, Ingredient base, Ingredient addition, String group) implements VanillaRecipe {
+
+        @Override
+        public @NotNull Type type() {
+            return Type.SMITHING_TRIM;
         }
     }
 
@@ -164,7 +169,7 @@ public sealed interface VanillaRecipe {
 
     /**
      * Represents a recipe in a stonecutter.
-     * Unlike the  count field in shaped and shapeless crafting recipes, this count field here is required.
+     * Unlike the count field in shaped and shapeless crafting recipes, this count field here is required.
      */
     record Stonecutting(Ingredient ingredients, Result result, String group) implements VanillaRecipe {
         @Override
@@ -190,7 +195,8 @@ public sealed interface VanillaRecipe {
         CRAFTING_SHAPED("minecraft:crafting_shaped"),
         CRAFTING_SHAPELESS("minecraft:crafting_shapeless"),
         SMELTING("minecraft:smelting"),
-        SMITHING("minecraft:smithing"),
+        SMITHING_TRANSFORM("minecraft:smithing_trim"),
+        SMITHING_TRIM("minecraft:smithing_transform"),
         SMOKING("minecraft:smoking"),
         STONECUTTING("minecraft:stonecutting"),
         NATIVE("minecraft:native"),
@@ -233,6 +239,9 @@ public sealed interface VanillaRecipe {
             public Item {
                 extraData = Map.copyOf(extraData);
             }
+        }
+
+        record None() implements Ingredient {
         }
 
         record Tag(String tag) implements Ingredient {
@@ -283,10 +292,6 @@ public sealed interface VanillaRecipe {
 
         public int column() {
             return column;
-        }
-
-        public boolean isWithin2x2() {
-            return row < 2 && column < 2;
         }
     }
 

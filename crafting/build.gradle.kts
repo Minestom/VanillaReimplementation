@@ -1,4 +1,4 @@
 dependencies {
     compileOnly(project(":core"))
-    compileOnly(project(":mojang-data"))
+    compileOnly(project(":crafting-data"))
 }

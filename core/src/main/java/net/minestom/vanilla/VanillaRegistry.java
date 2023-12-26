@@ -20,17 +20,8 @@ public sealed interface VanillaRegistry permits VanillaReimplementationImpl.Vani
      */
     void register(@NotNull EntityType type, @NotNull EntitySpawner supplier);
 
-    /**
-     * Registers a recipe id to its recipe.
-     *
-     * @param recipeId the recipe id
-     * @param recipe   the recipe
-     */
-    void register(@NotNull String recipeId, @NotNull VanillaRecipe recipe);
-
     interface EntitySpawner {
         @NotNull Entity spawn(@NotNull VanillaRegistry.EntityContext context);
-
     }
 
     interface EntityContext extends TagReadable {

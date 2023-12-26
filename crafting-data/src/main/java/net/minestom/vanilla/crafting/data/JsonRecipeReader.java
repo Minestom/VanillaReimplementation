@@ -61,7 +61,8 @@ public class JsonRecipeReader {
             case CRAFTING_SHAPED -> readCraftingShaped(object);
             case CRAFTING_SHAPELESS -> readCraftingShapeless(object);
             case SMELTING -> readSmelting(object);
-            case SMITHING -> readSmithing(object);
+            case SMITHING_TRANSFORM -> readSmithingTransform(object);
+            case SMITHING_TRIM -> readSmithingTrim(object);
             case SMOKING -> readSmoking(object);
             case STONECUTTING -> readStonecutting(object);
             case NATIVE -> readNative(object);
@@ -74,7 +75,7 @@ public class JsonRecipeReader {
 
         int cookingTime = orDefault(object.get("cookingtime"), JsonElement::getAsInt, VanillaRecipe.Blasting.DEFAULT_COOKING_TIME);
         double experience = required(object.get("experience"), JsonElement::getAsDouble, "experience", "blasting");
-        String group = orDefault(object.get("group"), JsonElement::getAsString, null);
+        String group = orDefault(object.get("group"), JsonElement::getAsString, "");
         VanillaRecipe.Ingredient ingredient = required(object.get("ingredient"), this::readIngredient, "ingredient", "blasting");
         VanillaRecipe.Result result = required(object.get("result"), this::readResult, "result", "blasting");
 
@@ -87,7 +88,7 @@ public class JsonRecipeReader {
 
         int cookingTime = orDefault(object.get("cookingtime"), JsonElement::getAsInt, VanillaRecipe.CampfireCooking.DEFAULT_COOKING_TIME);
         double experience = required(object.get("experience"), JsonElement::getAsDouble, "experience", "campfire_cooking");
-        String group = orDefault(object.get("group"), JsonElement::getAsString, null);
+        String group = orDefault(object.get("group"), JsonElement::getAsString, "");
         VanillaRecipe.Ingredient ingredient = required(object.get("ingredient"), this::readIngredient, "ingredient", "campfire_cooking");
         VanillaRecipe.Result result = required(object.get("result"), this::readResult, "result", "campfire_cooking");
 
@@ -101,7 +102,7 @@ public class JsonRecipeReader {
         JsonObject jsonPalette = required(object.get("key"), JsonElement::getAsJsonObject, "key", "crafting_shaped");
         JsonArray jsonPattern = required(object.get("pattern"), JsonElement::getAsJsonArray, "pattern", "crafting_shaped");
         VanillaRecipe.Result result = required(object.get("result"), this::readResult, "result", "crafting_shaped");
-        String group = orDefault(object.get("group"), JsonElement::getAsString, null);
+        String group = orDefault(object.get("group"), JsonElement::getAsString, "");
 
         Map<Character, VanillaRecipe.Ingredient> palette = jsonPalette.entrySet().stream()
                 .map(entry -> Map.entry(entry.getKey().charAt(0), readIngredient(entry.getValue())))
@@ -131,7 +132,7 @@ public class JsonRecipeReader {
     private VanillaRecipe.CraftingShapeless readCraftingShapeless(JsonObject object) {
         JsonArray jsonIngredients = required(object.get("ingredients"), JsonElement::getAsJsonArray, "ingredients", "crafting_shapeless");
         VanillaRecipe.Result result = required(object.get("result"), this::readResult, "result", "crafting_shapeless");
-        String group = orDefault(object.get("group"), JsonElement::getAsString, null);
+        String group = orDefault(object.get("group"), JsonElement::getAsString, "");
 
         Map<VanillaRecipe.Ingredient, Integer> ingredients = new HashMap<>();
         StreamSupport.stream(jsonIngredients.spliterator(), false)
@@ -147,23 +148,36 @@ public class JsonRecipeReader {
 
         int cookingTime = orDefault(object.get("cookingtime"), JsonElement::getAsInt, VanillaRecipe.Smelting.DEFAULT_COOKING_TIME);
         double experience = required(object.get("experience"), JsonElement::getAsDouble, "experience", "smelting");
-        String group = orDefault(object.get("group"), JsonElement::getAsString, null);
+        String group = orDefault(object.get("group"), JsonElement::getAsString, "");
         VanillaRecipe.Ingredient ingredient = required(object.get("ingredient"), this::readIngredient, "ingredient", "smelting");
         VanillaRecipe.Result result = required(object.get("result"), this::readResult, "result", "smelting");
 
         return new VanillaRecipe.Smelting(ingredient, result, experience, cookingTime, group);
     }
 
-    private VanillaRecipe.Smithing readSmithing(JsonObject object) {
-        log("Smithing");
+    private VanillaRecipe.SmithingTransform readSmithingTransform(JsonObject object) {
+        log("SmithingTransform");
         log(object);
 
+        VanillaRecipe.Ingredient template = required(object.get("template"), this::readIngredient, "base", "smithing");
         VanillaRecipe.Ingredient base = required(object.get("base"), this::readIngredient, "base", "smithing");
         VanillaRecipe.Ingredient addition = required(object.get("addition"), this::readIngredient, "addition", "smithing");
         VanillaRecipe.Result result = required(object.get("result"), this::readResult, "result", "smithing");
-        String group = orDefault(object.get("group"), JsonElement::getAsString, null);
+        String group = orDefault(object.get("group"), JsonElement::getAsString, "");
 
-        return new VanillaRecipe.Smithing(base, addition, result, group);
+        return new VanillaRecipe.SmithingTransform(template, base, addition, result, group);
+    }
+
+    private VanillaRecipe.SmithingTrim readSmithingTrim(JsonObject object) {
+        log("SmithingTrim");
+        log(object);
+
+        VanillaRecipe.Ingredient template = required(object.get("template"), this::readIngredient, "base", "smithing");
+        VanillaRecipe.Ingredient base = required(object.get("base"), this::readIngredient, "base", "smithing");
+        VanillaRecipe.Ingredient addition = required(object.get("addition"), this::readIngredient, "addition", "smithing");
+        String group = orDefault(object.get("group"), JsonElement::getAsString, "");
+
+        return new VanillaRecipe.SmithingTrim(template, base, addition, group);
     }
 
     private VanillaRecipe.Smoking readSmoking(JsonObject object) {
@@ -172,7 +186,7 @@ public class JsonRecipeReader {
 
         int cookingTime = orDefault(object.get("cookingtime"), JsonElement::getAsInt, VanillaRecipe.Smoking.DEFAULT_COOKING_TIME);
         double experience = required(object.get("experience"), JsonElement::getAsDouble, "experience", "smoking");
-        String group = orDefault(object.get("group"), JsonElement::getAsString, null);
+        String group = orDefault(object.get("group"), JsonElement::getAsString, "");
         VanillaRecipe.Ingredient ingredient = required(object.get("ingredient"), this::readIngredient, "ingredient", "smoking");
         VanillaRecipe.Result result = required(object.get("result"), this::readResult, "result", "smoking");
 
@@ -185,14 +199,14 @@ public class JsonRecipeReader {
 
         VanillaRecipe.Ingredient ingredient = required(object.get("ingredient"), this::readIngredient, "ingredient", "stonecutting");
         VanillaRecipe.Result result = required(object.get("result"), this::readResult, "result", "stonecutting");
-        String group = orDefault(object.get("group"), JsonElement::getAsString, null);
+        String group = orDefault(object.get("group"), JsonElement::getAsString, "");
 
         return new VanillaRecipe.Stonecutting(ingredient, result, group);
     }
 
     private VanillaRecipe readNative(JsonObject object) {
         String type = required(object.get("type"), JsonElement::getAsString, "type", "native");
-        String group = orDefault(object.get("group"), JsonElement::getAsString, null);
+        String group = orDefault(object.get("group"), JsonElement::getAsString, "");
 
         return new VanillaRecipe.Native(NamespaceID.from(type), group);
     }

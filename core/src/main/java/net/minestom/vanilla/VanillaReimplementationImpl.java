@@ -38,7 +38,6 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
     private final ServerProcess process;
     private final Map<NamespaceID, Instance> worlds = new ConcurrentHashMap<>();
     private final Map<EntityType, VanillaRegistry.EntitySpawner> entity2Spawner = new ConcurrentHashMap<>();
-    private final Map<String, VanillaRecipe> id2Recipe = new ConcurrentHashMap<>();
     private final Map<Class<Feature>, Feature> class2Feature = new ConcurrentHashMap<>();
     private final Map<Object, Random> randoms = Collections.synchronizedMap(new WeakHashMap<>());
 
@@ -198,11 +197,6 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
         @Override
         public void register(@NotNull EntityType type, @NotNull EntitySpawner supplier) {
             entity2Spawner.put(type, supplier);
-        }
-
-        @Override
-        public void register(@NotNull String recipeId, @NotNull VanillaRecipe recipe) {
-            id2Recipe.put(recipeId, recipe);
         }
     }
 
