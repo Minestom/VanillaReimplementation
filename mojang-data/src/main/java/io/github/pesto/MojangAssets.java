@@ -3,10 +3,9 @@ package io.github.pesto;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import io.github.pesto.files.ByteArray;
-import io.github.pesto.files.FileSystem;
+import net.minestom.vanilla.files.ByteArray;
+import net.minestom.vanilla.files.FileSystem;
 import net.minestom.vanilla.logging.Loading;
-import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -14,6 +13,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
@@ -23,14 +24,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static java.nio.file.StandardOpenOption.*;
 
-public final class MojangAssets {
+final class MojangAssets {
     private static final File ROOT = new File(".", "mojang-data");
     private static final String VERSION_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
-    private final Map<String, CompletableFuture<FileSystem<ByteArray>>> versions = new ConcurrentHashMap<>();
 
     public CompletableFuture<FileSystem<ByteArray>> getAssets(@NotNull String version) {
-        versions.putIfAbsent(version, CompletableFuture.supplyAsync(() -> downloadResources(version)));
-        return versions.get(version);
+        return CompletableFuture.supplyAsync(() -> downloadResources(version));
     }
 
     private FileSystem<ByteArray> downloadResources(@NotNull String version) {
@@ -106,13 +105,39 @@ public final class MojangAssets {
             destination.createNewFile();
         }
 
-        try (
-                ReadableByteChannel in = Channels.newChannel(new URL(url).openStream());
-                FileChannel channel = FileChannel.open(destination.toPath(), CREATE, WRITE, TRUNCATE_EXISTING)
-        ) {
-            channel.transferFrom(in, 0, Long.MAX_VALUE);
+        URLConnection connection = new URL(url).openConnection();
+        connection.connect();
+        try (InputStream input = connection.getInputStream()) {
 
-            boolean success = destination.exists() && destination.length() > 0;
+            // Download the jar to memory first
+            ByteBuffer buffer = ByteBuffer.allocateDirect(connection.getContentLength());
+
+            double totalMB = (double) connection.getContentLengthLong() / 1024 / 1024;
+            Loading.start(String.format("Downloading vanilla jar (%.2f MB)...", totalMB));
+            long pos = 0;
+            long segmentCompleted = 0;
+            while (true) {
+                var bytes = input.readNBytes(64);
+                if (bytes.length == 0) break;
+                pos += bytes.length;
+                buffer.put(bytes);
+
+                // we only want to update the progress every 8th of the total size
+                double progress = (double) pos / (double) connection.getContentLengthLong();
+                if (progress - segmentCompleted > 1.0 / 8.0) {
+                    segmentCompleted = (long) (progress * 8.0) / 8;
+                    Loading.updater().progress(progress);
+                }
+            }
+            Loading.finish();
+
+            // Write the buffer to the file
+            buffer.flip();
+            try (FileChannel channel = FileChannel.open(destination.toPath(), WRITE, TRUNCATE_EXISTING)) {
+                channel.write(buffer);
+            }
+
+            boolean success = destination.exists() && destination.length() == connection.getContentLengthLong();
             if (!success)
                 throw new IOException("Failed to download client JAR");
         }

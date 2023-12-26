@@ -1,5 +1,6 @@
-package net.minestom.vanilla.crafting;
+package net.minestom.vanilla.crafting.data;
 
+import net.minestom.vanilla.crafting.VanillaRecipe;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.Map;

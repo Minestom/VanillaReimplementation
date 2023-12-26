@@ -1,4 +1,4 @@
-package io.github.pesto.files;
+package net.minestom.vanilla.files;
 
 import java.io.IOException;
 import java.nio.file.Files;

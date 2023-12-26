@@ -36,7 +36,7 @@ public sealed interface VanillaRecipe {
         }
 
         @Override
-        public Type type() {
+        public @NotNull Type type() {
             return Type.BLASTING;
         }
     }
@@ -61,7 +61,7 @@ public sealed interface VanillaRecipe {
         }
 
         @Override
-        public Type type() {
+        public @NotNull Type type() {
             return Type.CAMPFIRE_COOKING;
         }
     }
@@ -85,7 +85,7 @@ public sealed interface VanillaRecipe {
         }
 
         @Override
-        public Type type() {
+        public @NotNull Type type() {
             return Type.CRAFTING_SHAPED;
         }
     }
@@ -97,7 +97,7 @@ public sealed interface VanillaRecipe {
     record CraftingShapeless(Map<Ingredient, Integer> ingredients, Result result,
                              String group) implements VanillaRecipe {
         @Override
-        public Type type() {
+        public @NotNull Type type() {
             return Type.CRAFTING_SHAPELESS;
         }
     }
@@ -121,7 +121,7 @@ public sealed interface VanillaRecipe {
         }
 
         @Override
-        public Type type() {
+        public @NotNull Type type() {
             return Type.SMELTING;
         }
     }
@@ -133,7 +133,7 @@ public sealed interface VanillaRecipe {
     record Smithing(Ingredient base, Ingredient addition, Result result, String group) implements VanillaRecipe {
 
         @Override
-        public Type type() {
+        public @NotNull Type type() {
             return Type.SMITHING;
         }
     }
@@ -157,7 +157,7 @@ public sealed interface VanillaRecipe {
         }
 
         @Override
-        public Type type() {
+        public @NotNull Type type() {
             return Type.SMOKING;
         }
     }
@@ -168,7 +168,7 @@ public sealed interface VanillaRecipe {
      */
     record Stonecutting(Ingredient ingredients, Result result, String group) implements VanillaRecipe {
         @Override
-        public Type type() {
+        public @NotNull Type type() {
             return Type.STONECUTTING;
         }
     }
@@ -179,7 +179,7 @@ public sealed interface VanillaRecipe {
      */
     record Native(NamespaceID id, String group) implements VanillaRecipe {
         @Override
-        public Type type() {
+        public @NotNull Type type() {
             return Type.NATIVE;
         }
     }

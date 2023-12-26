@@ -1,16 +1,15 @@
-package net.minestom.vanilla.crafting;
+package net.minestom.vanilla.crafting.data;
 
+import net.minestom.vanilla.crafting.VanillaRecipe;
 import org.jetbrains.annotations.ApiStatus;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import static net.minestom.vanilla.crafting.VanillaRecipeBuilder.Stages.*;
+import static net.minestom.vanilla.crafting.data.VanillaRecipeBuilder.Stages.*;
 
 @ApiStatus.Experimental
 public sealed interface VanillaRecipeBuilder permits VanillaRecipeBuilderImpl {

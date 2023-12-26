@@ -1,4 +1,4 @@
-package io.github.pesto.files;
+package net.minestom.vanilla.files;
 
 import net.minestom.server.utils.MathUtils;
 

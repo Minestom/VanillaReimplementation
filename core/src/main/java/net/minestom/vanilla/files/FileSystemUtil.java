@@ -1,4 +1,4 @@
-package io.github.pesto.files;
+package net.minestom.vanilla.files;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

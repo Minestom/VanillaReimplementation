@@ -1,10 +1,11 @@
-package net.minestom.vanilla.crafting;
+package net.minestom.vanilla.crafting.data;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.vanilla.crafting.VanillaRecipe;
 import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

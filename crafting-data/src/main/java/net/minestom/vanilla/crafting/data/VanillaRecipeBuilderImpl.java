@@ -1,4 +1,6 @@
-package net.minestom.vanilla.crafting;
+package net.minestom.vanilla.crafting.data;
+
+import net.minestom.vanilla.crafting.VanillaRecipe;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -137,11 +139,11 @@ final class VanillaRecipeBuilderImpl implements VanillaRecipeBuilder {
     public class CraftingShapedStageImpl implements CraftingShapedStage, CraftingShapedStage.Finish {
 
         @Override
-        public Stages.Result<Finish> ingredients(Consumer<ShapedIngredientAccumulator> ingredientBuilders) {
+        public Stages.Result<Finish> ingredients(Consumer<Stages.ShapedIngredients.ShapedIngredientAccumulator> ingredientBuilders) {
             Map<VanillaRecipe.Slot, Set<VanillaRecipe.Ingredient>> pattern = new HashMap<>();
-            ShapedIngredientAccumulator accumulator = new ShapedIngredientAccumulator() {
+            Stages.ShapedIngredients.ShapedIngredientAccumulator accumulator = new Stages.ShapedIngredients.ShapedIngredientAccumulator() {
                 @Override
-                public ShapedIngredientAccumulator put(VanillaRecipe.Slot slot, IngredientBuilder.IngredientCreator... creators) {
+                public Stages.ShapedIngredients.ShapedIngredientAccumulator put(VanillaRecipe.Slot slot, IngredientBuilder.IngredientCreator... creators) {
                     Set<VanillaRecipe.Ingredient> ingredients = Stream.of(creators)
                             .map(VanillaRecipeBuilderImpl::ingredientFromBuilder)
                             .collect(Collectors.toSet());
@@ -175,11 +177,11 @@ final class VanillaRecipeBuilderImpl implements VanillaRecipeBuilder {
     public class CraftingShapelessStageImpl implements CraftingShapelessStage, CraftingShapelessStage.Finish {
 
         @Override
-        public CraftingShapelessStageImpl ingredients(Consumer<UnshapedIngredientAccumulator> ingredientBuilders) {
+        public CraftingShapelessStageImpl ingredients(Consumer<Stages.UnshapedIngredients.UnshapedIngredientAccumulator> ingredientBuilders) {
             Map<Set<VanillaRecipe.Ingredient>, Integer> ingredients = new HashMap<>();
-            UnshapedIngredientAccumulator accumulator = new UnshapedIngredientAccumulator() {
+            Stages.UnshapedIngredients.UnshapedIngredientAccumulator accumulator = new Stages.UnshapedIngredients.UnshapedIngredientAccumulator() {
                 @Override
-                public UnshapedIngredientAccumulator add(int count, IngredientBuilder.IngredientCreator... creators) {
+                public Stages.UnshapedIngredients.UnshapedIngredientAccumulator add(int count, IngredientBuilder.IngredientCreator... creators) {
                     Set<VanillaRecipe.Ingredient> ingredientSet = new HashSet<>();
                     for (IngredientBuilder.IngredientCreator creator : creators) {
                         ingredientSet.add(ingredientFromBuilder(creator));

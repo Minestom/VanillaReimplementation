@@ -1,9 +1,8 @@
 package io.github.pesto;
 
-import io.github.pesto.files.ByteArray;
-import io.github.pesto.files.FileSystem;
+import net.minestom.vanilla.files.ByteArray;
+import net.minestom.vanilla.files.FileSystem;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,10 +12,13 @@ public class MojangDataFeature implements VanillaReimplementation.Feature {
 
     private static final String LATEST = "1.19.2";
     private final MojangAssets assets = new MojangAssets();
+    private CompletableFuture<FileSystem<ByteArray>> latest = new CompletableFuture<>();
 
     @Override
     public void hook(@NotNull HookContext context) {
-        assets.getAssets(LATEST).join();
+        assetsRequest(LATEST)
+                .thenAccept(latest::complete)
+                .join();
     }
 
     @Override
@@ -24,11 +26,14 @@ public class MojangDataFeature implements VanillaReimplementation.Feature {
         return NamespaceID.from("io.github.pesto:mojang_data");
     }
 
-    public CompletableFuture<FileSystem<ByteArray>> getAssets(@NotNull String version) {
-        return assets.getAssets(version);
+    public FileSystem<ByteArray> latestAssets() {
+        if (!latest.isDone()) {
+            throw new IllegalStateException("Cannot request assets before {@link MojangDataFeature} is loaded");
+        }
+        return latest.join();
     }
 
-    public CompletableFuture<FileSystem<ByteArray>> getLatest() {
-        return assets.getAssets(LATEST);
+    public CompletableFuture<FileSystem<ByteArray>> assetsRequest(@NotNull String version) {
+        return assets.getAssets(version);
     }
 }
