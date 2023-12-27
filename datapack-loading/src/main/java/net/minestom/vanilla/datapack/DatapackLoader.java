@@ -119,6 +119,8 @@ public class DatapackLoader {
         register(builder, NoiseSettings.SurfaceRule.SurfaceRuleCondition.VerticalAnchor.class, NoiseSettings.SurfaceRule.SurfaceRuleCondition.VerticalAnchor::fromJson);
         register(builder, CubicSpline.class, CubicSpline::fromJson);
         register(builder, DensityFunction.OldBlendedNoise.class, DensityFunction.OldBlendedNoise::fromJson);
+        register(builder, Tag.TagValue.class, Tag.TagValue::fromJson);
+        register(builder, Tag.TagValue.ObjectOrTagReference.class, Tag.TagValue.ObjectOrTagReference::fromJson);
 
         return builder.build();
     }
@@ -220,7 +222,7 @@ public class DatapackLoader {
                 FileSystem<Structure> structures = dataFolder.folder("structures").map(Structure::fromInput);
                 FileSystem<ChatType> chat_type = parseJsonFolder(dataFolder, "chat_type", adaptor(ChatType.class));
                 FileSystem<DamageType> damage_type = parseJsonFolder(dataFolder, "damage_type", adaptor(DamageType.class));
-                Tags tags = Tags.from(source.folder("tags", FileSystem.BYTES_TO_STRING));
+                FileSystem<Tag> tags = parseJsonFolder(dataFolder, "tags", adaptor(Tag.class));
                 FileSystem<Dimension> dimensions = parseJsonFolder(dataFolder, "dimension", adaptor(Dimension.class));
                 FileSystem<DimensionType> dimension_type = parseJsonFolder(dataFolder, "dimension_type", adaptor(DimensionType.class));
                 Datapack.WorldGen world_gen = Datapack.WorldGen.from(dataFolder.folder("worldgen"));

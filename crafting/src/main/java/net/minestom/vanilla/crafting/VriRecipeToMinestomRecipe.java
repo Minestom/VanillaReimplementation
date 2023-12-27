@@ -1,11 +1,12 @@
 package net.minestom.vanilla.crafting;
 
-import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.DeclareRecipesPacket;
 import net.minestom.server.recipe.*;
+import net.minestom.server.utils.NamespaceID;
+import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.recipe.Recipe;
 import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -13,10 +14,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-class VriRecipeToMinestomRecipe {
+record VriRecipeToMinestomRecipe(Datapack datapack) {
 
     private <V extends Recipe> net.minestom.server.recipe.Recipe use(Recipe recipe, Function<V, net.minestom.server.recipe.Recipe> action) {
         //noinspection unchecked
@@ -204,13 +206,27 @@ class VriRecipeToMinestomRecipe {
         if (ingredient instanceof Recipe.Ingredient.Item item) {
             return List.of(toItemstack(item.item()));
         } else if (ingredient instanceof Recipe.Ingredient.Tag tag) {
-            // TODO: Implement tag support
-            Logger.warn("Tag support for recipes are not implemented yet");
-            return List.of(
-                    ItemStack.builder(Material.NAME_TAG)
-                            .displayName(Component.text("Tag: " + tag.tag()))
-                            .build()
-            );
+
+            for (var entry : datapack.namespacedData().entrySet()) {
+                String namespace = entry.getKey();
+                Datapack.NamespacedData data = entry.getValue();
+                var itemTags = data.tags().folder("items");
+                for (var itemEntry : itemTags.readAll().entrySet()) {
+                    String tagName = itemEntry.getKey().replace(".json", "");
+                    Datapack.Tag itemTag = itemEntry.getValue();
+
+                    String namespacedTag = namespace + ":" + tagName;
+                    if (namespacedTag.equals(tag.tag())) {
+                        // TODO: Correctly support tag's `replace` property
+                        return resolveTagItems(itemTag)
+                                .stream()
+                                .map(ItemStack::of)
+                                .toList();
+                    }
+                }
+            }
+
+            throw new UnsupportedOperationException("Unable to resolve tag " + tag.tag());
         } else if (ingredient instanceof Recipe.Ingredient.Multi multi) {
             return multi.items()
                     .stream()
@@ -225,5 +241,67 @@ class VriRecipeToMinestomRecipe {
         } else {
             throw new UnsupportedOperationException("Unknown ingredient type " + ingredient.getClass().getName());
         }
+    }
+
+    private List<Material> resolveTagItems(Datapack.Tag tag) {
+        List<Material> materials = new ArrayList<>();
+        for (Datapack.Tag.TagValue value : tag.values()) {
+            resolveTagValue(value, materials::add);
+        }
+        return materials;
+    }
+
+    private void resolveTagValue(Datapack.Tag.TagValue value, Consumer<Material> out) {
+        if (value instanceof Datapack.Tag.TagValue.ObjectOrTagReference objectOrTagReference) {
+            if (objectOrTagReference.tag().domain().startsWith("#")) {
+                // starting with a hashtag means this is a reference to another tag
+                // first remove the hashtag
+                NamespaceID newNamespace = NamespaceID.from(objectOrTagReference.tag().domain().substring(1), objectOrTagReference.tag().path());
+                var mats = resolveReferenceTag(newNamespace);
+                if (mats != null) {
+                    mats.forEach(out);
+                    return;
+                }
+                throw new UnsupportedOperationException("Unable to resolve where tag " + objectOrTagReference.tag() + " is pointing to");
+            }
+
+            // find the material
+            var material = Material.fromNamespaceId(objectOrTagReference.tag());
+            if (material != null) {
+                out.accept(material);
+                return;
+            }
+            throw new UnsupportedOperationException("Unable to resolve material " + objectOrTagReference.tag());
+        }
+        if (value instanceof Datapack.Tag.TagValue.TagEntry tagEntry) {
+            try {
+                resolveTagValue(tagEntry.id(), out);
+            } catch (UnsupportedOperationException e) {
+                if (tagEntry.required() == null || tagEntry.required()) {
+                    throw e;
+                }
+            }
+        }
+        throw new UnsupportedOperationException("Unknown tag value type " + value.getClass().getName());
+    }
+
+    private @Nullable List<Material> resolveReferenceTag(NamespaceID tagNamespace) {
+        // otherwise resolve to another tag
+        for (var entry : datapack.namespacedData().entrySet()) {
+            String namespace = entry.getKey();
+            Datapack.NamespacedData data = entry.getValue();
+            var itemTags = data.tags().folder("items");
+            for (var itemEntry : itemTags.readAll().entrySet()) {
+                String tagName = itemEntry.getKey().replace(".json", "");
+                Datapack.Tag itemTag = itemEntry.getValue();
+
+                NamespaceID namespacedTag = NamespaceID.from(namespace, tagName);
+                if (namespacedTag.equals(tagNamespace)) {
+                    return resolveTagItems(itemTag);
+                }
+            }
+        }
+
+        return null;
     }
 }

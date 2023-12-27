@@ -16,7 +16,7 @@ public class CraftingFeature implements VanillaReimplementation.Feature {
         DatapackLoadingFeature datapackData = context.vri().feature(DatapackLoadingFeature.class);
         Datapack datapack = datapackData.vanilla();
 
-        VriRecipeToMinestomRecipe recipeConverter = new VriRecipeToMinestomRecipe();
+        VriRecipeToMinestomRecipe recipeConverter = new VriRecipeToMinestomRecipe(datapack);
         datapack.namespacedData().forEach((namespace, data) -> {
             data.recipes().readAll().forEach((id, recipe) -> {
                 Logger.debug("Registering recipe " + id + "...");
