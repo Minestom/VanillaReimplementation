@@ -57,6 +57,7 @@ public interface Recipe {
     }
 
     interface Ingredient {
+
         static Ingredient fromJson(JsonReader reader) throws IOException {
             return JsonUtils.<Ingredient>typeMapMapped(reader, Map.of(
                     JsonReader.Token.BEGIN_ARRAY, json -> {
@@ -68,10 +69,15 @@ public interface Recipe {
                         json.endArray();
                         return new Multi(items.build().toList());
                     },
-                    JsonReader.Token.BEGIN_OBJECT, DatapackLoader.moshi(Single.class)
+                    JsonReader.Token.BEGIN_OBJECT, DatapackLoader.moshi(Single.class),
+                    JsonReader.Token.NULL, json -> {
+                        json.nextNull();
+                        return new None();
+                    }
             ));
         }
 
+        // single means within an array, not necessarily a singular item
         interface Single extends Ingredient {
             static Single fromJson(JsonReader reader) throws IOException {
                 JsonReader peek = reader.peekJson();
@@ -92,6 +98,9 @@ public interface Recipe {
         }
 
         record Tag(String tag) implements Single {
+        }
+
+        record None() implements Ingredient {
         }
 
         record Multi(List<Single> items) implements Ingredient {
@@ -267,14 +276,14 @@ public interface Recipe {
         }
     }
 
-    record SmithingTrim(String group, Ingredient.Single base, Ingredient.Single addition, Ingredient.Single result, Ingredient.Single template) implements Recipe {
+    record SmithingTrim(String group, Ingredient.Single base, Ingredient.Single addition, Result result, Ingredient.Single template) implements Recipe {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:smithing_trim");
         }
     }
 
-    record SmithingTransform(String group, Ingredient.Single base, Ingredient.Single addition, Ingredient.Single result, Ingredient.Single template) implements Recipe {
+    record SmithingTransform(String group, Ingredient.Single base, Ingredient.Single addition, Result result, Ingredient.Single template) implements Recipe {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:smithing_transform");

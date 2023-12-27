@@ -12,6 +12,7 @@ include("entity-meta")
 include("server")
 include("items")
 include("mojang-data")
+include("crafting")
 include("datapack-loading")
 include("datapack-tests")
 

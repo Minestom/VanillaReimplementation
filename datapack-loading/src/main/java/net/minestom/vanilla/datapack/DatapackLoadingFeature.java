@@ -19,18 +19,16 @@ public class DatapackLoadingFeature implements VanillaReimplementation.Feature {
     @Override
     public void hook(@NotNull HookContext context) {
 
-        Loading.start("Fetching from Mojang data");
         @NotNull MojangDataFeature data = context.vri().feature(MojangDataFeature.class);
-        Loading.finish();
 
-        Loading.start("Loading vanilla datapack");
-        FileSystem<ByteArray> fs = data.getLatest().join();
+        Loading.start("Parsing vanilla datapack");
+        FileSystem<ByteArray> fs = data.latestAssets();
         datapack = Datapack.loadByteArray(fs);
         Loading.finish();
     }
 
     public @NotNull Datapack vanilla() {
-        Objects.requireNonNull(datapack, "Datapack not loaded yet");
+        Objects.requireNonNull(datapack, "DatapackLoadingFeature not loaded yet");
         return datapack;
     }
 

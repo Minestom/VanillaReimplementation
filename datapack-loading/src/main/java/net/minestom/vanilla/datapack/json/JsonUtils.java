@@ -26,7 +26,7 @@ public class JsonUtils {
 
     public interface ObjectOrList<O, E> {
         boolean isObject();
-        O asObject() throws IllegalStateException;
+        O asObject();
 
         boolean isList();
         List<E> asList();

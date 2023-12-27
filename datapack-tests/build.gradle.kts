@@ -15,7 +15,7 @@ tasks.test {
 }
 
 minecraft {
-    latestRelease() // or: latestRelease() or latestSnapshot()
+    version("1.20.1")
     runs {
         server()
     }

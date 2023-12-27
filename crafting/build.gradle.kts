@@ -1,4 +1,4 @@
 dependencies {
     compileOnly(project(":core"))
-    compileOnly(project(":crafting-data"))
+    compileOnly(project(":datapack-loading"))
 }
