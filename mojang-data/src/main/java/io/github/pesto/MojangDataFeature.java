@@ -12,10 +12,13 @@ public class MojangDataFeature implements VanillaReimplementation.Feature {
 
     private static final String LATEST = "1.20.1";
     private final MojangAssets assets = new MojangAssets();
+    private CompletableFuture<FileSystem<ByteArray>> latest = new CompletableFuture<>();
 
     @Override
     public void hook(@NotNull HookContext context) {
-        assets.getAssets(LATEST).join();
+        assetsRequest(LATEST)
+                .thenAccept(latest::complete)
+                .join();
     }
 
     @Override
@@ -23,11 +26,14 @@ public class MojangDataFeature implements VanillaReimplementation.Feature {
         return NamespaceID.from("io.github.pesto:mojang_data");
     }
 
-    public CompletableFuture<FileSystem<ByteArray>> getAssets(@NotNull String version) {
-        return assets.getAssets(version);
+    public FileSystem<ByteArray> latestAssets() {
+        if (!latest.isDone()) {
+            throw new IllegalStateException("Cannot request assets before {@link MojangDataFeature} is loaded");
+        }
+        return latest.join();
     }
 
-    public CompletableFuture<FileSystem<ByteArray>> getLatest() {
-        return assets.getAssets(LATEST);
+    public CompletableFuture<FileSystem<ByteArray>> assetsRequest(@NotNull String version) {
+        return assets.getAssets(version);
     }
 }

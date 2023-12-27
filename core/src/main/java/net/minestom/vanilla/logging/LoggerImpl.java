@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 record LoggerImpl(Level level) implements Logger {
 
     static final LoggerImpl DEFAULT = new LoggerImpl(Level.INFO);
-    public static Level LOG_LEVEL = Level.INFO;
+    public static Level LOG_LEVEL = Level.valueOf(System.getProperty("minestom.vri.log-level", "SETUP").toUpperCase());
 
     private static LoggerImpl lastLogger = DEFAULT;
     /** true if this logger implementation was the last used to log a message. false if it was an external call to {@link System#out} */
@@ -52,7 +52,7 @@ record LoggerImpl(Level level) implements Logger {
     @Override
     public Logger print(String message) {
         synchronized (printLock) {
-            if (LOG_LEVEL.ordinal() < level.ordinal()) return this;
+            if (LOG_LEVEL.ordinal() > level.ordinal()) return this;
             if (loggerWasLast && !lastLogger.equals(this) && !newLine) {
                 newLine();
             }

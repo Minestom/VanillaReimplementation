@@ -21,7 +21,6 @@ public sealed interface VanillaRegistry permits VanillaReimplementationImpl.Vani
 
     interface EntitySpawner {
         @NotNull Entity spawn(@NotNull VanillaRegistry.EntityContext context);
-
     }
 
     interface EntityContext extends TagReadable {

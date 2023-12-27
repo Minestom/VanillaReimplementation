@@ -122,6 +122,7 @@ class LoggingLoadingBar implements LoadingBar {
         }
 
         private void renderThis() {
+            out.accept("\r");
             printIndent(parent);
             out.accept(MESSAGE_COLOR.toString());
             render(message, progress, out);

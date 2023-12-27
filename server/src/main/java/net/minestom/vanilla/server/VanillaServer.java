@@ -44,7 +44,7 @@ class VanillaServer {
         VanillaReimplementation vri = VanillaReimplementation.hook(MinecraftServer.process());
 
         VanillaServer vanillaServer = new VanillaServer(server, vri, args);
-        Logger.info("vri is setup.");
+        Logger.info("vri (%s) is setup.", MinecraftServer.VERSION_NAME);
         vanillaServer.start("0.0.0.0", 25565);
     }
 
