@@ -110,32 +110,30 @@ public interface Recipe {
     record Result(Material item, @Optional Integer count) {
     }
 
-    record Blasting(String group,
-                    JsonUtils.SingleOrList<Ingredient> ingredient, Material result, double experience, @Optional Integer cookingTime) implements CookingRecipe {
+    record Blasting(String group, JsonUtils.SingleOrList<Ingredient> ingredient, Material result,
+                    double experience, @Optional Integer cookingTime) implements CookingRecipe {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:blasting");
         }
     }
 
-    record CampfireCooking(String group,
-                           JsonUtils.SingleOrList<Ingredient> ingredient, Material result, double experience, @Optional Integer cookingTime) implements CookingRecipe {
+    record CampfireCooking(String group, JsonUtils.SingleOrList<Ingredient> ingredient, Material result,
+                           double experience, @Optional Integer cookingTime) implements CookingRecipe {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:campfire_cooking");
         }
     }
 
-    record Shaped(String group,
-                          List<String> pattern, Map<Character, Ingredient> key, Result result) implements Recipe {
+    record Shaped(String group, List<String> pattern, Map<Character, Ingredient> key, Result result) implements Recipe {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:crafting_shaped");
         }
     }
 
-    record Shapeless(String group,
-                     JsonUtils.SingleOrList<Ingredient> ingredients, Result result) implements Recipe {
+    record Shapeless(String group, JsonUtils.SingleOrList<Ingredient> ingredients, Result result) implements Recipe {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:crafting_shapeless");
@@ -244,46 +242,48 @@ public interface Recipe {
         }
     }
 
-    record Smelting(String group,
-                    JsonUtils.SingleOrList<Ingredient> ingredient, Material result, double experience, @Optional Integer cookingTime) implements CookingRecipe {
+    record Smelting(String group, JsonUtils.SingleOrList<Ingredient> ingredient, Material result,
+                    double experience, @Optional Integer cookingTime) implements CookingRecipe {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:smelting");
         }
     }
 
-    record Smithing(String group,
-                    Ingredient.Single base, Ingredient.Single addition, Ingredient.Item result) implements Recipe {
+    record Smithing(String group, Ingredient.Single base, Ingredient.Single addition,
+                    Ingredient.Item result) implements Recipe {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:smithing");
         }
     }
 
-    record Smoking(String group,
-                   JsonUtils.SingleOrList<Ingredient> ingredient, Material result, double experience, @Optional Integer cookingTime) implements CookingRecipe {
+    record Smoking(String group, JsonUtils.SingleOrList<Ingredient> ingredient, Material result,
+                   double experience, @Optional Integer cookingTime) implements CookingRecipe {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:smoking");
         }
     }
 
-    record Stonecutting(String group,
-                        JsonUtils.SingleOrList<Ingredient> ingredient, Material result, int count) implements Recipe {
+    record Stonecutting(String group, JsonUtils.SingleOrList<Ingredient> ingredient, Material result,
+                        int count) implements Recipe {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:stonecutting");
         }
     }
 
-    record SmithingTrim(String group, Ingredient.Single base, Ingredient.Single addition, Result result, Ingredient.Single template) implements Recipe {
+    record SmithingTrim(String group, Ingredient.Single base, Ingredient.Single addition, Result result,
+                        Ingredient.Single template) implements Recipe {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:smithing_trim");
         }
     }
 
-    record SmithingTransform(String group, Ingredient.Single base, Ingredient.Single addition, Result result, Ingredient.Single template) implements Recipe {
+    record SmithingTransform(String group, Ingredient.Single base, Ingredient.Single addition, Result result,
+                             Ingredient.Single template) implements Recipe {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:smithing_transform");

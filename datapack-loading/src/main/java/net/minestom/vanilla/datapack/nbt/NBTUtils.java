@@ -25,7 +25,7 @@ public class NBTUtils {
      * @param comparison the comparison, that is being compared against the guarantee. NBT compounds in this parameter,
      *                   whether deeper in the tree or not, are allowed to have keys that the guarantee does not - it's
      *                   basically compared against a standard.
-     * @param assureListOrder whether or not to assure list order. When true, lists are directly compared, but when
+     * @param assureListOrder whether to assure list order. When true, lists are directly compared, but when
      *                        false, the comparison is checked to see if it contains each item in the guarantee.
      * @return true if the comparison fits the guarantee, otherwise false
      */
@@ -35,7 +35,7 @@ public class NBTUtils {
             return true;
         }
         if (comparison == null) {
-            // If it's null at this point, we already assured that guarantee is null, so it must be invalid
+            // If it's null at this point, we already assured that guarantee is not null, so it must be invalid
             return false;
         }
         if (!guarantee.getID().equals(comparison.getID())) {

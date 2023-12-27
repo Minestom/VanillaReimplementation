@@ -145,7 +145,6 @@ public interface Datapack {
     }
 
     record Dimension(NamespaceID type) {
-
     }
 
     record WorldGen(
