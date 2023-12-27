@@ -8,10 +8,13 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public interface FileSystem<F> {
+public interface FileSystem<F> extends FileSystemMappers {
 
     /**
      * @return a map of file names (no directory prefix) to F objects
@@ -24,6 +27,15 @@ public interface FileSystem<F> {
      * @return a set of folder names (no directory prefix)
      */
     Set<String> folders();
+
+    /**
+     * Queries all the files in the given directory and returns a set of file names.
+     *
+     * @return a set of file names (no directory prefix)
+     */
+    default Set<String> files() {
+        return readAll().keySet();
+    }
 
     /**
      * Navigates to the given subdirectory and returns a new FileSource for that directory.
@@ -48,6 +60,13 @@ public interface FileSystem<F> {
         return fs;
     }
 
+    default <T> FileSystem<T> folder(String path, Function<F, T> mapper) {
+        FileSystem<F> fs = folder(path);
+        if (fs == null)
+            return null;
+        return fs.map(mapper);
+    }
+
     default FileSystem<F> folder(@NotNull String path, @NotNull String separator) {
         return folder(path.split(separator));
     }
@@ -57,6 +76,10 @@ public interface FileSystem<F> {
     }
 
     default <T> FileSystem<T> map(Function<F, T> mapper) {
+        return map((str, file) -> mapper.apply(file));
+    }
+
+    default <T> FileSystem<T> map(BiFunction<String, F, T> mapper) {
         return new MappedFileSystem<>(this, mapper);
     }
 
@@ -64,8 +87,17 @@ public interface FileSystem<F> {
         return new CacheFileSystem<>(this);
     }
 
-    static FileSystem<ByteArray> empty() {
-        return new DynamicFileSystem<>();
+    default FileSystem<F> lazy() {
+        return new LazyFileSystem<>(this);
+    }
+
+    default FileSystem<F> inMemory() {
+        return DynamicFileSystem.from(this);
+    }
+
+    static <T> FileSystem<T> empty() {
+        //noinspection unchecked
+        return (FileSystem<T>) CacheFileSystem.EMPTY;
     }
 
     static FileSystem<ByteArray> fileSystem(Path path) {
@@ -78,5 +110,43 @@ public interface FileSystem<F> {
 
     static FileSystem<ByteArray> fromZipFile(File file, Predicate<String> pathFilter) {
         return FileSystemUtil.unzipIntoFileSystem(file, pathFilter);
+    }
+
+    default boolean hasFile(String path) {
+        return readAll().containsKey(path);
+    }
+    default boolean hasFolder(String path) {
+        return folders().contains(path);
+    }
+
+
+    static String toString(FileSystem<?> fs) {
+        Stream.Builder<String> builder = Stream.builder();
+        toString(fs, builder, 0);
+        return builder.build().collect(Collectors.joining());
+    }
+
+    static void toString(FileSystem<?> fs, Stream.Builder<String> builder, int depth) {
+        String prefix = "  ".repeat(depth);
+
+        String folderChar = "\uD83D\uDDC0";
+        String fileChar = "\uD83D\uDDCE";
+
+        for (String folder : fs.folders()) {
+            builder.add(prefix);
+            builder.add(folderChar);
+            builder.add(" ");
+            builder.add(folder);
+            builder.add("\n");
+            toString(fs.folder(folder), builder, depth + 1);
+        }
+
+        for (String file : fs.files()) {
+            builder.add(prefix);
+            builder.add(fileChar);
+            builder.add(" ");
+            builder.add(file);
+            builder.add("\n");
+        }
     }
 }

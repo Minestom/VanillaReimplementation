@@ -20,7 +20,7 @@ class PathFileSystem implements FileSystem<ByteArray> {
         try {
             return Files.walk(this.path, 0)
                     .filter(Files::isRegularFile)
-                    .collect(Collectors.toMap(
+                    .collect(Collectors.toUnmodifiableMap(
                             path -> path.getFileName().toString(),
                             path -> {
                                 try {
@@ -51,5 +51,10 @@ class PathFileSystem implements FileSystem<ByteArray> {
     @Override
     public PathFileSystem folder(String path) {
         return new PathFileSystem(this.path.resolve(path));
+    }
+
+    @Override
+    public String toString() {
+        return FileSystem.toString(this);
     }
 }

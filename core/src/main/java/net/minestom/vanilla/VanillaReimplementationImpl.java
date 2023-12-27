@@ -13,22 +13,19 @@ import net.minestom.server.tag.TagHandler;
 import net.minestom.server.tag.TagWritable;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
-import net.minestom.vanilla.crafting.VanillaRecipe;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.instance.SetupVanillaInstanceEvent;
-import net.minestom.vanilla.logging.Level;
 import net.minestom.vanilla.logging.Loading;
 import net.minestom.vanilla.logging.Logger;
 import net.minestom.vanilla.logging.StatusUpdater;
 import net.minestom.vanilla.utils.DependencySorting;
-import net.minestom.vanilla.utils.MinestomResources;
+import net.minestom.vanilla.utils.MinestomUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -56,7 +53,7 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
         Loading.start("Initialising");
 
         Loading.start("Initialising Minestom Resources...");
-        MinestomResources.initialize();
+        MinestomUtils.initialize();
         Loading.finish();
 
         Loading.updater().progress(0.33);

@@ -4,7 +4,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.tag.TagReadable;
-import net.minestom.vanilla.crafting.VanillaRecipe;
 import org.jetbrains.annotations.NotNull;
 
 /**

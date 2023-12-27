@@ -4,6 +4,7 @@ import net.minestom.server.utils.MathUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -41,8 +42,12 @@ public class ByteArray {
         return new ByteArrayInputStream(bytes);
     }
 
-    public String toString() {
-        return new String(bytes, StandardCharsets.UTF_8);
+    public String toCharacterString() {
+        return toCharacterString(StandardCharsets.UTF_8);
+    }
+
+    public String toCharacterString(Charset charset) {
+        return new String(bytes, charset);
     }
 
     private byte[] deepCopy(byte[] source) {

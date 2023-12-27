@@ -1,6 +1,8 @@
 package net.minestom.vanilla.generation;
 
-import de.articdive.jnoise.JNoise;
+import de.articdive.jnoise.generators.noisegen.opensimplex.FastSimplexNoiseGenerator;
+import de.articdive.jnoise.generators.noisegen.white.WhiteNoiseGenerator;
+import de.articdive.jnoise.pipeline.JNoise;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
@@ -11,11 +13,17 @@ import org.jetbrains.annotations.NotNull;
 
 public class VanillaTestGenerator implements Generator {
 
-    private final JNoise noise = JNoise.newBuilder().fastSimplex().setFrequency(1.0 / 32.0).build();
-    private final JNoise treeNoise = JNoise.newBuilder().white().setFrequency(999999.0).build();
+    private final JNoise noise = JNoise.newBuilder()
+            .fastSimplex(FastSimplexNoiseGenerator.newBuilder()
+                    .build())
+            .scale(1.0 / 32.0)
+            .build();
+    private final JNoise treeNoise = JNoise.newBuilder()
+            .white(WhiteNoiseGenerator.newBuilder().build())
+            .build();
 
     private synchronized double noise(JNoise noise, double x, double z) {
-        return noise.getNoise(x, 0, z);
+        return noise.evaluateNoise(x, 0, z);
     }
 
     @Override

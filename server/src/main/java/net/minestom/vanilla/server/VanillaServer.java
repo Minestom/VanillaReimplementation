@@ -107,8 +107,9 @@ class VanillaServer {
             connectionManager.removePlayer(player.getPlayerConnection());
         }));
 
-        // Preload 16x16 chunks
-        int radius = 16 / 2;
+        // Preload chunks
+        long start = System.nanoTime();
+        int radius = MinecraftServer.getChunkViewDistance();
         int total = radius * 2 * radius * 2;
         Loading.start("Preloading " + total + " chunks");
         CompletableFuture<?>[] chunkFutures = new CompletableFuture[total];
@@ -126,7 +127,9 @@ class VanillaServer {
         for (CompletableFuture<?> future : chunkFutures) {
             if (future != null) future.join();
         }
+        long end = System.nanoTime();
         Loading.finish();
+        Logger.info("Chunks per second: " + (total / ((end - start) / 1e9)));
 
         // Debug
         if (Arrays.asList(args).contains("-debug")) {

@@ -38,4 +38,3 @@ out/
 # Vanilla-like server
 server.properties
 world/
-vanilla_worldgen/*
