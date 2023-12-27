@@ -45,7 +45,7 @@ public interface Logger {
     }
     static Logger info(String message, Object... args) {
         if (args.length == 0) return info().println(message);
-        return info().printf(message, args);
+        return info().printf(message, args).println();
     }
     static Logger info(Throwable throwable, Object... args) {
         return info().throwable(throwable, args);

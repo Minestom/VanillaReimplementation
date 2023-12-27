@@ -48,8 +48,7 @@ final class MojangAssets {
                 downloadJar(versionInfo, jar);
             }
 
-            return FileSystem.fromZipFile(jar, path -> path.startsWith("data/minecraft/"))
-                    .folder("data", "minecraft");
+            return FileSystem.fromZipFile(jar, path -> path.startsWith("data/minecraft/")).folder("data");
 
         } catch (IOException e) {
             exitError(e.getMessage());

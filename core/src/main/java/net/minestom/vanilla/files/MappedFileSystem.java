@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-class MappedFileSystem<F, T> implements FileSystem<T> {
+class MappedFileSystem<F, T> implements FileSystemImpl<T> {
 
     private final FileSystem<F> original;
     private final BiFunction<String, F, T> mapper;
@@ -16,24 +16,27 @@ class MappedFileSystem<F, T> implements FileSystem<T> {
     }
 
     @Override
-    public Map<String, T> readAll() {
-        return original.readAll().entrySet()
-                .stream()
-                .collect(Collectors.toConcurrentMap(Map.Entry::getKey, e -> mapper.apply(e.getKey(), e.getValue())));
-    }
-
-    @Override
     public Set<String> folders() {
         return original.folders();
     }
 
     @Override
-    public FileSystem<T> folder(String path) {
+    public Set<String> files() {
+        return original.files();
+    }
+
+    @Override
+    public FileSystemImpl<T> folder(String path) {
         return new MappedFileSystem<>(original.folder(path), mapper);
     }
 
     @Override
+    public T file(String path) {
+        return mapper.apply(path, original.file(path));
+    }
+
+    @Override
     public String toString() {
-        return FileSystem.toString(this);
+        return FileSystemImpl.toString(this);
     }
 }

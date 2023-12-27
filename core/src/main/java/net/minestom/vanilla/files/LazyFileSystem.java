@@ -3,6 +3,7 @@ package net.minestom.vanilla.files;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -10,50 +11,48 @@ import java.util.stream.Collectors;
  * A FileSystem that lazily loads its contents.
  * @param <F>
  */
-public class LazyFileSystem<F> implements FileSystem<F> {
+public class LazyFileSystem<F> implements FileSystemImpl<F> {
 
-    private @Nullable Map<String, F> files = null;
-    private @Nullable Map<String, FileSystem<F>> folders = null;
     private final FileSystem<F> original;
 
     protected LazyFileSystem(FileSystem<F> original) {
         this.original = original;
     }
 
-    private Map<String, F> loadFiles() {
-        if (files != null)
-            return files;
-        this.files = original.readAll();
-        return files;
-    }
-
-    private Map<String, FileSystem<F>> loadFolders() {
-        if (folders != null)
-            return folders;
-        this.folders = original.folders().stream()
-                .collect(Collectors.toUnmodifiableMap(Function.identity(),
-                        name -> original.folder(name).lazy()));
+    private Set<String> folders = null;
+    @Override
+    public Set<String> folders() {
+        if (folders == null) {
+            folders = Set.copyOf(original.folders());
+        }
         return folders;
     }
 
+    private Set<String> files = null;
     @Override
-    public Map<String, F> readAll() {
-        return loadFiles();
+    public Set<String> files() {
+        if (files == null) {
+            files = Set.copyOf(original.files());
+        }
+        return files;
     }
 
-    @Override
-    public Set<String> folders() {
-        return loadFolders().keySet();
-    }
 
+    private final Map<String, @Nullable FileSystem<F>> folderCache = new ConcurrentHashMap<>();
     @Override
     public FileSystem<F> folder(String path) {
-        return loadFolders().get(path);
+        return folderCache.computeIfAbsent(path, original::folder);
+    }
+
+    private final Map<String, @Nullable F> fileCache = new ConcurrentHashMap<>();
+    @Override
+    public F file(String path) {
+        return fileCache.computeIfAbsent(path, original::file);
     }
 
     @Override
     public String toString() {
-        return FileSystem.toString(this);
+        return FileSystemImpl.toString(this);
     }
 
     @Override

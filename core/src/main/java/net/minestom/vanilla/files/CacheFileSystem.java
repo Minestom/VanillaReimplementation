@@ -1,13 +1,11 @@
 package net.minestom.vanilla.files;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-class CacheFileSystem<F> implements FileSystem<F> {
+class CacheFileSystem<F> implements FileSystemImpl<F> {
 
     static final CacheFileSystem<?> EMPTY = new CacheFileSystem<>(new DynamicFileSystem<>());
 
@@ -15,15 +13,11 @@ class CacheFileSystem<F> implements FileSystem<F> {
     private final Map<String, FileSystem<F>> folders;
 
     protected CacheFileSystem(FileSystem<F> original) {
-        this.files = Map.copyOf(original.readAll());
+        this.files = Map.copyOf(original.files().stream()
+                .collect(Collectors.toUnmodifiableMap(Function.identity(), original::file)));
         this.folders = original.folders().stream()
                 .collect(Collectors.toUnmodifiableMap(Function.identity(),
                         name -> original.folder(name).cache()));
-    }
-
-    @Override
-    public Map<String, F> readAll() {
-        return files;
     }
 
     @Override
@@ -32,13 +26,23 @@ class CacheFileSystem<F> implements FileSystem<F> {
     }
 
     @Override
+    public Set<String> files() {
+        return files.keySet();
+    }
+
+    @Override
     public FileSystem<F> folder(String path) {
-        return folders.get(path);
+        return folders.getOrDefault(path, FileSystem.empty());
+    }
+
+    @Override
+    public F file(String path) {
+        return files.get(path);
     }
 
     @Override
     public String toString() {
-        return FileSystem.toString(this);
+        return FileSystemImpl.toString(this);
     }
 
     @Override

@@ -4,10 +4,14 @@ import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackLoadingFeature;
+import net.minestom.vanilla.datapack.recipe.Recipe;
+import net.minestom.vanilla.files.FileSystem;
 import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class CraftingFeature implements VanillaReimplementation.Feature {
 
@@ -18,7 +22,8 @@ public class CraftingFeature implements VanillaReimplementation.Feature {
 
         VriRecipeToMinestomRecipe recipeConverter = new VriRecipeToMinestomRecipe(datapack);
         datapack.namespacedData().forEach((namespace, data) -> {
-            data.recipes().readAll().forEach((id, recipe) -> {
+            FileSystem<Recipe> recipeFileSystem = data.recipes();
+            recipeFileSystem.files().stream().collect(Collectors.toMap(Function.identity(), recipeFileSystem::file)).forEach((id, recipe) -> {
                 Logger.debug("Registering recipe " + id + "...");
                 var recipeManager = context.vri().process().recipe();
 

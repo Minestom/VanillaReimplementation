@@ -45,9 +45,9 @@ class FileSystemUtil {
                     continue;
 
                 if (entry.isDirectory() || name.endsWith("\\")) {
-                    source.processDirectory(name);
+                    source.addFolder(name);
                 } else {
-                    source.processFile(name, ByteArray.copyOf(in.readAllBytes()));
+                    source.addFile(name, ByteArray.copyOf(in.readAllBytes()));
                 }
             }
         } catch (IOException | PatternSyntaxException e) {

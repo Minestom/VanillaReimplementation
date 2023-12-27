@@ -126,9 +126,7 @@ public class DatapackLoader {
     }
 
     static <T> FileSystem<T> parseJsonFolder(FileSystem<ByteArray> source, String path, Function<String, T> converter) {
-        return source.hasFolder(path) ?
-                source.folder(path, FileSystem.BYTES_TO_STRING).map(converter) :
-                FileSystem.empty();
+        return source.folder(path).map(FileSystem.BYTES_TO_STRING).map(converter);
     }
 
     public static <T> Function<String, T> adaptor(Class<T> clazz) {

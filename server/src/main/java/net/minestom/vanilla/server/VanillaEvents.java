@@ -99,7 +99,10 @@ public class VanillaEvents {
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
 
         eventNode.addListener(
-                EventListener.of(PlayerLoginEvent.class, event -> event.setSpawningInstance(overworld))
+                EventListener.of(PlayerLoginEvent.class, event -> {
+                    event.setSpawningInstance(overworld);
+                    Logger.info(event.getPlayer().getUsername() + " joined the server");
+                })
         );
 
         eventNode.addListener(PlayerMoveEvent.class, event -> {
@@ -143,12 +146,12 @@ public class VanillaEvents {
 
                             player.getInstance().loadChunk(player.getPosition()).join();
 
-                            int y = 0;
-                            while (!player.getInstance().getBlock(1, y, 1).isAir()) {
-                                y++;
+                            int y = player.getInstance().getDimensionType().getMaxY();
+                            while (player.getInstance().getBlock(1, y, 1).isAir()) {
+                                y--;
                             }
 
-                            player.teleport(new Pos(1, y, 1));
+                            player.teleport(new Pos(1, y + 1, 1));
                             PlayerInventory inventory = player.getInventory();
 
                             inventory.addItemStack(ItemStack.of(Material.OBSIDIAN, 1));

@@ -17,6 +17,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 record VriRecipeToMinestomRecipe(Datapack datapack) {
 
@@ -211,7 +212,8 @@ record VriRecipeToMinestomRecipe(Datapack datapack) {
                 String namespace = entry.getKey();
                 Datapack.NamespacedData data = entry.getValue();
                 var itemTags = data.tags().folder("items");
-                for (var itemEntry : itemTags.readAll().entrySet()) {
+                for (var itemEntry : itemTags.files().stream()
+                        .collect(Collectors.toUnmodifiableMap(Function.identity(), itemTags::file)).entrySet()) {
                     String tagName = itemEntry.getKey().replace(".json", "");
                     Datapack.Tag itemTag = itemEntry.getValue();
 
@@ -291,7 +293,8 @@ record VriRecipeToMinestomRecipe(Datapack datapack) {
             String namespace = entry.getKey();
             Datapack.NamespacedData data = entry.getValue();
             var itemTags = data.tags().folder("items");
-            for (var itemEntry : itemTags.readAll().entrySet()) {
+            for (var itemEntry : itemTags.files().stream()
+                    .collect(Collectors.toUnmodifiableMap(Function.identity(), itemTags::file)).entrySet()) {
                 String tagName = itemEntry.getKey().replace(".json", "");
                 Datapack.Tag itemTag = itemEntry.getValue();
 
