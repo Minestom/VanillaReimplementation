@@ -1,4 +1,4 @@
-package net.minestom.vanilla.blocks;
+package net.minestom.vanilla.blocks.behaviours;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
@@ -6,6 +6,8 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.time.TimeUnit;
+import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
+import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.damage.DamageTypes;
 import net.minestom.vanilla.system.NetherPortal;
 import org.jetbrains.annotations.NotNull;
@@ -21,8 +23,8 @@ public class FireBlockBehaviour extends VanillaBlockBehaviour {
 //    }
 
     @Override
-    public void onTouch(@NotNull VanillaTouch touch) {
-        Entity touching = touch.touching();
+    public void onTouch(@NotNull Touch touch) {
+        Entity touching = touch.getTouching();
 
         if (!(touching instanceof LivingEntity livingEntity)) {
             return;

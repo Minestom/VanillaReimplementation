@@ -1,9 +1,10 @@
-package net.minestom.vanilla.blocks.oxidisable;
+package net.minestom.vanilla.blocks.behaviours.oxidisable;
 
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.inventory.InventoryManipulation;
 import net.minestom.vanilla.randomticksystem.RandomTickable;
@@ -122,10 +123,10 @@ public class OxidatableBlockBehaviour extends WaxableBlockBehaviour implements R
     }
 
     @Override
-    public boolean onInteract(@NotNull VanillaInteraction interaction) {
-        Player.Hand hand = interaction.hand();
-        Player player = interaction.player();
-        Block interactionBlock = interaction.block();
+    public boolean onInteract(@NotNull Interaction interaction) {
+        Player.Hand hand = interaction.getHand();
+        Player player = interaction.getPlayer();
+        Block interactionBlock = interaction.getBlock();
 
         ItemStack item = player.getInventory().getItemInHand(hand);
         Material material = item.material();
@@ -134,7 +135,7 @@ public class OxidatableBlockBehaviour extends WaxableBlockBehaviour implements R
                 && material.namespace().value().toLowerCase().contains("_axe")) { // TODO: Better way to check if it's an axe
             Block previousBlock = Block.fromStateId(previous);
             Objects.requireNonNull(previousBlock, "Block with state id " + previous + " was not found");
-            interaction.instance().setBlock(interaction.blockPosition(), previousBlock);
+            interaction.getInstance().setBlock(interaction.getBlockPosition(), previousBlock);
             InventoryManipulation.damageItemIfNotCreative(player, hand, 1);
             return false;
         }

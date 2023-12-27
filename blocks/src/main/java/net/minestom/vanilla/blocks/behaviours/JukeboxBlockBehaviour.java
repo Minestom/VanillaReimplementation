@@ -1,4 +1,4 @@
-package net.minestom.vanilla.blocks;
+package net.minestom.vanilla.blocks.behaviours;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
@@ -12,6 +12,8 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
+import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
+import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.inventory.InventoryManipulation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,8 +34,8 @@ public class JukeboxBlockBehaviour extends VanillaBlockBehaviour {
     }
 
     @Override
-    public void onDestroy(@NotNull VanillaDestroy destroy) {
-        stopPlayback(destroy.instance(), destroy.blockPosition(), destroy.block());
+    public void onDestroy(@NotNull Destroy destroy) {
+        stopPlayback(destroy.getInstance(), destroy.getBlockPosition(), destroy.getBlock());
     }
 
     public @Nullable ItemStack getDisc(Block block) {
@@ -56,12 +58,12 @@ public class JukeboxBlockBehaviour extends VanillaBlockBehaviour {
     }
 
     @Override
-    public boolean onInteract(@NotNull VanillaInteraction interaction) {
-        Player player = interaction.player();
-        Player.Hand hand = interaction.hand();
-        Instance instance = interaction.instance();
-        Block block = interaction.block();
-        Point pos = interaction.blockPosition();
+    public boolean onInteract(@NotNull Interaction interaction) {
+        Player player = interaction.getPlayer();
+        Player.Hand hand = interaction.getHand();
+        Instance instance = interaction.getInstance();
+        Block block = interaction.getBlock();
+        Point pos = interaction.getBlockPosition();
         ItemStack heldItem = player.getInventory().getItemInMainHand();
 
         ItemStack stack = this.getDisc(block);
@@ -106,8 +108,8 @@ public class JukeboxBlockBehaviour extends VanillaBlockBehaviour {
         return true;
     }
 
-    public void tick(@NotNull VanillaTick tick) {
-        Instance instance = tick.instance();
+    public void tick(@NotNull Tick tick) {
+        Instance instance = tick.getInstance();
 
         long age = instance.getWorldAge();
 

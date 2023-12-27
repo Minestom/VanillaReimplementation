@@ -1,4 +1,4 @@
-package net.minestom.vanilla.blocks;
+package net.minestom.vanilla.blocks.behaviours;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -7,6 +7,8 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.VanillaRegistry;
+import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
+import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdatable;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdateInfo;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdateManager;

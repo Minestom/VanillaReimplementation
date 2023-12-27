@@ -1,4 +1,4 @@
-package net.minestom.vanilla.blocks;
+package net.minestom.vanilla.blocks.behaviours;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -7,6 +7,8 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.world.DimensionType;
+import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
+import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,9 +25,9 @@ public class EndPortalBlockBehaviour extends VanillaBlockBehaviour {
 //    }
 
     @Override
-    public void onTouch(@NotNull VanillaTouch touch) {
-        Instance instance = touch.instance();
-        Entity touching = touch.touching();
+    public void onTouch(@NotNull Touch touch) {
+        Instance instance = touch.getInstance();
+        Entity touching = touch.getTouching();
 
 
         DimensionType targetDimension = instance.getDimensionType() == VanillaDimensionTypes.END ? VanillaDimensionTypes.OVERWORLD : VanillaDimensionTypes.END;

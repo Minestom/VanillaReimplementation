@@ -1,6 +1,5 @@
-package net.minestom.vanilla.blocks.chestlike;
+package net.minestom.vanilla.blocks.behaviours.chestlike;
 
-import it.unimi.dsi.fastutil.objects.ObjectIterables;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;

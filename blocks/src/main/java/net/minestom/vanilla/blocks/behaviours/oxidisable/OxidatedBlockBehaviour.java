@@ -1,4 +1,4 @@
-package net.minestom.vanilla.blocks.oxidisable;
+package net.minestom.vanilla.blocks.behaviours.oxidisable;
 
 import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.blocks.VanillaBlocks;

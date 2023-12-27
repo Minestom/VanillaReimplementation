@@ -1,4 +1,4 @@
-package net.minestom.vanilla.blocks;
+package net.minestom.vanilla.blocks.behaviours;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -11,7 +11,9 @@ import net.minestom.server.inventory.Inventory;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.Direction;
-import net.minestom.vanilla.blocks.chestlike.ChestInventory;
+import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
+import net.minestom.vanilla.blocks.VanillaBlocks;
+import net.minestom.vanilla.blocks.behaviours.chestlike.ChestInventory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -58,13 +60,13 @@ public abstract class ChestLikeBlockBehaviour extends VanillaBlockBehaviour {
     }
 
     @Override
-    public void onDestroy(@NotNull VanillaDestroy destroy) {
-        Instance instance = destroy.instance();
-        Point pos = destroy.blockPosition();
-        Block block = destroy.block();
+    public void onDestroy(@NotNull Destroy destroy) {
+        Instance instance = destroy.getInstance();
+        Point pos = destroy.getBlockPosition();
+        Block block = destroy.getBlock();
 
         // TODO: Introduce a way to get the block this is getting replaced with, enabling us to remove the tick delay.
-        destroy.instance().scheduleNextTick(ignored -> {
+        destroy.getInstance().scheduleNextTick(ignored -> {
             if (instance.getBlock(pos).compare(block)) {
                 // Same block, don't remove chest inventory
                 return;
@@ -85,7 +87,7 @@ public abstract class ChestLikeBlockBehaviour extends VanillaBlockBehaviour {
 
                 ItemEntity entity = new ItemEntity(item);
 
-                entity.setInstance(destroy.instance());
+                entity.setInstance(destroy.getInstance());
                 entity.teleport(new Pos(pos.x() + rng.nextDouble(), pos.y() + .5f, pos.z() + rng.nextDouble()));
             }
         });
@@ -101,14 +103,14 @@ public abstract class ChestLikeBlockBehaviour extends VanillaBlockBehaviour {
 //    }
 
     @Override
-    public boolean onInteract(@NotNull VanillaInteraction interaction) {
+    public boolean onInteract(@NotNull Interaction interaction) {
         // TODO: handle double chests
         // TODO: Handle crouching players
 
-        Block block = interaction.block();
-        Instance instance = interaction.instance();
-        Point pos = interaction.blockPosition();
-        Player player = interaction.player();
+        Block block = interaction.getBlock();
+        Instance instance = interaction.getInstance();
+        Point pos = interaction.getBlockPosition();
+        Player player = interaction.getPlayer();
 
         Block above = instance.getBlock(pos.blockX(), pos.blockY() + 1, pos.blockZ());
 

@@ -1,4 +1,4 @@
-package net.minestom.vanilla.blocks;
+package net.minestom.vanilla.blocks.behaviours;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.ItemEntity;
@@ -7,6 +7,8 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
+import net.minestom.vanilla.blocks.VanillaBlocks;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -36,16 +38,16 @@ public class CakeBlockBehaviour extends VanillaBlockBehaviour {
 
     private static final ItemStack flint_and_steel = ItemStack.of(Material.FLINT_AND_STEEL);
 
-    protected CakeBlockBehaviour(VanillaBlocks.@NotNull BlockContext context) {
+    public CakeBlockBehaviour(VanillaBlocks.@NotNull BlockContext context) {
         super(context);
     }
 
     @Override
-    public boolean onInteract(@NotNull VanillaInteraction interaction) {
-        Player player = interaction.player();
-        Block block = interaction.block();
-        Point point = interaction.blockPosition();
-        Instance instance = interaction.instance();
+    public boolean onInteract(@NotNull Interaction interaction) {
+        Player player = interaction.getPlayer();
+        Block block = interaction.getBlock();
+        Point point = interaction.getBlockPosition();
+        Instance instance = interaction.getInstance();
 
         int food = player.getFood();
         float saturation = player.getFoodSaturation();
@@ -74,10 +76,10 @@ public class CakeBlockBehaviour extends VanillaBlockBehaviour {
     }
 
     @Override
-    public void onDestroy(@NotNull VanillaDestroy destroy) {
-        Block block = destroy.block();
-        Instance instance = destroy.instance();
-        Point point = destroy.blockPosition();
+    public void onDestroy(@NotNull Destroy destroy) {
+        Block block = destroy.getBlock();
+        Instance instance = destroy.getInstance();
+        Point point = destroy.getBlockPosition();
 
         tryDropCandle(block, instance, point);
     }

@@ -1,5 +1,6 @@
-package net.minestom.vanilla.blocks;
+package net.minestom.vanilla.blocks.behaviours;
 
+import net.minestom.vanilla.blocks.VanillaBlocks;
 import org.jetbrains.annotations.NotNull;
 
 public class TrappedChestBlockBehaviour extends ChestLikeBlockBehaviour {
@@ -18,6 +19,4 @@ public class TrappedChestBlockBehaviour extends ChestLikeBlockBehaviour {
     public boolean dropContentsOnDestroy() {
         return true;
     }
-
-
 }

@@ -1,4 +1,4 @@
-package net.minestom.vanilla.blocks;
+package net.minestom.vanilla.blocks.behaviours;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -11,6 +11,8 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.item.Material;
 import net.minestom.vanilla.VanillaRegistry;
+import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
+import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.entitymeta.EntityTags;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,10 +32,10 @@ public class TNTBlockBehaviour extends VanillaBlockBehaviour {
 //    }
 
     @Override
-    public boolean onInteract(@NotNull VanillaInteraction interaction) {
-        Point blockPosition = interaction.blockPosition();
-        Player player = interaction.player();
-        Player.Hand hand = interaction.hand();
+    public boolean onInteract(@NotNull Interaction interaction) {
+        Point blockPosition = interaction.getBlockPosition();
+        Player player = interaction.getPlayer();
+        Player.Hand hand = interaction.getHand();
         PlayerInventory inventory = player.getInventory();
 
         if (inventory.getItemInHand(hand).getMaterial() != Material.FLINT_AND_STEEL) {

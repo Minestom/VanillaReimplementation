@@ -1,4 +1,4 @@
-package net.minestom.vanilla.blocks.chestlike;
+package net.minestom.vanilla.blocks.behaviours.chestlike;
 
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
@@ -6,7 +6,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
-import net.minestom.vanilla.blocks.ChestLikeBlockBehaviour;
+import net.minestom.vanilla.blocks.behaviours.ChestLikeBlockBehaviour;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;

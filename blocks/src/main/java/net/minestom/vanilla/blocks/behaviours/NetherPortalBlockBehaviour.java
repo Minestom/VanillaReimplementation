@@ -1,4 +1,4 @@
-package net.minestom.vanilla.blocks;
+package net.minestom.vanilla.blocks.behaviours;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
@@ -10,6 +10,8 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.world.DimensionType;
+import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
+import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdatable;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdateInfo;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
@@ -56,11 +58,11 @@ public class NetherPortalBlockBehaviour extends VanillaBlockBehaviour implements
     }
 
     @Override
-    public void onTouch(@NotNull VanillaTouch touch) {
-        Block block = touch.block();
-        Instance instance = touch.instance();
-        Point pos = touch.blockPosition();
-        Entity touching = touch.touching();
+    public void onTouch(@NotNull Touch touch) {
+        Block block = touch.getBlock();
+        Instance instance = touch.getInstance();
+        Point pos = touch.getBlockPosition();
+        Entity touching = touch.getTouching();
 
         Long lastPortalUpdate = block.getTag(LAST_PORTAL_UPDATE_KEY);
 
@@ -275,9 +277,9 @@ public class NetherPortalBlockBehaviour extends VanillaBlockBehaviour implements
     }
 
     @Override
-    public void onDestroy(@NotNull VanillaDestroy destroy) {
-        Block block = destroy.block();
-        Instance instance = destroy.instance();
+    public void onDestroy(@NotNull Destroy destroy) {
+        Block block = destroy.getBlock();
+        Instance instance = destroy.getInstance();
 
         NetherPortal netherPortal = getPortal(block);
         if (netherPortal != null) {
