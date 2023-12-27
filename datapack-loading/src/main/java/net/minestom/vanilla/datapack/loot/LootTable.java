@@ -1,21 +1,27 @@
 package net.minestom.vanilla.datapack.loot;
 
 import com.squareup.moshi.JsonReader;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.vanilla.datapack.DatapackLoader;
+import net.minestom.vanilla.datapack.Datapack;
+import net.minestom.vanilla.datapack.DatapackUtils;
 import net.minestom.vanilla.datapack.json.JsonUtils;
+import net.minestom.vanilla.datapack.loot.context.LootContext;
 import net.minestom.vanilla.datapack.loot.function.LootFunction;
 import net.minestom.vanilla.datapack.loot.function.Predicate;
 import net.minestom.vanilla.datapack.number.NumberProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
-public record LootTable(@Nullable String type, List<LootFunction> functions, List<Pool> pools) {
+public record LootTable(@Nullable String type, @Nullable List<LootFunction> functions, List<Pool> pools) {
     public record Pool(List<Predicate> conditions,
-                       List<LootFunction> functions,
+                       @Nullable List<LootFunction> functions,
                        NumberProvider rolls,
                        NumberProvider bonus_rolls,
                        List<Pool.Entry> entries) {
@@ -39,6 +45,17 @@ public record LootTable(@Nullable String type, List<LootFunction> functions, Lis
                 });
             }
 
+            sealed interface ItemGenerator extends Entry {
+                @Nullable List<LootFunction> functions();
+                @Nullable NumberProvider weight();
+                NumberProvider quality();
+
+                /**
+                 * Each element in this list is a singular loot entry.
+                 */
+                List<List<ItemStack>> apply(Datapack datapack, LootContext context);
+            }
+
             /**
              * item -> Provides a loot entry that drops a single item stack.
              * • functions: Invokes item functions to the item stack(s).
@@ -52,11 +69,18 @@ public record LootTable(@Nullable String type, List<LootFunction> functions, Lis
                         NumberProvider weight,
                         NumberProvider quality,
                         NamespaceID name,
-                        @Nullable Integer count) implements Pool.Entry {
+                        @Nullable Integer count) implements ItemGenerator {
 
                 @Override
                 public NamespaceID type() {
                     return NamespaceID.from("minecraft:item");
+                }
+
+                @Override
+                public List<List<ItemStack>> apply(Datapack datapack, LootContext context) {
+                    return List.of(List.of(
+                            ItemStack.of(Objects.requireNonNull(Material.fromNamespaceId(name)), count == null ? 1 : count)
+                    ));
                 }
             }
 
@@ -74,11 +98,34 @@ public record LootTable(@Nullable String type, List<LootFunction> functions, Lis
                        NumberProvider weight,
                        NumberProvider quality,
                        NamespaceID name,
-                       boolean expand) implements Pool.Entry {
+                       boolean expand) implements ItemGenerator {
 
                 @Override
                 public NamespaceID type() {
                     return NamespaceID.from("minecraft:tag");
+                }
+
+                @Override
+                public List<List<ItemStack>> apply(Datapack datapack, LootContext context) {
+                    List<List<ItemStack>> result = new ArrayList<>();
+
+                    var itemTags = DatapackUtils.findTags(datapack, "items", name);
+
+                    var items = itemTags.stream()
+                            .map(Material::fromNamespaceId)
+                            .filter(Objects::nonNull)
+                            .map(material -> ItemStack.of(material, 1))
+                            .toList();
+
+                    if (expand) {
+                        for (var item : items) {
+                            result.add(List.of(item));
+                        }
+                    } else {
+                        result.add(items);
+                    }
+
+                    return List.copyOf(result);
                 }
             }
 
@@ -114,11 +161,18 @@ public record LootTable(@Nullable String type, List<LootFunction> functions, Lis
                            List<LootFunction> functions,
                            NumberProvider weight,
                            NumberProvider quality,
-                           String name) implements Pool.Entry {
+                           String name) implements ItemGenerator {
 
                 @Override
                 public NamespaceID type() {
                     return NamespaceID.from("minecraft:dynamic");
+                }
+
+                @Override
+                public List<List<ItemStack>> apply(Datapack datapack, LootContext context) {
+                    Block blockEntity = context.get(LootContext.BLOCK_ENTITY);
+                    // TODO: Drop chest contents
+                    return List.of(List.of());
                 }
             }
 
@@ -132,11 +186,16 @@ public record LootTable(@Nullable String type, List<LootFunction> functions, Lis
             record Empty(List<Predicate> conditions,
                          List<LootFunction> functions,
                          NumberProvider weight,
-                         NumberProvider quality) implements Pool.Entry {
+                         NumberProvider quality) implements ItemGenerator {
 
                 @Override
                 public NamespaceID type() {
                     return NamespaceID.from("minecraft:empty");
+                }
+
+                @Override
+                public List<List<ItemStack>> apply(Datapack datapack, LootContext context) {
+                    return List.of(List.of());
                 }
             }
 

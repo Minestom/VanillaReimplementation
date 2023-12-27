@@ -1,7 +1,6 @@
 package net.minestom.vanilla.blocks;
 
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -9,7 +8,7 @@ import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.BlockUpdateFeature;
 import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
-import net.minestom.vanilla.logging.Loading;
+import net.minestom.vanilla.datapack.DatapackLoadingFeature;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
@@ -20,8 +19,7 @@ public class VanillaBlocksFeature implements VanillaReimplementation.Feature {
     @Override
     public void hook(@NotNull HookContext context) {
         VanillaReimplementation vri = context.vri();
-        VanillaRegistry registry = context.registry();
-        VanillaBlocks.registerAll(vri, registry);
+        VanillaBlocks.registerAll(vri);
 
         vri.process().eventHandler().addListener(PlayerBlockPlaceEvent.class, event -> {
             Block block = event.getBlock();
@@ -63,11 +61,11 @@ public class VanillaBlocksFeature implements VanillaReimplementation.Feature {
 
     @Override
     public @NotNull NamespaceID namespaceId() {
-        return NamespaceID.from("vri:vanilla-blocks");
+        return NamespaceID.from("vri:blocks");
     }
 
     @Override
     public @NotNull Set<Class<? extends VanillaReimplementation.Feature>> dependencies() {
-        return Set.of(BlockUpdateFeature.class);
+        return Set.of(BlockUpdateFeature.class, DatapackLoadingFeature.class);
     }
 }

@@ -15,8 +15,6 @@ import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.VanillaReimplementation;
-import net.minestom.vanilla.randomticksystem.RandomTickManager;
-import net.minestom.vanilla.randomticksystem.RandomTickable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -102,10 +100,6 @@ public class BlockUpdateManager {
                 updatable.blockUpdate(instance, pos, info);
             }
         };
-    }
-
-    public static void registerRandomTickable(short stateId, RandomTickable randomTickable) {
-        RandomTickManager.registerRandomTickable(stateId, randomTickable);
     }
 
     public interface UpdateHandler {

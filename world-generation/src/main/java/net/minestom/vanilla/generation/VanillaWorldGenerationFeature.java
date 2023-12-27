@@ -23,7 +23,7 @@ public class VanillaWorldGenerationFeature implements VanillaReimplementation.Fe
 
             NamespaceID plains = NamespaceID.from("minecraft:plains");
             DatapackLoadingFeature datapackLoading = context.vri().feature(DatapackLoadingFeature.class);
-            Datapack datapack = datapackLoading.vanilla();
+            Datapack datapack = datapackLoading.current();
 
             Datapack.NamespacedData data = datapack.namespacedData().get("minecraft");
             if (data == null) {

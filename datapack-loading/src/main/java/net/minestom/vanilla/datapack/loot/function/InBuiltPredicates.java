@@ -334,7 +334,9 @@ interface InBuiltPredicates {
 
         @Override
         public boolean test(LootContext context) {
-            return ThreadLocalRandom.current().nextFloat() < 1.0 / context.getOrThrow(LootContext.EXPLOSION_RADIUS);
+            Double explosionRadius = context.get(LootContext.EXPLOSION_RADIUS);
+            if (explosionRadius == null) return true;
+            return ThreadLocalRandom.current().nextFloat() < 1.0 / explosionRadius;
         }
     }
 

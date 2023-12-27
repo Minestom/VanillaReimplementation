@@ -97,7 +97,7 @@ public interface Recipe {
         record Item(Material item) implements Single {
         }
 
-        record Tag(String tag) implements Single {
+        record Tag(NamespaceID tag) implements Single {
         }
 
         record None() implements Ingredient {

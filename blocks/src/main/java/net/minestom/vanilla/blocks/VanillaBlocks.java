@@ -1,30 +1,28 @@
 package net.minestom.vanilla.blocks;
 
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
-import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.BlockHandler;
-import net.minestom.server.utils.NamespaceID;
-import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
-import net.minestom.vanilla.blocks.oxidisable.OxidatableBlockBehaviour;
-import net.minestom.vanilla.blocks.oxidisable.WaxedBlockBehaviour;
+import net.minestom.vanilla.blocks.behaviours.*;
+import net.minestom.vanilla.blocks.behaviours.oxidisable.OxidatableBlockBehaviour;
+import net.minestom.vanilla.blocks.behaviours.oxidisable.WaxedBlockBehaviour;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdatable;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdateManager;
+import net.minestom.vanilla.datapack.DatapackLoadingFeature;
+import net.minestom.vanilla.randomticksystem.RandomTickManager;
 import net.minestom.vanilla.randomticksystem.RandomTickable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 /**
  * All blocks available in the vanilla reimplementation
@@ -189,15 +187,24 @@ public enum VanillaBlocks {
     }
 
     /**
-     * Register all vanilla commands into the given blockManager. ConnectionManager will handle replacing the basic
+     * Register all vanilla blocks. ConnectionManager will handle replacing the basic
      * block with its custom variant.
      *
-     * @param vri      the vanilla reimplementation object
-     * @param registry the block registry
+     * @param vri the vanilla reimplementation object
      */
-    public static void registerAll(@NotNull VanillaReimplementation vri, @NotNull VanillaRegistry registry) {
+    public static void registerAll(@NotNull VanillaReimplementation vri) {
 
         EventNode<Event> events = EventNode.all("vanilla-blocks");
+
+        // block loot
+        VanillaBlockLoot loot = new VanillaBlockLoot(vri, vri.feature(DatapackLoadingFeature.class).current());
+        events.addListener(EventListener.builder(PlayerBlockBreakEvent.class)
+                .filter(event -> !event.isCancelled())
+                .handler(loot::spawnLoot)
+                .build());
+
+        Short2ObjectMap<VanillaBlockBehaviour> stateId2behaviour = new Short2ObjectOpenHashMap<>();
+
         for (VanillaBlocks vb : values()) {
             BlockContext context = new BlockContext() {
                 @Override
@@ -211,60 +218,39 @@ public enum VanillaBlocks {
                 }
             };
             VanillaBlockBehaviour behaviour = vb.context2handler.apply(context);
-            registerEvents(events, vb.stateId, behaviour);
+
+            for (Block possibleState : Objects.requireNonNull(Block.fromStateId(vb.stateId)).possibleStates()) {
+                short possibleStateId = possibleState.stateId();
+                stateId2behaviour.put(possibleStateId, behaviour);
+            }
 
             if (behaviour instanceof BlockUpdatable updatable)
                 BlockUpdateManager.registerUpdatable(vb.stateId, updatable);
 
             if (behaviour instanceof RandomTickable randomTickable)
-                BlockUpdateManager.registerRandomTickable(vb.stateId, randomTickable);
-
-            // TODO: Find replacements for this hacky block handler
-            events.addListener(EventListener.builder(PlayerBlockPlaceEvent.class)
-                    .filter(event -> event.getBlock().stateId() == vb.stateId)
-                    .handler(event -> {
-                        NamespaceID namespace = NamespaceID.from("vri", vb.name().toLowerCase());
-                        BlockHandler handler = new BehaviourBlockHandler(namespace, behaviour);
-                        event.setBlock(event.getBlock().withHandler(handler));
-                    })
-                    .build());
+                RandomTickManager.registerRandomTickable(vb.stateId, randomTickable);
         }
+
+        registerEvents(events, stateId2behaviour);
+
         vri.process().eventHandler().addChild(events);
     }
 
-    private static void registerEvents(EventNode<Event> node, short stateId, VanillaBlockBehaviour behaviour) {
-        Block block = Block.fromStateId(stateId);
-        Objects.requireNonNull(block, "Block is null for stateId: " + stateId);
+    private static void registerEvents(EventNode<Event> node, Short2ObjectMap<VanillaBlockBehaviour> behaviours) {
         node.addListener(EventListener.builder(PlayerBlockPlaceEvent.class)
-                .filter(event -> event.getBlock().compare(block))
-                .handler(blockPlaceHandler(behaviour))
-                .build());
-        node.addListener(EventListener.builder(PlayerBlockBreakEvent.class)
-                .filter(event -> event.getBlock().compare(block))
-                .handler(blockBreakHandler(behaviour))
-                .build());
-        node.addListener(EventListener.builder(PlayerBlockInteractEvent.class)
-                .filter(event -> event.getBlock().compare(block))
-                .handler(blockInteractHandler(behaviour))
-                .build());
-    }
+                .filter(event -> behaviours.containsKey(event.getBlock().stateId()))
+                .handler(event -> {
+                    short stateId = event.getBlock().stateId();
+                    Block block = Objects.requireNonNull(Block.fromStateId(stateId));
+                    var behaviour = behaviours.get(stateId);
 
-    private static Consumer<PlayerBlockPlaceEvent> blockPlaceHandler(VanillaBlockBehaviour behaviour) {
-        return event -> {
-            AtomicReference<Block> blockToPlace = new AtomicReference<>(event.getBlock());
-            behaviour.onPlace(new PlayerPlacement(event));
-            if (!event.getBlock().compare(blockToPlace.get())) {
-                event.setBlock(blockToPlace.get());
-            }
-        };
-    }
-
-    private static Consumer<PlayerBlockBreakEvent> blockBreakHandler(VanillaBlockBehaviour behaviour) {
-        return event -> behaviour.onDestroy(new PlayerBreak(event));
-    }
-
-    private static Consumer<PlayerBlockInteractEvent> blockInteractHandler(VanillaBlockBehaviour behaviour) {
-        return event -> behaviour.onInteract(new PlayerInteract(event));
+                    behaviour.onPlace(new PlayerPlacement(event));
+                    Block blockToPlace = event.getBlock();
+                    if (blockToPlace.compare(block)) {
+                        event.setBlock(blockToPlace.withHandler(behaviour));
+                    }
+                })
+                .build());
     }
 
     private record PlayerPlacement(PlayerBlockPlaceEvent event) implements VanillaBlockBehaviour.VanillaPlacement,
@@ -293,111 +279,6 @@ public enum VanillaBlocks {
         @Override
         public @NotNull Player player() {
             return event.getPlayer();
-        }
-    }
-
-    private record PlayerBreak(PlayerBlockBreakEvent event) implements VanillaBlockBehaviour.VanillaDestroy {
-        @Override
-        public @NotNull Block block() {
-            return event.getBlock();
-        }
-
-        @Override
-        public @NotNull Instance instance() {
-            return event.getInstance();
-        }
-
-        @Override
-        public @NotNull Point blockPosition() {
-            return event.getBlockPosition();
-        }
-    }
-
-    private record PlayerInteract(PlayerBlockInteractEvent event) implements VanillaBlockBehaviour.VanillaInteraction {
-        @Override
-        public @NotNull Block block() {
-            return event.getBlock();
-        }
-
-        @Override
-        public @NotNull Instance instance() {
-            return event.getInstance();
-        }
-
-        @Override
-        public @NotNull Point blockPosition() {
-            return event.getBlockPosition();
-        }
-
-        @Override
-        public @NotNull Player player() {
-            return event.getPlayer();
-        }
-
-        @Override
-        public @NotNull Player.Hand hand() {
-            return event.getHand();
-        }
-    }
-
-    private record BlockTick(BlockHandler.Tick tick) implements VanillaBlockBehaviour.VanillaTick {
-        @Override
-        public @NotNull Block block() {
-            return tick.getBlock();
-        }
-
-        @Override
-        public @NotNull Instance instance() {
-            return tick.getInstance();
-        }
-
-        @Override
-        public @NotNull Point getBlockPosition() {
-            return tick.getBlockPosition();
-        }
-    }
-
-    private record BlockTouch(BlockHandler.Touch touch) implements VanillaBlockBehaviour.VanillaTouch {
-        @Override
-        public @NotNull Block block() {
-            return touch.getBlock();
-        }
-
-        @Override
-        public @NotNull Instance instance() {
-            return touch.getInstance();
-        }
-
-        @Override
-        public @NotNull Point blockPosition() {
-            return touch.getBlockPosition();
-        }
-
-        @Override
-        public @NotNull Entity touching() {
-            return touch.getTouching();
-        }
-    }
-
-    private record BehaviourBlockHandler(NamespaceID namespace, VanillaBlockBehaviour behaviour) implements BlockHandler {
-        @Override
-        public @NotNull NamespaceID getNamespaceId() {
-            return namespace;
-        }
-
-        @Override
-        public void tick(@NotNull Tick tick) {
-            behaviour.tick(new BlockTick(tick));
-        }
-
-        @Override
-        public boolean isTickable() {
-            return behaviour.isTickable();
-        }
-
-        @Override
-        public void onTouch(@NotNull Touch touch) {
-            behaviour.onTouch(new BlockTouch(touch));
         }
     }
 }

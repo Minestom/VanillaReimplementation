@@ -27,7 +27,7 @@ public class DatapackLoadingFeature implements VanillaReimplementation.Feature {
         Loading.finish();
     }
 
-    public @NotNull Datapack vanilla() {
+    public @NotNull Datapack current() {
         Objects.requireNonNull(datapack, "DatapackLoadingFeature not loaded yet");
         return datapack;
     }

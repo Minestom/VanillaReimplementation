@@ -18,7 +18,7 @@ public class CraftingFeature implements VanillaReimplementation.Feature {
     @Override
     public void hook(@NotNull HookContext context) {
         DatapackLoadingFeature datapackData = context.vri().feature(DatapackLoadingFeature.class);
-        Datapack datapack = datapackData.vanilla();
+        Datapack datapack = datapackData.current();
 
         VriRecipeToMinestomRecipe recipeConverter = new VriRecipeToMinestomRecipe(datapack);
         datapack.namespacedData().forEach((namespace, data) -> {
@@ -29,7 +29,7 @@ public class CraftingFeature implements VanillaReimplementation.Feature {
 
                 net.minestom.server.recipe.Recipe minestomRecipe = recipeConverter.convert(id, recipe, player -> true);
                 if (minestomRecipe == null) {
-                    Logger.warn("Failed to convert recipe " + id + ", skipping.");
+                    Logger.debug("Failed to convert recipe " + id + ", skipping.");
                     return;
                 }
                 recipeManager.addRecipe(minestomRecipe);

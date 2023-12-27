@@ -83,7 +83,7 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
     @Override
     public <T extends Feature> @NotNull T feature(Class<T> clazz) {
         //noinspection unchecked
-        return (T) Objects.requireNonNull(class2Feature.get(clazz), () -> "Feature " + clazz + " was not loaded correctly.");
+        return (T) Objects.requireNonNull(class2Feature.get(clazz), () -> "Feature " + clazz + " has not loaded yet.");
     }
 
 

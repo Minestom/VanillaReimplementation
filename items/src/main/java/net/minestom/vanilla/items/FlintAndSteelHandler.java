@@ -5,6 +5,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.Direction;
 import net.minestom.vanilla.inventory.InventoryManipulation;
@@ -34,7 +35,17 @@ public class FlintAndSteelHandler implements VanillaItemHandler {
 
         if (atFirePosition.isAir()) {
             InventoryManipulation.damageItemIfNotCreative(player, hand, 1);
-            instance.setBlock(firePosition, Block.FIRE);
+            // Block block, Instance instance, Point blockPosition, Player player, Player.Hand hand,
+            // BlockFace blockFace, float cursorX, float cursorY, float cursorZ
+            instance.placeBlock(new BlockHandler.PlayerPlacement(
+                    Block.FIRE,
+                    instance,
+                    firePosition,
+                    player,
+                    hand,
+                    event.getBlockFace(),
+                    0, 0, 0 // TODO: cursor position via raycast
+            ));
             return true;
         }
 
