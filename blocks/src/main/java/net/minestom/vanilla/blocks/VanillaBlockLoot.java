@@ -30,7 +30,6 @@ public record VanillaBlockLoot(VanillaReimplementation vri, Datapack datapack) {
     }
 
     public void spawnLoot(@NotNull PlayerBlockBreakEvent event) {
-        Audiences.all().sendMessage(Component.text("" + event.getBlock()));
         String blockName = event.getBlock().namespace().value();
         datapack.namespacedData().forEach((namespace, data) -> {
             FileSystem<LootTable> blocks = data.loot_tables().folder("blocks");
@@ -139,7 +138,7 @@ public record VanillaBlockLoot(VanillaReimplementation vri, Datapack datapack) {
         }
     }
 
-    private static boolean fails(List<Predicate> predicates, LootContext context) {
+    private static boolean fails(@Nullable List<Predicate> predicates, LootContext context) {
         if (predicates == null) return false;
         for (Predicate predicate : predicates) {
             if (!predicate.test(context)) {
@@ -168,15 +167,9 @@ public record VanillaBlockLoot(VanillaReimplementation vri, Datapack datapack) {
             case "minecraft:alternatives" -> {
                 LootTable.Pool.Entry.Alternatives alternatives = (LootTable.Pool.Entry.Alternatives) entry;
                 for (LootTable.Pool.Entry alternative : alternatives.children()) {
-                    boolean passed = false;
-                    for (Predicate condition : alternative.conditions()) {
-                        if (condition.test(context)) {
-                            addEntries(context, alternative, out);
-                            passed = true;
-                            break;
-                        }
-                    }
-                    if (passed) break;
+                    if (fails(alternative.conditions(), context)) continue;
+                    addEntries(context, alternative, out);
+                    break;
                 }
             }
             case "minecraft:sequence" -> {

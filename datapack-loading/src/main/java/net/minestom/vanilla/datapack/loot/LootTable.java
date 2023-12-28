@@ -27,7 +27,7 @@ public record LootTable(@Nullable String type, @Nullable List<LootFunction> func
                        List<Pool.Entry> entries) {
 
         public sealed interface Entry {
-            List<Predicate> conditions();
+            @Nullable List<Predicate> conditions();
 
             NamespaceID type();
 

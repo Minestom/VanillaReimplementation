@@ -8,6 +8,7 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
+import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import net.minestom.server.tag.TagWritable;
@@ -172,6 +173,7 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
         // Anvil directory
         AnvilLoader loader = new AnvilLoader(name.value());
         instance.setChunkLoader(loader);
+        instance.setChunkSupplier(LightingChunk::new);
 
         // Setup event
         SetupVanillaInstanceEvent event = new SetupVanillaInstanceEvent(instance);

@@ -14,6 +14,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.AddEntityToInstanceEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.item.PickupItemEvent;
+import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
@@ -102,6 +103,12 @@ public class VanillaEvents {
                 EventListener.of(PlayerLoginEvent.class, event -> {
                     event.setSpawningInstance(overworld);
                     Logger.info(event.getPlayer().getUsername() + " joined the server");
+                })
+        );
+
+        eventNode.addListener(
+                EventListener.of(PlayerDisconnectEvent.class, event -> {
+                    Logger.info(event.getPlayer().getUsername() + " left the server");
                 })
         );
 

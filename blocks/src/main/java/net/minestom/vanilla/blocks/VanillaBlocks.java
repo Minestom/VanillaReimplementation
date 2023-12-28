@@ -3,6 +3,7 @@ package net.minestom.vanilla.blocks;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
@@ -200,6 +201,7 @@ public enum VanillaBlocks {
         VanillaBlockLoot loot = new VanillaBlockLoot(vri, vri.feature(DatapackLoadingFeature.class).current());
         events.addListener(EventListener.builder(PlayerBlockBreakEvent.class)
                 .filter(event -> !event.isCancelled())
+                .filter(event -> event.getPlayer().getGameMode() != GameMode.CREATIVE)
                 .handler(loot::spawnLoot)
                 .build());
 

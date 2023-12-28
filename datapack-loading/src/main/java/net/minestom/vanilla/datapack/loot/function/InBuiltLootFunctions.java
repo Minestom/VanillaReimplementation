@@ -9,6 +9,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.Enchantment;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -96,7 +97,7 @@ interface InBuiltLootFunctions {
 
             @Override
             public ItemStack apply(Context context) {
-                int enchantLevel = context.itemStack().meta().getEnchantmentMap().get(enchantment);
+                int enchantLevel = context.itemStack().meta().getEnchantmentMap().getOrDefault(enchantment, (short) 0);
                 double n = enchantLevel * parameters.bonusMultiplier();
                 int count = (int) context.random().nextDouble(n);
                 return context.itemStack().withAmount(count);
@@ -120,7 +121,7 @@ interface InBuiltLootFunctions {
     }
 
     // Copies an entity's or a block entity's name tag into the item's display.Name tag.
-    record CopyName(LootContext.Trait<Component> source) implements LootFunction {
+    record CopyName(LootContext.Trait<?> source) implements LootFunction {
 
         @Override
         public NamespaceID function() {
@@ -129,7 +130,18 @@ interface InBuiltLootFunctions {
 
         @Override
         public ItemStack apply(Context context) {
-            Component name = context.getOrThrow(source);
+            Object entityOrBlockEntity = context.getOrThrow(source);
+            @Nullable Component name = null;
+            if (entityOrBlockEntity instanceof Entity entity) {
+                name = entity.getCustomName();
+            }
+            if (entityOrBlockEntity instanceof Block blockEntity) {
+                BlockHandler handler = blockEntity.handler();
+                if (handler == null) return context.itemStack();
+                // TODO: This is not the correct way to get the block entity's name
+                name = Component.text(handler.getNamespaceId().value());
+            }
+            if (name == null) return context.itemStack();
             return context.itemStack().withDisplayName(name);
         }
     }
