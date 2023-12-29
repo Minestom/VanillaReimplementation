@@ -13,27 +13,26 @@ public class DependencySorting {
 
     public static <T, ND extends NamespaceDependent<T>> List<ND> sort(Set<ND> dependants) {
         List<ND> sorted = new ArrayList<>();
-
+        Set<T> visited = new HashSet<>();
         for (ND dependant : dependants) {
-            // find the index of the first element that depends on this element
-            int index = -1;
-            for (int i = 0; i < sorted.size(); i++) {
-                if (sorted.get(i).dependencies().contains(dependant.identity())) {
-                    index = i;
-                    break;
-                }
-            }
-
-            // if no element depends on this element, add it to the very start
-            if (index == -1) {
-                sorted.add(dependant);
-                continue;
-            }
-
-            // else add it before the first element that depends on it
-            sorted.add(index, dependant);
+            visit(dependant, dependants, sorted, visited);
         }
-
         return List.copyOf(sorted);
+    }
+
+    private static <T, ND extends NamespaceDependent<T>> void visit(ND dependant, Set<ND> dependants, List<ND> sorted, Set<T> visited) {
+        T identity = dependant.identity();
+        if (visited.contains(identity)) {
+            return;
+        }
+        visited.add(identity);
+        for (T dependency : dependant.dependencies()) {
+            ND dependencyDependant = dependants.stream()
+                    .filter(d -> d.identity().equals(dependency))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Missing dependency " + dependency + " for " + identity));
+            visit(dependencyDependant, dependants, sorted, visited);
+        }
+        sorted.add(dependant);
     }
 }

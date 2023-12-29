@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
@@ -132,7 +133,7 @@ class VanillaServer {
         Logger.info("Chunks per second: " + (total / ((end - start) / 1e9)));
 
         // Debug
-        if (Arrays.asList(args).contains("-debug")) {
+        if (List.of(args).contains("-debug")) {
             Logger.debug("Debug mode enabled.");
             Logger.debug("To disable it, remove the -debug argument");
             VanillaDebug.hook(this);
