@@ -35,6 +35,8 @@ public class CraftingFeature implements VanillaReimplementation.Feature {
                 recipeManager.addRecipe(minestomRecipe);
             });
         });
+
+        new SurvivalInventoryCrafting(datapack, context.vri()).init();
     }
 
     @Override
