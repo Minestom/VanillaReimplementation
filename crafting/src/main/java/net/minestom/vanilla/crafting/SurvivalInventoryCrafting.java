@@ -16,11 +16,12 @@ import net.minestom.vanilla.datapack.recipe.Recipe;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public record SurvivalInventoryCrafting(Datapack datapack, VanillaReimplementation vri) {
 
-    public void init() {
+    public EventNode<Event> init() {
         EventNode<Event> node = EventNode.all("vri:survival-inventory-crafting");
 
         node.addListener(InventoryClickEvent.class, event -> {
@@ -36,7 +37,7 @@ public record SurvivalInventoryCrafting(Datapack datapack, VanillaReimplementati
 
             // if we are clicking on the output slot, remove one from all of the input slots
             if (output.isValidExternal(slot)) {
-                for (int i = 0; i < 4; i++) {
+                for (int i = 0; i < input.size(); i++) {
                     input.set(inv, i, input.get(inv, i).withAmount(prev -> prev - 1));
                 }
                 return;
@@ -52,7 +53,7 @@ public record SurvivalInventoryCrafting(Datapack datapack, VanillaReimplementati
             output.set(inv, Objects.requireNonNullElse(result, ItemStack.AIR));
         });
 
-        vri.process().eventHandler().addChild(node);
+        return node;
     }
 
     private @Nullable ItemStack tryRecipe(Material topLeft, Material topRight, Material bottomLeft, Material bottomRight) {
@@ -74,7 +75,14 @@ public record SurvivalInventoryCrafting(Datapack datapack, VanillaReimplementati
                 if (recipe.type().equals(NamespaceID.from("minecraft:crafting_shaped"))) {
                     Recipe.Shaped shaped = (Recipe.Shaped) recipe;
 
-                    if (utils.recipeMatchesShaped2x2(shaped, List.of(topLeft, topRight, bottomLeft, bottomRight))) {
+                    // collect materials for pattern matching
+                    Map<Slot, Material> materials = Map.of(
+                            Slot.TOP_LEFT, topLeft,
+                            Slot.TOP_MID, topRight,
+                            Slot.MID_LEFT, bottomLeft,
+                            Slot.MID_MID, bottomRight
+                    );
+                    if (utils.recipeMatchesShapedNxN(shaped, materials, 2)) {
                         return ItemStack.of(shaped.result().item(), shaped.result().count() == null ? 1 : shaped.result().count());
                     }
                 }

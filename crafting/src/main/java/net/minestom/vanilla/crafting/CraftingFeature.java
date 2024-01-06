@@ -1,5 +1,7 @@
 package net.minestom.vanilla.crafting;
 
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.datapack.Datapack;
@@ -36,7 +38,11 @@ public class CraftingFeature implements VanillaReimplementation.Feature {
             });
         });
 
-        new SurvivalInventoryCrafting(datapack, context.vri()).init();
+        EventNode<Event> survival = new SurvivalInventoryCrafting(datapack, context.vri()).init();
+        context.vri().process().eventHandler().addChild(survival);
+
+        EventNode<Event> crafting = new CraftingInventoryCrafting(datapack, context.vri()).init();
+        context.vri().process().eventHandler().addChild(crafting);
     }
 
     @Override

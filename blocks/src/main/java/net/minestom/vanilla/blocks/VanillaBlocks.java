@@ -129,6 +129,8 @@ public enum VanillaBlocks {
     ENDER_CHEST(Block.ENDER_CHEST, EnderChestBlockBehaviour::new),
     JUKEBOX(Block.JUKEBOX, JukeboxBlockBehaviour::new),
 
+    CRAFTING_TABLE(Block.CRAFTING_TABLE, CraftingTableBehaviour::new),
+
     // Start of cakes
     CAKE(Block.CAKE, CakeBlockBehaviour::new),
     CANDLE_CAKE(Block.CANDLE_CAKE, CakeBlockBehaviour::new),

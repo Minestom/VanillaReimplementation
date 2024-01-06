@@ -18,23 +18,13 @@ enum Slot {
         this.col = col;
     }
 
-    public static Collection<Slot> crafting2x2() {
-        return Set.of(TOP_LEFT, TOP_MID, MID_LEFT, MID_MID);
+    public static Collection<Slot> craftingNxN(int n) {
+        if (n == 2) return Set.of(TOP_LEFT, TOP_MID, MID_LEFT, MID_MID);
+        if (n == 3) return Set.of(TOP_LEFT, TOP_MID, TOP_RIGHT, MID_LEFT, MID_MID, MID_RIGHT, BOTTOM_LEFT, BOTTOM_MID, BOTTOM_RIGHT);
+        throw new IllegalArgumentException("n must be 2 or 3");
     }
 
-    public static Collection<Slot> crafting3x3() {
-        return Set.of(TOP_LEFT, TOP_MID, TOP_RIGHT, MID_LEFT, MID_MID, MID_RIGHT, BOTTOM_LEFT, BOTTOM_MID, BOTTOM_RIGHT);
-    }
-
-    public boolean tryGetSpace3x3(int rows, int cols) {
-        return hasSpaceNxN(rows, cols, 3);
-    }
-
-    public boolean tryGetSpace2x2(int rows, int cols) {
-        return hasSpaceNxN(rows, cols, 2);
-    }
-
-    private boolean hasSpaceNxN(int rows, int cols, int n) {
+    public boolean hasSpaceNxN(int rows, int cols, int n) {
         int rowSpace = n - row;
         int colSpace = n - col;
         return rowSpace >= rows && colSpace >= cols;
