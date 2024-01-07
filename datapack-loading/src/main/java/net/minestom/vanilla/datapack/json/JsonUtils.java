@@ -4,6 +4,7 @@ import com.squareup.moshi.JsonReader;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import okio.Buffer;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -25,10 +26,13 @@ public class JsonUtils {
     }
 
     public interface ObjectOrList<O, E> {
+        /** Throws an exception if this is not an object */
         boolean isObject();
         O asObject();
 
         boolean isList();
+
+        /** Throws an exception if this is not a list */
         List<E> asList();
     }
 
@@ -71,7 +75,7 @@ public class JsonUtils {
             }
 
             @Override
-            public java.util.List<O> list() {
+            public java.util.@NotNull List<O> list() {
                 return java.util.List.of(object);
             }
         }
@@ -98,7 +102,7 @@ public class JsonUtils {
             }
 
             @Override
-            public java.util.List<L> list() {
+            public java.util.@NotNull List<L> list() {
                 return list;
             }
         }

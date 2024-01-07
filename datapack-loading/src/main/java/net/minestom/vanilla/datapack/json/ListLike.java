@@ -9,7 +9,10 @@ import java.util.ListIterator;
 
 public interface ListLike<T> extends List<T> {
 
-    List<T> list();
+    /**
+     * Returns a list containing all of the elements in this list, in proper sequence.
+     */
+    @NotNull List<T> list();
 
     @Override
     default int size() {
@@ -34,13 +37,13 @@ public interface ListLike<T> extends List<T> {
 
     @NotNull
     @Override
-    default Object[] toArray() {
+    default Object @NotNull [] toArray() {
         return list().toArray();
     }
 
     @NotNull
     @Override
-    default <T1> T1[] toArray(@NotNull T1[] a) {
+    default <T1> T1 @NotNull [] toArray(@NotNull T1 @NotNull [] a) {
         return list().toArray(a);
     }
 
