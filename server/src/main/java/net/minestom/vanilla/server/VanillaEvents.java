@@ -14,10 +14,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.AddEntityToInstanceEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.item.PickupItemEvent;
-import net.minestom.server.event.player.PlayerDisconnectEvent;
-import net.minestom.server.event.player.PlayerLoginEvent;
-import net.minestom.server.event.player.PlayerMoveEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.instance.ExplosionSupplier;
 import net.minestom.server.instance.Instance;
@@ -25,6 +22,11 @@ import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.ConnectionManager;
+import net.minestom.server.network.packet.client.ClientPacket;
+import net.minestom.server.network.packet.client.play.ClientKeepAlivePacket;
+import net.minestom.server.network.packet.client.play.ClientPlayerPositionAndRotationPacket;
+import net.minestom.server.network.packet.client.play.ClientPlayerPositionPacket;
+import net.minestom.server.network.packet.client.play.ClientPlayerRotationPacket;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.vanilla.generation.VanillaTestGenerator;
 import net.minestom.vanilla.instance.VanillaExplosion;
@@ -112,6 +114,19 @@ public class VanillaEvents {
                 })
         );
 
+        eventNode.addListener(
+                PlayerPacketEvent.class,
+                event -> {
+                    ClientPacket packet = event.getPacket();
+                    // moving around and keepalive packets aren't usually required
+                    if (packet instanceof ClientPlayerPositionPacket) return;
+                    if (packet instanceof ClientKeepAlivePacket) return;
+                    if (packet instanceof ClientPlayerPositionAndRotationPacket) return;
+                    if (packet instanceof ClientPlayerRotationPacket) return;
+//                    Logger.info("Packet received " + event.getPacket());
+                }
+        );
+
         eventNode.addListener(PlayerMoveEvent.class, event -> {
             Player player = event.getPlayer();
             Point pos = player.getPosition();
@@ -165,6 +180,8 @@ public class VanillaEvents {
                             inventory.addItemStack(ItemStack.of(Material.FLINT_AND_STEEL, 1));
                             inventory.addItemStack(ItemStack.of(Material.RED_BED, 1));
                             inventory.addItemStack(ItemStack.of(Material.CHEST, 1));
+                            inventory.addItemStack(ItemStack.of(Material.CRAFTING_TABLE, 1));
+                            inventory.addItemStack(ItemStack.of(Material.OAK_LOG, 32));
                         })
                         .build()
         );
