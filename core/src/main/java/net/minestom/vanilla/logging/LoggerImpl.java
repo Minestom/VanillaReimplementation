@@ -3,12 +3,13 @@ package net.minestom.vanilla.logging;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Calendar;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 record LoggerImpl(Level level) implements Logger {
 
-    static final LoggerImpl DEFAULT = new LoggerImpl(Level.INFO);
-    public static Level LOG_LEVEL = Level.valueOf(System.getProperty("minestom.vri.log-level", "SETUP").toUpperCase());
+    public static Level LOG_LEVEL = Level.valueOf(Objects.requireNonNullElse(System.getenv("minestom.vri.log-level"), "SETUP").toUpperCase());
+    static final LoggerImpl DEFAULT = new LoggerImpl(LOG_LEVEL);
 
     private static LoggerImpl lastLogger = DEFAULT;
     /** true if this logger implementation was the last used to log a message. false if it was an external call to {@link System#out} */
@@ -113,6 +114,7 @@ record LoggerImpl(Level level) implements Logger {
 
     private String prepareLevelPrefix() {
         Color color = switch (level) {
+            case TRACE -> Color.WHITE;
             case DEBUG -> Color.BLUE;
             case SETUP -> Color.MAGENTA;
             case INFO -> Color.CYAN;

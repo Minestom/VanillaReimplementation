@@ -45,7 +45,7 @@ class VanillaServer {
         VanillaReimplementation vri = VanillaReimplementation.hook(MinecraftServer.process());
 
         VanillaServer vanillaServer = new VanillaServer(server, vri, args);
-        Logger.info("vri (%s) is setup.", MinecraftServer.VERSION_NAME);
+        Logger.info("Vanilla Reimplementation (%s) is setup.", MinecraftServer.VERSION_NAME);
         vanillaServer.start("0.0.0.0", 25565);
     }
 
@@ -130,12 +130,12 @@ class VanillaServer {
         }
         long end = System.nanoTime();
         Loading.finish();
-        Logger.info("Chunks per second: " + (total / ((end - start) / 1e9)));
+        Logger.debug("Chunks per second: " + (total / ((end - start) / 1e9)));
 
         // Debug
         if (List.of(args).contains("-debug")) {
-            Logger.debug("Debug mode enabled.");
-            Logger.debug("To disable it, remove the -debug argument");
+            Logger.info("Debug mode enabled.");
+            Logger.info("To disable it, remove the -debug argument");
             VanillaDebug.hook(this);
         }
     }

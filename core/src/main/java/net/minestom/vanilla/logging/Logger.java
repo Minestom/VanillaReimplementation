@@ -1,10 +1,6 @@
 package net.minestom.vanilla.logging;
 
 public interface Logger {
-    static void setLogLevel(Level level) {
-        LoggerImpl.LOG_LEVEL = level;
-    }
-
     static Logger logger() {
         return LoggerImpl.DEFAULT;
     }
@@ -85,6 +81,11 @@ public interface Logger {
      * @return the logger
      */
     Logger level(Level level);
+
+    /**
+     * Gets the current level of the logger
+     */
+    Level level();
 
     Logger print(String message);
     default Logger println(String message) {

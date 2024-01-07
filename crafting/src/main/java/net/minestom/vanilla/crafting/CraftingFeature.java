@@ -26,12 +26,10 @@ public class CraftingFeature implements VanillaReimplementation.Feature {
         datapack.namespacedData().forEach((namespace, data) -> {
             FileSystem<Recipe> recipeFileSystem = data.recipes();
             recipeFileSystem.files().stream().collect(Collectors.toMap(Function.identity(), recipeFileSystem::file)).forEach((id, recipe) -> {
-                Logger.debug("Registering recipe " + id + "...");
                 var recipeManager = context.vri().process().recipe();
 
                 net.minestom.server.recipe.Recipe minestomRecipe = recipeConverter.convert(id, recipe, player -> true);
                 if (minestomRecipe == null) {
-                    Logger.debug("Failed to convert recipe " + id + ", skipping.");
                     return;
                 }
                 recipeManager.addRecipe(minestomRecipe);

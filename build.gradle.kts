@@ -55,6 +55,7 @@ subprojects {
     }
 
     serviceLoader.serviceInterfaces.add("net.minestom.vanilla.VanillaReimplementation\$Feature")
+    serviceLoader.serviceInterfaces.add("org.slf4j.spi.SLF4JServiceProvider")
 
     tasks.getByName("build").dependsOn("shadowJar")
 

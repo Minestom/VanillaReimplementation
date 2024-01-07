@@ -170,11 +170,11 @@ record VriRecipeToMinestomRecipe(Datapack datapack) {
                 };
             });
             case "native" -> {
-                Logger.warn("Native recipes are not supported yet");
+                Logger.warn("Native recipes are not supported yet, skipping.");
                 yield null;
             }
             default -> {
-                Logger.debug("Unknown recipe type " + vr.type().value());
+                Logger.debug("Unknown recipe type " + vr.type().value() + ", skipping.");
                 yield null;
             }
         };
