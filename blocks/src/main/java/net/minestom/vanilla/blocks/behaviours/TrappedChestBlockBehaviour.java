@@ -1,13 +1,15 @@
 package net.minestom.vanilla.blocks.behaviours;
 
+import net.kyori.adventure.text.Component;
+import net.minestom.server.inventory.InventoryType;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import org.jetbrains.annotations.NotNull;
 
-public class TrappedChestBlockBehaviour extends ChestLikeBlockBehaviour {
+public class TrappedChestBlockBehaviour extends InventoryBlockBehaviour {
     // TODO: redstone signal
 
     public TrappedChestBlockBehaviour(@NotNull VanillaBlocks.BlockContext context) {
-        super(context, 3 * 9);
+        super(context, InventoryType.CHEST_3_ROW, Component.text("Trapped Chest"));
     }
 
 //    @Override

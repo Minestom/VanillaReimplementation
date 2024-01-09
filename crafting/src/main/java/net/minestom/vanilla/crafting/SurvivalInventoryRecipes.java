@@ -19,10 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public record SurvivalInventoryCrafting(Datapack datapack, VanillaReimplementation vri) {
+public record SurvivalInventoryRecipes(Datapack datapack, VanillaReimplementation vri) {
 
     public EventNode<Event> init() {
-        EventNode<Event> node = EventNode.all("vri:survival-inventory-crafting");
+        EventNode<Event> node = EventNode.all("vri:survival-inventory-recipes");
 
         node.addListener(InventoryClickEvent.class, event -> {
             Player player = event.getPlayer();

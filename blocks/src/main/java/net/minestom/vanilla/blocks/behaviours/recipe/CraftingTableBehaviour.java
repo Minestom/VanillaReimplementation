@@ -1,4 +1,4 @@
-package net.minestom.vanilla.blocks.behaviours;
+package net.minestom.vanilla.blocks.behaviours.recipe;
 
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventListener;

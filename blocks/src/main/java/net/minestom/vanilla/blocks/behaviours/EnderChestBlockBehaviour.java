@@ -1,8 +1,10 @@
 package net.minestom.vanilla.blocks.behaviours;
 
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.system.EnderChestSystem;
@@ -10,9 +12,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class EnderChestBlockBehaviour extends ChestLikeBlockBehaviour {
+public class EnderChestBlockBehaviour extends InventoryBlockBehaviour {
     public EnderChestBlockBehaviour(@NotNull VanillaBlocks.BlockContext context) {
-        super(context, 3 * 9);
+        super(context, InventoryType.CHEST_3_ROW, Component.text("Ender Chest"));
     }
 
     @Override

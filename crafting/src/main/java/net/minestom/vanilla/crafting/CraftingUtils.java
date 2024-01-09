@@ -134,7 +134,7 @@ public record CraftingUtils(Datapack datapack) {
                 .count();
     }
 
-    private @NotNull Set<Material> ingredientToMaterials(Recipe.Ingredient ingredient) {
+    public @NotNull Set<Material> ingredientToMaterials(Recipe.Ingredient ingredient) {
         if (ingredient instanceof Recipe.Ingredient.Tag tag) {
             return DatapackUtils.findTags(datapack, "items", tag.tag())
                     .stream()

@@ -1,5 +1,6 @@
 package net.minestom.vanilla.blocks.behaviours;
 
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.ItemEntity;
@@ -8,12 +9,13 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.inventory.Inventory;
+import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.Direction;
 import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
 import net.minestom.vanilla.blocks.VanillaBlocks;
-import net.minestom.vanilla.blocks.behaviours.chestlike.ChestInventory;
+import net.minestom.vanilla.blocks.behaviours.chestlike.BlockInventory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -23,19 +25,21 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Base class for Ender Chest, Chest and Trapped Chest
+ * Base class for blocks with an inventory.
  * <p>
  * This class needs onPlace to be able to change the block being placed
  */
-public abstract class ChestLikeBlockBehaviour extends VanillaBlockBehaviour {
+public abstract class InventoryBlockBehaviour extends VanillaBlockBehaviour {
 
     public static final Tag<List<ItemStack>> TAG_ITEMS = Tag.ItemStack("vri:chest_items").list();
     protected static final Random rng = new Random();
-    protected final int size;
+    protected final InventoryType type;
+    protected final Component title;
 
-    public ChestLikeBlockBehaviour(@NotNull VanillaBlocks.BlockContext context, int size) {
+    public InventoryBlockBehaviour(@NotNull VanillaBlocks.BlockContext context, InventoryType type, Component title) {
         super(context);
-        this.size = size;
+        this.type = type;
+        this.title = title;
     }
 
     @Override
@@ -50,8 +54,7 @@ public abstract class ChestLikeBlockBehaviour extends VanillaBlockBehaviour {
             return;
         }
 
-
-        ItemStack[] itemsArray = new ItemStack[size];
+        ItemStack[] itemsArray = new ItemStack[type.getSize()];
         Arrays.fill(itemsArray, ItemStack.AIR);
 
         // Override the block to set
@@ -73,7 +76,7 @@ public abstract class ChestLikeBlockBehaviour extends VanillaBlockBehaviour {
             }
 
             // Different block, remove chest inventory
-            List<ItemStack> items = ChestInventory.remove(instance, pos);
+            List<ItemStack> items = BlockInventory.remove(instance, pos);
 
             if (!dropContentsOnDestroy()) {
                 return;
@@ -118,7 +121,7 @@ public abstract class ChestLikeBlockBehaviour extends VanillaBlockBehaviour {
             return false;
         }
 
-        Inventory chestInventory = ChestInventory.from(instance, pos);
+        Inventory chestInventory = BlockInventory.from(instance, pos, type, title);
         player.openInventory(chestInventory);
         return true;
     }
@@ -136,10 +139,23 @@ public abstract class ChestLikeBlockBehaviour extends VanillaBlockBehaviour {
         if (items == null) {
             throw new IllegalStateException("Chest block has no items");
         }
-        if (items.size() != this.size) {
+        if (items.size() != this.type.getSize()) {
             throw new IllegalStateException("Invalid items size");
         }
         return items;
+    }
+
+    /**
+     * Sets the items in this block only
+     *
+     * @param block the block
+     * @param items the items
+     */
+    protected Block setItems(Block block, List<ItemStack> items) {
+        if (items.size() != this.type.getSize()) {
+            throw new IllegalStateException("Invalid items size");
+        }
+        return block.withTag(TAG_ITEMS, items);
     }
 
     /**
@@ -169,7 +185,7 @@ public abstract class ChestLikeBlockBehaviour extends VanillaBlockBehaviour {
         Block otherBlock = instance.getBlock(positionOfOtherChest);
         BlockHandler handler = otherBlock.handler();
 
-        if (handler instanceof ChestLikeBlockBehaviour chestLike) {
+        if (handler instanceof InventoryBlockBehaviour chestLike) {
             items.addAll(chestLike.getItems(otherBlock));
         }
 

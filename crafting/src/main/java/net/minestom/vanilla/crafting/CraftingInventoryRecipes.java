@@ -16,10 +16,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public record CraftingInventoryCrafting(Datapack datapack, VanillaReimplementation vri) {
+public record CraftingInventoryRecipes(Datapack datapack, VanillaReimplementation vri) {
 
     public EventNode<Event> init() {
-        EventNode<Event> node = EventNode.all("vri:crafting-inventory-crafting");
+        EventNode<Event> node = EventNode.all("vri:crafting-inventory-recipes");
 
         node.addListener(InventoryClickEvent.class, event -> {
             int slot = event.getSlot();

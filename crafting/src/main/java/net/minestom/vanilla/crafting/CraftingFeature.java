@@ -8,7 +8,6 @@ import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackLoadingFeature;
 import net.minestom.vanilla.datapack.recipe.Recipe;
 import net.minestom.vanilla.files.FileSystem;
-import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
@@ -36,11 +35,14 @@ public class CraftingFeature implements VanillaReimplementation.Feature {
             });
         });
 
-        EventNode<Event> survival = new SurvivalInventoryCrafting(datapack, context.vri()).init();
+        EventNode<Event> survival = new SurvivalInventoryRecipes(datapack, context.vri()).init();
         context.vri().process().eventHandler().addChild(survival);
 
-        EventNode<Event> crafting = new CraftingInventoryCrafting(datapack, context.vri()).init();
+        EventNode<Event> crafting = new CraftingInventoryRecipes(datapack, context.vri()).init();
         context.vri().process().eventHandler().addChild(crafting);
+
+        EventNode<Event> smelting = new SmeltingInventoryRecipes(datapack, context.vri()).init();
+        context.vri().process().eventHandler().addChild(smelting);
     }
 
     @Override

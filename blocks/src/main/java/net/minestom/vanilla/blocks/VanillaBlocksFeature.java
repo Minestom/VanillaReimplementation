@@ -29,34 +29,35 @@ public class VanillaBlocksFeature implements VanillaReimplementation.Feature {
 
             if (block.handler() instanceof VanillaBlockBehaviour vanillaHandler) {
                 // Create the new placement object
-                VanillaBlockBehaviour.VanillaPlacement placement = new VanillaBlockBehaviour.VanillaPlacement() {
-                    @Override
-                    public @NotNull Block blockToPlace() {
-                        return blockToPlace.get();
-                    }
-
-                    @Override
-                    public @NotNull Instance instance() {
-                        return instance;
-                    }
-
-                    @Override
-                    public @NotNull Point position() {
-                        return position;
-                    }
-
-                    @Override
-                    public void blockToPlace(@NotNull Block newBlock) {
-                        blockToPlace.getAndSet(newBlock);
-                        // TODO: Run vanillaHandler.onPlace again on the new block if it's a vanilla block
-                    }
-                };
-
+                VanillaBlockBehaviour.VanillaPlacement placement = new PlacementImpl(blockToPlace, instance, position);
                 vanillaHandler.onPlace(placement);
             }
 
             event.setBlock(blockToPlace.get());
         });
+    }
+
+    private record PlacementImpl(AtomicReference<Block> blockToPlaceRef, Instance instance, Point position) implements VanillaBlockBehaviour.VanillaPlacement {
+        @Override
+        public @NotNull Block blockToPlace() {
+            return blockToPlaceRef.get();
+        }
+
+        @Override
+        public @NotNull Instance instance() {
+            return instance;
+        }
+
+        @Override
+        public @NotNull Point position() {
+            return position;
+        }
+
+        @Override
+        public void blockToPlace(@NotNull Block newBlock) {
+            blockToPlaceRef.getAndSet(newBlock);
+            // TODO: Run vanillaHandler.onPlace again on the new block if it's a vanilla block
+        }
     }
 
     @Override

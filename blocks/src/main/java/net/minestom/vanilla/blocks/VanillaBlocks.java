@@ -16,6 +16,8 @@ import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.blocks.behaviours.*;
 import net.minestom.vanilla.blocks.behaviours.oxidisable.OxidatableBlockBehaviour;
 import net.minestom.vanilla.blocks.behaviours.oxidisable.WaxedBlockBehaviour;
+import net.minestom.vanilla.blocks.behaviours.recipe.CraftingTableBehaviour;
+import net.minestom.vanilla.blocks.behaviours.recipe.FurnaceBehaviour;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdatable;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdateManager;
 import net.minestom.vanilla.datapack.DatapackLoadingFeature;
@@ -129,7 +131,9 @@ public enum VanillaBlocks {
     ENDER_CHEST(Block.ENDER_CHEST, EnderChestBlockBehaviour::new),
     JUKEBOX(Block.JUKEBOX, JukeboxBlockBehaviour::new),
 
+    // recipes
     CRAFTING_TABLE(Block.CRAFTING_TABLE, CraftingTableBehaviour::new),
+    FURNACE(Block.FURNACE, FurnaceBehaviour::new),
 
     // Start of cakes
     CAKE(Block.CAKE, CakeBlockBehaviour::new),

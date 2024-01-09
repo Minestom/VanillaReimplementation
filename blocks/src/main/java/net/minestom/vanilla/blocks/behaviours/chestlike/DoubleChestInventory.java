@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class DoubleChestInventory extends Inventory {
-    private final ChestInventory left;
-    private final ChestInventory right;
+    private final BlockInventory left;
+    private final BlockInventory right;
 
-    public DoubleChestInventory(ChestInventory left, ChestInventory right, String title) {
+    public DoubleChestInventory(BlockInventory left, BlockInventory right, String title) {
         super(InventoryType.CHEST_6_ROW, title);
         this.left = left;
         this.right = right;
@@ -44,7 +44,7 @@ public class DoubleChestInventory extends Inventory {
 
     public List<ItemStack> itemStacks() {
         return Stream.of(left, right)
-                .map(ChestInventory::itemStacks)
+                .map(BlockInventory::itemStacks)
                 .flatMap(Collection::stream)
                 .toList();
     }

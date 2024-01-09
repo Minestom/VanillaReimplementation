@@ -24,7 +24,7 @@ import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.loot.NBTPath;
 import net.minestom.vanilla.datapack.loot.context.LootContext;
 import net.minestom.vanilla.datapack.number.NumberProvider;
-import net.minestom.vanilla.tag.VanillaTags;
+import net.minestom.vanilla.tag.Tags;
 import net.minestom.vanilla.utils.JavaUtils;
 import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.nbt.NBT;
@@ -157,11 +157,11 @@ interface InBuiltLootFunctions {
         @Override
         public ItemStack apply(Context context) {
             NBT sourceNbt = source.nbt(context);
-            NBT itemStackTagNbt = context.itemStack().getTag(VanillaTags.ItemStack.TAG);
+            NBT itemStackTagNbt = context.itemStack().getTag(Tags.Items.TAG);
             for (Operation operation : operations) {
                 itemStackTagNbt = operation.applyOperation(sourceNbt, itemStackTagNbt);
             }
-            return context.itemStack().withTag(VanillaTags.ItemStack.TAG, itemStackTagNbt);
+            return context.itemStack().withTag(Tags.Items.TAG, itemStackTagNbt);
         }
 
         public sealed interface Source {
@@ -307,7 +307,7 @@ interface InBuiltLootFunctions {
             Block blockState = context.getOrThrow(LootContext.BLOCK_STATE);
             Map<String, String> blockProperties = blockState.properties();
 
-            NBTCompound nbt = context.itemStack().getTag(VanillaTags.ItemStack.BLOCKSTATE);
+            NBTCompound nbt = context.itemStack().getTag(Tags.Items.BLOCKSTATE);
             MutableNBTCompound mutable = nbt.toMutableCompound();
             for (String property : properties) {
                 String value = blockProperties.get(property);
@@ -316,7 +316,7 @@ interface InBuiltLootFunctions {
                 }
                 mutable.setString(property, value);
             }
-            return context.itemStack().withTag(VanillaTags.ItemStack.BLOCKSTATE, mutable.toCompound());
+            return context.itemStack().withTag(Tags.Items.BLOCKSTATE, mutable.toCompound());
         }
     }
 
@@ -658,9 +658,9 @@ interface InBuiltLootFunctions {
         }
 
         public record Pattern(String pattern, String color) {
-            public VanillaTags.ItemStack.Banner.Pattern toPattern() {
+            public Tags.Items.Banner.Pattern toPattern() {
                 int color = DyeColor.valueOf(this.color().toUpperCase(Locale.ROOT)).ordinal();
-                return new VanillaTags.ItemStack.Banner.Pattern(pattern(), color);
+                return new Tags.Items.Banner.Pattern(pattern(), color);
             }
         }
 
@@ -671,9 +671,9 @@ interface InBuiltLootFunctions {
                 return itemStack;
             }
 
-            List<VanillaTags.ItemStack.Banner.Pattern> patternsList;
+            List<Tags.Items.Banner.Pattern> patternsList;
             if (append) {
-                patternsList = new ArrayList<>(itemStack.getTag(VanillaTags.ItemStack.Banner.PATTERNS));
+                patternsList = new ArrayList<>(itemStack.getTag(Tags.Items.Banner.PATTERNS));
             } else {
                 patternsList = new ArrayList<>();
             }
@@ -682,7 +682,7 @@ interface InBuiltLootFunctions {
                 patternsList.add(pattern.toPattern());
             }
 
-            return itemStack.withTag(VanillaTags.ItemStack.Banner.PATTERNS, patternsList);
+            return itemStack.withTag(Tags.Items.Banner.PATTERNS, patternsList);
         }
     }
 
@@ -888,7 +888,7 @@ interface InBuiltLootFunctions {
 
         @Override
         public ItemStack apply(Context context) {
-            return context.itemStack().withTag(VanillaTags.ItemStack.Potion.POTION, potion);
+            return context.itemStack().withTag(Tags.Items.Potion.POTION, potion);
         }
     }
 

@@ -6,7 +6,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
-import net.minestom.vanilla.blocks.behaviours.ChestLikeBlockBehaviour;
+import net.minestom.vanilla.blocks.behaviours.InventoryBlockBehaviour;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -15,22 +15,23 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ChestInventory extends Inventory {
+// TODO: Update the tags within the blocks.
+public class BlockInventory extends Inventory {
 
-    private static final Map<Instance, Map<Point, ChestInventory>> INSTANCE2CHESTS = new ConcurrentHashMap<>();
+    private static final Map<Instance, Map<Point, BlockInventory>> INSTANCE2CHESTS = new ConcurrentHashMap<>();
 
     protected final ItemStack[] items;
     protected final Instance instance;
     protected final Point pos;
 
-    private ChestInventory(Instance instance, Point pos) {
-        super(InventoryType.CHEST_3_ROW, Component.text("Chest"));
+    private BlockInventory(Instance instance, Point pos, InventoryType inventoryType, Component title) {
+        super(inventoryType, title);
 
         this.instance = instance;
         this.pos = pos;
 
         // Set items
-        List<ItemStack> itemsList = instance.getBlock(pos).getTag(ChestLikeBlockBehaviour.TAG_ITEMS);
+        List<ItemStack> itemsList = instance.getBlock(pos).getTag(InventoryBlockBehaviour.TAG_ITEMS);
         if (itemsList == null) {
             ItemStack[] newItems = new ItemStack[3 * 9];
             Arrays.fill(newItems, ItemStack.AIR);
@@ -40,9 +41,16 @@ public class ChestInventory extends Inventory {
         }
     }
 
-    public static ChestInventory from(Instance instance, Point pos) {
-        return INSTANCE2CHESTS.computeIfAbsent(instance, k -> new WeakHashMap<>())
-                .computeIfAbsent(pos, k -> new ChestInventory(instance, pos));
+    public static BlockInventory from(Instance instance, Point pos, InventoryType inventoryType, Component title) {
+        BlockInventory inv = INSTANCE2CHESTS.computeIfAbsent(instance, k -> new WeakHashMap<>())
+                .computeIfAbsent(pos, k -> new BlockInventory(instance, pos, inventoryType, title));
+        if (inv.getInventoryType() != inventoryType) {
+            throw new IllegalStateException("Inventory type mismatch");
+        }
+        if (!inv.getTitle().equals(title)) {
+            throw new IllegalStateException("Inventory title mismatch");
+        }
+        return inv;
     }
 
     public static @NotNull List<ItemStack> remove(Instance instance, Point pos) {
@@ -65,7 +73,7 @@ public class ChestInventory extends Inventory {
     @Override
     public void setItemStack(int slot, @NotNull ItemStack itemStack) {
         items[slot] = itemStack;
-        instance.setBlock(pos, instance.getBlock(pos).withTag(ChestLikeBlockBehaviour.TAG_ITEMS, List.of(items)));
+        instance.setBlock(pos, instance.getBlock(pos).withTag(InventoryBlockBehaviour.TAG_ITEMS, List.of(items)));
     }
 
     @Override

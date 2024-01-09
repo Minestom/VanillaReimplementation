@@ -1,6 +1,7 @@
 package net.minestom.vanilla.tag;
 
-import net.minestom.server.color.DyeColor;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
 import org.jglrxavpok.hephaistos.nbt.NBT;
@@ -11,10 +12,10 @@ import org.jglrxavpok.hephaistos.nbt.NBTString;
 import java.util.List;
 import java.util.Map;
 
-public interface VanillaTags {
+public interface Tags {
 
 
-    interface ItemStack {
+    interface Items {
         Tag<NBT> TAG = Tag.NBT("tag")
                 .defaultValue(NBTCompound.EMPTY);
         Tag<NBTCompound> BLOCKSTATE = TAG.path("BlockEntityTag")
@@ -41,6 +42,17 @@ public interface VanillaTags {
                     .map(nbt -> nbt instanceof NBTString nbts ?
                             NamespaceID.from(nbts.getValue()) : NamespaceID.from("minecraft:empty"),
                             nbt -> new NBTString(nbt.toString()));
+        }
+    }
+
+    interface Blocks {
+        interface Furnace {
+            // The number of ticks that the furnace can cook for
+            Tag<Integer> COOKING_TICKS = Tag.Integer("vri:furnace:cooking_ticks").defaultValue(0);
+
+            // The number of ticks that the furnace has been cooking for
+            Tag<Integer> COOKING_PROGRESS = Tag.Integer("vri:furnace:cooking_progress").defaultValue(0);
+
         }
     }
 }
