@@ -182,6 +182,9 @@ public class VanillaEvents {
                             inventory.addItemStack(ItemStack.of(Material.CHEST, 1));
                             inventory.addItemStack(ItemStack.of(Material.CRAFTING_TABLE, 1));
                             inventory.addItemStack(ItemStack.of(Material.OAK_LOG, 32));
+                            inventory.addItemStack(ItemStack.of(Material.STONECUTTER, 1));
+                            inventory.addItemStack(ItemStack.of(Material.STONE, 64));
+
                         })
                         .build()
         );
