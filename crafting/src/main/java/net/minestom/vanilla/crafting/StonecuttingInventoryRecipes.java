@@ -40,9 +40,18 @@ public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplement
             if (event.getInventory() == null) return;
             if (event.getInventory().getInventoryType() != InventoryType.STONE_CUTTER) return;
             if (!output.isValidExternal(slot)) return;
-            if (event.getClickedItem().isAir() || event.getCursorItem().isAir()) return;
+            if (event.getCursorItem().isAir()) return;
+            if (event.getClickedItem().isAir()) {
+                // the output slot is empty, but the cursor is not. the player is trying to put items in the output slot
+                event.setCancelled(true);
+                return;
+            }
             StackingRule stackingRule = StackingRule.get();
-            if (!stackingRule.canBeStacked(event.getClickedItem(), event.getCursorItem())) return;
+            if (!stackingRule.canBeStacked(event.getClickedItem(), event.getCursorItem())) {
+                // the player is holding an incompatible item.
+                event.setCancelled(true);
+                return;
+            }
             if (stackingRule.getMaxSize(event.getClickedItem()) <
                     (event.getClickedItem().amount() + event.getCursorItem().amount())) {
                 // cannot be merged. ignore the click
@@ -60,6 +69,13 @@ public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplement
             if (event.getInventory() == null) return;
             Inventory inv = event.getInventory();
             if (event.getInventory().getInventoryType() != InventoryType.STONE_CUTTER) return;
+
+            if (input.isValidExternal(slot)) {
+                if (event.getClickedItem().material() != event.getCursorItem().material()) {
+                    // the player has changed the input item. the output should be cleared.
+                    output.set(inv, ItemStack.AIR);
+                }
+            }
 
             if (output.isValidExternal(slot)) {
                 Recipe.Stonecutting recipe = getRecipe(input.get(inv).material(),event.getClickedItem().material(), event.getClickedItem().amount());
