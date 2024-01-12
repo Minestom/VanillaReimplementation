@@ -6,12 +6,11 @@ import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerLoginEvent;
-import net.minestom.server.instance.Chunk;
+import net.minestom.server.extras.lan.OpenToLAN;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.logging.Level;
@@ -22,11 +21,9 @@ import net.minestom.vanilla.system.ServerProperties;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
 
 class VanillaServer {
 
@@ -93,7 +90,7 @@ class VanillaServer {
                     }
                     event.getPlayer().setRespawnPoint(new Pos(0, y, 0));
                 });
-
+        vri.process().scheduler().scheduleNextTick(OpenToLAN::open);
         // Register systems
         {
             // dimension types
@@ -102,11 +99,14 @@ class VanillaServer {
             VanillaEvents.register(this, serverProperties, eventHandler);
         }
 
-        MinecraftServer.getSchedulerManager().buildShutdownTask(() -> connectionManager.getOnlinePlayers().forEach(player -> {
-            // TODO: Saving
-            player.kick("Server is closing.");
-            connectionManager.removePlayer(player.getPlayerConnection());
-        }));
+        MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
+            connectionManager.getOnlinePlayers().forEach(player -> {
+                // TODO: Saving
+                player.kick("Server is closing.");
+                connectionManager.removePlayer(player.getPlayerConnection());
+            });
+            OpenToLAN.close();
+        });
 
         // Preload chunks
         long start = System.nanoTime();
@@ -186,7 +186,7 @@ class VanillaServer {
                     white-list=false
                     rcon.password=
                     generate-structures=true
-                    online-mode=true
+                    online-mode=false
                     max-build-height=256
                     level-seed=
                     prevent-proxy-connections=false

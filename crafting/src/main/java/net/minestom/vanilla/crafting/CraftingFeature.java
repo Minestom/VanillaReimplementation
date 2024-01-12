@@ -43,6 +43,9 @@ public class CraftingFeature implements VanillaReimplementation.Feature {
 
         EventNode<Event> smelting = new SmeltingInventoryRecipes(datapack, context.vri()).init();
         context.vri().process().eventHandler().addChild(smelting);
+
+        EventNode<Event> stonecutting = new StonecuttingInventoryRecipes(datapack, context.vri()).init();
+        context.vri().process().eventHandler().addChild(stonecutting);
     }
 
     @Override

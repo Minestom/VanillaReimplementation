@@ -146,7 +146,7 @@ record VriRecipeToMinestomRecipe(Datapack datapack) {
                 };
             });
             case "stonecutting" -> use(vr, (Recipe.Stonecutting recipe) -> {
-                return new StonecutterRecipe(id, group, toMinestom(recipe.ingredient()), toItemstack(recipe.result())) {
+                return new StonecutterRecipe(id, group, toMinestom(recipe.ingredient()), ItemStack.of(recipe.result(), recipe.count())) {
                     @Override
                     public boolean shouldShow(@NotNull Player player) {
                         return shouldShow.test(player);
