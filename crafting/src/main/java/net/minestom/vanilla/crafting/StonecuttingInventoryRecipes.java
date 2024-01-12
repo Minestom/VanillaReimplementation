@@ -23,6 +23,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplementation vri) {
 
@@ -71,14 +73,14 @@ public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplement
             if (event.getInventory().getInventoryType() != InventoryType.STONE_CUTTER) return;
 
             if (input.isValidExternal(slot)) {
-                if (event.getClickedItem().material() != event.getCursorItem().material()) {
+                if (!event.getClickedItem().material().equals(event.getCursorItem().material())) {
                     // the player has changed the input item. the output should be cleared.
                     output.set(inv, ItemStack.AIR);
                 }
             }
 
             if (output.isValidExternal(slot)) {
-                Recipe.Stonecutting recipe = getRecipe(input.get(inv).material(),event.getClickedItem().material(), event.getClickedItem().amount());
+                Recipe.Stonecutting recipe = getRecipe(input.get(inv).material(), event.getClickedItem().material(), event.getClickedItem().amount());
                 if (recipe == null) {
                     Logger.warn("Didn't find the recipe! what's going on? this is undefined behaviour");
                     return;
@@ -98,17 +100,20 @@ public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplement
             Inventory inv = event.getPlayer().getOpenInventory();
             if (inv == null) return;
             if (inv.getInventoryType() != InventoryType.STONE_CUTTER) return;
+            int index = packet.buttonId();
 
-            Recipe.Stonecutting recipe = getRecipes(input.get(inv).material()).get(packet.buttonId());
+            var recipes = getRecipes(input.get(inv).material());
+            if (index < 0 || index >= recipes.size()) return;
+            Recipe.Stonecutting recipe = recipes.get(packet.buttonId());
 
             output.set(inv, ItemStack.of(recipe.result(), recipe.count()));
         });
 
         return node;
     }
-    private @NotNull ArrayList<Recipe.Stonecutting> getRecipes(Material material) {
+    private @NotNull List<Recipe.Stonecutting> getRecipes(Material material) {
         CraftingUtils utils = new CraftingUtils(datapack);
-        ArrayList<Recipe.Stonecutting> recipes = new ArrayList<>();
+        List<Recipe.Stonecutting> recipes = new ArrayList<>();
 
         for (var entry : datapack.namespacedData().entrySet()) {
             Datapack.NamespacedData data = entry.getValue();
@@ -117,7 +122,10 @@ public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplement
                 Recipe recipe = data.recipes().file(file);
 
                 if (recipe instanceof Recipe.Stonecutting stonecutting) {
-                    if (utils.ingredientToMaterials(stonecutting.ingredient().asObject()).contains(material)) {
+                    var ingredientMatches = stonecutting.ingredient().list().stream()
+                            .flatMap(ingredient -> utils.ingredientToMaterials(ingredient).stream())
+                            .anyMatch(material::equals);
+                    if (ingredientMatches) {
                         recipes.add(stonecutting);
                     }
                 }
@@ -126,12 +134,12 @@ public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplement
 
         recipes.sort(Comparator.comparing(o -> o.result().name()));
 
-        return recipes;
+        return List.copyOf(recipes);
     }
 
     private @Nullable Recipe.Stonecutting getRecipe(Material input, Material output, int count) {
         for (Recipe.Stonecutting recipe : getRecipes(input)) {
-            if (recipe.result() == output && recipe.count() == count) {
+            if (output.equals(recipe.result()) && recipe.count() == count) {
                 return recipe;
             }
         }
