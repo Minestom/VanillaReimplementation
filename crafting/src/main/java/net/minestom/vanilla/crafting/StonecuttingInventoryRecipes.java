@@ -36,36 +36,6 @@ public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplement
 
         // TODO: shift-click mass crafting and take out.
 
-        node.addListener(InventoryPreClickEvent.class, event -> {
-            // for stacking items from an output slot
-            int slot = event.getSlot();
-            if (event.getInventory() == null) return;
-            if (event.getInventory().getInventoryType() != InventoryType.STONE_CUTTER) return;
-            if (!output.isValidExternal(slot)) return;
-            if (event.getCursorItem().isAir()) return;
-            if (event.getClickedItem().isAir()) {
-                // the output slot is empty, but the cursor is not. the player is trying to put items in the output slot
-                event.setCancelled(true);
-                return;
-            }
-            StackingRule stackingRule = StackingRule.get();
-            if (!stackingRule.canBeStacked(event.getClickedItem(), event.getCursorItem())) {
-                // the player is holding an incompatible item.
-                event.setCancelled(true);
-                return;
-            }
-            if (stackingRule.getMaxSize(event.getClickedItem()) <
-                    (event.getClickedItem().amount() + event.getCursorItem().amount())) {
-                // cannot be merged. ignore the click
-                event.setCancelled(true);
-            } else {
-                event.setClickedItem(event.getClickedItem().withAmount(
-                        event.getClickedItem().amount() + event.getCursorItem().amount()
-                ));
-                event.setCursorItem(ItemStack.AIR);
-            }
-        });
-
         node.addListener(InventoryClickEvent.class, event -> {
             int slot = event.getSlot();
             if (event.getInventory() == null) return;
@@ -93,6 +63,8 @@ public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplement
 
         });
 
+        // this is just to remove the warnings in console about unhandled packets, this packet is actually handled in the
+        // PlayerPacketEvent listener below.
         MinecraftServer.getPacketListenerManager().setListener(ClientClickWindowButtonPacket.class, (packet, player) -> {});
 
         node.addListener(PlayerPacketEvent.class, event -> {
@@ -108,6 +80,8 @@ public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplement
 
             output.set(inv, ItemStack.of(recipe.result(), recipe.count()));
         });
+
+        CraftingUtils.addOutputSlotEventHandler(node, Views.stonecutter().output(), InventoryType.STONE_CUTTER);
 
         return node;
     }

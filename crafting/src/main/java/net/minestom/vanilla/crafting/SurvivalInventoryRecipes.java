@@ -6,6 +6,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryClickEvent;
+import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -52,6 +53,8 @@ public record SurvivalInventoryRecipes(Datapack datapack, VanillaReimplementatio
 
             output.set(inv, Objects.requireNonNullElse(result, ItemStack.AIR));
         });
+
+        CraftingUtils.addOutputSlotEventHandler(node, Views.player().crafting().output(), null);
 
         return node;
     }

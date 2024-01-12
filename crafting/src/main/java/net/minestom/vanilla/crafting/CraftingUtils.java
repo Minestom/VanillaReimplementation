@@ -1,6 +1,12 @@
 package net.minestom.vanilla.crafting;
 
+import dev.goldenstack.window.InventoryView;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.inventory.InventoryPreClickEvent;
+import net.minestom.server.inventory.InventoryType;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.StackingRule;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackUtils;
@@ -115,8 +121,6 @@ public record CraftingUtils(Datapack datapack) {
 
     // tries to match the given slot materials to the given ingredients
     private boolean tryMatch3x3(Map<Slot, Material> materials, Map<Slot, Recipe.Ingredient> ingredients) {
-        System.out.println("Materials: " + materials);
-        System.out.println("Ingredients: " + ingredients);
         Set<Slot> usedItemStacks = new HashSet<>();
         for (var entry : ingredients.entrySet()) {
             Slot slot = entry.getKey();
@@ -157,5 +161,45 @@ public record CraftingUtils(Datapack datapack) {
                     .collect(Collectors.toUnmodifiableSet());
         }
         throw new UnsupportedOperationException("Unknown ingredient type " + ingredient.getClass().getName());
+    }
+
+    public static void addOutputSlotEventHandler(EventNode<? super InventoryPreClickEvent> node, InventoryView.Singular outputSlot, @Nullable InventoryType inventoryType) {
+        node.addListener(InventoryPreClickEvent.class, event -> {
+            // for stacking items from an output slot
+            int slot = event.getSlot();
+            if (event.getInventory() == null && inventoryType != null) {
+                //
+                return;
+            }
+            boolean shouldPass = event.getInventory() == null && inventoryType != null;
+            if (shouldPass || event.getInventory().getInventoryType() != inventoryType) {
+                return;
+            }
+            if (!outputSlot.isValidExternal(slot)) return;
+
+            ItemStack cursorItem = event.getCursorItem();
+            ItemStack clickedItem = event.getClickedItem();
+
+            if (cursorItem.isAir()) return;
+            if (clickedItem.isAir()) {
+                // the output slot is empty, but the cursor is not. the player is trying to put items in the output slot
+                event.setCancelled(true);
+                return;
+            }
+
+            StackingRule stackingRule = StackingRule.get();
+            if (!stackingRule.canBeStacked(clickedItem, cursorItem)) {
+                // the player is holding an incompatible item.
+                event.setCancelled(true);
+                return;
+            }
+            if (stackingRule.getMaxSize(clickedItem) < (clickedItem.amount() + cursorItem.amount())) {
+                // cannot be merged. ignore the click
+                event.setCancelled(true);
+            } else {
+                event.setClickedItem(clickedItem.withAmount(count -> count + cursorItem.amount()));
+                event.setCursorItem(ItemStack.AIR);
+            }
+        });
     }
 }

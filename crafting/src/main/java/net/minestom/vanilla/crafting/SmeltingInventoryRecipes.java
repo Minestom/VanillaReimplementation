@@ -75,6 +75,8 @@ public record SmeltingInventoryRecipes(Datapack datapack, VanillaReimplementatio
             instance.setBlock(pos, newBlock);
         });
 
+        CraftingUtils.addOutputSlotEventHandler(node, Views.furnace().output(), InventoryType.FURNACE);
+
         return node;
     }
 

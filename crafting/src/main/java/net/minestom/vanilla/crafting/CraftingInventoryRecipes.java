@@ -57,6 +57,8 @@ public record CraftingInventoryRecipes(Datapack datapack, VanillaReimplementatio
             output.set(inv, Objects.requireNonNullElse(result, ItemStack.AIR));
         });
 
+        CraftingUtils.addOutputSlotEventHandler(node, Views.craftingTable().result(), InventoryType.CRAFTING);
+
         return node;
     }
 
