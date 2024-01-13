@@ -1,5 +1,6 @@
 package net.minestom.vanilla.datapack.recipe;
 
+import com.squareup.moshi.Json;
 import com.squareup.moshi.JsonReader;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.NamespaceID;
@@ -111,7 +112,7 @@ public interface Recipe {
     }
 
     record Blasting(String group, JsonUtils.SingleOrList<Ingredient> ingredient, Material result,
-                    double experience, @Optional Integer cookingTime) implements CookingRecipe {
+                    double experience, @Optional @Json(name = "cookingtime") Integer cookingTime) implements CookingRecipe {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:blasting");
@@ -119,7 +120,7 @@ public interface Recipe {
     }
 
     record CampfireCooking(String group, JsonUtils.SingleOrList<Ingredient> ingredient, Material result,
-                           double experience, @Optional Integer cookingTime) implements CookingRecipe {
+                           double experience, @Optional @Json(name = "cookingtime") Integer cookingTime) implements CookingRecipe {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:campfire_cooking");
@@ -243,7 +244,7 @@ public interface Recipe {
     }
 
     record Smelting(String group, JsonUtils.SingleOrList<Ingredient> ingredient, Material result,
-                    double experience, @Optional Integer cookingTime) implements CookingRecipe {
+                    double experience, @Optional @Json(name = "cookingtime") Integer cookingTime) implements CookingRecipe {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:smelting");
@@ -259,7 +260,7 @@ public interface Recipe {
     }
 
     record Smoking(String group, JsonUtils.SingleOrList<Ingredient> ingredient, Material result,
-                   double experience, @Optional Integer cookingTime) implements CookingRecipe {
+                   double experience, @Optional @Json(name = "cookingtime") Integer cookingTime) implements CookingRecipe {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:smoking");
