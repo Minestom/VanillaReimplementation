@@ -16,7 +16,6 @@ import org.jetbrains.annotations.Nullable;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
@@ -37,6 +36,7 @@ import net.minestom.vanilla.tag.Tags.Blocks.Campfire.ItemWithSlot;
 public class CampfireBehaviour extends VanillaBlockBehaviour {
 
     private static final int SLOT_AMOUNT = 4;
+    private static final Random RNG = new Random();
     private final RecipeManager recipeManager;
 
     public CampfireBehaviour(VanillaBlocks.@NotNull BlockContext context) {
@@ -71,9 +71,6 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
         if (items.stream().filter(item -> !item.isAir()).anyMatch(item -> findCampfireCookingRecipe(item).isEmpty()))
             throw new IllegalArgumentException("Items passed with CampfireBehaviour#withItems contains item that doesn't have CAMPFIRE_COOKING recipe.");
 
-        while (items.size() < SLOT_AMOUNT)
-            items.add(ItemStack.AIR);
-
         List<Campfire.ItemWithSlot> slotItems = IntStream.range(0, items.size())
                 .mapToObj(slot -> new Campfire.ItemWithSlot(items.get(slot).material(), slot))
                 .toList();
@@ -90,7 +87,7 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
             throw new IllegalArgumentException("CampfireCookingRecipe has invalid ingredients in CampfireBehaviour#appendItem.");
         int index = freeSlot.getAsInt();
         items.set(index, ingredients.get(0));
-        return withCookingProgress(withItems(block, items), index, 600);
+        return withCookingProgress(withItems(block, items), index, recipe.getCookingTime());
     }
 
     @Override
@@ -98,14 +95,14 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
         Instance instance = interaction.getInstance();
         Point pos = interaction.getBlockPosition();
         Player player = interaction.getPlayer();
-        Block campfire = interaction.getBlock();
+        Block block = interaction.getBlock();
         ItemStack input = player.getItemInHand(interaction.getHand());
         Optional<CampfireCookingRecipe> recipeOptional = findCampfireCookingRecipe(input);
 
         if (recipeOptional.isEmpty())
             return true;
 
-        List<ItemStack> items = getItemsOrDefault(campfire);
+        List<ItemStack> items = getItemsOrDefault(block);
         if (findFirstFreeSlot(items).isEmpty())
             return true;
 
@@ -115,8 +112,36 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
             return true;
 
         CampfireCookingRecipe recipe = recipeOptional.get();
-        instance.setBlock(pos, appendItem(campfire, recipe));
+        instance.setBlock(pos, appendItem(block, recipe));
         return false;
+    }
+
+    @Override
+    public void onDestroy(@NotNull BlockHandler.Destroy destroy) {
+        Instance instance = destroy.getInstance();
+        Point pos = destroy.getBlockPosition();
+        Block block = destroy.getBlock();
+
+        // TODO: Introduce a way to get the block this is getting replaced with, enabling us to remove the tick delay.
+        instance.scheduleNextTick(ignored -> {
+            Block newBlock = instance.getBlock(pos);
+            if (newBlock.compare(block)) {
+                // Same block, don't remove campfire
+                return;
+            }
+
+            // Different block, remove campfire
+            List<ItemStack> items = getItemsOrDefault(block);
+
+            for (ItemStack item : items) {
+
+                if (item == null) {
+                    continue;
+                }
+
+                dropItem(instance, pos, item);
+            }
+        });
     }
 
     @Override
@@ -125,15 +150,19 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
         Block block = tick.getBlock();
         Point pos = tick.getBlockPosition();
 
-        if (!block.hasTag(Campfire.COOKING_PROGRESS)) {
-            super.tick(tick);
+        if (!block.hasTag(Campfire.COOKING_PROGRESS))
             return;
-        }
 
         List<Campfire.ItemWithSlot> items = new ArrayList<>(block.getTag(Campfire.ITEMS));
 
-        if (items.isEmpty()) {
-            super.tick(tick);
+        if (items.isEmpty())
+            return;
+
+        boolean lit = Boolean.parseBoolean(block.getProperty("lit"));
+        if (!lit) {
+            for (ItemWithSlot item : items)
+                dropItem(instance, pos, ItemStack.of(item.material()));
+            instance.setBlock(pos, withItems(block, Collections.nCopies(4, ItemStack.AIR)));
             return;
         }
 
@@ -156,8 +185,9 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
             progress -= 1;
             i.set(progress);
         }
-        instance.setBlock(pos, block.withTag(Campfire.COOKING_PROGRESS, cookingProgress));
-        super.tick(tick);
+
+        Block newBlock = block.withTag(Campfire.COOKING_PROGRESS, cookingProgress);
+        instance.setBlock(pos, newBlock);
     }
 
     @Override
@@ -174,22 +204,13 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
         Optional<CampfireCookingRecipe> recipeOptional = findCampfireCookingRecipe(input);
         if (recipeOptional.isEmpty())
             throw new IllegalArgumentException("Cannot end campfire cooking progress because input recipe doesn't found");
-        ItemEntity resultEntity = new ItemEntity(recipeOptional.get().getResult());
-        resultEntity.setInstance(instance);
-        resultEntity.teleport(new Pos(pos.x() + 0.5f, pos.y() + 1f, pos.z() + 0.5f));
-        resultEntity.setPickable(true);
+        dropItem(instance, pos, recipeOptional.get().getResult());
+    }
 
-        Random rng = new Random();
-        final float horizontalSpeed = 2f;
-        final float verticalSpeed = 2f;
-
-        resultEntity.setVelocity(new Vec(
-                rng.nextGaussian() * horizontalSpeed,
-                rng.nextFloat() * verticalSpeed,
-                rng.nextGaussian() * horizontalSpeed
-        ));
-
-        resultEntity.setInstance(instance);
+    private void dropItem(Instance instance, Point pos, ItemStack item) {
+        ItemEntity resultItemEntity = new ItemEntity(item);
+        resultItemEntity.setInstance(instance);
+        resultItemEntity.teleport(new Pos(pos.x() + RNG.nextDouble(), pos.y() + .5f, pos.z() + RNG.nextDouble()));
     }
 
     private OptionalInt findFirstFreeSlot(List<ItemStack> items) {
