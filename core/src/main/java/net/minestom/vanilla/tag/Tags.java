@@ -61,6 +61,10 @@ public interface Tags {
                                     "Slot", new NBTByte((byte) item.slot),
                                     "Count", new NBTByte((byte) 1)
                             ))).list();
+
+            // The number of ticks that the campfire has been cooking for, for each of the 4 slots, 0 means end of the cooking
+            Tag<List<Integer>> COOKING_PROGRESS = Tag.Integer("vri:campfire:cooking_progress").defaultValue(0).list();
+
         }
         interface Furnace {
             // The number of ticks that the furnace can cook for
