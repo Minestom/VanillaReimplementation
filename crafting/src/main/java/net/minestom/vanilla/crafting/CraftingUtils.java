@@ -3,6 +3,8 @@ package net.minestom.vanilla.crafting;
 import dev.goldenstack.window.InventoryView;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
+import net.minestom.server.inventory.AbstractInventory;
+import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -163,43 +165,68 @@ public record CraftingUtils(Datapack datapack) {
         throw new UnsupportedOperationException("Unknown ingredient type " + ingredient.getClass().getName());
     }
 
+    /**
+     * This is used to handle the output slot of a crafting inventory.
+     * It implements the following behaviour:
+     * <ul>
+     *     <li>If the output slot is empty, do nothing</li>
+     *     <li>If the output slot is not empty:</li>
+     *     <ul>
+     *         <li>If the cursor is empty, set the cursor to the output slot and clear the output slot</li>
+     *         <li>If the cursor is not empty, and the cursor and output slot are compatible, merge the items</li>
+     *         <li>If the cursor is not empty, and the cursor and output slot are not compatible, do nothing</li>
+     *     </ul>
+     * </ul>
+     *
+     * @implNote This only works for left clicks currently
+     */
     public static void addOutputSlotEventHandler(EventNode<? super InventoryPreClickEvent> node, InventoryView.Singular outputSlot, @Nullable InventoryType inventoryType) {
         node.addListener(InventoryPreClickEvent.class, event -> {
             // for stacking items from an output slot
             int slot = event.getSlot();
-            if (event.getInventory() == null && inventoryType != null) {
-                //
-                return;
-            }
-            boolean shouldPass = event.getInventory() == null && inventoryType != null;
-            if (shouldPass || event.getInventory().getInventoryType() != inventoryType) {
+            Inventory inventory = event.getInventory();
+            if (inventory == null) {
+                if (inventoryType != null) {
+                    // survival inventory, but we want to handle a different inventory type
+                    return;
+                }
+            } else if (inventory.getInventoryType() != inventoryType) {
                 return;
             }
             if (!outputSlot.isValidExternal(slot)) return;
 
-            ItemStack cursorItem = event.getCursorItem();
-            ItemStack clickedItem = event.getClickedItem();
+            ItemStack cursor = event.getCursorItem();
+            ItemStack output = event.getClickedItem();
 
-            if (cursorItem.isAir()) return;
-            if (clickedItem.isAir()) {
-                // the output slot is empty, but the cursor is not. the player is trying to put items in the output slot
+            // If the output slot is empty, do nothing
+            if (output.isAir()) {
                 event.setCancelled(true);
                 return;
             }
 
+            // If the output slot is not empty:
+
+            // If the cursor is empty, set the cursor to the output slot and clear the output slot
+            if (cursor.isAir()) {
+                // treat this like a normal click
+                return;
+            }
+
+            // If the cursor is not empty:
+
+            // if the cursor and output slot are compatible, merge the items
             StackingRule stackingRule = StackingRule.get();
-            if (!stackingRule.canBeStacked(clickedItem, cursorItem)) {
-                // the player is holding an incompatible item.
-                event.setCancelled(true);
+            if (stackingRule.canBeStacked(cursor, output)) {
+                ItemStack newCursor = cursor.withAmount(amount -> amount + output.amount());
+
+                // I know these look swapped around, but it's correct
+                event.setCursorItem(ItemStack.AIR);
+                event.setClickedItem(newCursor);
                 return;
             }
-            if (stackingRule.getMaxSize(clickedItem) < (clickedItem.amount() + cursorItem.amount())) {
-                // cannot be merged. ignore the click
-                event.setCancelled(true);
-            } else {
-                event.setClickedItem(clickedItem.withAmount(count -> count + cursorItem.amount()));
-                event.setCursorItem(ItemStack.AIR);
-            }
+
+            // if the cursor and output slot are not compatible, do nothing
+            event.setCancelled(true);
         });
     }
 }
