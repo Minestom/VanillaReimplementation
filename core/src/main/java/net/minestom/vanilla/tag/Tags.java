@@ -1,10 +1,10 @@
 package net.minestom.vanilla.tag;
 
-import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Vec;
+import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
 import org.jglrxavpok.hephaistos.nbt.NBT;
+import org.jglrxavpok.hephaistos.nbt.NBTByte;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTInt;
 import org.jglrxavpok.hephaistos.nbt.NBTString;
@@ -46,6 +46,22 @@ public interface Tags {
     }
 
     interface Blocks {
+        interface Campfire {
+            record ItemWithSlot(Material material, int slot){
+            }
+
+            Tag<List<ItemWithSlot>> ITEMS = Tag.NBT("Items")
+                    .map(nbt -> nbt instanceof NBTCompound ? (NBTCompound) nbt : NBTCompound.EMPTY, nbt -> nbt)
+                    .map(nbt -> new ItemWithSlot(
+                                    Material.fromNamespaceId(nbt.getString("id")),
+                                    nbt.getByte("Slot")
+                            ),
+                            item -> new NBTCompound(Map.of(
+                                    "id", new NBTString(item.material.name()),
+                                    "Slot", new NBTByte((byte) item.slot),
+                                    "Count", new NBTByte((byte) 1)
+                            ))).list();
+        }
         interface Furnace {
             // The number of ticks that the furnace can cook for
             Tag<Integer> COOKING_TICKS = Tag.Integer("vri:furnace:cooking_ticks").defaultValue(0);

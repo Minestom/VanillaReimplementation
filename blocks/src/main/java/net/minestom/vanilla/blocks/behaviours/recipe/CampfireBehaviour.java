@@ -4,14 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBT;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.jglrxavpok.hephaistos.nbt.NBTList;
-import org.jglrxavpok.hephaistos.nbt.NBTType;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
@@ -19,21 +16,17 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
 import net.minestom.server.recipe.CampfireCookingRecipe;
 import net.minestom.server.recipe.Recipe.Type;
 import net.minestom.server.recipe.RecipeManager;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.tag.TagReadable;
-import net.minestom.server.tag.TagSerializer;
-import net.minestom.server.tag.TagWritable;
 import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.inventory.InventoryManipulation;
+import net.minestom.vanilla.tag.Tags.Blocks.Campfire;
 
 public class CampfireBehaviour extends VanillaBlockBehaviour {
 
-    public static final Tag<List<ItemStack>> ITEMS_KEY = Tag.View(new CampfireItemsSerializer());
     private final RecipeManager recipeManager;
 
     public CampfireBehaviour(VanillaBlocks.@NotNull BlockContext context) {
@@ -42,7 +35,10 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
     }
 
     public @Nullable List<ItemStack> getItems(Block block) {
-        return block.getTag(ITEMS_KEY);
+        List<Campfire.ItemWithSlot> items = block.getTag(Campfire.ITEMS);
+        if(items == null)
+            return null;
+        return items.stream().map(item -> ItemStack.of(item.material())).collect(Collectors.toList());
     }
 
     public @NotNull Block withItems(Block block, @NotNull List<ItemStack> items) {
@@ -50,7 +46,10 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
             throw new IllegalArgumentException("Items size is more than 4 in CampfireBehaviour#withItems.");
         if (items.stream().anyMatch(item -> findCampfireCookingRecipe(item).isEmpty()))
             throw new IllegalArgumentException("Items passed with CampfireBehaviour#withItems contains item that doesn't have CAMPFIRE_COOKING recipe.");
-        return block.withTag(ITEMS_KEY, items);
+        List<Campfire.ItemWithSlot> slotItems = IntStream.range(0, items.size())
+                .mapToObj(slot -> new Campfire.ItemWithSlot(items.get(slot).material(), slot))
+                .toList();
+        return block.withTag(Campfire.ITEMS, slotItems);
     }
 
     @Override
@@ -85,7 +84,7 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
 
     @Override
     public @NotNull Collection<Tag<?>> getBlockEntityTags() {
-        return List.of(ITEMS_KEY);
+        return List.of(Campfire.ITEMS);
     }
 
     @Override
@@ -108,46 +107,6 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
                         return false;
                     return items.get(0).material().equals(input.material());
                 }).findFirst();
-    }
-
-    private static class CampfireItemsSerializer implements TagSerializer<List<ItemStack>> {
-
-        private final Tag<NBT> internal = Tag.NBT("Items");
-
-        @Override
-        public @Nullable List<ItemStack> read(@NotNull TagReadable reader) {
-            NBTList<NBTCompound> item = (NBTList<NBTCompound>) reader.getTag(internal);
-            if (item == null)
-                return null;
-            List<ItemStack> result = new ArrayList<>();
-            item.forEach(nbtCompound -> {
-                byte amount = nbtCompound.getAsByte("Count");
-                String id = nbtCompound.getString("id");
-                Material material = Material.fromNamespaceId(id);
-                result.add(ItemStack.of(material, amount));
-            });
-            return result;
-        }
-
-        @Override
-        public void write(@NotNull TagWritable writer, @Nullable List<ItemStack> value) {
-            if (value == null) {
-                writer.removeTag(internal);
-                return;
-            }
-            writer.setTag(internal, NBT.List(
-                    NBTType.TAG_Compound,
-                    IntStream.range(0, value.size())
-                            .mapToObj(itemIndex -> NBT.Compound(nbt -> {
-                                ItemStack item = value.get(itemIndex);
-                                nbt.setByte("Count", (byte) item.amount());
-                                nbt.setByte("Slot", (byte) itemIndex);
-                                nbt.setString("id", item.material().name());
-                            }))
-                            .toList()
-            ));
-        }
-
     }
 
 }
