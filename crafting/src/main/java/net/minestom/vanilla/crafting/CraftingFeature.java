@@ -4,6 +4,9 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaReimplementation;
+import net.minestom.vanilla.crafting.smelting.BlastingInventoryRecipes;
+import net.minestom.vanilla.crafting.smelting.SmeltingInventoryRecipes;
+import net.minestom.vanilla.crafting.smelting.SmokingInventoryRecipes;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackLoadingFeature;
 import net.minestom.vanilla.datapack.recipe.Recipe;
@@ -43,6 +46,12 @@ public class CraftingFeature implements VanillaReimplementation.Feature {
 
         EventNode<Event> smelting = new SmeltingInventoryRecipes(datapack, context.vri()).init();
         context.vri().process().eventHandler().addChild(smelting);
+
+        EventNode<Event> smoking = new SmokingInventoryRecipes(datapack, context.vri()).init();
+        context.vri().process().eventHandler().addChild(smoking);
+
+        EventNode<Event> blasting = new BlastingInventoryRecipes(datapack, context.vri()).init();
+        context.vri().process().eventHandler().addChild(blasting);
 
         EventNode<Event> stonecutting = new StonecuttingInventoryRecipes(datapack, context.vri()).init();
         context.vri().process().eventHandler().addChild(stonecutting);
