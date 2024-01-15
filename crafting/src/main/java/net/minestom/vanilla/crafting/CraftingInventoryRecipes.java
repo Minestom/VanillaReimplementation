@@ -37,7 +37,6 @@ public record CraftingInventoryRecipes(Datapack datapack, VanillaReimplementatio
                 for (int i = 0; i < input.size(); i++) {
                     input.set(inv, i, input.get(inv, i).withAmount(prev -> prev - 1));
                 }
-                return;
             }
 
             Material topLeft = input.get(inv, 0).material();

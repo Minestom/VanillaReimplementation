@@ -17,9 +17,7 @@ import net.minestom.vanilla.blocks.behaviours.*;
 import net.minestom.vanilla.blocks.behaviours.oxidisable.OxidatableBlockBehaviour;
 import net.minestom.vanilla.blocks.behaviours.oxidisable.WaxedBlockBehaviour;
 import net.minestom.vanilla.blocks.behaviours.recipe.CampfireBehaviour;
-import net.minestom.vanilla.blocks.behaviours.recipe.CraftingTableBehaviour;
-import net.minestom.vanilla.blocks.behaviours.recipe.FurnaceBehaviour;
-import net.minestom.vanilla.blocks.behaviours.recipe.StonecutterBehaviour;
+import net.minestom.vanilla.blocks.behaviours.recipe.*;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdatable;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdateManager;
 import net.minestom.vanilla.datapack.DatapackLoadingFeature;
@@ -136,6 +134,8 @@ public enum VanillaBlocks {
     // recipes
     CRAFTING_TABLE(Block.CRAFTING_TABLE, CraftingTableBehaviour::new),
     FURNACE(Block.FURNACE, FurnaceBehaviour::new),
+    SMOKER(Block.SMOKER, SmokerBehaviour::new),
+    BLAST_FURNACE(Block.BLAST_FURNACE, BlastingFurnaceBehaviour::new),
 
     STONE_CUTTER(Block.STONECUTTER, StonecutterBehaviour::new),
     CAMPFIRE(Block.CAMPFIRE, CampfireBehaviour::new),

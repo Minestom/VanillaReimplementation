@@ -66,13 +66,17 @@ public interface Tags {
             Tag<List<Integer>> COOKING_PROGRESS = Tag.Integer("vri:campfire:cooking_progress").defaultValue(0).list();
 
         }
-        interface Furnace {
-            // The number of ticks that the furnace can cook for
+        interface Smelting {
+            // The number of ticks that the furnace can cook for without using another fuel item
             Tag<Integer> COOKING_TICKS = Tag.Integer("vri:furnace:cooking_ticks").defaultValue(0);
+
+            // The last fuel item that was used. Null if this furnace is not currently burning
+            Tag<Material> LAST_COOKED_ITEM = Tag.String("vri:furnace:last_cooked_item")
+                    .map(Material::fromNamespaceId, mat -> mat.namespace().toString())
+                    .defaultValue(Material.AIR);
 
             // The number of ticks that the furnace has been cooking for
             Tag<Integer> COOKING_PROGRESS = Tag.Integer("vri:furnace:cooking_progress").defaultValue(0);
-
         }
     }
 }

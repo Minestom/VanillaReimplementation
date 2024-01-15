@@ -1,0 +1,51 @@
+package net.minestom.vanilla.blocks.behaviours.recipe;
+
+import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.block.BlockHandler;
+import net.minestom.server.inventory.Inventory;
+import net.minestom.server.inventory.InventoryType;
+import net.minestom.vanilla.blocks.VanillaBlocks;
+import net.minestom.vanilla.blocks.behaviours.InventoryBlockBehaviour;
+import net.minestom.vanilla.blocks.behaviours.chestlike.BlockInventory;
+import net.minestom.vanilla.events.BlastingFurnaceTickEvent;
+import org.jetbrains.annotations.NotNull;
+
+public class BlastingFurnaceBehaviour extends InventoryBlockBehaviour {
+    public BlastingFurnaceBehaviour(VanillaBlocks.@NotNull BlockContext context) {
+        super(context, InventoryType.BLAST_FURNACE, Component.text("Blast Furnace"));
+    }
+
+    @Override
+    public boolean onInteract(@NotNull BlockHandler.Interaction interaction) {
+        Instance instance = interaction.getInstance();
+        Point pos = interaction.getBlockPosition();
+        Inventory inventory = BlockInventory.from(instance, pos, InventoryType.BLAST_FURNACE, Component.text("Blast Furnace"));
+        Player player = interaction.getPlayer();
+        player.openInventory(inventory);
+        return false;
+    }
+
+    @Override
+    public boolean dropContentsOnDestroy() {
+        return true;
+    }
+
+    @Override
+    public boolean isTickable() {
+        return true;
+    }
+
+    @Override
+    public void tick(@NotNull BlockHandler.Tick tick) {
+        var events = this.context.vri().process().eventHandler();
+        if (!events.hasListener(BlastingFurnaceTickEvent.class)) return; // fast exit since this is hot code
+        Instance instance = tick.getInstance();
+        Point pos = tick.getBlockPosition();
+        Inventory inventory = BlockInventory.from(instance, pos, InventoryType.BLAST_FURNACE, Component.text("Blast Furnace"));
+        BlastingFurnaceTickEvent event = new BlastingFurnaceTickEvent(tick.getBlock(), tick.getInstance(), tick.getBlockPosition(), inventory);
+        events.call(event);
+    }
+}

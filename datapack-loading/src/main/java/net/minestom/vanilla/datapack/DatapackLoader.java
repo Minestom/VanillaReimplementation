@@ -6,6 +6,8 @@ import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.doubles.DoubleLists;
 import net.minestom.server.utils.math.FloatRange;
 import net.minestom.vanilla.datapack.loot.NBTPath;
+import net.minestom.vanilla.datapack.trims.TrimMaterial;
+import net.minestom.vanilla.datapack.trims.TrimPattern;
 import net.minestom.vanilla.datapack.worldgen.*;
 import net.minestom.vanilla.datapack.worldgen.math.CubicSpline;
 import net.minestom.vanilla.datapack.worldgen.noise.Noise;
@@ -223,9 +225,13 @@ public class DatapackLoader {
                 FileSystem<Tag> tags = parseJsonFolder(dataFolder, "tags", adaptor(Tag.class));
                 FileSystem<Dimension> dimensions = parseJsonFolder(dataFolder, "dimension", adaptor(Dimension.class));
                 FileSystem<DimensionType> dimension_type = parseJsonFolder(dataFolder, "dimension_type", adaptor(DimensionType.class));
+                FileSystem<TrimPattern> trim_pattern = parseJsonFolder(dataFolder, "trim_pattern", adaptor(TrimPattern.class));
+                FileSystem<TrimMaterial> trim_material = parseJsonFolder(dataFolder, "trim_material", adaptor(TrimMaterial.class));
                 Datapack.WorldGen world_gen = Datapack.WorldGen.from(dataFolder.folder("worldgen"));
 
-                NamespacedData data = new NamespacedData(advancements, functions, item_modifiers, loot_tables, predicates, recipes, structures, chat_type, damage_type, tags, dimensions, dimension_type, world_gen);
+                NamespacedData data = new NamespacedData(advancements, functions, item_modifiers, loot_tables,
+                        predicates, recipes, structures, chat_type, damage_type, tags, dimensions, dimension_type,
+                        trim_pattern, trim_material, world_gen);
                 namespace2data.put(namespace, data);
             }
         }

@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-// TODO: Update the tags within the blocks.
+// TODO: Update the tags within the blocks instead of using this map
 public class BlockInventory extends Inventory {
 
     private static final Map<Instance, Map<Point, BlockInventory>> INSTANCE2CHESTS = new ConcurrentHashMap<>();

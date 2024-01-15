@@ -3,6 +3,8 @@ package net.minestom.vanilla.datapack;
 import com.squareup.moshi.JsonReader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.json.Optional;
+import net.minestom.vanilla.datapack.trims.TrimMaterial;
+import net.minestom.vanilla.datapack.trims.TrimPattern;
 import net.minestom.vanilla.datapack.worldgen.DensityFunction;
 import net.minestom.vanilla.datapack.worldgen.noise.Noise;
 import net.minestom.vanilla.files.ByteArray;
@@ -71,6 +73,8 @@ public interface Datapack {
                           FileSystem<Tag> tags,
                           FileSystem<Dimension> dimensions,
                           FileSystem<DimensionType> dimension_type,
+                          FileSystem<TrimPattern> trim_pattern,
+                          FileSystem<TrimMaterial> trim_material,
                           WorldGen world_gen) {
 
         /**
@@ -91,6 +95,8 @@ public interface Datapack {
                     tags.cache(),
                     dimensions.cache(),
                     dimension_type.cache(),
+                    trim_pattern.cache(),
+                    trim_material.cache(),
                     world_gen.cache()
             );
         }
