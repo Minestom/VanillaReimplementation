@@ -1,5 +1,6 @@
 package net.minestom.vanilla.tag;
 
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
@@ -11,6 +12,8 @@ import org.jglrxavpok.hephaistos.nbt.NBTString;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public interface Tags {
 
@@ -47,20 +50,19 @@ public interface Tags {
 
     interface Blocks {
         interface Campfire {
-            record ItemWithSlot(Material material, int slot){
-            }
-
-            Tag<List<ItemWithSlot>> ITEMS = Tag.NBT("Items")
+            Tag<List<ItemStack>> ITEMS = Tag.NBT("Items")
                     .map(nbt -> nbt instanceof NBTCompound ? (NBTCompound) nbt : NBTCompound.EMPTY, nbt -> nbt)
-                    .map(nbt -> new ItemWithSlot(
-                                    Material.fromNamespaceId(nbt.getString("id")),
-                                    nbt.getByte("Slot")
-                            ),
-                            item -> new NBTCompound(Map.of(
-                                    "id", new NBTString(item.material.name()),
-                                    "Slot", new NBTByte((byte) item.slot),
-                                    "Count", new NBTByte((byte) 1)
-                            ))).list();
+                    .list()
+                    .map(nbtList -> nbtList.stream()
+                                    .map(nbt -> ItemStack.of(Material.fromNamespaceId(nbt.getString("id"))))
+                                    .collect(Collectors.toList()),
+                            items -> IntStream.range(0, items.size())
+                                    .mapToObj(slot -> new NBTCompound(Map.of(
+                                            "id", new NBTString(items.get(slot).material().name()),
+                                            "Slot", new NBTByte((byte) slot),
+                                            "Count", new NBTByte((byte) 1)
+                                    )))
+                                    .toList());
 
             // The number of ticks that the campfire has been cooking for, for each of the 4 slots, 0 means end of the cooking
             Tag<List<Integer>> COOKING_PROGRESS = Tag.Integer("vri:campfire:cooking_progress").defaultValue(0).list();

@@ -8,11 +8,9 @@ import java.util.ListIterator;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Random;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -29,13 +27,13 @@ import net.minestom.server.recipe.RecipeManager;
 import net.minestom.server.tag.Tag;
 import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
 import net.minestom.vanilla.blocks.VanillaBlocks;
+import net.minestom.vanilla.blocks.behaviours.chestlike.BlockContainer;
 import net.minestom.vanilla.inventory.InventoryManipulation;
 import net.minestom.vanilla.tag.Tags.Blocks.Campfire;
-import net.minestom.vanilla.tag.Tags.Blocks.Campfire.ItemWithSlot;
 
 public class CampfireBehaviour extends VanillaBlockBehaviour {
 
-    private static final int SLOT_AMOUNT = 4;
+    private static final int CONTAINER_SIZE = 4;
     private static final Random RNG = new Random();
     private final RecipeManager recipeManager;
 
@@ -44,19 +42,12 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
         this.recipeManager = context.vri().process().recipe();
     }
 
-    public @Nullable List<ItemStack> getItems(Block block) {
-        List<Campfire.ItemWithSlot> items = block.getTag(Campfire.ITEMS);
-        if (items == null)
-            return null;
-        return items.stream().map(item -> ItemStack.of(item.material())).collect(Collectors.toList());
-    }
-
-    public @NotNull List<ItemStack> getItemsOrDefault(Block block) {
-        return Optional.ofNullable(getItems(block)).orElse(new ArrayList<>(Collections.nCopies(SLOT_AMOUNT, ItemStack.AIR)));
+    public List<ItemStack> getItems(Instance instance, Point pos) {
+        return BlockContainer.from(instance, pos, CONTAINER_SIZE, Campfire.ITEMS).itemStacks();
     }
 
     public @NotNull List<Integer> getCookingProgressOrDefault(Block block) {
-        return new ArrayList<>(Optional.ofNullable(block.getTag(Campfire.COOKING_PROGRESS)).orElse(Collections.nCopies(SLOT_AMOUNT, 0)));
+        return new ArrayList<>(Optional.ofNullable(block.getTag(Campfire.COOKING_PROGRESS)).orElse(Collections.nCopies(CONTAINER_SIZE, 0)));
     }
 
     public @NotNull Block withCookingProgress(Block block, int slotIndex, int cookingTime) {
@@ -65,20 +56,9 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
         return block.withTag(Campfire.COOKING_PROGRESS, cookingProgress);
     }
 
-    public @NotNull Block withItems(Block block, @NotNull List<ItemStack> items) {
-        if (items.size() > SLOT_AMOUNT)
-            throw new IllegalArgumentException("Items size is more than " + SLOT_AMOUNT + " in CampfireBehaviour#withItems.");
-        if (items.stream().filter(item -> !item.isAir()).anyMatch(item -> findCampfireCookingRecipe(item).isEmpty()))
-            throw new IllegalArgumentException("Items passed with CampfireBehaviour#withItems contains item that doesn't have CAMPFIRE_COOKING recipe.");
-
-        List<Campfire.ItemWithSlot> slotItems = IntStream.range(0, items.size())
-                .mapToObj(slot -> new Campfire.ItemWithSlot(items.get(slot).material(), slot))
-                .toList();
-        return block.withTag(Campfire.ITEMS, slotItems);
-    }
-
-    public @NotNull Block appendItem(Block block, @NotNull CampfireCookingRecipe recipe) {
-        List<ItemStack> items = getItemsOrDefault(block);
+    public @NotNull Block appendItem(Instance instance, Point pos, @NotNull CampfireCookingRecipe recipe) {
+        BlockContainer blockContainer = BlockContainer.from(instance, pos, CONTAINER_SIZE, Campfire.ITEMS);
+        List<ItemStack> items = blockContainer.itemStacks();
         OptionalInt freeSlot = findFirstFreeSlot(items);
         if (freeSlot.isEmpty())
             throw new IllegalArgumentException("Campfire doesn't have free slot for appending an item in CampfireBehaviour#appendItem");
@@ -86,8 +66,8 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
         if (ingredients == null || ingredients.size() != 1)
             throw new IllegalArgumentException("CampfireCookingRecipe has invalid ingredients in CampfireBehaviour#appendItem.");
         int index = freeSlot.getAsInt();
-        items.set(index, ingredients.get(0));
-        return withCookingProgress(withItems(block, items), index, recipe.getCookingTime());
+        Block block = blockContainer.setItemStack(index, ingredients.get(0));
+        return withCookingProgress(block, index, recipe.getCookingTime());
     }
 
     @Override
@@ -95,14 +75,13 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
         Instance instance = interaction.getInstance();
         Point pos = interaction.getBlockPosition();
         Player player = interaction.getPlayer();
-        Block block = interaction.getBlock();
         ItemStack input = player.getItemInHand(interaction.getHand());
         Optional<CampfireCookingRecipe> recipeOptional = findCampfireCookingRecipe(input);
 
         if (recipeOptional.isEmpty())
             return true;
 
-        List<ItemStack> items = getItemsOrDefault(block);
+        List<ItemStack> items = getItems(instance, pos);
         if (findFirstFreeSlot(items).isEmpty())
             return true;
 
@@ -112,7 +91,7 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
             return true;
 
         CampfireCookingRecipe recipe = recipeOptional.get();
-        instance.setBlock(pos, appendItem(block, recipe));
+        instance.setBlock(pos, appendItem(instance, pos, recipe));
         return false;
     }
 
@@ -131,7 +110,7 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
             }
 
             // Different block, remove campfire
-            List<ItemStack> items = getItemsOrDefault(block);
+            List<ItemStack> items = BlockContainer.remove(instance, pos);
 
             for (ItemStack item : items) {
 
@@ -153,20 +132,20 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
         if (!block.hasTag(Campfire.COOKING_PROGRESS))
             return;
 
-        List<Campfire.ItemWithSlot> items = new ArrayList<>(block.getTag(Campfire.ITEMS));
+        List<ItemStack> items = new ArrayList<>(getItems(instance, pos));
+        List<Integer> cookingProgress = new ArrayList<>(block.getTag(Campfire.COOKING_PROGRESS));
 
         if (items.isEmpty())
             return;
 
         boolean lit = Boolean.parseBoolean(block.getProperty("lit"));
         if (!lit) {
-            for (ItemWithSlot item : items)
-                dropItem(instance, pos, ItemStack.of(item.material()));
-            instance.setBlock(pos, withItems(block, Collections.nCopies(4, ItemStack.AIR)));
+            for (ItemStack item : items)
+                dropItem(instance, pos, item);
+            instance.setBlock(pos, block.withTag(Campfire.ITEMS, Collections.nCopies(4, ItemStack.AIR)));
             return;
         }
 
-        List<Integer> cookingProgress = new ArrayList<>(block.getTag(Campfire.COOKING_PROGRESS));
         for (ListIterator<Integer> i = cookingProgress.listIterator(); i.hasNext(); ) {
             int index = i.nextIndex();
             Integer progress = i.next();
@@ -177,7 +156,7 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
 
             if (progress <= 0) {
                 endCampfireCookingProgress(tick.getInstance(), tick.getBlockPosition(), ItemStack.of(inputMaterial));
-                items.set(index, new ItemWithSlot(Material.AIR, index));
+                items.set(index, ItemStack.AIR);
                 block = block.withTag(Campfire.ITEMS, items);
                 continue;
             }
@@ -186,8 +165,8 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
             i.set(progress);
         }
 
-        Block newBlock = block.withTag(Campfire.COOKING_PROGRESS, cookingProgress);
-        instance.setBlock(pos, newBlock);
+        Block updatedBlock = block.withTag(Campfire.COOKING_PROGRESS, cookingProgress);
+        instance.setBlock(pos, updatedBlock);
     }
 
     @Override
