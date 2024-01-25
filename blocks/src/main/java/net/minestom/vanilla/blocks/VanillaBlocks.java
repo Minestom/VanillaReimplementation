@@ -137,6 +137,7 @@ public enum VanillaBlocks {
     BLAST_FURNACE(Block.BLAST_FURNACE, BlastingFurnaceBehaviour::new),
 
     STONE_CUTTER(Block.STONECUTTER, StonecutterBehaviour::new),
+    SMITHING_TABLE(Block.SMITHING_TABLE, SmithingTableBehaviour::new),
 
     // Start of cakes
     CAKE(Block.CAKE, CakeBlockBehaviour::new),

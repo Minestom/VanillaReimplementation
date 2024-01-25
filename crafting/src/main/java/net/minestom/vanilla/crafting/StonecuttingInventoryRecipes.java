@@ -6,13 +6,11 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryClickEvent;
-import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.player.PlayerPacketEvent;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.StackingRule;
 import net.minestom.server.network.packet.client.play.ClientClickWindowButtonPacket;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.datapack.Datapack;
@@ -24,7 +22,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplementation vri) {
 
