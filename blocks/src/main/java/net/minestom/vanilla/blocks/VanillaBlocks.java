@@ -140,6 +140,7 @@ public enum VanillaBlocks {
     STONE_CUTTER(Block.STONECUTTER, StonecutterBehaviour::new),
     CAMPFIRE(Block.CAMPFIRE, CampfireBehaviour::new),
     SOUL_CAMPFIRE(Block.SOUL_CAMPFIRE, CampfireBehaviour::new),
+    SMITHING_TABLE(Block.SMITHING_TABLE, SmithingTableBehaviour::new),
 
     // Start of cakes
     CAKE(Block.CAKE, CakeBlockBehaviour::new),

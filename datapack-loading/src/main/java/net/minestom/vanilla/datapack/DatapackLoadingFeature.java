@@ -6,6 +6,7 @@ import net.minestom.vanilla.files.FileSystem;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.logging.Loading;
+import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 

@@ -33,6 +33,7 @@ class VanillaServer {
      * @param args arguments passed from console
      */
     public static void main(String[] args) {
+
         // Use the static server process
         MinecraftServer server = MinecraftServer.init();
 
@@ -43,6 +44,7 @@ class VanillaServer {
 
         VanillaServer vanillaServer = new VanillaServer(server, vri, args);
         Logger.info("Vanilla Reimplementation (%s) is setup.", MinecraftServer.VERSION_NAME);
+
         vanillaServer.start("0.0.0.0", 25565);
     }
 
@@ -59,6 +61,7 @@ class VanillaServer {
         this.minecraftServer = minecraftServer;
         this.serverProperties = getOrGenerateServerProperties();
         this.vri = vri;
+
 
         // Register all dimension types before making the worlds:
         for (DimensionType dimension : VanillaDimensionTypes.values()) {
@@ -90,7 +93,9 @@ class VanillaServer {
                     }
                     event.getPlayer().setRespawnPoint(new Pos(0, y, 0));
                 });
+
         vri.process().scheduler().scheduleNextTick(OpenToLAN::open);
+
         // Register systems
         {
             // dimension types
