@@ -58,7 +58,7 @@ public class EndPortalBlockBehaviour extends VanillaBlockBehaviour {
             if (targetDimension == VanillaDimensionTypes.END) {
                 for (int x = -1; x <= 1; x++) {
                     for (int z = -1; z <= 1; z++) {
-                        targetInstance.loadChunk(obsidianPlatformX / 16 + x, z);
+                        targetInstance.loadChunk(obsidianPlatformX / 16 + x, obsidianPlatformZ / 16 + z);
                     }
                 }
 

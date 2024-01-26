@@ -3,12 +3,12 @@ package net.minestom.vanilla.blocks.behaviours;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
 import net.minestom.vanilla.blocks.VanillaBlocks;
-// import net.minestom.vanilla.damage.DamageTypes;
 import net.minestom.vanilla.system.NetherPortal;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +34,7 @@ public class FireBlockBehaviour extends VanillaBlockBehaviour {
             return;
         }
 
-        // livingEntity.damage(DamageTypes.IN_FIRE, 1.0f);
+        livingEntity.damage(DamageType.IN_FIRE, 1.0f);
         livingEntity.setFireForDuration(8000, TimeUnit.MILLISECOND);
     }
 
