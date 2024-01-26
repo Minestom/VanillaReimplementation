@@ -3,7 +3,6 @@ package net.minestom.vanilla;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdateManager;
 import net.minestom.vanilla.logging.Loading;
-import net.minestom.vanilla.logging.Logger;
 import net.minestom.vanilla.randomticksystem.RandomTickManager;
 import org.jetbrains.annotations.NotNull;
 

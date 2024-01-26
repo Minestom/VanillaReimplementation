@@ -41,7 +41,7 @@ public class DifficultyCommand extends Command {
     }
 
     private void difficultyCallback(@NotNull CommandSender sender, @NotNull ArgumentSyntaxException exception) {
-        sender.asPlayer().sendMessage("'" + exception.getInput() + "' is not a valid difficulty!");
+        sender.sendMessage("'" + exception.getInput() + "' is not a valid difficulty!");
     }
 
     private boolean isAllowed(CommandSender player, String commandName) {

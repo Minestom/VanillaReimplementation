@@ -13,6 +13,7 @@ import net.minestom.server.utils.Direction;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Objects;
 
 public abstract class FlowableFluid extends Fluid {
 
@@ -253,7 +254,7 @@ public abstract class FlowableFluid extends Fluid {
                 || block.compare(Block.SEAGRASS)
                 || block.compare(Block.TALL_SEAGRASS)
                 || block.compare(Block.SEA_PICKLE)
-                || tags.getTag(Tag.BasicType.BLOCKS, "minecraft:signs").contains(block.namespace())
+                || Objects.requireNonNull(tags.getTag(Tag.BasicType.BLOCKS, "minecraft:signs")).contains(block.namespace())
                 || block.name().contains("door")
                 || block.name().contains("coral")) {
             return false;

@@ -23,7 +23,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.network.packet.client.ClientPacket;
-import net.minestom.server.network.packet.client.play.ClientKeepAlivePacket;
+import net.minestom.server.network.packet.client.common.ClientKeepAlivePacket;
 import net.minestom.server.network.packet.client.play.ClientPlayerPositionAndRotationPacket;
 import net.minestom.server.network.packet.client.play.ClientPlayerPositionPacket;
 import net.minestom.server.network.packet.client.play.ClientPlayerRotationPacket;
@@ -40,8 +40,8 @@ public class VanillaEvents {
 
         ExplosionSupplier explosionGenerator = (centerX, centerY, centerZ, strength, additionalData) -> {
 
-            boolean isTNT = additionalData != null && Boolean.TRUE.equals(additionalData.get(VanillaExplosion.DROP_EVERYTHING_KEY));
-            boolean noBlockDamage = additionalData != null && Boolean.TRUE.equals(additionalData.get(VanillaExplosion.DONT_DESTROY_BLOCKS_KEY));
+            boolean isTNT = additionalData != null && Boolean.TRUE.equals(additionalData.getBoolean(VanillaExplosion.DROP_EVERYTHING_KEY));
+            boolean noBlockDamage = additionalData != null && Boolean.TRUE.equals(additionalData.getBoolean(VanillaExplosion.DONT_DESTROY_BLOCKS_KEY));
 
             return VanillaExplosion.builder(new Pos(centerX, centerY, centerZ), strength)
                     .destroyBlocks(!noBlockDamage)
@@ -102,16 +102,15 @@ public class VanillaEvents {
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
 
         eventNode.addListener(
-                EventListener.of(PlayerLoginEvent.class, event -> {
+                EventListener.of(AsyncPlayerConfigurationEvent.class, event -> {
+
                     event.setSpawningInstance(overworld);
                     Logger.info(event.getPlayer().getUsername() + " joined the server");
                 })
         );
 
         eventNode.addListener(
-                EventListener.of(PlayerDisconnectEvent.class, event -> {
-                    Logger.info(event.getPlayer().getUsername() + " left the server");
-                })
+                EventListener.of(PlayerDisconnectEvent.class, event -> Logger.info(event.getPlayer().getUsername() + " left the server"))
         );
 
         eventNode.addListener(
@@ -122,7 +121,8 @@ public class VanillaEvents {
                     if (packet instanceof ClientPlayerPositionPacket) return;
                     if (packet instanceof ClientKeepAlivePacket) return;
                     if (packet instanceof ClientPlayerPositionAndRotationPacket) return;
-                    if (packet instanceof ClientPlayerRotationPacket) return;
+                    if (packet instanceof ClientPlayerRotationPacket) {
+                    }
 //                    Logger.info("Packet received " + event.getPacket());
                 }
         );

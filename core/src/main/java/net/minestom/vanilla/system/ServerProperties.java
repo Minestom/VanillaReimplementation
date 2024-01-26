@@ -1,6 +1,7 @@
 package net.minestom.vanilla.system;
 
 import java.io.*;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -33,7 +34,7 @@ public class ServerProperties {
     }
 
     private void loadDefault() throws IOException {
-        try (var defaultInput = new InputStreamReader(ServerProperties.class.getResourceAsStream("/server.properties.default"))) {
+        try (var defaultInput = new InputStreamReader(Objects.requireNonNull(ServerProperties.class.getResourceAsStream("/server.properties.default")))) {
             properties.load(defaultInput);
         }
     }

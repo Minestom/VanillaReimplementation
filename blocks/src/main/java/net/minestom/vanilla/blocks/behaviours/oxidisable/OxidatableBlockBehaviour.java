@@ -4,7 +4,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.inventory.InventoryManipulation;
 import net.minestom.vanilla.randomticksystem.RandomTickable;
@@ -103,7 +102,7 @@ public class OxidatableBlockBehaviour extends WaxableBlockBehaviour implements R
                 .filter(block -> !(block.handler() instanceof WaxedBlockBehaviour))
                 .filter(block -> block.handler() instanceof OxygenSensitive os
                         && os.oxidisedLevel() > oxidisedLevel()) // Filter out unrelated blocks
-                .map(block -> (OxygenSensitive) block.handler())
+                .map(block -> (OxygenSensitive) block.handler()).filter(Objects::nonNull)
                 .filter(handler -> handler.oxidisedLevel() > oxidisedLevel)
                 .count();
         double m = oxidisedLevel == 0 ? 0.75 : 1;

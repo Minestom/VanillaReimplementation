@@ -7,17 +7,12 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.crafting.CraftingUtils;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.recipe.Recipe;
 import net.minestom.vanilla.events.FurnaceTickEvent;
 import net.minestom.vanilla.tag.Tags;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 public record SmeltingInventoryRecipes(Datapack datapack, VanillaReimplementation vri) {
 

@@ -5,10 +5,6 @@ import net.minestom.vanilla.datapack.DatapackUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
 class LazyLoadedNoise implements Noise {
     private @Nullable Noise noise = null;
 

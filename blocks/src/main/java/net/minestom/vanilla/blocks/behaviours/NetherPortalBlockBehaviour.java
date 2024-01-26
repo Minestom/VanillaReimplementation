@@ -22,7 +22,6 @@ import net.minestom.vanilla.system.NetherPortal;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class NetherPortalBlockBehaviour extends VanillaBlockBehaviour implements BlockUpdatable {

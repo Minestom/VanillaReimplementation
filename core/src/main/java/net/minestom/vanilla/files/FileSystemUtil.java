@@ -56,5 +56,5 @@ class FileSystemUtil {
         return source;
     }
 
-    static Gson gson = new Gson();
+    static final Gson gson = new Gson();
 }

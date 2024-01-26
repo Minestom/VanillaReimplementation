@@ -5,7 +5,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.extras.lan.OpenToLAN;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -76,7 +76,7 @@ class VanillaServer {
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
 
         vri.process().eventHandler()
-                .addListener(PlayerLoginEvent.class, event -> {
+                .addListener(AsyncPlayerConfigurationEvent.class, event -> {
                     event.setSpawningInstance(overworld);
                     event.getPlayer().setGameMode(GameMode.SPECTATOR);
                     overworld.loadChunk(0, 0).join();

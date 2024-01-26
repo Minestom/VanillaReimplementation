@@ -2,26 +2,16 @@ package net.minestom.vanilla.blocks.behaviours.recipe;
 
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.EventListener;
-import net.minestom.server.event.inventory.InventoryCloseEvent;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
-import net.minestom.server.item.ItemStack;
-import net.minestom.server.tag.Tag;
-import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.blocks.behaviours.InventoryBlockBehaviour;
 import net.minestom.vanilla.blocks.behaviours.chestlike.BlockInventory;
 import net.minestom.vanilla.events.FurnaceTickEvent;
-import net.minestom.vanilla.tag.Tags;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 public class FurnaceBehaviour extends InventoryBlockBehaviour {
     public FurnaceBehaviour(VanillaBlocks.@NotNull BlockContext context) {

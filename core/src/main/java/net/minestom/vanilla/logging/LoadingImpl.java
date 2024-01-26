@@ -9,7 +9,7 @@ class LoadingImpl implements Loading {
     private final @Nullable LoadingImpl parent;
     private final @Nullable LoadingBar loadingBar;
     private final long started = System.currentTimeMillis();
-    private double progress = 0;
+    private final double progress = 0;
     public Level level;
     private LoadingImpl(@Nullable LoadingImpl parent, @Nullable LoadingBar loadingBar, Level level) {
         this.parent = parent;

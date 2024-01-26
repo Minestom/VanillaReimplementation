@@ -79,7 +79,10 @@ public class ForceloadCommand extends Command {
     }
 
     private void usageAddFrom(CommandSender sender, CommandContext context) {
-        Player player = sender.asPlayer();
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("This command must be executed by a player!");
+            return;
+        }
         RelativeVec fromVec = context.get("from");
         Vec position = fromVec.from(player.getPosition());
 
@@ -93,7 +96,10 @@ public class ForceloadCommand extends Command {
     }
 
     private void usageAddFromTo(CommandSender sender, CommandContext context) {
-        Player player = sender.asPlayer();
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("This command must be executed by a player!");
+            return;
+        }
         RelativeVec fromVec = context.get("from");
         RelativeVec toVec = context.get("to");
         Vec from = fromVec.from(player.getPosition());
@@ -117,7 +123,10 @@ public class ForceloadCommand extends Command {
     }
 
     private void usageRemoveFrom(CommandSender sender, CommandContext context) {
-        Player player = sender.asPlayer();
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("This command must be executed by a player!");
+            return;
+        }
         RelativeVec fromVec = context.get("from");
         Vec position = fromVec.from(player.getPosition());
 
@@ -132,7 +141,10 @@ public class ForceloadCommand extends Command {
     }
 
     private void usageRemoveFromTo(CommandSender sender, CommandContext context) {
-        Player player = sender.asPlayer();
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("This command must be executed by a player!");
+            return;
+        }
         RelativeVec fromVec = context.get("from");
         RelativeVec toVec = context.get("to");
         Vec from = fromVec.from(player.getPosition());

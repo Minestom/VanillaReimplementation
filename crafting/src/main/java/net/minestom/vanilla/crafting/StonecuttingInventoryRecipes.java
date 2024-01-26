@@ -6,13 +6,11 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryClickEvent;
-import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.player.PlayerPacketEvent;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.StackingRule;
 import net.minestom.server.network.packet.client.play.ClientClickWindowButtonPacket;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.datapack.Datapack;
@@ -24,13 +22,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplementation vri) {
 
-    static Views.Stonecutter stonecutter = Views.stonecutter();
-    static InventoryView.Singular input = stonecutter.input();
-    static InventoryView.Singular output = stonecutter.output();
+    static final Views.Stonecutter stonecutter = Views.stonecutter();
+    static final InventoryView.Singular input = stonecutter.input();
+    static final InventoryView.Singular output = stonecutter.output();
     public EventNode<Event> init() {
         EventNode<Event> node = EventNode.all("vri:stone-cutting-inventory-recipes");
 
@@ -65,7 +62,7 @@ public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplement
 
         // this is just to remove the warnings in console about unhandled packets, this packet is actually handled in the
         // PlayerPacketEvent listener below.
-        MinecraftServer.getPacketListenerManager().setListener(ClientClickWindowButtonPacket.class, (packet, player) -> {});
+        MinecraftServer.getPacketListenerManager().setPlayListener(ClientClickWindowButtonPacket.class, (packet, player) -> {});
 
         node.addListener(PlayerPacketEvent.class, event -> {
             if (!(event.getPacket() instanceof ClientClickWindowButtonPacket packet)) return;

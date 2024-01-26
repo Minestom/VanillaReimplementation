@@ -122,7 +122,7 @@ public class BlockUpdateManager {
     }
 
     private void updateNeighbors(int duration) {
-        if (updateNeighbors.size() == 0) {
+        if (updateNeighbors.isEmpty()) {
             return;
         }
 

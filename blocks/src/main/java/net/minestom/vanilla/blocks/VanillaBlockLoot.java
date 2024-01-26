@@ -1,8 +1,5 @@
 package net.minestom.vanilla.blocks;
 
-import com.google.gson.Gson;
-import net.kyori.adventure.text.Component;
-import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.entity.Player;
@@ -151,13 +148,9 @@ public record VanillaBlockLoot(VanillaReimplementation vri, Datapack datapack) {
     private void addEntries(LootContext context, LootTable.Pool.Entry entry, Consumer<LootTable.Pool.Entry.ItemGenerator> out) {
         if (fails(entry.conditions(), context)) return;
         switch (entry.type().toString()) {
-            case "minecraft:item", "minecraft:tag", "minecraft:dynamic", "minecraft:empty" -> {
-                out.accept((LootTable.Pool.Entry.ItemGenerator) entry);
-            }
-            case "minecraft:loot_table" -> {
-                // TODO: recursive loot tables
-                Logger.debug("Recursive loot tables are not yet supported");
-            }
+            case "minecraft:item", "minecraft:tag", "minecraft:dynamic", "minecraft:empty" -> out.accept((LootTable.Pool.Entry.ItemGenerator) entry);
+            case "minecraft:loot_table" -> // TODO: recursive loot tables
+                    Logger.debug("Recursive loot tables are not yet supported");
             case "minecraft:group" -> {
                 LootTable.Pool.Entry.Group group = (LootTable.Pool.Entry.Group) entry;
                 for (LootTable.Pool.Entry groupEntry : group.children()) {

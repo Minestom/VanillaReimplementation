@@ -439,7 +439,7 @@ public class Climate {
                 arrayList.add(new RSubTree<>(arrayList2));
                 arrayList2 = new ArrayList<>();
             }
-            if (arrayList2.size() != 0) {
+            if (!arrayList2.isEmpty()) {
                 arrayList.add(new RSubTree<>(arrayList2));
             }
             return arrayList;

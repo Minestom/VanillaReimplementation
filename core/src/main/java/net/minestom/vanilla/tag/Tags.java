@@ -10,6 +10,7 @@ import org.jglrxavpok.hephaistos.nbt.NBTString;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public interface Tags {
 
@@ -28,7 +29,7 @@ public interface Tags {
             Tag<List<Pattern>> PATTERNS = BLOCKSTATE.path("Patterns") // TODO: Is this correct?
                     .map(nbt -> new Pattern(
                             nbt.getString("Pattern"),
-                            nbt.getInt("Color")
+                            Objects.requireNonNull(nbt.getInt("Color"))
                     ), pattern -> new NBTCompound(Map.of(
                             "Pattern", new NBTString(pattern.pattern()),
                             "Color", new NBTInt(pattern.color())

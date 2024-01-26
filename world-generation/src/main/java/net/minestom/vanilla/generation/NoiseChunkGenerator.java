@@ -50,7 +50,7 @@ public class NoiseChunkGenerator implements ChunkGenerator {
     // Minestom
     private final DimensionType dimensionType;
 
-    public NoiseChunkGenerator(Datapack datapack, @NotNull BiomeSource biomeSource, @NotNull NoiseSettings settings, DimensionType dimensionType) {
+    public NoiseChunkGenerator(@NotNull Datapack datapack, @NotNull BiomeSource biomeSource, @NotNull NoiseSettings settings, DimensionType dimensionType) {
         this.datapack = datapack;
         this.biomeSource = biomeSource;
         this.settings = settings;

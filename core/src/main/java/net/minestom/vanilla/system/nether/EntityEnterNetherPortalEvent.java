@@ -25,7 +25,7 @@ public class EntityEnterNetherPortalEvent implements Event, InstanceEvent, Entit
     }
 
     @Override
-    public Entity getEntity() {
+    public @NotNull Entity getEntity() {
         return entity;
     }
 
@@ -48,7 +48,7 @@ public class EntityEnterNetherPortalEvent implements Event, InstanceEvent, Entit
     }
 
     @Override
-    public @NotNull Instance getInstance() {
+    public Instance getInstance() {
         return null;
     }
 }
