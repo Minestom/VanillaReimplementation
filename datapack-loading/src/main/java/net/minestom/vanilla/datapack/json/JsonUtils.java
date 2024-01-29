@@ -173,6 +173,10 @@ public class JsonUtils {
         return readFunction.apply(reader);
     }
 
+    /**
+     * Note that this method MUTATES the reader.
+     * In order to safely use this method, you should call {@link JsonReader#peekJson()} and use that instead.
+     */
     public static <T> @Nullable T findProperty(JsonReader reader, String property, IoFunction<JsonReader, T> read) throws IOException {
         while (reader.hasNext() && reader.peek() != JsonReader.Token.END_OBJECT) {
             String name = reader.nextName();

@@ -125,25 +125,6 @@ public class Util {
                 | (long) (h);
     }
 
-    public static boolean isPowerOfTwo(int x) {
-        return (x & (x - 1)) == 0;
-    }
-
-    public static long upperPowerOfTwo(long x) {
-        x -= 1;
-        x |= x >> 1;
-        x |= x >> 2;
-        x |= x >> 4;
-        x |= x >> 8;
-        x |= x >> 18;
-        x |= x >> 32;
-        return x + 1;
-    }
-
-    public static BigInteger fromBytes(byte[] digest) {
-        return new BigInteger(1, digest);
-    }
-
     public static <T> @NotNull T jsonRequire(JsonObject root, String key, Function<JsonElement, T> mapper) {
         JsonElement element = root.get(key);
         if (element == null) {
@@ -226,18 +207,6 @@ public class Util {
         return object;
     }
 
-    public static <A> Function<JsonElement, List<A>> jsonReadArray(Function<JsonElement, A> mapper) {
-        return element -> {
-            if (element.isJsonArray()) {
-                return StreamSupport.stream(element.getAsJsonArray().spliterator(), false)
-                        .map(mapper)
-                        .collect(Collectors.toList());
-            } else {
-                return Collections.singletonList(mapper.apply(element));
-            }
-        };
-    }
-
     public static int chunkMinX(Point chunkPos) {
         int chunkX = chunkPos.chunkX();
         return chunkX * Chunk.CHUNK_SIZE_X;
@@ -256,128 +225,17 @@ public class Util {
         return chunkMinZ(chunkPos) + Chunk.CHUNK_SIZE_Z;
     }
 
-    public static byte[] md5(String name) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            return md.digest(name.getBytes(StandardCharsets.UTF_8));
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static Function<JsonElement, Block> jsonVanillaBlock() {
-        return element -> {
-            if (element.isJsonPrimitive()) {
-                String name = element.getAsString();
-                return Block.fromNamespaceId(name);
-            }
-
-            JsonObject object = element.getAsJsonObject();
-            String name = object.get("Name").getAsString();
-            Block block = Block.fromNamespaceId(name);
-            if (block == null) {
-                throw new IllegalArgumentException("Unknown block " + name);
-            }
-            if (object.has("properties")) {
-                JsonObject properties = object.getAsJsonObject("properties");
-                for (var entry : properties.entrySet()) {
-                    String key = entry.getKey();
-                    String value = entry.getValue().getAsString();
-                    block = block.withProperty(key, value);
-                }
-            }
-            return block;
-        };
-    }
-
-    public static int chunkMinY(Chunk chunk) {
-        return chunk.getInstance().getDimensionType().getMinY();
-    }
-
-    public static int chunkMaxY(Chunk chunk) {
-        return chunk.getInstance().getDimensionType().getMaxY();
-    }
-
-    public static boolean jsonIsString(Object obj) {
-        if (obj instanceof String)
-            return true;
-        if (obj instanceof JsonPrimitive primitive)
-            return primitive.isString();
-        return false;
-    }
-
-    public static String jsonToString(Object obj) {
-        if (obj instanceof String str)
-            return str;
-        if (obj instanceof JsonPrimitive primitive)
-            return primitive.getAsString();
-        throw new IllegalArgumentException("Expected a string, got " + obj.getClass().getName());
-    }
-
-    public static @NotNull Map<String, String> noiseParametersJsons() {
-        return allFilesWithin(Paths.get("vanilla_worldgen/worldgen/noise"));
-    }
-
-    public static @NotNull Map<String, String> densityFunctionJsons() {
-        return allFilesWithin(Paths.get("vanilla_worldgen/worldgen/density_function"));
-    }
-
-    public static @NotNull Map<String, String> noiseSettingsJsons() {
-        return allFilesWithin(Paths.get("vanilla_worldgen/worldgen/noise_settings"));
-    }
-
-    private static @NotNull Map<String, String> allFilesWithin(Path path) {
-        try (Stream<Path> stream = Files.walk(path)) {
-            return stream
-                    .filter(Files::isRegularFile)
-                    .filter(p -> p.getFileName().toString().endsWith(".json"))
-                    .collect(Collectors.toMap(
-                            p -> p.toString()
-                                    .substring(path.toString().length() + 1)
-                                    // remove .json
-                                    .replace(".json", "")
-                                    .replace("\\", "/"),
-                            p -> {
-                                try {
-                                    return Files.readString(p);
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }
-                    ));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static @Nullable Double parseDouble(String str) {
-        try {
-            return Double.parseDouble(str);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    private static long cantor(long a, long b) {
-        return (a + b) * (a + b + 1L) / 2L + b;
-    }
-
-    public static long hash(int x, int y, int z) {
-        return cantor(x, cantor(y, z));
-    }
-
     public record Seed(long low, long high) {
         public Seed mixed() {
             return new Seed(staffordMix13(low), staffordMix13(high));
         }
     }
 
-    public static Seed extract128Seed(long $$0) {
-        long $$1 = $$0 ^ 0x6a09e667f3bcc909L;
-        long $$2 = $$1 - 0x61c8864680b583ebL;
-        return new Seed($$1, $$2);
+    public static Seed extract128Seed(long originalSeed) {
+        long low = originalSeed ^ 0x6a09e667f3bcc909L;
+        long high = low - 0x61c8864680b583ebL;
+        return new Seed(low, high);
     }
-
 
     /* David Stafford's (http://zimbry.blogspot.com/2011/09/better-bit-mixing-improving-on.html)
      * "Mix13" variant of the 64-bit finalizer in Austin Appleby's MurmurHash3 algorithm. */

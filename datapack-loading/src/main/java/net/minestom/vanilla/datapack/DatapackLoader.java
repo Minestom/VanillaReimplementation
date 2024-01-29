@@ -118,11 +118,18 @@ public class DatapackLoader {
         register(builder, Noise.class, Noise::fromJson);
         register(builder, NoiseSettings.SurfaceRule.class, NoiseSettings.SurfaceRule::fromJson);
         register(builder, NoiseSettings.SurfaceRule.SurfaceRuleCondition.class, NoiseSettings.SurfaceRule.SurfaceRuleCondition::fromJson);
-        register(builder, NoiseSettings.SurfaceRule.SurfaceRuleCondition.VerticalAnchor.class, NoiseSettings.SurfaceRule.SurfaceRuleCondition.VerticalAnchor::fromJson);
+        register(builder, VerticalAnchor.class, VerticalAnchor::fromJson);
         register(builder, CubicSpline.class, CubicSpline::fromJson);
         register(builder, DensityFunction.OldBlendedNoise.class, DensityFunction.OldBlendedNoise::fromJson);
         register(builder, Tag.TagValue.class, Tag.TagValue::fromJson);
         register(builder, Tag.TagValue.ObjectOrTagReference.class, Tag.TagValue.ObjectOrTagReference::fromJson);
+        register(builder, Biome.Effects.Particle.Options.class, Biome.Effects.Particle.Options::fromJson);
+        register(builder, Biome.Sound.class, Biome.Sound::fromJson);
+        register(builder, Carver.class, Carver::fromJson);
+        register(builder, FloatProvider.class, FloatProvider::fromJson);
+        register(builder, Biome.CarversList.class, Biome.CarversList::fromJson);
+        register(builder, Biome.CarversList.Single.class, Biome.CarversList.Single::fromJson);
+        register(builder, HeightProvider.class, HeightProvider::fromJson);
 
         return builder.build();
     }
@@ -269,16 +276,24 @@ public class DatapackLoader {
     }
 
     private static <T> void register(Moshi.Builder builder, Class<T> clazz, IoFunction<JsonReader, T> reader) {
-        register(builder, clazz, new JsonAdapter<>() {
-            @Override
-            public T fromJson(JsonReader jsonReader) throws IOException {
-                return reader.apply(jsonReader);
-            }
+        register(builder, clazz, new IoJsonAdaptor<>(reader));
+    }
 
-            @Override
-            public void toJson(JsonWriter writer, T value) throws IOException {
-            }
-        });
+    private static class IoJsonAdaptor <T> extends JsonAdapter<T> {
+        private final IoFunction<JsonReader, T> reader;
+
+        public IoJsonAdaptor(IoFunction<JsonReader, T> reader) {
+            this.reader = reader;
+        }
+
+        @Override
+        public T fromJson(JsonReader jsonReader) throws IOException {
+            return reader.apply(jsonReader);
+        }
+
+        @Override
+        public void toJson(JsonWriter writer, T value) throws IOException {
+        }
     }
 
     public interface IoFunction<T, R> {
@@ -314,13 +329,13 @@ public class DatapackLoader {
     }
 
     private static UUID uuidFromJson(JsonReader reader) throws IOException {
-        return null; // TODO: UUID from json
+        throw new UnsupportedOperationException("UUIDs are not supported yet");
     }
 
     private static Block blockFromJson(JsonReader reader) throws IOException {
         return JsonUtils.typeMapMapped(reader, Map.of(
-                JsonReader.Token.STRING, json -> Block.fromNamespaceId(json.nextString())
-                // TODO: Add support for block states?
+                JsonReader.Token.STRING, json -> Block.fromNamespaceId(json.nextString()),
+                JsonReader.Token.BEGIN_OBJECT, json -> DatapackLoader.moshi(BlockState.class).apply(json).toMinestom()
         ));
     }
 
