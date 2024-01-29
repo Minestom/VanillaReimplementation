@@ -27,7 +27,7 @@ import net.minestom.server.recipe.RecipeManager;
 import net.minestom.server.tag.Tag;
 import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
 import net.minestom.vanilla.blocks.VanillaBlocks;
-import net.minestom.vanilla.blocks.behaviours.chestlike.BlockContainer;
+import net.minestom.vanilla.blocks.behaviours.chestlike.BlockItems;
 import net.minestom.vanilla.inventory.InventoryManipulation;
 import net.minestom.vanilla.tag.Tags.Blocks.Campfire;
 
@@ -43,7 +43,7 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
     }
 
     public List<ItemStack> getItems(Instance instance, Point pos) {
-        return BlockContainer.from(instance, pos, CONTAINER_SIZE, Campfire.ITEMS).itemStacks();
+        return BlockItems.from(instance, pos, CONTAINER_SIZE).itemStacks();
     }
 
     public @NotNull List<Integer> getCookingProgressOrDefault(Block block) {
@@ -57,8 +57,8 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
     }
 
     public @NotNull Block appendItem(Instance instance, Point pos, @NotNull CampfireCookingRecipe recipe) {
-        BlockContainer blockContainer = BlockContainer.from(instance, pos, CONTAINER_SIZE, Campfire.ITEMS);
-        List<ItemStack> items = blockContainer.itemStacks();
+        BlockItems blockItems = BlockItems.from(instance, pos, CONTAINER_SIZE);
+        List<ItemStack> items = blockItems.itemStacks();
         OptionalInt freeSlot = findFirstFreeSlot(items);
         if (freeSlot.isEmpty())
             throw new IllegalArgumentException("Campfire doesn't have free slot for appending an item in CampfireBehaviour#appendItem");
@@ -66,7 +66,7 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
         if (ingredients == null || ingredients.size() != 1)
             throw new IllegalArgumentException("CampfireCookingRecipe has invalid ingredients in CampfireBehaviour#appendItem.");
         int index = freeSlot.getAsInt();
-        Block block = blockContainer.setItemStack(index, ingredients.get(0));
+        Block block = blockItems.setItemStack(index, ingredients.get(0));
         return withCookingProgress(block, index, recipe.getCookingTime());
     }
 
@@ -110,7 +110,7 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
             }
 
             // Different block, remove campfire
-            List<ItemStack> items = BlockContainer.remove(instance, pos);
+            List<ItemStack> items = BlockItems.remove(instance, pos);
 
             for (ItemStack item : items) {
 
