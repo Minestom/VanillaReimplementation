@@ -5,7 +5,7 @@ import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.json.Optional;
 import net.minestom.vanilla.datapack.trims.TrimMaterial;
 import net.minestom.vanilla.datapack.trims.TrimPattern;
-import net.minestom.vanilla.datapack.worldgen.DensityFunction;
+import net.minestom.vanilla.datapack.worldgen.*;
 import net.minestom.vanilla.datapack.worldgen.noise.Noise;
 import net.minestom.vanilla.files.ByteArray;
 import net.minestom.vanilla.files.FileSystem;
@@ -16,8 +16,6 @@ import net.minestom.vanilla.datapack.loot.LootTable;
 import net.minestom.vanilla.datapack.loot.function.LootFunction;
 import net.minestom.vanilla.datapack.loot.function.Predicate;
 import net.minestom.vanilla.datapack.recipe.Recipe;
-import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
-import net.minestom.vanilla.datapack.worldgen.Structure;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -154,8 +152,8 @@ public interface Datapack {
     }
 
     record WorldGen(
-            FileSystem<ByteArray> biome,
-            FileSystem<ByteArray> configured_carver,
+            FileSystem<Biome> biome,
+            FileSystem<Carver> configured_carver,
             FileSystem<ByteArray> configured_feature,
             FileSystem<DensityFunction> density_function,
             FileSystem<ByteArray> flat_level_generator_preset,
@@ -171,8 +169,8 @@ public interface Datapack {
             ) {
         public static WorldGen from(FileSystem<ByteArray> worldgen) {
             return new WorldGen(
-                    worldgen.folder("biome"),
-                    worldgen.folder("configured_carver"),
+                    DatapackLoader.parseJsonFolder(worldgen, "biome", DatapackLoader.adaptor(Biome.class)),
+                    DatapackLoader.parseJsonFolder(worldgen, "configured_carver", DatapackLoader.adaptor(Carver.class)),
                     worldgen.folder("configured_feature"),
                     DatapackLoader.parseJsonFolder(worldgen, "density_function", DatapackLoader.adaptor(DensityFunction.class)),
                     worldgen.folder("flat_level_generator_preset"),

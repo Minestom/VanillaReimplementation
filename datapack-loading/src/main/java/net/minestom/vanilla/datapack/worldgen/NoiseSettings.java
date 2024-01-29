@@ -163,7 +163,7 @@ public record NoiseSettings(
 
         Pos2Block apply(Context context);
 
-        interface Context {
+        interface Context extends VerticalAnchor.Context {
             NamespaceID biome();
 
             int minY();
@@ -354,9 +354,8 @@ public record NoiseSettings(
 
                 @Override
                 public boolean test(SurfaceRule.Context context) {
-                    VerticalAnchor.Context vaContext = new VerticalAnchor.Context(context.minY(), context.maxY());
-                    int trueAtAndBelowY = true_at_and_below().apply(vaContext);
-                    int falseAtAndAboveY = false_at_and_above().apply(vaContext);
+                    int trueAtAndBelowY = true_at_and_below().apply(context);
+                    int falseAtAndAboveY = false_at_and_above().apply(context);
                     if (context.blockY() <= trueAtAndBelowY) {
                         return true;
                     }
@@ -369,50 +368,6 @@ public record NoiseSettings(
                 }
             }
 
-            sealed interface VerticalAnchor {
-
-                record Context(int minY, int maxY) {
-                }
-
-                int apply(Context context);
-
-                static VerticalAnchor fromJson(JsonReader reader) throws IOException {
-                    // Vertical anchor is a special case...
-                    // thx mojang!
-                    reader.beginObject();
-                    String type = reader.nextName();
-                    int value = reader.nextInt();
-                    reader.endObject();
-                    return switch (type) {
-                        case "absolute" -> new Absolute(value);
-                        case "above_bottom" -> new AboveBottom(value);
-                        case "below_top" -> new BelowTop(value);
-                        default -> throw new IllegalStateException("Unexpected value: " + type);
-                    };
-                }
-
-                record Absolute(int value) implements VerticalAnchor {
-                    @Override
-                    public int apply(Context context) {
-                        return value;
-                    }
-                }
-
-                record AboveBottom(int offset) implements VerticalAnchor {
-                    @Override
-                    public int apply(Context context) {
-                        return context.minY() + offset;
-                    }
-                }
-
-                record BelowTop(int offset) implements VerticalAnchor {
-                    @Override
-                    public int apply(Context context) {
-                        return context.maxY() - offset;
-                    }
-                }
-            }
-
             record YAbove(VerticalAnchor anchor, int surface_depth_multiplier, boolean add_stone_depth) implements SurfaceRuleCondition {
                 @Override
                 public NamespaceID type() {
@@ -421,9 +376,8 @@ public record NoiseSettings(
 
                 @Override
                 public boolean test(SurfaceRule.Context context) {
-                    VerticalAnchor.Context vaContext = new VerticalAnchor.Context(context.minY(), context.maxY());
                     int stoneDepth = add_stone_depth() ? context.stoneDepthAbove() : 0;
-                    return context.blockY() + stoneDepth >= anchor.apply(vaContext) + context.surfaceDepth() * surface_depth_multiplier();
+                    return context.blockY() + stoneDepth >= anchor.apply(context) + context.surfaceDepth() * surface_depth_multiplier();
                 }
             }
 
