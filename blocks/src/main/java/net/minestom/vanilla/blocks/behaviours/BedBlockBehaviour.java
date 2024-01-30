@@ -84,7 +84,7 @@ public class BedBlockBehaviour extends VanillaBlockBehaviour {
 //            }
 
             // Make player sleep
-            PlayerMeta meta = player.getEntityMeta();
+            PlayerMeta meta = player.getPlayerMeta();
             meta.setBedInWhichSleepingPosition(pos);
             meta.setPose(Entity.Pose.SLEEPING);
 
