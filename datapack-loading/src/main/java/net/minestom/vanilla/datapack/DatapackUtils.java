@@ -1,19 +1,14 @@
 package net.minestom.vanilla.datapack;
 
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.vanilla.datapack.trims.TrimMaterial;
-import net.minestom.vanilla.datapack.trims.TrimPattern;
 import net.minestom.vanilla.datapack.worldgen.DensityFunction;
 import net.minestom.vanilla.datapack.worldgen.noise.Noise;
 import net.minestom.vanilla.files.FileSystem;
-import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.*;
-import org.jglrxavpok.hephaistos.parser.SNBTParser;
 
-import java.io.StringReader;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -25,68 +20,6 @@ public class DatapackUtils {
 
     public static Optional<DensityFunction> findDensityFunction(Datapack datapack, String file) {
         return findInJsonData(file, datapack, data -> data.world_gen().density_function());
-    }
-
-    private static Map<String, NBTString> getOverrideTrimMaterials(TrimMaterial trimMaterial) {
-        Map<String,NBTString> map = new HashMap<>();
-        if (trimMaterial.override_armor_materials() == null) return map;
-        trimMaterial.override_armor_materials().forEach((namespaceID, s) -> {
-            map.put(namespaceID.path(), NBT.String(s));
-        });
-        return map;
-    }
-
-    public static List<NBTCompound> getTrimMaterials(Datapack datapack) {
-        List<NBTCompound> output = new ArrayList<>();
-        datapack.namespacedData().forEach((name, namespacedData) -> {
-            AtomicInteger i = new AtomicInteger(0);
-            namespacedData.trim_material().files().forEach(fileName -> {
-                TrimMaterial trimMaterial = namespacedData.trim_material().file(fileName);
-                try {
-                    output.add(NBT.Compound(Map.of(
-                            "name", NBT.String(fileName.split("\\.")[0]),
-                            "id", NBT.Int(i.getAndIncrement()),
-                            "element", NBT.Compound(Map.of(
-                                    "asset_name", NBT.String(trimMaterial.asset_name()),
-                                    "ingredient", NBT.String(trimMaterial.ingredient().asString()),
-                                    "item_model_index", NBT.Float(trimMaterial.item_model_index()),
-                                    "override_armor_materials", NBT.Compound(getOverrideTrimMaterials(trimMaterial)),
-                                    "description", new SNBTParser(new StringReader(GsonComponentSerializer.gson().serialize(trimMaterial.description()))).parse()
-                            ))
-                    )));
-                } catch (NBTException e) {
-                    throw new RuntimeException(e);
-                }
-
-            });
-        });
-        return output;
-    }
-
-    public static List<NBTCompound> getTrimPatterns(Datapack datapack) {
-        List<NBTCompound> output = new ArrayList<>();
-        datapack.namespacedData().forEach((name, namespacedData) -> {
-            AtomicInteger i = new AtomicInteger(0);
-            namespacedData.trim_pattern().files().forEach(fileName -> {
-                TrimPattern trimPattern = namespacedData.trim_pattern().file(fileName);
-                try {
-                    output.add(NBT.Compound(Map.of(
-                            "name", NBT.String(fileName.split("\\.")[0]),
-                            "id", NBT.Int(i.getAndIncrement()),
-                            "element", NBT.Compound(Map.of(
-                                    "asset_id", NBT.String(trimPattern.asset_id().asString()),
-                                    "template_item", NBT.String(trimPattern.template_item().asString()),
-                                    "decal", NBT.Byte(trimPattern.decal() == Boolean.TRUE ? 0 : 1),
-                                    "description", new SNBTParser(new StringReader(GsonComponentSerializer.gson().serialize(trimPattern.description()))).parse()
-                            ))
-                    )));
-                } catch (NBTException e) {
-                    throw new RuntimeException(e);
-                }
-
-            });
-        });
-        return output;
     }
 
     public static Set<NamespaceID> findTags(Datapack datapack, String tagType, NamespaceID namespaceID) {

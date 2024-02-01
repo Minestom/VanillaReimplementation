@@ -8,6 +8,8 @@ import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.armor.TrimMaterial;
+import net.minestom.server.item.armor.TrimPattern;
 import net.minestom.server.tag.Tag;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.datapack.Datapack;
@@ -16,7 +18,6 @@ import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.nbt.NBT;
 
-import java.lang.reflect.Field;
 import java.util.Map;
 
 public record SmithingInventoryRecipes(Datapack datapack, VanillaReimplementation vri) {
@@ -27,17 +28,6 @@ public record SmithingInventoryRecipes(Datapack datapack, VanillaReimplementatio
         EventNode<Event> node = EventNode.all("vri:smithing-inventory-recipes");
 
         // TODO: shift-click mass crafting and take out.
-
-        {
-            // TODO: REMOVE THIS after minestom-ce is updated to have 4 slots in smithing table inventory.
-            try {
-                Field size = InventoryType.class.getDeclaredField("size");
-                size.setAccessible(true);
-                size.setInt(InventoryType.SMITHING, 4);
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
 
         CraftingUtils.addOutputSlotEventHandler(node, Smithing.OUTPUT, InventoryType.SMITHING);
 
@@ -69,19 +59,22 @@ public record SmithingInventoryRecipes(Datapack datapack, VanillaReimplementatio
                 Smithing.OUTPUT.set(inv,Smithing.BASE.get(inv).withMaterial(transform.result().item()));
             }
             else if (recipe instanceof Recipe.SmithingTrim trim) {
-                String trimName = getTrimPatternFromTemplate(Smithing.TEMPLATE.get(inv).material());
-                if (trimName == null) {
-                    Logger.warn("Can't find the trim name for %s while a recipe was found! why is this happening?".formatted(
+                String trimPatternName = getTrimPatternFromTemplate(Smithing.TEMPLATE.get(inv).material());
+                String trimMaterialName = getTrimMaterialFromIngredient(Smithing.ADDITION.get(inv).material());
+                if (trimPatternName == null || trimMaterialName == null) {
+                    Logger.warn("Can't find the trim data for %s while a recipe was found! why is this happening?".formatted(
                             Smithing.TEMPLATE.get(inv).material().name()
                     ));
                     return;
                 }
                 Smithing.OUTPUT.set(inv, Smithing.BASE.get(inv).withTag(trimTag,
                         NBT.Compound(Map.of(
-                                "material", NBT.String(Smithing.ADDITION.get(inv).material().name()),
-                                "pattern", NBT.String(trimName)
-                        )))
-                );
+                                "material",
+                                    NBT.String(trimMaterialName),
+                                    "pattern",
+                                    NBT.String(trimPatternName)
+                        ))
+                ));
             }
 
         });
@@ -89,9 +82,19 @@ public record SmithingInventoryRecipes(Datapack datapack, VanillaReimplementatio
         return node;
     }
 
+    private @Nullable String getTrimMaterialFromIngredient(Material material) {
+        TrimMaterial trimMaterial = TrimMaterial.fromIngredient(material);
+        if (trimMaterial == null) {
+            return null;
+        }
+        return trimMaterial.name();
+    }
     private @Nullable String getTrimPatternFromTemplate(Material template) {
-        // TODO: actually load trim patterns
-        return template.namespace().domain() + ":" + template.namespace().path().split("_")[0];
+        TrimPattern trimPattern = TrimPattern.fromTemplate(template);
+        if (trimPattern == null) {
+            return null;
+        }
+        return trimPattern.name();
     }
 
     private @Nullable Recipe.Smithing getRecipe(Material template, Material base, Material addition) {
@@ -110,7 +113,9 @@ public record SmithingInventoryRecipes(Datapack datapack, VanillaReimplementatio
                             utils.ingredientToMaterials(smithing.template()).contains(template) &&
                             utils.ingredientToMaterials(smithing.base()).contains(base) &&
                             utils.ingredientToMaterials(smithing.addition()).contains(addition)
-                    ) return smithing;
+                    ) {
+                        return smithing;
+                    }
                 }
             }
         }
