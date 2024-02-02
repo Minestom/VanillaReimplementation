@@ -235,7 +235,7 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
 
         for (Feature feature : sortedByDependencies) {
             if (!predicate.test(feature)) {
-                Logger.info("Skipping feature %s...%n", feature.namespaceId());
+                Logger.info("Skipping feature %s...", feature.namespaceId());
                 continue;
             }
 
