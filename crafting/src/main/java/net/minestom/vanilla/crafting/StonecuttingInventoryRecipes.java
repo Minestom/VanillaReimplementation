@@ -1,7 +1,7 @@
 package net.minestom.vanilla.crafting;
 
 import dev.goldenstack.window.InventoryView;
-import dev.goldenstack.window.Views;
+import dev.goldenstack.window.v1_19.Views;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;

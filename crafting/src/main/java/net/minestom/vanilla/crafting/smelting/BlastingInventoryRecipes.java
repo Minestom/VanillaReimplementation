@@ -1,6 +1,6 @@
 package net.minestom.vanilla.crafting.smelting;
 
-import dev.goldenstack.window.Views;
+import dev.goldenstack.window.v1_19.Views;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.block.Block;

@@ -1,7 +1,7 @@
 package net.minestom.vanilla.crafting;
 
 import dev.goldenstack.window.InventoryView;
-import dev.goldenstack.window.Views;
+import dev.goldenstack.window.v1_19.Views;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryClickEvent;
@@ -27,10 +27,10 @@ public record CraftingInventoryRecipes(Datapack datapack, VanillaReimplementatio
             Inventory inv = event.getInventory();
             if (event.getInventory().getInventoryType() != InventoryType.CRAFTING) return;
 
-            var table = Views.craftingTable();
+            var table = Views.CRAFTING_TABLE;
 
             InventoryView input = table.input();
-            InventoryView.Singular output = table.result();
+            InventoryView.Singular output = table.output();
 
             // if we are clicking on the output slot, remove one from all of the input slots
             if (output.isValidExternal(slot)) {
@@ -56,7 +56,7 @@ public record CraftingInventoryRecipes(Datapack datapack, VanillaReimplementatio
             output.set(inv, Objects.requireNonNullElse(result, ItemStack.AIR));
         });
 
-        CraftingUtils.addOutputSlotEventHandler(node, Views.craftingTable().result(), InventoryType.CRAFTING);
+        CraftingUtils.addOutputSlotEventHandler(node, Views.craftingTable().output(), InventoryType.CRAFTING);
 
         return node;
     }
