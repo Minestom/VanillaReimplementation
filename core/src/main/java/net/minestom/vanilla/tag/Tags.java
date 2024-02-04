@@ -66,7 +66,7 @@ public interface Tags {
                                     .toList());
 
             // The number of ticks that the campfire has been cooking for, for each of the 4 slots, 0 means end of the cooking
-            Tag<List<Integer>> COOKING_PROGRESS = Tag.Integer("vri:campfire:cooking_progress").defaultValue(0).list();
+            Tag<List<Integer>> COOKING_PROGRESS = Tag.Integer("vri:campfire:cooking_progress").list().defaultValue(List.of(0, 0, 0, 0));
 
         }
         interface Smelting {
