@@ -1,6 +1,5 @@
 package net.minestom.vanilla.commands;
 
-import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.CommandSender;
@@ -32,7 +31,7 @@ public class GamemodeCommand extends Command {
         gamemode.setCallback((sender, exception) -> sender.sendMessage(
                 Component.text("Invalid gamemode ", NamedTextColor.RED)
                         .append(Component.text(exception.getInput(), NamedTextColor.WHITE))
-                        .append(Component.text("!")), MessageType.SYSTEM));
+                        .append(Component.text("!"))));
 
         ArgumentEntity player = ArgumentType.Entity("targets").onlyPlayers(true);
 
@@ -40,19 +39,19 @@ public class GamemodeCommand extends Command {
         setDefaultExecutor((sender, context) -> {
             String commandName = context.getCommandName();
 
-            sender.sendMessage(Component.text("Usage: /" + commandName + " <gamemode> [targets]", NamedTextColor.RED), MessageType.SYSTEM);
+            sender.sendMessage(Component.text("Usage: /" + commandName + " <gamemode> [targets]", NamedTextColor.RED));
         });
 
         //Command Syntax for /gamemode <gamemode>
         addSyntax((sender, context) -> {
             //Limit execution to players only
-            if (!sender.isPlayer()) {
+            if (!(sender instanceof Player playerSender)) {
                 sender.sendMessage(Component.text("Please run this command in-game.", NamedTextColor.RED));
                 return;
             }
 
             //Check permission, this could be replaced with hasPermission
-            if (sender.asPlayer().getPermissionLevel() < 2) {
+            if (playerSender.getPermissionLevel() < 2) {
                 sender.sendMessage(Component.text("You don't have permission to use this command.", NamedTextColor.RED));
                 return;
             }
@@ -60,14 +59,14 @@ public class GamemodeCommand extends Command {
             GameMode mode = context.get(gamemode);
 
             //Set the gamemode for the sender
-            executeSelf(sender.asPlayer(), mode);
+            executeSelf(playerSender, mode);
         }, gamemode);
 
         //Command Syntax for /gamemode <gamemode> [targets]
         addSyntax((sender, context) -> {
             //Check permission for players only
             //This allows the console to use this syntax too
-            if (sender.isPlayer() && sender.asPlayer().getPermissionLevel() < 2) {
+            if ((sender instanceof Player playerSender) && playerSender.getPermissionLevel() < 2) {
                 sender.sendMessage(Component.text("You don't have permission to use this command.", NamedTextColor.RED));
                 return;
             }
@@ -85,17 +84,17 @@ public class GamemodeCommand extends Command {
      * notifies them (and the sender) in the chat.
      */
     private void executeOthers(CommandSender sender, GameMode mode, List<Entity> entities) {
-        if (entities.size() == 0) {
+        if (entities.isEmpty()) {
             //If there are no players that could be modified, display an error message
-            if (sender.isPlayer())
-                sender.sendMessage(Component.translatable("argument.entity.notfound.player", NamedTextColor.RED), MessageType.SYSTEM);
-            else sender.sendMessage(Component.text("No player was found", NamedTextColor.RED), MessageType.SYSTEM);
+            if (sender instanceof Player playerSender)
+                sender.sendMessage(Component.translatable("argument.entity.notfound.player", NamedTextColor.RED));
+            else sender.sendMessage(Component.text("No player was found", NamedTextColor.RED));
         } else for (Entity entity : entities) {
             if (entity instanceof Player p) {
                 if (p == sender) {
                     //If the player is the same as the sender, call
                     //executeSelf to display one message instead of two
-                    executeSelf(sender.asPlayer(), mode);
+                    executeSelf(p, mode);
                 } else {
                     p.setGameMode(mode);
 
@@ -104,8 +103,8 @@ public class GamemodeCommand extends Command {
                     Component playerName = p.getDisplayName() == null ? p.getName() : p.getDisplayName();
 
                     //Send a message to the changed player and the sender
-                    p.sendMessage(Component.translatable("gameMode.changed", gamemodeComponent), MessageType.SYSTEM);
-                    sender.sendMessage(Component.translatable("commands.gamemode.success.other", playerName, gamemodeComponent), MessageType.SYSTEM);
+                    p.sendMessage(Component.translatable("gameMode.changed", gamemodeComponent));
+                    sender.sendMessage(Component.translatable("commands.gamemode.success.other", playerName, gamemodeComponent));
                 }
             }
         }
@@ -124,6 +123,6 @@ public class GamemodeCommand extends Command {
         Component gamemodeComponent = Component.translatable(gamemodeString);
 
         //Send the translated message to the player.
-        sender.sendMessage(Component.translatable("commands.gamemode.success.self", gamemodeComponent), MessageType.SYSTEM);
+        sender.sendMessage(Component.translatable("commands.gamemode.success.self", gamemodeComponent));
     }
 }

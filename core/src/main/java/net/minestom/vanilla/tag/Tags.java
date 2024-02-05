@@ -12,6 +12,7 @@ import org.jglrxavpok.hephaistos.nbt.NBTString;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -32,7 +33,7 @@ public interface Tags {
             Tag<List<Pattern>> PATTERNS = BLOCKSTATE.path("Patterns") // TODO: Is this correct?
                     .map(nbt -> new Pattern(
                             nbt.getString("Pattern"),
-                            nbt.getInt("Color")
+                            Objects.requireNonNull(nbt.getInt("Color"))
                     ), pattern -> new NBTCompound(Map.of(
                             "Pattern", new NBTString(pattern.pattern()),
                             "Color", new NBTInt(pattern.color())
@@ -65,7 +66,7 @@ public interface Tags {
                                     .toList());
 
             // The number of ticks that the campfire has been cooking for, for each of the 4 slots, 0 means end of the cooking
-            Tag<List<Integer>> COOKING_PROGRESS = Tag.Integer("vri:campfire:cooking_progress").defaultValue(0).list();
+            Tag<List<Integer>> COOKING_PROGRESS = Tag.Integer("vri:campfire:cooking_progress").list().defaultValue(List.of(0, 0, 0, 0));
 
         }
         interface Smelting {

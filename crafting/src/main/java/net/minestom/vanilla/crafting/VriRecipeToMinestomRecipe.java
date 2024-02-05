@@ -5,7 +5,6 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.DeclareRecipesPacket;
 import net.minestom.server.recipe.*;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackUtils;
 import net.minestom.vanilla.datapack.recipe.Recipe;
@@ -15,10 +14,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 record VriRecipeToMinestomRecipe(Datapack datapack) {
 
@@ -31,27 +28,23 @@ record VriRecipeToMinestomRecipe(Datapack datapack) {
         String group = Objects.requireNonNullElseGet(vr.group(), () -> "core" + ThreadLocalRandom.current().nextInt());
 
         return switch (vr.type().value()) {
-            case "blasting" -> use(vr, (Recipe.Blasting recipe) -> {
-                return new BlastingRecipe(id, group, RecipeCategory.Cooking.MISC, ItemStack.of(recipe.result()), (float) recipe.experience(), recipe.cookingTime() == null ? 100 : recipe.cookingTime()) {
-                    {
-                        this.setIngredient(toMinestom(recipe.ingredient()));
-                    }
-                    @Override
-                    public boolean shouldShow(@NotNull Player player) {
-                        return shouldShow.test(player);
-                    }
-                };
+            case "blasting" -> use(vr, (Recipe.Blasting recipe) -> new BlastingRecipe(id, group, RecipeCategory.Cooking.MISC, ItemStack.of(recipe.result()), (float) recipe.experience(), recipe.cookingTime() == null ? 100 : recipe.cookingTime()) {
+                {
+                    this.setIngredient(toMinestom(recipe.ingredient()));
+                }
+                @Override
+                public boolean shouldShow(@NotNull Player player) {
+                    return shouldShow.test(player);
+                }
             });
-            case "campfire_cooking" -> use(vr, (Recipe.CampfireCooking recipe) -> {
-                return new CampfireCookingRecipe(id, group, RecipeCategory.Cooking.MISC, toItemstack(recipe.result()), (float) recipe.experience(), recipe.cookingTime() == null ? 100 : recipe.cookingTime()) {
-                    {
-                        this.setIngredient(toMinestom(recipe.ingredient()));
-                    }
-                    @Override
-                    public boolean shouldShow(@NotNull Player player) {
-                        return shouldShow.test(player);
-                    }
-                };
+            case "campfire_cooking" -> use(vr, (Recipe.CampfireCooking recipe) -> new CampfireCookingRecipe(id, group, RecipeCategory.Cooking.MISC, toItemstack(recipe.result()), (float) recipe.experience(), recipe.cookingTime() == null ? 100 : recipe.cookingTime()) {
+                {
+                    this.setIngredient(toMinestom(recipe.ingredient()));
+                }
+                @Override
+                public boolean shouldShow(@NotNull Player player) {
+                    return shouldShow.test(player);
+                }
             });
             case "crafting_shaped" -> use(vr, (Recipe.Shaped recipe) -> {
                 int minRow = Integer.MAX_VALUE;
@@ -123,51 +116,41 @@ record VriRecipeToMinestomRecipe(Datapack datapack) {
                     }
                 };
             });
-            case "smelting" -> use(vr, (Recipe.Smelting recipe) -> {
-                return new SmeltingRecipe(id, group, RecipeCategory.Cooking.MISC, toItemstack(recipe.result()), (float) recipe.experience(), recipe.cookingTime() == null ? 100 : recipe.cookingTime()) {
-                    {
-                        this.setIngredient(toMinestom(recipe.ingredient()));
-                    }
-                    @Override
-                    public boolean shouldShow(@NotNull Player player) {
-                        return shouldShow.test(player);
-                    }
-                };
+            case "smelting" -> use(vr, (Recipe.Smelting recipe) -> new SmeltingRecipe(id, group, RecipeCategory.Cooking.MISC, toItemstack(recipe.result()), (float) recipe.experience(), recipe.cookingTime() == null ? 100 : recipe.cookingTime()) {
+                {
+                    this.setIngredient(toMinestom(recipe.ingredient()));
+                }
+                @Override
+                public boolean shouldShow(@NotNull Player player) {
+                    return shouldShow.test(player);
+                }
             });
-            case "smoking" -> use(vr, (Recipe.Smoking recipe) -> {
-                return new SmokingRecipe(id, group, RecipeCategory.Cooking.MISC, toItemstack(recipe.result()), (float) recipe.experience(), recipe.cookingTime() == null ? 100 : recipe.cookingTime()) {
-                    {
-                        this.setIngredient(toMinestom(recipe.ingredient()));
-                    }
-                    @Override
-                    public boolean shouldShow(@NotNull Player player) {
-                        return shouldShow.test(player);
-                    }
-                };
+            case "smoking" -> use(vr, (Recipe.Smoking recipe) -> new SmokingRecipe(id, group, RecipeCategory.Cooking.MISC, toItemstack(recipe.result()), (float) recipe.experience(), recipe.cookingTime() == null ? 100 : recipe.cookingTime()) {
+                {
+                    this.setIngredient(toMinestom(recipe.ingredient()));
+                }
+                @Override
+                public boolean shouldShow(@NotNull Player player) {
+                    return shouldShow.test(player);
+                }
             });
-            case "stonecutting" -> use(vr, (Recipe.Stonecutting recipe) -> {
-                return new StonecutterRecipe(id, group, toMinestom(recipe.ingredient()), ItemStack.of(recipe.result(), recipe.count())) {
-                    @Override
-                    public boolean shouldShow(@NotNull Player player) {
-                        return shouldShow.test(player);
-                    }
-                };
+            case "stonecutting" -> use(vr, (Recipe.Stonecutting recipe) -> new StonecutterRecipe(id, group, toMinestom(recipe.ingredient()), ItemStack.of(recipe.result(), recipe.count())) {
+                @Override
+                public boolean shouldShow(@NotNull Player player) {
+                    return shouldShow.test(player);
+                }
             });
-            case "smithing_transform" -> use(vr, (Recipe.SmithingTransform recipe) -> {
-                return new SmithingTransformRecipe(id, toMinestomIngredient(recipe.template()), toMinestomIngredient(recipe.base()), toMinestomIngredient(recipe.addition()), toItemstack(recipe.result())) {
-                    @Override
-                    public boolean shouldShow(@NotNull Player player) {
-                        return shouldShow.test(player);
-                    }
-                };
+            case "smithing_transform" -> use(vr, (Recipe.SmithingTransform recipe) -> new SmithingTransformRecipe(id, toMinestomIngredient(recipe.template()), toMinestomIngredient(recipe.base()), toMinestomIngredient(recipe.addition()), toItemstack(recipe.result())) {
+                @Override
+                public boolean shouldShow(@NotNull Player player) {
+                    return shouldShow.test(player);
+                }
             });
-            case "smithing_trim" -> use(vr, (Recipe.SmithingTrim recipe) -> {
-                return new SmithingTrimRecipe(id, toMinestomIngredient(recipe.template()), toMinestomIngredient(recipe.base()), toMinestomIngredient(recipe.addition())) {
-                    @Override
-                    public boolean shouldShow(@NotNull Player player) {
-                        return shouldShow.test(player);
-                    }
-                };
+            case "smithing_trim" -> use(vr, (Recipe.SmithingTrim recipe) -> new SmithingTrimRecipe(id, toMinestomIngredient(recipe.template()), toMinestomIngredient(recipe.base()), toMinestomIngredient(recipe.addition())) {
+                @Override
+                public boolean shouldShow(@NotNull Player player) {
+                    return shouldShow.test(player);
+                }
             });
             case "native" -> {
                 Logger.warn("Native recipes are not supported yet, skipping.");

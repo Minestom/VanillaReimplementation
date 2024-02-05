@@ -251,10 +251,12 @@ public interface Recipe {
         }
     }
 
-    record Smithing(String group, Ingredient.Single base, Ingredient.Single addition,
-                    Ingredient.Item result) implements Recipe {
-        @Override
-        public @NotNull NamespaceID type() {
+    public interface Smithing extends Recipe {
+
+        Ingredient.Single template();
+        Ingredient.Single base();
+        Ingredient.Single addition();
+        default @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:smithing");
         }
     }
@@ -276,7 +278,7 @@ public interface Recipe {
     }
 
     record SmithingTrim(String group, Ingredient.Single base, Ingredient.Single addition, Result result,
-                        Ingredient.Single template) implements Recipe {
+                        Ingredient.Single template) implements Smithing {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:smithing_trim");
@@ -284,7 +286,7 @@ public interface Recipe {
     }
 
     record SmithingTransform(String group, Ingredient.Single base, Ingredient.Single addition, Result result,
-                             Ingredient.Single template) implements Recipe {
+                             Ingredient.Single template) implements Smithing {
         @Override
         public @NotNull NamespaceID type() {
             return NamespaceID.from("minecraft:smithing_transform");

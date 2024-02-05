@@ -1,7 +1,6 @@
 package net.minestom.vanilla.commands;
 
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.instancemeta.InstanceMetaFeature;
 import org.jetbrains.annotations.NotNull;

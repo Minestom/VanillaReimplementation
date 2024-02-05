@@ -30,6 +30,7 @@ import net.minestom.vanilla.datapack.loot.function.LootFunction;
 import net.minestom.vanilla.datapack.loot.function.Predicate;
 import net.minestom.vanilla.datapack.number.NumberProvider;
 import net.minestom.vanilla.datapack.recipe.Recipe;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTException;
@@ -65,12 +66,12 @@ public class DatapackLoader {
             Type elementType = Types.collectionElementType(type, Collection.class);
             return new JsonAdapter<JsonUtils.SingleOrList<?>>() {
                 @Override
-                public JsonUtils.SingleOrList<?> fromJson(JsonReader reader) throws IOException {
+                public JsonUtils.SingleOrList<?> fromJson(@NotNull JsonReader reader) throws IOException {
                     return JsonUtils.SingleOrList.fromJson(elementType, reader);
                 }
 
                 @Override
-                public void toJson(JsonWriter writer, JsonUtils.SingleOrList<?> value) throws IOException {
+                public void toJson(@NotNull JsonWriter writer, JsonUtils.SingleOrList<?> value) {
                 }
             };
         });

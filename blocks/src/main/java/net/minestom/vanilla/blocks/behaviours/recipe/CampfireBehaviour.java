@@ -10,6 +10,7 @@ import java.util.OptionalInt;
 import java.util.Random;
 import java.util.stream.IntStream;
 
+import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import net.minestom.server.coordinate.Point;
@@ -42,38 +43,42 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
         this.recipeManager = context.vri().process().recipe();
     }
 
-    public List<ItemStack> getItems(Instance instance, Point pos) {
-        return BlockItems.from(instance, pos, CONTAINER_SIZE).itemStacks();
-    }
-
-    public @NotNull List<Integer> getCookingProgressOrDefault(Block block) {
-        return new ArrayList<>(Optional.ofNullable(block.getTag(Campfire.COOKING_PROGRESS)).orElse(Collections.nCopies(CONTAINER_SIZE, 0)));
+    public BlockItems getBlockItems(Block block) {
+        return BlockItems.from(block, CONTAINER_SIZE);
     }
 
     public @NotNull Block withCookingProgress(Block block, int slotIndex, int cookingTime) {
-        List<Integer> cookingProgress = getCookingProgressOrDefault(block);
+        List<Integer> cookingProgress = new ArrayList<>(block.getTag(Campfire.COOKING_PROGRESS));
         cookingProgress.set(slotIndex, cookingTime);
         return block.withTag(Campfire.COOKING_PROGRESS, cookingProgress);
     }
 
-    public @NotNull Block appendItem(Instance instance, Point pos, @NotNull CampfireCookingRecipe recipe) {
-        BlockItems blockItems = BlockItems.from(instance, pos, CONTAINER_SIZE);
-        List<ItemStack> items = blockItems.itemStacks();
-        OptionalInt freeSlot = findFirstFreeSlot(items);
+    /**
+     * Appends an item to the first available slot in the campfire.
+     * @return the index of the slot the item was appended to.
+     */
+    public int appendItem(BlockItems items, @NotNull CampfireCookingRecipe recipe) {
+        OptionalInt freeSlot = findFirstFreeSlot(items.itemStacks());
+
         if (freeSlot.isEmpty())
             throw new IllegalArgumentException("Campfire doesn't have free slot for appending an item in CampfireBehaviour#appendItem");
+
         List<ItemStack> ingredients = recipe.getIngredient().items();
+
         if (ingredients == null || ingredients.size() != 1)
             throw new IllegalArgumentException("CampfireCookingRecipe has invalid ingredients in CampfireBehaviour#appendItem.");
+
         int index = freeSlot.getAsInt();
-        Block block = blockItems.setItemStack(index, ingredients.get(0));
-        return withCookingProgress(block, index, recipe.getCookingTime());
+        items.set(index, ingredients.get(0));
+
+        return index;
     }
 
     @Override
     public boolean onInteract(@NotNull BlockHandler.Interaction interaction) {
         Instance instance = interaction.getInstance();
         Point pos = interaction.getBlockPosition();
+        Block block = interaction.getBlock();
         Player player = interaction.getPlayer();
         ItemStack input = player.getItemInHand(interaction.getHand());
         Optional<CampfireCookingRecipe> recipeOptional = findCampfireCookingRecipe(input);
@@ -81,8 +86,8 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
         if (recipeOptional.isEmpty())
             return true;
 
-        List<ItemStack> items = getItems(instance, pos);
-        if (findFirstFreeSlot(items).isEmpty())
+        BlockItems items = getBlockItems(block);
+        if (findFirstFreeSlot(items.itemStacks()).isEmpty())
             return true;
 
         boolean itemNotConsumed = !InventoryManipulation.consumeItemIfNotCreative(player, interaction.getHand(), 1);
@@ -91,7 +96,9 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
             return true;
 
         CampfireCookingRecipe recipe = recipeOptional.get();
-        instance.setBlock(pos, appendItem(instance, pos, recipe));
+        int index = appendItem(items, recipe);
+        block = withCookingProgress(block, index, recipe.getCookingTime());
+        instance.setBlock(pos, items.apply(block));
         return false;
     }
 
@@ -110,7 +117,7 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
             }
 
             // Different block, remove campfire
-            List<ItemStack> items = BlockItems.remove(instance, pos);
+            List<ItemStack> items = BlockItems.from(newBlock).itemStacks();
 
             for (ItemStack item : items) {
 
@@ -128,21 +135,19 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
         Instance instance = tick.getInstance();
         Block block = tick.getBlock();
         Point pos = tick.getBlockPosition();
+        BlockItems items = getBlockItems(block);
 
-        if (!block.hasTag(Campfire.COOKING_PROGRESS))
+        if (items.isAir())
             return;
 
-        List<ItemStack> items = new ArrayList<>(getItems(instance, pos));
         List<Integer> cookingProgress = new ArrayList<>(block.getTag(Campfire.COOKING_PROGRESS));
-
-        if (items.isEmpty())
-            return;
 
         boolean lit = Boolean.parseBoolean(block.getProperty("lit"));
         if (!lit) {
-            for (ItemStack item : items)
+            for (ItemStack item : items.itemStacks())
                 dropItem(instance, pos, item);
-            instance.setBlock(pos, block.withTag(Campfire.ITEMS, Collections.nCopies(4, ItemStack.AIR)));
+            items.setItems(Collections.nCopies(4, ItemStack.AIR));
+            instance.setBlock(pos, items.apply(block));
             return;
         }
 
@@ -151,13 +156,12 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
             Integer progress = i.next();
             Material inputMaterial = items.get(index).material();
 
-            if (inputMaterial == Material.AIR)
+            if (Material.AIR.equals(inputMaterial))
                 continue;
 
             if (progress <= 0) {
                 endCampfireCookingProgress(tick.getInstance(), tick.getBlockPosition(), ItemStack.of(inputMaterial));
                 items.set(index, ItemStack.AIR);
-                block = block.withTag(Campfire.ITEMS, items);
                 continue;
             }
 
@@ -165,8 +169,9 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
             i.set(progress);
         }
 
-        Block updatedBlock = block.withTag(Campfire.COOKING_PROGRESS, cookingProgress);
-        instance.setBlock(pos, updatedBlock);
+        block = items.apply(block);
+        block = block.withTag(Campfire.COOKING_PROGRESS, cookingProgress);
+        instance.setBlock(pos, block);
     }
 
     @Override

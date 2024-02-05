@@ -34,7 +34,7 @@ public class ItemManager {
     private void handlePlayerUseItemEvent(PlayerUseItemEvent event) {
         ItemStack itemStack = event.getItemStack();
 
-        VanillaItemHandler itemHandler = itemHandlersByMaterial.get(itemStack.getMaterial());
+        VanillaItemHandler itemHandler = itemHandlersByMaterial.get(itemStack.material());
 
         if (itemHandler == null) {
             return;
@@ -46,7 +46,7 @@ public class ItemManager {
     private void handlePlayerUseItemOnBlockEvent(PlayerUseItemOnBlockEvent event) {
         ItemStack itemStack = event.getItemStack();
 
-        VanillaItemHandler itemHandler = itemHandlersByMaterial.get(itemStack.getMaterial());
+        VanillaItemHandler itemHandler = itemHandlersByMaterial.get(itemStack.material());
 
         if (itemHandler == null) {
             return;

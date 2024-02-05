@@ -3,7 +3,6 @@ package net.minestom.vanilla.datapack.worldgen;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
-import net.minestom.vanilla.datapack.worldgen.random.XoroshiroRandom;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

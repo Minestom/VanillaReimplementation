@@ -8,6 +8,7 @@ import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.ArgumentStringArray;
 import net.minestom.server.command.builder.arguments.ArgumentType;
+import net.minestom.server.entity.Player;
 
 /**
  * Command that displays a player action
@@ -27,12 +28,16 @@ public class MeCommand extends Command {
         player.sendMessage("Usage: /me <message>");
     }
 
-    private void execute(CommandSender player, CommandContext arguments) {
+    private void execute(CommandSender sender, CommandContext arguments) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("This command must be executed by a player!");
+            return;
+        }
         String[] messageParts = arguments.get("message");
 
         TextComponent.Builder builder = Component.text();
 
-        builder.append(Component.text(" * " + player.asPlayer().getUsername()));
+        builder.append(Component.text(" * " + player.getUsername()));
 
         builder.append(Component.text(" "));
         builder.append(Component.text(messageParts[0]));
@@ -47,7 +52,7 @@ public class MeCommand extends Command {
 
     @SuppressWarnings("unused")
     private boolean isAllowed(CommandSender player) {
-        return player.isPlayer(); // TODO: permissions
+        return player instanceof Player; // TODO: permissions
     }
 }
 

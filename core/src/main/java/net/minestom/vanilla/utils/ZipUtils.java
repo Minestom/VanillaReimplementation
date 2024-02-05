@@ -1,4 +1,4 @@
-package net.minestom.vanilla.util;
+package net.minestom.vanilla.utils;
 
 import java.io.IOException;
 import java.io.InputStream;

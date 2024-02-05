@@ -18,6 +18,7 @@ import net.minestom.vanilla.inventory.InventoryManipulation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -95,7 +96,7 @@ public class JukeboxBlockBehaviour extends VanillaBlockBehaviour {
                                 pos.blockX(),
                                 pos.blockY(),
                                 pos.blockZ(),
-                                heldItem.getMaterial().id(),
+                                heldItem.material().id(),
                                 false
                         )
                 );
@@ -115,7 +116,6 @@ public class JukeboxBlockBehaviour extends VanillaBlockBehaviour {
 
         // Continue only every 3 seconds
         if (age % (MinecraftServer.TICK_PER_SECOND * 3L) != 0) {
-            return;
         }
 
         // TODO: Play sound to all players without the sound playing
@@ -148,7 +148,7 @@ public class JukeboxBlockBehaviour extends VanillaBlockBehaviour {
      * Stops playback in an instance
      */
     private void stopPlayback(Instance instance, Point pos, Block block) {
-        ItemEntity discEntity = new ItemEntity(getDisc(block));
+        ItemEntity discEntity = new ItemEntity(Objects.requireNonNull(getDisc(block)));
         discEntity.setInstance(instance);
         discEntity.teleport(new Pos(pos.x() + 0.5f, pos.y() + 1f, pos.z() + 0.5f));
         discEntity.setPickable(true);

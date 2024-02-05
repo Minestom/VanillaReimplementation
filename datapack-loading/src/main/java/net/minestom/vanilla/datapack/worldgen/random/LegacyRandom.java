@@ -1,7 +1,5 @@
 package net.minestom.vanilla.datapack.worldgen.random;
 
-import net.minestom.vanilla.datapack.worldgen.util.Util;
-
 public class LegacyRandom implements WorldgenRandom {
 
     private long seed;

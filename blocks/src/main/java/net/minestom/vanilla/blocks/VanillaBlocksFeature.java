@@ -6,7 +6,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.BlockUpdateFeature;
-import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.datapack.DatapackLoadingFeature;
 import org.jetbrains.annotations.NotNull;

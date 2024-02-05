@@ -2,7 +2,6 @@ package io.github.togar2.fluids;
 
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.BlockUpdateFeature;
-import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
 import org.jetbrains.annotations.NotNull;
 

@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 record LoggerImpl(Level level) implements Logger {
 
-    public static Level LOG_LEVEL = Level.valueOf(Objects.requireNonNullElse(System.getenv("minestom.vri.log-level"), "SETUP").toUpperCase());
+    public static final Level LOG_LEVEL = Level.valueOf(Objects.requireNonNullElse(System.getenv("minestom.vri.log-level"), "SETUP").toUpperCase());
     static final LoggerImpl DEFAULT = new LoggerImpl(LOG_LEVEL);
 
     private static LoggerImpl lastLogger = DEFAULT;

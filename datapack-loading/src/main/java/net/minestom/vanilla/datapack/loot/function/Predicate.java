@@ -5,7 +5,6 @@ import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.loot.context.LootContext;
 
 import java.io.IOException;
-import java.util.Map;
 
 public interface Predicate extends InBuiltPredicates {
 

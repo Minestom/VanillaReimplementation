@@ -10,9 +10,9 @@ import java.util.concurrent.CompletableFuture;
 
 public class MojangDataFeature implements VanillaReimplementation.Feature {
 
-    private static final String LATEST = "1.20.1";
+    private static final String LATEST = "1.20.4";
     private final MojangAssets assets = new MojangAssets();
-    private CompletableFuture<FileSystem<ByteArray>> latest = new CompletableFuture<>();
+    private final CompletableFuture<FileSystem<ByteArray>> latest = new CompletableFuture<>();
 
     @Override
     public void hook(@NotNull HookContext context) {

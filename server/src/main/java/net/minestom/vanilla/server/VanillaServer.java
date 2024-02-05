@@ -5,7 +5,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.extras.lan.OpenToLAN;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -33,6 +33,7 @@ class VanillaServer {
      * @param args arguments passed from console
      */
     public static void main(String[] args) {
+
         // Use the static server process
         MinecraftServer server = MinecraftServer.init();
 
@@ -43,6 +44,7 @@ class VanillaServer {
 
         VanillaServer vanillaServer = new VanillaServer(server, vri, args);
         Logger.info("Vanilla Reimplementation (%s) is setup.", MinecraftServer.VERSION_NAME);
+
         vanillaServer.start("0.0.0.0", 25565);
     }
 
@@ -60,6 +62,7 @@ class VanillaServer {
         this.serverProperties = getOrGenerateServerProperties();
         this.vri = vri;
 
+
         // Register all dimension types before making the worlds:
         for (DimensionType dimension : VanillaDimensionTypes.values()) {
             vri.process().dimension().addDimension(dimension);
@@ -76,7 +79,7 @@ class VanillaServer {
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
 
         vri.process().eventHandler()
-                .addListener(PlayerLoginEvent.class, event -> {
+                .addListener(AsyncPlayerConfigurationEvent.class, event -> {
                     event.setSpawningInstance(overworld);
                     event.getPlayer().setGameMode(GameMode.SPECTATOR);
                     overworld.loadChunk(0, 0).join();
@@ -90,7 +93,9 @@ class VanillaServer {
                     }
                     event.getPlayer().setRespawnPoint(new Pos(0, y, 0));
                 });
+
         vri.process().scheduler().scheduleNextTick(OpenToLAN::open);
+
         // Register systems
         {
             // dimension types

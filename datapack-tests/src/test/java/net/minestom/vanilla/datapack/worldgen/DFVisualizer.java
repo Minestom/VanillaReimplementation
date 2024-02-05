@@ -38,9 +38,7 @@ public class DFVisualizer {
         // register a listener to update the image when the slider is moved
         AtomicDouble axisValue = new AtomicDouble(0);
         AtomicDouble target = new AtomicDouble(0);
-        slider.addChangeListener(e -> {
-            target.set(slider.getValue());
-        });
+        slider.addChangeListener(e -> target.set(slider.getValue()));
         Thread daemon = new Thread(() -> {
             while (true) {
                 System.out.println("target: " + target.get() + ", axisValue: " + axisValue.get());

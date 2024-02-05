@@ -1,9 +1,7 @@
 package net.minestom.vanilla.files;
 
-import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 class MappedFileSystem<F, T> implements FileSystemImpl<T> {
 

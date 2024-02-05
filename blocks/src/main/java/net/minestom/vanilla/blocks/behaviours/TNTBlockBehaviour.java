@@ -38,7 +38,7 @@ public class TNTBlockBehaviour extends VanillaBlockBehaviour {
         Player.Hand hand = interaction.getHand();
         PlayerInventory inventory = player.getInventory();
 
-        if (inventory.getItemInHand(hand).getMaterial() != Material.FLINT_AND_STEEL) {
+        if (inventory.getItemInHand(hand).material() != Material.FLINT_AND_STEEL) {
             return true;
         }
 

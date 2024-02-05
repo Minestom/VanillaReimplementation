@@ -1,16 +1,14 @@
 package net.minestom.vanilla.blocks;
 
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
-import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents a singular vanilla block's logic. e.g. white bed, cake, furnace, etc.
@@ -24,7 +22,7 @@ public abstract class VanillaBlockBehaviour implements BlockHandler {
     protected VanillaBlockBehaviour(@NotNull VanillaBlocks.BlockContext context) {
         this.context = context;
         this.baseBlock = context.stateId();
-        this.namespaceID = Block.fromStateId(context.stateId()).namespace();
+        this.namespaceID = Objects.requireNonNull(Block.fromStateId(context.stateId())).namespace();
     }
 
     /**
