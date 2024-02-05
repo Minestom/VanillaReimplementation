@@ -131,6 +131,8 @@ public class DatapackLoader {
         register(builder, Biome.CarversList.class, Biome.CarversList::fromJson);
         register(builder, Biome.CarversList.Single.class, Biome.CarversList.Single::fromJson);
         register(builder, HeightProvider.class, HeightProvider::fromJson);
+        register(builder, ConfiguredFeature.class, ConfiguredFeature::fromJson);
+        register(builder, PlacedFeature.PlacementModifier.class, PlacedFeature.PlacementModifier::fromJson);
 
         return builder.build();
     }
