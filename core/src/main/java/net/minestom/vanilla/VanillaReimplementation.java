@@ -8,6 +8,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.TagWritable;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
+import net.minestom.vanilla.entity.EntityContext;
 import net.minestom.vanilla.logging.StatusUpdater;
 import net.minestom.vanilla.utils.DependencySorting;
 import org.jetbrains.annotations.NotNull;
@@ -60,26 +61,26 @@ public interface VanillaReimplementation {
     <T extends Feature> @NotNull T feature(Class<T> clazz);
 
     /**
-     * Creates an {@link net.minestom.vanilla.VanillaRegistry.EntityContext} for the given type and position
+     * Creates an {@link net.minestom.vanilla.EntityContext} for the given type and position
      *
      * @param type     the type of the entity
      * @param position the position of the entity at spawn
      * @return the context
      */
-    default @NotNull VanillaRegistry.EntityContext entityContext(EntityType type, Point position) {
+    default @NotNull EntityContext entityContext(EntityType type, Point position) {
         return entityContext(type, position, writer -> {
         });
     }
 
     /**
-     * Creates an {@link net.minestom.vanilla.VanillaRegistry.EntityContext} for the given type and position, with the
+     * Creates an {@link net.minestom.vanilla.EntityContext} for the given type and position, with the
      * given tag values.
      *
      * @param type     the type of the entity
      * @param position the position of the entity at spawn
      * @return the context
      */
-    @NotNull VanillaRegistry.EntityContext entityContext(EntityType type, Point position,
+    @NotNull EntityContext entityContext(EntityType type, Point position,
                                                          @NotNull Consumer<TagWritable> tagWriter);
 
     /**
@@ -88,7 +89,7 @@ public interface VanillaReimplementation {
      * @param context the context
      * @return the new entity
      */
-    @Nullable Entity createEntity(@NotNull VanillaRegistry.EntityContext context);
+    @Nullable Entity createEntity(@NotNull EntityContext context);
 
     /**
      * Creates a new vanilla entity, using the specified context, returning a dummy entity if the entity type is not
@@ -97,7 +98,7 @@ public interface VanillaReimplementation {
      * @param context the context
      * @return the new entity
      */
-    @NotNull Entity createEntityOrDummy(@NotNull VanillaRegistry.EntityContext context);
+    @NotNull Entity createEntityOrDummy(@NotNull EntityContext context);
 
     /**
      * Creates and registers a vanilla instance.

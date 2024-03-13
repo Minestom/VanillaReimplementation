@@ -10,9 +10,9 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.item.Material;
-import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
 import net.minestom.vanilla.blocks.VanillaBlocks;
+import net.minestom.vanilla.entity.EntityContext;
 import net.minestom.vanilla.entitymeta.EntityTags;
 import org.jetbrains.annotations.NotNull;
 
@@ -52,7 +52,7 @@ public class TNTBlockBehaviour extends VanillaBlockBehaviour {
         Pos initialPosition = new Pos(blockPosition.blockX() + 0.5f, blockPosition.blockY() + 0f, blockPosition.blockZ() + 0.5f);
 
         // Create the entity
-        VanillaRegistry.EntityContext entityContext = context.vri().entityContext(EntityType.TNT, initialPosition,
+        EntityContext entityContext = context.vri().entityContext(EntityType.TNT, initialPosition,
                 writable -> writable.setTag(EntityTags.PrimedTnt.FUSE_TIME, fuseTime));
         Entity primedTnt = context.vri().createEntityOrDummy(entityContext);
 

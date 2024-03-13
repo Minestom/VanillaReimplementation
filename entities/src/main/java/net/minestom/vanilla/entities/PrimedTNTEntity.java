@@ -5,6 +5,7 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.other.PrimedTntMeta;
 import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.VanillaRegistry;
+import net.minestom.vanilla.entity.EntityContext;
 import net.minestom.vanilla.entitymeta.EntityTags;
 import net.minestom.vanilla.instance.VanillaExplosion;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +16,7 @@ public class PrimedTNTEntity extends Entity {
 
     private int fuseTime;
 
-    public PrimedTNTEntity(@NotNull VanillaRegistry.EntityContext context) {
+    public PrimedTNTEntity(@NotNull EntityContext context) {
         this(Objects.requireNonNullElse(context.getTag(EntityTags.PrimedTnt.FUSE_TIME), 80));
     }
 

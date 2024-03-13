@@ -15,10 +15,13 @@ import net.minestom.server.tag.TagWritable;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
+import net.minestom.vanilla.entity.EntityContext;
 import net.minestom.vanilla.instance.SetupVanillaInstanceEvent;
 import net.minestom.vanilla.logging.Loading;
 import net.minestom.vanilla.logging.Logger;
 import net.minestom.vanilla.logging.StatusUpdater;
+import net.minestom.vanilla.registry.entity.VanillaEntityRegistry;
+import net.minestom.vanilla.registry.entity.VanillaEntityRegistryImpl;
 import net.minestom.vanilla.utils.DependencySorting;
 import net.minestom.vanilla.utils.MinestomUtils;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +38,7 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
 
     private final ServerProcess process;
     private final Map<NamespaceID, Instance> worlds = new ConcurrentHashMap<>();
-    private final Map<EntityType, VanillaRegistry.EntitySpawner> entity2Spawner = new ConcurrentHashMap<>();
+    private final VanillaEntityRegistry entityRegistry = new VanillaEntityRegistryImpl();
     private final Map<Class<Feature>, Feature> class2Feature = new ConcurrentHashMap<>();
     private final Map<Object, Random> randoms = Collections.synchronizedMap(new WeakHashMap<>());
 
@@ -89,25 +92,25 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
 
 
     /**
-     * Creates an {@link VanillaRegistry.EntityContext} for the given type and position
+     * Creates an {@link EntityContext} for the given type and position
      *
      * @param type     the type of the entity
      * @param position the position of the entity at spawn
      * @return the context
      */
-    public @NotNull VanillaRegistry.EntityContext entityContext(EntityType type, Point position) {
+    public @NotNull EntityContext entityContext(EntityType type, Point position) {
         return new EntityContextImpl(type, Pos.fromPoint(position));
     }
 
     /**
-     * Creates an {@link VanillaRegistry.EntityContext} for the given type and position, with the
+     * Creates an {@link EntityContext} for the given type and position, with the
      * given tag values.
      *
      * @param type     the type of the entity
      * @param position the position of the entity at spawn
      * @return the context
      */
-    public @NotNull VanillaRegistry.EntityContext entityContext(EntityType type, Point position,
+    public @NotNull EntityContext entityContext(EntityType type, Point position,
                                                                 @NotNull Consumer<TagWritable> tagWriter) {
         EntityContextImpl impl = new EntityContextImpl(type, Pos.fromPoint(position));
         tagWriter.accept(impl);
@@ -115,7 +118,7 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
     }
 
     private record EntityContextImpl(@NotNull EntityType type, @NotNull Pos position,
-                                     @NotNull TagHandler tagHandler) implements VanillaRegistry.EntityContext, TagWritable {
+                                     @NotNull TagHandler tagHandler) implements EntityContext, TagWritable {
         public EntityContextImpl(@NotNull EntityType type, @NotNull Pos position) {
             this(type, position, TagHandler.newHandler());
         }
@@ -137,12 +140,10 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
      * @param context the context
      * @return the new entity
      */
-    public @Nullable Entity createEntity(@NotNull VanillaRegistry.EntityContext context) {
-        // Get the spawner
-        VanillaRegistry.EntitySpawner spawner = entity2Spawner.get(context.type());
-
-        // Create the entity
-        return spawner != null ? spawner.spawn(context) : null;
+    public @Nullable Entity createEntity(@NotNull EntityContext context) {
+        return entityRegistry.optionalEntitySpawner(context.type())
+          .map(spawner -> spawner.spawn(context))
+          .orElse(null);
     }
 
     /**
@@ -152,7 +153,7 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
      * @param context the context
      * @return the new entity
      */
-    public @NotNull Entity createEntityOrDummy(@NotNull VanillaRegistry.EntityContext context) {
+    public @NotNull Entity createEntityOrDummy(@NotNull EntityContext context) {
         Entity entity = createEntity(context);
         return entity != null ? entity : new DummyEntity(context.type());
     }
@@ -193,9 +194,10 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
     }
 
     final class VanillaRegistryImpl implements VanillaRegistry {
+
         @Override
-        public void register(@NotNull EntityType type, @NotNull EntitySpawner supplier) {
-            entity2Spawner.put(type, supplier);
+        public @NotNull VanillaEntityRegistry entityRegistry() {
+            return entityRegistry;
         }
     }
 

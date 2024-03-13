@@ -6,12 +6,12 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdatable;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdateInfo;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdateManager;
+import net.minestom.vanilla.entity.EntityContext;
 import net.minestom.vanilla.entitymeta.EntityTags;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,7 +51,7 @@ public class GravityBlockBehaviour extends VanillaBlockBehaviour implements Bloc
 
         // Create the context
         Pos initialPosition = new Pos(position.x() + 0.5f, Math.round(position.y()), position.z() + 0.5f);
-        VanillaRegistry.EntityContext entityContext = context.vri().entityContext(EntityType.FALLING_BLOCK,
+        EntityContext entityContext = context.vri().entityContext(EntityType.FALLING_BLOCK,
                 initialPosition, nbt -> nbt.setTag(EntityTags.FallingBlock.BLOCK, block));
         Entity entity = context.vri().createEntityOrDummy(entityContext);
 

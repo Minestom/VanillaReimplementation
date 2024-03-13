@@ -6,8 +6,8 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.instance.block.Block;
-import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.VanillaReimplementation;
+import net.minestom.vanilla.entity.EntityContext;
 import net.minestom.vanilla.entitymeta.EntityTags;
 
 import java.util.Random;
@@ -38,13 +38,13 @@ public class VanillaDebug {
         switch (message) {
             case "tnt" -> {
                 Pos pos = player.getPosition();
-                VanillaRegistry.EntityContext context = vri.entityContext(EntityType.TNT, pos);
+                EntityContext context = vri.entityContext(EntityType.TNT, pos);
                 Entity entity = vri.createEntityOrDummy(context);
                 entity.setInstance(server.overworld(), pos);
             }
             case "fallingblock" -> {
                 Pos pos = player.getPosition();
-                VanillaRegistry.EntityContext context = vri.entityContext(EntityType.FALLING_BLOCK, pos,
+                EntityContext context = vri.entityContext(EntityType.FALLING_BLOCK, pos,
                         tags -> tags.setTag(EntityTags.FallingBlock.BLOCK, blocks[random.nextInt(blocks.length)]));
                 Entity entity = vri.createEntityOrDummy(context);
                 entity.setInstance(server.overworld(), pos);

@@ -9,6 +9,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.vanilla.VanillaRegistry;
+import net.minestom.vanilla.entity.EntityContext;
 import net.minestom.vanilla.entitymeta.EntityTags;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,7 +32,7 @@ public class FallingBlockEntity extends Entity {
         meta.setSpawnPosition(initialPosition);
     }
 
-    public FallingBlockEntity(@NotNull VanillaRegistry.EntityContext context) {
+    public FallingBlockEntity(@NotNull EntityContext context) {
         this(Objects.requireNonNullElse(context.getTag(EntityTags.FallingBlock.BLOCK), Block.AIR), context.position());
     }
 
