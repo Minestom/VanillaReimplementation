@@ -1,67 +1,63 @@
 package net.minestom.vanilla.datapack.worldgen;
 
+import com.squareup.moshi.JsonReader;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
+import net.minestom.vanilla.datapack.json.NamespaceTag;
 
+import java.io.IOException;
 import java.util.List;
 
-public interface BlockPredicate {
-    NamespaceID type();
+public sealed interface BlockPredicate {
+
+    default NamespaceID type() {
+        return JsonUtils.getNamespaceTag(this.getClass());
+    }
+
+    static BlockPredicate fromJson(JsonReader reader) throws IOException {
+        return JsonUtils.sealedUnionNamespace(reader, BlockPredicate.class, "type");
+    }
 
     /**
      * All the specified block predicates need to match
      * @param predicates The child predicates
      */
+    @NamespaceTag("all_of")
     record AllOf(List<BlockPredicate> predicates) implements BlockPredicate {
-        @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:all_of");
-        }
     }
 
     /**
      * Must matches at least one of the specified block predicates
      * @param predicates The child predicates
      */
+    @NamespaceTag("any_of")
     record AnyOf(List<BlockPredicate> predicates) implements BlockPredicate {
-        @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:any_of");
-        }
     }
 
     /**
      * Whether the Y level is in the world
      * @param offset A list of 3 integers specifying an [X, Y, Z] block position offset to check
      */
+    @NamespaceTag("inside_world_bounds")
     record InsideWorldBounds(IntList offset) implements BlockPredicate {
-        @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:inside_world_bounds");
-        }
     }
 
     /**
      * Material is solid
      * @param offset A list of 3 integers specifying an [X, Y, Z] block position offset to check
      */
+    @NamespaceTag("solid")
     record Solid(IntList offset) implements BlockPredicate {
-        @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:solid");
-        }
     }
 
     /**
      * Material is replacable
      * @param offset A list of 3 integers specifying an [X, Y, Z] block position offset to check
      */
+    @NamespaceTag("replaceable")
     record Replaceable(IntList offset) implements BlockPredicate {
-        @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:replaceable");
-        }
     }
 
     /**
@@ -69,11 +65,8 @@ public interface BlockPredicate {
      * @param offset A list of 3 integers specifying an [X, Y, Z] block position offset to check
      * @param direction The direction of the block to check if it is sturdy. With sturdy is meant that the block's block supporting box is full in the direction.
      */
+    @NamespaceTag("has_sturdy_face")
     record HasSturdyFace(IntList offset, String direction) implements BlockPredicate {
-        @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:has_sturdy_face");
-        }
     }
 
     /**
@@ -81,11 +74,8 @@ public interface BlockPredicate {
      * @param offset A list of 3 integers specifying an [X, Y, Z] block position offset to check
      * @param tag The block tag without # to check
      */
+    @NamespaceTag("matching_block_tag")
     record MatchingBlockTag(IntList offset, String tag) implements BlockPredicate {
-        @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:matching_block_tag");
-        }
     }
 
     /**
@@ -93,11 +83,8 @@ public interface BlockPredicate {
      * @param offset A list of 3 integers specifying an [X, Y, Z] block position offset to check
      * @param blocks The blocks that will match. Cn be a block ID or a block tag, or a list of block IDs
      */
+    @NamespaceTag("matching_blocks")
     record MatchingBlocks(IntList offset, JsonUtils.SingleOrList<String> blocks) implements BlockPredicate {
-        @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:matching_blocks");
-        }
     }
 
     /**
@@ -105,21 +92,15 @@ public interface BlockPredicate {
      * @param offset A list of 3 integers specifying an [X, Y, Z] block position offset to check
      * @param fluids The fluids that will match. Cn be a fluid ID or a fluid tag, or a list of fluid IDs
      */
+    @NamespaceTag("matching_fluids")
     record MatchingFluids(IntList offset, JsonUtils.SingleOrList<String> fluids) implements BlockPredicate {
-        @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:matching_fluids");
-        }
     }
 
     /**
      * Inverts the predicate
      */
+    @NamespaceTag("not")
     record Not(BlockPredicate predicate) implements BlockPredicate {
-        @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:not");
-        }
     }
 
     /**
@@ -127,10 +108,7 @@ public interface BlockPredicate {
      * @param offset A list of 3 integers specifying an [X, Y, Z] block position offset to check
      * @param state The block state to check
      */
+    @NamespaceTag("would_survive")
     record WouldSurvive(IntList offset, BlockState state) implements BlockPredicate {
-        @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:would_survive");
-        }
     }
 }

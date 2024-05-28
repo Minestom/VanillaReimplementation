@@ -1,9 +1,16 @@
 package net.minestom.vanilla.datapack;
 
-import com.squareup.moshi.*;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonWriter;
+import com.squareup.moshi.JsonReader;
+import com.squareup.moshi.Moshi;
+import com.squareup.moshi.Types;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.doubles.DoubleLists;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntLists;
 import net.minestom.server.utils.math.FloatRange;
 import net.minestom.vanilla.datapack.loot.NBTPath;
 import net.minestom.vanilla.datapack.trims.TrimMaterial;
@@ -91,6 +98,7 @@ public class DatapackLoader {
 
         // Misc
         register(builder, DoubleList.class, DatapackLoader::doubleListFromJson);
+        register(builder, IntList.class, DatapackLoader::intListFromJson);
 
         // VRI Datapack
         register(builder, Advancement.Trigger.class, Advancement.Trigger::fromJson);
@@ -132,7 +140,22 @@ public class DatapackLoader {
         register(builder, Biome.CarversList.Single.class, Biome.CarversList.Single::fromJson);
         register(builder, HeightProvider.class, HeightProvider::fromJson);
         register(builder, ConfiguredFeature.class, ConfiguredFeature::fromJson);
+        register(builder, PlacedFeature.class, PlacedFeature::fromJson);
         register(builder, PlacedFeature.PlacementModifier.class, PlacedFeature.PlacementModifier::fromJson);
+        register(builder, BlockStateProvider.class, BlockStateProvider::fromJson);
+        register(builder, ConfiguredFeature.Tree.MinimumSize.class, ConfiguredFeature.Tree.MinimumSize::fromJson);
+        register(builder, ConfiguredFeature.Tree.RootPlacer.class, ConfiguredFeature.Tree.RootPlacer::fromJson);
+        register(builder, ConfiguredFeature.Tree.TrunkPlacer.class, ConfiguredFeature.Tree.TrunkPlacer::fromJson);
+        register(builder, ConfiguredFeature.Tree.FoliagePlacer.class, ConfiguredFeature.Tree.FoliagePlacer::fromJson);
+        register(builder, ConfiguredFeature.Tree.Decorator.class, ConfiguredFeature.Tree.Decorator::fromJson);
+        register(builder, BlockPredicate.class, BlockPredicate::fromJson);
+        register(builder, IntProvider.class, IntProvider::fromJson);
+        register(builder, RuleTest.class, RuleTest::fromJson);
+        register(builder, ProcessorList.class, ProcessorList::fromJson);
+        register(builder, BlockEntityModifier.class, BlockEntityModifier::fromJson);
+        register(builder, BlockStateProvider.DualNoiseProvider.Variety.class, BlockStateProvider.DualNoiseProvider.Variety::fromJson);
+        register(builder, ProcessorList.Processor.class, ProcessorList.Processor::fromJson);
+        register(builder, PosRuleTest.class, PosRuleTest::fromJson);
 
         return builder.build();
     }
@@ -195,8 +218,7 @@ public class DatapackLoader {
     public Datapack load(FileSystem<ByteArray> source) {
 
         // Default
-        McMeta mcmeta;
-        mcmeta = !source.hasFile("pack.mcmeta") ? new McMeta() : source.map(FileSystem.BYTES_TO_STRING).map(adaptor(McMeta.class)).file("pack.mcmeta");
+        McMeta mcmeta = !source.hasFile("pack.mcmeta") ? new McMeta() : source.map(FileSystem.BYTES_TO_STRING).map(adaptor(McMeta.class)).file("pack.mcmeta");
         @Nullable ByteArray pack_png = !source.hasFile("pack.png") ? null : source.file("pack.png");
 //        ImageIO.read(pack_png.toStream());
 
@@ -377,6 +399,21 @@ public class DatapackLoader {
                     }
                     json.endArray();
                     return DoubleLists.unmodifiable(list);
+                };
+            default -> null;
+        });
+    }
+
+    private static IntList intListFromJson(JsonReader reader) throws IOException {
+        return JsonUtils.typeMap(reader, token -> switch (token) {
+            case BEGIN_ARRAY -> json -> {
+                    json.beginArray();
+                    IntList list = new IntArrayList();
+                    while (json.peek() == JsonReader.Token.NUMBER) {
+                        list.add(json.nextInt());
+                    }
+                    json.endArray();
+                    return IntLists.unmodifiable(list);
                 };
             default -> null;
         });

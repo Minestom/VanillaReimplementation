@@ -129,25 +129,33 @@ public class JsonUtils {
     }
 
     public static <T> T sealedUnionString(JsonReader reader, Class<T> clazz, String property) throws IOException {
-        String unionTag = JsonUtils.findProperty(reader.peekJson(), property, JsonReader::nextString);
+        String unionTag;
+        try (JsonReader json = reader.peekJson()) {
+            json.beginObject();
+            unionTag = JsonUtils.findProperty(json, property, JsonReader::nextString);
+        }
         for (Class<?> permittedSubclass : clazz.getPermittedSubclasses()) {
             StringTag someTag = permittedSubclass.getAnnotation(StringTag.class);
             if (someTag != null && someTag.value().equals(unionTag)) {
                 return DatapackLoader.<T>moshi(permittedSubclass).apply(reader);
             }
         }
-        return null;
+        throw new IOException("Unhandled tag: " + unionTag);
     }
 
     public static <T> T sealedUnionNamespace(JsonReader reader, Class<T> clazz, String property) throws IOException {
-        NamespaceID unionTag = JsonUtils.findProperty(reader.peekJson(), property, DatapackLoader.moshi(NamespaceID.class));
+        NamespaceID unionTag;
+        try (JsonReader json = reader.peekJson()) {
+            json.beginObject();
+            unionTag = JsonUtils.findProperty(json, property, DatapackLoader.moshi(NamespaceID.class));
+        }
         for (Class<?> permittedSubclass : clazz.getPermittedSubclasses()) {
             NamespaceTag someTag = permittedSubclass.getAnnotation(NamespaceTag.class);
             if (someTag != null && NamespaceID.from(someTag.value()).equals(unionTag)) {
                 return DatapackLoader.<T>moshi(permittedSubclass).apply(reader);
             }
         }
-        return null;
+        throw new IOException("Unhandled tag: " + unionTag);
     }
 
     public static NamespaceID getNamespaceTag(Class<?> clazz) {
@@ -203,7 +211,8 @@ public class JsonUtils {
     public static <T> T typeMap(JsonReader reader, IoFunction<JsonReader.Token, IoFunction<JsonReader, T>> type2readFunction) throws IOException {
         JsonReader.Token token = reader.peek();
         IoFunction<JsonReader, T> readFunction = type2readFunction.apply(token);
-        if (readFunction == null) throw new IllegalStateException("Unknown token type: " + token);
+        if (readFunction == null)
+            throw new IllegalStateException("Unknown token type: " + token);
         return readFunction.apply(reader);
     }
 

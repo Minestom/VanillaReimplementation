@@ -1,7 +1,9 @@
 package net.minestom.vanilla.datapack;
 
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.vanilla.datapack.worldgen.ConfiguredFeature;
 import net.minestom.vanilla.datapack.worldgen.DensityFunction;
+import net.minestom.vanilla.datapack.worldgen.ProcessorList;
 import net.minestom.vanilla.datapack.worldgen.noise.Noise;
 import net.minestom.vanilla.files.FileSystem;
 import org.jetbrains.annotations.Nullable;
@@ -14,12 +16,21 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class DatapackUtils {
+
     public static Optional<Noise> findNoise(Datapack datapack, String file) {
-        return findInJsonData(file, datapack, data -> data.world_gen().noise());
+        return findInJsonData(datapack, file, data -> data.world_gen().noise());
     }
 
     public static Optional<DensityFunction> findDensityFunction(Datapack datapack, String file) {
-        return findInJsonData(file, datapack, data -> data.world_gen().density_function());
+        return findInJsonData(datapack,   file, data -> data.world_gen().density_function());
+    }
+
+    public static Optional<ProcessorList> findProcessorList(Datapack datapack, String file) {
+        return findInJsonData(datapack, file, data -> data.world_gen().processor_list());
+    }
+
+    public static Optional<ConfiguredFeature> findConfiguredFeature(Datapack datapack, String file) {
+        return findInJsonData(datapack, file, data -> data.world_gen().configured_feature());
     }
 
     public static Set<NamespaceID> findTags(Datapack datapack, String tagType, NamespaceID namespaceID) {
@@ -94,7 +105,7 @@ public class DatapackUtils {
         return null;
     }
 
-    private static <T> Optional<T> findInJsonData(String file, Datapack datapack, Function<Datapack.NamespacedData, FileSystem<T>> getFolder) {
+    private static <T> Optional<T> findInJsonData(Datapack datapack, String file, Function<Datapack.NamespacedData, FileSystem<T>> getFolder) {
         NamespaceID namespaceID = NamespaceID.from(file);
         for (var entry : datapack.namespacedData().entrySet()) {
 

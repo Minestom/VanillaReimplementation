@@ -14,7 +14,13 @@ class CacheFileSystem<F> implements FileSystemImpl<F> {
 
     protected CacheFileSystem(FileSystem<F> original) {
         this.files = Map.copyOf(original.files().stream()
-                .collect(Collectors.toUnmodifiableMap(Function.identity(), original::file)));
+                .collect(Collectors.toUnmodifiableMap(Function.identity(), path -> {
+                    try {
+                        return original.file(path);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to cache file " + path, e);
+                    }
+                })));
         this.folders = original.folders().stream()
                 .collect(Collectors.toUnmodifiableMap(Function.identity(),
                         name -> original.folder(name).cache()));

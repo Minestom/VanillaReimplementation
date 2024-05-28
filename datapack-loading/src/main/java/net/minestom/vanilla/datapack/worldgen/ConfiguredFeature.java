@@ -3,20 +3,46 @@ package net.minestom.vanilla.datapack.worldgen;
 import com.squareup.moshi.Json;
 import com.squareup.moshi.JsonReader;
 import it.unimi.dsi.fastutil.ints.IntList;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.vanilla.datapack.json.JsonUtils;
-import net.minestom.vanilla.datapack.json.NamespaceTag;
-import net.minestom.vanilla.datapack.json.Optional;
+import net.minestom.vanilla.datapack.DatapackLoader;
+import net.minestom.vanilla.datapack.DatapackUtils;
+import net.minestom.vanilla.datapack.json.*;
 
 import java.io.IOException;
 import java.util.List;
 
 public sealed interface ConfiguredFeature {
+
     default NamespaceID type() {
         return JsonUtils.getNamespaceTag(this.getClass());
     }
+
     static ConfiguredFeature fromJson(JsonReader reader) throws IOException {
-        return JsonUtils.sealedUnionNamespace(reader, ConfiguredFeature.class, "type");
+        return JsonUtils.typeMap(reader, token -> switch (token) {
+            case BEGIN_OBJECT -> json -> JsonUtils.sealedUnionNamespace(json, ConfiguredFeature.class, "type");
+            case STRING -> json -> new Reference(json.nextString());
+            default -> null;
+        });
+    }
+
+    final class Reference extends FileLoaded<ConfiguredFeature> implements ConfiguredFeature {
+        public Reference(String file) {
+            super(file);
+
+            Reference self = this;
+            DatapackLoader.loading().whenFinished(finisher -> {
+                DatapackUtils.findConfiguredFeature(finisher.datapack(), file).ifPresentOrElse(configuredFeature -> {
+                    self.value = configuredFeature;
+                }, () -> {
+                    throw new IllegalStateException("Could not find configured feature with filename " + file);
+                });
+            });
+        }
+
+        public ConfiguredFeature feature() {
+            return this.get();
+        }
     }
 
     @NamespaceTag("bamboo")
@@ -44,7 +70,7 @@ public sealed interface ConfiguredFeature {
     record BasaltPillar() implements ConfiguredFeature {
     }
 
-    @NamespaceTag("block_blob")
+    @NamespaceTag("block_column")
     record BlockColumn(Config config) implements ConfiguredFeature {
 
         /**
@@ -243,7 +269,7 @@ public sealed interface ConfiguredFeature {
          * @param overlay_processors The processor for overlay structure templates.
          * @param max_empty_corners_allowed How many corners of the structure are allowed to be empty for it to generate. Prevents structures floating in the air.
          */
-        public record Config(List<StructureTemplate> fossil_structures, List<StructureTemplate> overlay_structures, ProcessorList fossil_processors, ProcessorList overlay_processors, int max_empty_corners_allowed) {
+        public record Config(List<NamespaceID> fossil_structures, List<NamespaceID> overlay_structures, ProcessorList fossil_processors, ProcessorList overlay_processors, int max_empty_corners_allowed) {
         }
     }
 
@@ -310,6 +336,11 @@ public sealed interface ConfiguredFeature {
     @NamespaceTag("huge_brown_mushroom")
     record HugeBrownMushroom(Config config) implements ConfiguredFeature {
 
+        public static final Config DEFAULT_CONFIG = new Config(
+                new BlockStateProvider.SimpleStateProvider(BlockState.fromMinestom(Block.BROWN_MUSHROOM_BLOCK)),
+                new BlockStateProvider.SimpleStateProvider(BlockState.fromMinestom(Block.MUSHROOM_STEM)),
+                2);
+
         /**
          * @param cap_provider The block to use for the cap.
          * @param stem_provider The block to use for the stem.
@@ -337,6 +368,11 @@ public sealed interface ConfiguredFeature {
     @NamespaceTag("huge_red_mushroom")
     record HugeRedMushroom(Config config) implements ConfiguredFeature {
 
+        public static final Config DEFAULT_CONFIG = new Config(
+                new BlockStateProvider.SimpleStateProvider(BlockState.fromMinestom(Block.RED_MUSHROOM_BLOCK)),
+                new BlockStateProvider.SimpleStateProvider(BlockState.fromMinestom(Block.MUSHROOM_STEM)),
+                2);
+
         /**
          * @param cap_provider The block to use for the cap.
          * @param stem_provider The block to use for the stem.
@@ -356,7 +392,7 @@ public sealed interface ConfiguredFeature {
         }
     }
 
-    @NamespaceTag("ice_patch")
+    @NamespaceTag("ice_spike")
     record IceSpike() implements ConfiguredFeature {
     }
 
@@ -653,7 +689,8 @@ public sealed interface ConfiguredFeature {
          * @param requires_block_below Whether the spring feature requires a block in  valid_blocks below the fluid.
          * @param valid_blocks Can be a block ID or a block tag, or a list of block IDs.
          */
-        public record Config(BlockState state, @Optional Integer rock_count, @Optional Integer hole_count, @Optional Boolean requires_block_below, JsonUtils.SingleOrList<String> valid_blocks) {
+        public record Config(BlockState state, @Optional Integer rock_count, @Optional Integer hole_count,
+                             @Optional Boolean requires_block_below, JsonUtils.SingleOrList<String> valid_blocks) {
         }
     }
 
@@ -672,14 +709,23 @@ public sealed interface ConfiguredFeature {
          * @param foliage_placer foliage_placer
          * @param decorators Decorations to add to the tree apart from the trunk and leaves.
          */
-        public record Config(@Optional Boolean ignore_vines, @Optional Boolean force_dirt, BlockStateProvider dirt_provider, BlockStateProvider trunk_provider, BlockStateProvider foliage_provider, MinimumSize minimum_size, RootPlacer root_placer, TrunkPlacer trunk_placer, FoliagePlacer foliage_placer, List<Decorator> decorators) {
+        public record Config(@Optional Boolean ignore_vines, @Optional Boolean force_dirt,
+                             BlockStateProvider dirt_provider, BlockStateProvider trunk_provider,
+                             BlockStateProvider foliage_provider, MinimumSize minimum_size, RootPlacer root_placer,
+                             TrunkPlacer trunk_placer, FoliagePlacer foliage_placer, List<Decorator> decorators) {
         }
 
-        public interface MinimumSize {
+        public sealed interface MinimumSize {
             /**
              * @return One of two_layers_feature_size or three_layers_feature_size
              */
-            String type();
+            default String type() {
+                return JsonUtils.getStringTag(getClass());
+            }
+
+            static MinimumSize fromJson(JsonReader reader) throws IOException {
+                return JsonUtils.sealedUnionNamespace(reader, MinimumSize.class, "type");
+            }
 
             /**
              * @param min_clipped_height (optional) Value between 0 and 80 (inclusive). If the possible height at this location is lower than trunk height, but greater or equal to this value, the tree generates anyway. If not specified, the tree won't generate as long as the possible height is lower than trunk height. If the possible height at this location is lower than this value, the tree cannot generate.
@@ -687,11 +733,8 @@ public sealed interface ConfiguredFeature {
              * @param lower_size (optional, defaults to 0) Value between 0 and 16 (inclusive). Minimum width of the tree at heights under limit.
              * @param upper_size (optional, defaults to 1) Value between 0 and 16 (inclusive). Minimum width of the tree at heights greater than or equals limit.
              */
+            @NamespaceTag("two_layers_feature_size")
             record TwoLayersFeatureSize(@Optional Integer min_clipped_height, @Optional Integer limit, @Optional Integer lower_size, @Optional Integer upper_size) implements MinimumSize {
-                @Override
-                public String type() {
-                    return "two_layers_feature_size";
-                }
             }
 
             /**
@@ -702,16 +745,19 @@ public sealed interface ConfiguredFeature {
              * @param upper_size (optional, defaults to 1) Value between 0 and 16 (inclusive). Minimum width of the tree at the upper layer.
              * @param middle_size (optional, defaults to 1) Value between 0 and 16 (inclusive). Minimum width of the tree at the middle layer.
              */
+            @NamespaceTag("three_layers_feature_size")
             record ThreeLayersFeatureSize(@Optional Integer min_clipped_height, @Optional Integer limit, @Optional Integer upper_limit, @Optional Integer lower_size, @Optional Integer upper_size, @Optional Integer middle_size) implements MinimumSize {
-                @Override
-                public String type() {
-                    return "three_layers_feature_size";
-                }
             }
         }
 
-        public interface RootPlacer {
-            String type();
+        public sealed interface RootPlacer {
+            default String type() {
+                return JsonUtils.getStringTag(getClass());
+            }
+
+            static RootPlacer fromJson(JsonReader reader) throws IOException {
+                return JsonUtils.sealedUnionNamespace(reader, RootPlacer.class, "type");
+            }
 
             /**
              * @return The block used as the root of the tree.
@@ -732,6 +778,7 @@ public sealed interface ConfiguredFeature {
              * @param above_root_provider The block above the root.
              * @param above_root_placement_chance The probability of generating the block. Value between 0.0 and 1.0 (inclusive).
              */
+            @NamespaceTag("above_root_placement")
             record AboveRootPlacement(BlockStateProvider above_root_provider, float above_root_placement_chance) {
             }
 
@@ -743,19 +790,22 @@ public sealed interface ConfiguredFeature {
              * @param muddy_roots_in A block ID or a block tag, or a list of block IDs. Roots in it will turn into muddy root blocks.
              * @param muddy_roots_provider Blocks used as muddy roots.
              */
-            record MangroveRootPlacer(BlockStateProvider root_provider, IntProvider trunk_offset_y, @Optional AboveRootPlacement above_root_placement, int max_root_width, int max_root_length, float random_skew_chance, JsonUtils.SingleOrList<String> can_grow_through, JsonUtils.SingleOrList<String> muddy_roots_in, BlockStateProvider muddy_roots_provider) implements RootPlacer {
-                @Override
-                public String type() {
-                    return "mangrove_root_placer";
-                }
+            @NamespaceTag("mangrove_root_placer")
+            record MangroveRootPlacer(BlockStateProvider root_provider, IntProvider trunk_offset_y, @Optional AboveRootPlacement above_root_placement, @Optional Integer max_root_width, @Optional Integer max_root_length, @Optional Float random_skew_chance, JsonUtils.SingleOrList<String> can_grow_through, JsonUtils.SingleOrList<String> muddy_roots_in, BlockStateProvider muddy_roots_provider) implements RootPlacer {
             }
         }
 
-        public interface TrunkPlacer {
+        public sealed interface TrunkPlacer {
             /**
              * @return One of straight_trunk_placer, forking_trunk_placer, giant_trunk_placer, mega_jungle_trunk_placer, dark_oak_trunk_placer, fancy_trunk_placer, bending_trunk_placer, upwards_branching_trunk_placer, or cherry_trunk_placer.
              */
-            String type();
+            default String type() {
+                return JsonUtils.getStringTag(getClass());
+            }
+
+            static TrunkPlacer fromJson(JsonReader reader) throws IOException {
+                return JsonUtils.sealedUnionNamespace(reader, TrunkPlacer.class, "type");
+            }
 
             /**
              * @return base_height Value between 0 and 32 (inclusive).
@@ -772,15 +822,36 @@ public sealed interface ConfiguredFeature {
              */
             int height_rand_b();
 
+            @NamespaceTag("straight_trunk_placer")
+            record StraightTrunkPlacer(int base_height, int height_rand_a, int height_rand_b) implements TrunkPlacer {
+            }
+
+            @NamespaceTag("forking_trunk_placer")
+            record ForkingTrunkPlacer(int base_height, int height_rand_a, int height_rand_b) implements TrunkPlacer {
+            }
+
+            @NamespaceTag("giant_trunk_placer")
+            record GiantTrunkPlacer(int base_height, int height_rand_a, int height_rand_b) implements TrunkPlacer {
+            }
+
+            @NamespaceTag("mega_jungle_trunk_placer")
+            record MegaJungleTrunkPlacer(int base_height, int height_rand_a, int height_rand_b) implements TrunkPlacer {
+            }
+
+            @NamespaceTag("dark_oak_trunk_placer")
+            record DarkOakTrunkPlacer(int base_height, int height_rand_a, int height_rand_b) implements TrunkPlacer {
+            }
+
+            @NamespaceTag("fancy_trunk_placer")
+            record FancyTrunkPlacer(int base_height, int height_rand_a, int height_rand_b) implements TrunkPlacer {
+            }
+
             /**
              * @param bend_length Value between 1 and 64 (inclusive).
              * @param min_height_for_leaves (optional, defaults to 1) Must be a positive integer.
              */
+            @NamespaceTag("bending_trunk_placer")
             record BendingTrunkPlacer(int base_height, int height_rand_a, int height_rand_b, IntProvider bend_length, int min_height_for_leaves) implements TrunkPlacer {
-                @Override
-                public String type() {
-                    return "bending_trunk_placer";
-                }
             }
 
             /**
@@ -789,11 +860,8 @@ public sealed interface ConfiguredFeature {
              * @param place_branch_per_log_probability The probability of each log producing a branch. Value between 0.0 and 1.0 (inclusive).
              * @param can_grow_through A block ID or a block tag, or a list of block IDs. Represents blocks that tree trunks can grow through.
              */
+            @NamespaceTag("upwards_branching_trunk_placer")
             record UpwardsBranchingTrunkPlacer(int base_height, int height_rand_a, int height_rand_b, IntProvider extra_branch_steps, IntProvider extra_branch_length, float place_branch_per_log_probability, JsonUtils.SingleOrList<String> can_grow_through) implements TrunkPlacer {
-                @Override
-                public String type() {
-                    return "upwards_branching_trunk_placer";
-                }
             }
 
             /**
@@ -802,19 +870,22 @@ public sealed interface ConfiguredFeature {
              * @param branch_start_offset_from_top A uniform int provider, which provides a number between two bounds with uniform distribution. Must between -16 and 0 (inclusive). And since it needs at least 2 blocks variation for the branch starts to fit both branches, max_inclusive must be at least min_inclusive + 1.
              * @param branch_end_offset_from_top Value between -16 and 16 (inclusive).
              */
+            @NamespaceTag("cherry_trunk_placer")
             record CherryTrunkPlacer(int base_height, int height_rand_a, int height_rand_b, IntProvider branch_count, IntProvider branch_horizontal_length, IntProvider.Uniform branch_start_offset_from_top, IntProvider branch_end_offset_from_top) implements TrunkPlacer {
-                @Override
-                public String type() {
-                    return "cherry_trunk_placer";
-                }
             }
         }
 
-        public interface FoliagePlacer {
+        public sealed interface FoliagePlacer {
             /**
              * @return One of blob_foliage_placer, spruce_foliage_placer, pine_foliage_placer, acacia_foliage_placer, bush_foliage_placer, fancy_foliage_placer, jungle_foliage_placer, mega_pine_foliage_placer, dark_oak_foliage_placer, random_spread_foliage_placer, or cherry_foliage_placer.
              */
-            String type();
+            default NamespaceID type() {
+                return JsonUtils.getNamespaceTag(getClass());
+            }
+
+            static FoliagePlacer fromJson(JsonReader reader) throws IOException {
+                return JsonUtils.sealedUnionNamespace(reader, FoliagePlacer.class, "type");
+            }
 
             /**
              * @return radius The radius of the foliage.
@@ -829,82 +900,66 @@ public sealed interface ConfiguredFeature {
             /**
              * @param height The foliage's height. Value between 0 and 16 (inclusive).
              */
+            @NamespaceTag("blob_foliage_placer")
             record BlobFoliagePlacer(IntProvider radius, IntProvider offset, int height) implements FoliagePlacer {
-                @Override
-                public String type() {
-                    return "blob_foliage_placer";
-                }
             }
 
             /**
              * @param height The foliage's height. Value between 0 and 16 (inclusive).
              */
+            @NamespaceTag("bush_foliage_placer")
             record BushFoliagePlacer(IntProvider radius, IntProvider offset, int height) implements FoliagePlacer {
-                @Override
-                public String type() {
-                    return "bush_foliage_placer";
-                }
             }
 
             /**
              * @param height The foliage's height. Value between 0 and 16 (inclusive).
              */
+            @NamespaceTag("fancy_foliage_placer")
             record FancyFoliagePlacer(IntProvider radius, IntProvider offset, int height) implements FoliagePlacer {
-                @Override
-                public String type() {
-                    return "fancy_foliage_placer";
-                }
             }
 
             /**
              * @param height The foliage's height. Value between 0 and 16 (inclusive).
              */
+            @NamespaceTag("jungle_foliage_placer")
             record JungleFoliagePlacer(IntProvider radius, IntProvider offset, int height) implements FoliagePlacer {
-                @Override
-                public String type() {
-                    return "jungle_foliage_placer";
-                }
             }
 
             /**
              * @param trunk_height Value between 0 and 24 (inclusive).
              */
+            @NamespaceTag("spruce_foliage_placer")
             record SpruceFoliagePlacer(IntProvider radius, IntProvider offset, IntProvider trunk_height) implements FoliagePlacer {
-                @Override
-                public String type() {
-                    return "spruce_foliage_placer";
-                }
             }
 
             /**
              * @param height Value between 0 and 24 (inclusive).
              */
+            @NamespaceTag("pine_foliage_placer")
             record PineFoliagePlacer(IntProvider radius, IntProvider offset, IntProvider height) implements FoliagePlacer {
-                @Override
-                public String type() {
-                    return "pine_foliage_placer";
-                }
+            }
+
+            @NamespaceTag("acacia_foliage_placer")
+            record AcaciaFoliagePlacer(IntProvider radius, IntProvider offset) implements FoliagePlacer {
             }
 
             /**
              * @param crown_height Value between 0 and 24 (inclusive).
              */
+            @NamespaceTag("mega_pine_foliage_placer")
             record MegaPineFoliagePlacer(IntProvider radius, IntProvider offset, IntProvider crown_height) implements FoliagePlacer {
-                @Override
-                public String type() {
-                    return "mega_pine_foliage_placer";
-                }
+            }
+
+            @NamespaceTag("dark_oak_foliage_placer")
+            record DarkOakFoliagePlacer(IntProvider radius, IntProvider offset) implements FoliagePlacer {
             }
 
             /**
              * @param foliage_height Value between 1 and 512 (inclusive).
              * @param leaf_placement_attempts Value between 0 and 256 (inclusive).
              */
+            @NamespaceTag("random_spread_foliage_placer")
             record RandomSpreadFoliagePlacer(IntProvider radius, IntProvider offset, IntProvider foliage_height, int leaf_placement_attempts) implements FoliagePlacer {
-                @Override
-                public String type() {
-                    return "random_spread_foliage_placer";
-                }
             }
 
             /**
@@ -914,58 +969,53 @@ public sealed interface ConfiguredFeature {
              * @param hanging_leaves_chance Value between 0.0 and 1.0 (inclusive).
              * @param hanging_leaves_extension_chance Value between 0.0 and 1.0 (inclusive).
              */
+            @NamespaceTag("cherry_foliage_placer")
             record CherryFoliagePlacer(IntProvider radius, IntProvider offset, IntProvider height, float wide_bottom_layer_hole_chance, float corner_hole_chance, float hanging_leaves_chance, float hanging_leaves_extension_chance) implements FoliagePlacer {
-                @Override
-                public String type() {
-                    return "cherry_foliage_placer";
-                }
             }
         }
 
-        public interface Decorator {
+        public sealed interface Decorator {
             /**
              * @return The type of decoration to add. One of trunk_vine, leave_vine, cocoa, beehive, alter_ground, or attached_to_leaves.
              */
-            String type();
+            default NamespaceID type() {
+                return JsonUtils.getNamespaceTag(getClass());
+            }
+
+            static Decorator fromJson(JsonReader reader) throws IOException {
+                return JsonUtils.sealedUnionNamespace(reader, Decorator.class, "type");
+            }
+
+            @NamespaceTag("trunk_vine")
+            record TrunkVine() implements Decorator {
+            }
 
             /**
              * @param probability Value between 0.0 and 1.0 (inclusive).
              */
+            @NamespaceTag("leave_vine")
             record LeaveVine(float probability) implements Decorator {
-                @Override
-                public String type() {
-                    return "leave_vine";
-                }
             }
 
             /**
              * @param probability Value between 0.0 and 1.0 (inclusive).
              */
+            @NamespaceTag("cocoa")
             record Cocoa(float probability) implements Decorator {
-                @Override
-                public String type() {
-                    return "cocoa";
-                }
             }
 
             /**
              * @param probability Value between 0.0 and 1.0 (inclusive).
              */
+            @NamespaceTag("beehive")
             record Beehive(float probability) implements Decorator {
-                @Override
-                public String type() {
-                    return "beehive";
-                }
             }
 
             /**
              * @param provider The block to replace the ground with.
              */
+            @NamespaceTag("alter_ground")
             record AlterGround(BlockStateProvider provider) implements Decorator {
-                @Override
-                public String type() {
-                    return "alter_ground";
-                }
             }
 
             /**
@@ -976,17 +1026,9 @@ public sealed interface ConfiguredFeature {
              * @param block_provider The block of the decoration.
              * @param directions (Cannot be empty) Directions to generate.
              */
+            @NamespaceTag("attached_to_leaves")
             record AttachedToLeaves(float probability, int exclusion_radius_xz, int exclusion_radius_y, int required_empty_blocks, BlockStateProvider block_provider, List<String> directions) implements Decorator {
-                @Override
-                public String type() {
-                    return "attached_to_leaves";
-                }
             }
-        }
-
-        @Override
-        public NamespaceID type() {
-            return NamespaceID.from("tree");
         }
     }
 
@@ -1066,5 +1108,19 @@ public sealed interface ConfiguredFeature {
 
     @NamespaceTag("weeping_vines")
     record WeepingVines() implements ConfiguredFeature {
+    }
+
+    // UNDOCUMENTED
+
+    @NamespaceTag("clay_pool_with_dripleaves")
+    record ClayPoolWithDripleaves() implements ConfiguredFeature {
+    }
+
+    @NamespaceTag("clay_with_dripleaves")
+    record ClayWithDripleaves() implements ConfiguredFeature {
+    }
+
+    @NamespaceTag("moss_vegetation")
+    record MossVegetation() implements ConfiguredFeature {
     }
 }

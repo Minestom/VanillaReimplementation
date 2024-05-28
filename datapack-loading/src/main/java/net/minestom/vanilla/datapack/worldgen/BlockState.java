@@ -27,4 +27,8 @@ public record BlockState(String name, Map<String, String> properties) {
         reader.endObject();
         return new BlockState(name, properties);
     }
+
+    public static BlockState fromMinestom(Block block) {
+        return new BlockState(block.namespace().asString(), block.properties());
+    }
 }

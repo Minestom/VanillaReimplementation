@@ -257,7 +257,7 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
             feature.hook(context);
         } catch (Exception e) {
             Logger.error(e, "Failed to load feature: %s%n", feature.namespaceId());
-            throw new RuntimeException(e);
+            throw e;
         } finally {
             Loading.finish();
         }

@@ -4,6 +4,7 @@ import com.squareup.moshi.JsonReader;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
+import net.minestom.vanilla.datapack.json.NamespaceTag;
 import net.minestom.vanilla.datapack.json.Optional;
 
 import java.io.IOException;
@@ -11,7 +12,9 @@ import java.util.List;
 
 public sealed interface HeightProvider {
 
-    NamespaceID type();
+    default NamespaceID type() {
+        return JsonUtils.getNamespaceTag(this.getClass());
+    }
 
     static HeightProvider fromJson(JsonReader reader) throws IOException {
         try (var json = reader.peekJson()) {
@@ -20,70 +23,44 @@ public sealed interface HeightProvider {
                 return new Constant(VerticalAnchor.fromJson(reader));
             }
         }
-        return JsonUtils.unionStringTypeAdapted(reader, "type", type -> switch (type) {
-            case "minecraft:constant" -> Constant.class;
-            case "minecraft:uniform" -> Uniform.class;
-            case "minecraft:biased_to_bottom" -> BiasedToBottom.class;
-            case "minecraft:very_biased_to_bottom" -> VeryBiasedToBottom.class;
-            case "minecraft:biased_to_top" -> BiasedToTop.class;
-            case "minecraft:weighted_list" -> WeightedList.class;
-            default -> null;
-        });
+        return JsonUtils.sealedUnionNamespace(reader, HeightProvider.class, "type");
     }
 
     // value: The vertical anchor to use as constant height.
+    @NamespaceTag("constant")
     record Constant(VerticalAnchor value) implements HeightProvider {
-        @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:constant");
-        }
     }
 
     //  min_inclusive: The vertical anchor to use as minimum height.
     //  max_inclusive: The vertical anchor to use as maximum height.
+    @NamespaceTag("uniform")
     record Uniform(VerticalAnchor min_inclusive, VerticalAnchor max_inclusive) implements HeightProvider {
-        @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:uniform");
-        }
     }
 
     //  min_inclusive: The vertical anchor to use as minimum height.
     //  max_inclusive: The vertical anchor to use as maximum height.
     //  inner: (optional, defaults to 1) The inner value. Must be at least 1.
+    @NamespaceTag("biased_to_bottom")
     record BiasedToBottom(VerticalAnchor min_inclusive, VerticalAnchor max_inclusive, @Optional Integer inner) implements HeightProvider {
-        @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:biased_to_bottom");
-        }
     }
 
     // min_inclusive: The vertical anchor to use as minimum height.
     // max_inclusive: The vertical anchor to use as maximum height.
     // inner: (optional, defaults to 1) The inner value. Must be at least 1.
+    @NamespaceTag("very_biased_to_bottom")
     record VeryBiasedToBottom(VerticalAnchor min_inclusive, VerticalAnchor max_inclusive, @Optional Integer inner) implements HeightProvider {
-        @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:very_biased_to_bottom");
-        }
     }
 
     // min_inclusive: The vertical anchor to use as minimum height.
     // max_inclusive: The vertical anchor to use as maximum height.
     // plateau: (optional, defaults to 0) The length of the range in the middle of the trapezoid distribution that has a uniform distribution.
-    record BiasedToTop(VerticalAnchor min_inclusive, VerticalAnchor max_inclusive, @Optional Integer plateau) implements HeightProvider {
-        @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:biased_to_top");
-        }
+    @NamespaceTag("trapezoid")
+    record Trapezoid(VerticalAnchor min_inclusive, VerticalAnchor max_inclusive, @Optional Integer plateau) implements HeightProvider {
     }
 
     //  distribution: (Cannot be empty) A random weighted pool of height providers.
+    @NamespaceTag("weighted_list")
     record WeightedList(List<Entry> distribution) implements HeightProvider {
-        @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:weighted_list");
-        }
 
         // data: A height provider.
         // weight: The weight of this entry.
