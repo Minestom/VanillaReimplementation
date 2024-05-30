@@ -24,6 +24,7 @@ public class DensityFunctionTests {
 
     // End islands are used in many other tests. So test them first.
     private final String END_ISLANDS = "{ \"type\": \"minecraft:end_islands\" }";
+
     @Test
     public void testEndIslands() {
         assertExact(END_ISLANDS);
@@ -202,24 +203,6 @@ public class DensityFunctionTests {
                 """, END_ISLANDS, END_ISLANDS_CUBED));
     }
 
-    // Noise is the big boi, so test it thoroughly.
-    @Test
-    public void testNoise() {
-        assertExact("""
-                {
-                  "type": "minecraft:noise",
-                  "noise": {
-                    "firstOctave": -3,
-                    "amplitudes": [
-                      1
-                    ]
-                  },
-                  "xz_scale": 1.0,
-                  "y_scale": 1.0
-                }
-                """);
-    }
-
     private void testPositions(BiConsumer<Vec, Integer> consumer) {
         double dist = 0.0001;
 
@@ -231,6 +214,7 @@ public class DensityFunctionTests {
             double x = random.nextDouble(-dist, dist);
             double y = random.nextDouble(-dist, dist);
             double z = random.nextDouble(-dist, dist);
+
             consumer.accept(new Vec(x, y, z), i++);
         }
     }

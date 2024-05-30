@@ -20,6 +20,7 @@ public interface DensityFunction extends DensityFunctions, NumberFunction<Densit
         return JsonUtils.typeMap(reader, token -> switch (token) {
             case NUMBER -> json -> new Constant(json.nextDouble());
             case STRING -> json -> new LazyLoadedDensityFunction(json.nextString(), DatapackLoader.loading());
+            // TODO: Use JsonUtils.sealedUnionNamespace instead of JsonUtils.unionStringTypeAdapted
             case BEGIN_OBJECT -> json -> JsonUtils.unionStringTypeAdapted(json, "type", type -> switch (type) {
                 case "minecraft:blend_alpha" -> BlendAlpha.class;
                 case "minecraft:blend_offset" -> BlendOffset.class;
