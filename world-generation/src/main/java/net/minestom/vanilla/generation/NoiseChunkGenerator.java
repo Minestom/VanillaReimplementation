@@ -66,32 +66,13 @@ public class NoiseChunkGenerator implements ChunkGenerator {
         };
     }
 
-//    public fill(randomState: RandomState, chunk: Chunk, onlyFirstZ: boolean = false) {
-//        const minY = Math.max(chunk.minY, this.settings.noise.minY)
-//        const maxY = Math.min(chunk.maxY, this.settings.noise.minY + this.settings.noise.height)
-//
-//        const cellWidth = NoiseSettings.cellWidth(this.settings.noise)
-//        const cellHeight = NoiseSettings.cellHeight(this.settings.noise)
-//        const cellCountXZ = Math.floor(16 / cellWidth)
-//
-//        const minCellY = Math.floor(minY / cellHeight)
-//        const cellCountY = Math.floor((maxY - minY) / cellHeight)
-//
-//        const minX = ChunkPos.minBlockX(chunk.pos)
-//        const minZ = ChunkPos.minBlockZ(chunk.pos)
-//
-//        const noiseChunk = this.getOrCreateNoiseChunk(randomState, chunk)
-
     public void fill(Datapack datapack, RandomState randomState, TargetChunk chunk) {
-        fill(datapack, randomState, chunk, false);
-    }
-
-    public void fill(Datapack datapack, RandomState randomState, TargetChunk chunk, boolean onlyFirstZ) {
         int minY = Math.max(chunk.minY(), this.settings.noise().min_y());
         int maxY = Math.min(chunk.maxY(), this.settings.noise().min_y() + this.settings.noise().height());
 
         int cellWidth = NoiseSettings.cellWidth(this.settings);
         int cellHeight = NoiseSettings.cellHeight(this.settings);
+
         int cellCountXZ = Math.floorDiv(16, cellWidth);
 
         int minCellY = Math.floorDiv(minY, cellHeight);
@@ -100,7 +81,7 @@ public class NoiseChunkGenerator implements ChunkGenerator {
         NoiseChunk noiseChunk = this.getOrCreateNoiseChunk(randomState, chunk);
 
         for (int cellX = 0; cellX < cellCountXZ; cellX += 1) {
-            for (int cellZ = 0; cellZ < (onlyFirstZ ? 1 : cellCountXZ); cellZ += 1) {
+            for (int cellZ = 0; cellZ < cellCountXZ; cellZ += 1) {
                 for (int cellY = cellCountY - 1; cellY >= 0; cellY -= 1) {
                     for (int offY = cellHeight - 1; offY >= 0; offY -= 1) {
                         int blockY = (minCellY + cellY) * cellHeight + offY;
@@ -110,7 +91,7 @@ public class NoiseChunkGenerator implements ChunkGenerator {
                             int blockX = chunk.minX() + cellX * cellWidth + offX;
                             int sectionX = blockX & 0xF;
 
-                            for (int offZ = 0; offZ < (onlyFirstZ ? 1 : cellWidth); offZ += 1) {
+                            for (int offZ = 0; offZ < cellWidth; offZ += 1) {
                                 int blockZ = chunk.minZ() + cellZ * cellWidth + offZ;
                                 int sectionZ = blockZ & 0xF;
 
@@ -183,63 +164,6 @@ public class NoiseChunkGenerator implements ChunkGenerator {
         fill(this.datapack, randomState, chunk);
     }
 
-    private static class TargetChunkImpl implements TargetChunk {
-
-        private final int chunkX;
-        private final int chunkZ;
-
-        private final int minSection;
-        private final int maxSection;
-
-        private final ChunkBatch batch;
-
-        private final Int2ObjectMap<Block> blocks = new Int2ObjectOpenHashMap<>();
-
-        public TargetChunkImpl(ChunkBatch batch, int chunkX, int chunkZ, int minSection, int maxSection) {
-            this.chunkX = chunkX;
-            this.chunkZ = chunkZ;
-            this.minSection = minSection;
-            this.maxSection = maxSection;
-            this.batch = batch;
-        }
-
-        @Override
-        public int chunkX() {
-            return this.chunkX;
-        }
-
-        @Override
-        public int chunkZ() {
-            return this.chunkZ;
-        }
-
-        @Override
-        public int minSection() {
-            return this.minSection;
-        }
-
-        @Override
-        public int maxSection() {
-            return this.maxSection;
-        }
-
-        @Override
-        public @UnknownNullability Block getBlock(int x, int y, int z, @NotNull Condition condition) {
-            int index = ChunkUtils.getBlockIndex(x, y, z);
-            return this.blocks.getOrDefault(index, Block.STONE);
-        }
-
-        @Override
-        public void setBlock(int x, int y, int z, @NotNull Block block) {
-            if (x < minX() || x >= maxX() || y < minY() || y >= maxY() || z < minZ() || z >= maxZ()) {
-                return;
-            }
-            int index = ChunkUtils.getBlockIndex(x, y, z);
-            this.blocks.put(index, block);
-            batch.setBlock(x - minX(), y, z - minZ(), block);
-        }
-    }
-
     public interface TargetChunk extends Block.Getter, Block.Setter {
         int chunkX();
 
@@ -281,5 +205,62 @@ public class NoiseChunkGenerator implements ChunkGenerator {
     @Override
     public @Nullable List<ChunkPopulator> getPopulators() {
         return null;
+    }
+}
+
+class TargetChunkImpl implements NoiseChunkGenerator.TargetChunk {
+
+    private final int chunkX;
+    private final int chunkZ;
+
+    private final int minSection;
+    private final int maxSection;
+
+    private final ChunkBatch batch;
+
+    private final Int2ObjectMap<Block> blocks = new Int2ObjectOpenHashMap<>();
+
+    public TargetChunkImpl(ChunkBatch batch, int chunkX, int chunkZ, int minSection, int maxSection) {
+        this.chunkX = chunkX;
+        this.chunkZ = chunkZ;
+        this.minSection = minSection;
+        this.maxSection = maxSection;
+        this.batch = batch;
+    }
+
+    @Override
+    public int chunkX() {
+        return this.chunkX;
+    }
+
+    @Override
+    public int chunkZ() {
+        return this.chunkZ;
+    }
+
+    @Override
+    public int minSection() {
+        return this.minSection;
+    }
+
+    @Override
+    public int maxSection() {
+        return this.maxSection;
+    }
+
+    @Override
+    public @UnknownNullability Block getBlock(int x, int y, int z, @NotNull Condition condition) {
+        int index = ChunkUtils.getBlockIndex(x, y, z);
+        return this.blocks.getOrDefault(index, Block.STONE);
+    }
+
+    @Override
+    public void setBlock(int x, int y, int z, @NotNull Block block) {
+        if (x < minX() || x >= maxX() || y < minY() || y >= maxY() || z < minZ() || z >= maxZ()) {
+            return;
+        }
+        int index = ChunkUtils.getBlockIndex(x, y, z);
+        this.blocks.put(index, block);
+        batch.setBlock(x - minX(), y, z - minZ(), block);
     }
 }

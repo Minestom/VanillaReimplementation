@@ -102,21 +102,21 @@ public record NoiseSettings(
     /**
      *  noise_router: Routes density functions to noise parameters used for world generation. Each field can be an ID of density function or a density function (can be in constant form or object form).
      *
-     *      initial_density_without_jaggedness: Related to the generation of aquifer and surface rule. At a horizonal position, starting from the top of the world, the game searches from top to bottom with the precision of size_vertical*4 blocks. The first Y-level whose noise value greater than 25/64 is used as the initial terrain height for world generation. This height should be generally lower than the actual terrain height (determined by the final density).
-     *      final_density: Determines where there is an air or a default block. If positive, returns default block which will can be replaced by the  surface_rule. Otherwise, an air where aquifers can generate.
-     *      barrier: Affects whether to separate between aquifers and open areas in caves. Larger values leads to higher probability to separate.
-     *      fluid_level_floodedness: Affects the probability of generating liquid in an cave for aquifer. The larger value leads to higher probability. The noise value greater than 1.0 is regarded as 1.0, and value less than -1.0 is regarded as -1.0.
-     *      fluid_level_spread: Affects the height of the liquid surface at a horizonal position. Smaller value leads to higher probability for lower height.
-     *      lava: Affects whether an aquifer here uses lava instead of water. The threshold is 0.3.
-     *      vein_toggle: Affects ore vein type and vertical range. If the noise value is greater than 0.0, the vein will be a copper vein. If the noise value is less than or equal to 0.0, the vein will be an iron vein.
-     *      vein_ridged: Controls which blocks are part of a vein. If greater than or equal to 0.0, the block will not be part of a vein. If less than 0.0, the block will be either the vein type's stone block, or possibly an ore block.
-     *      vein_gap: Affects which blocks in a vein will be ore blocks. If greater than -0.3, and a random number is less than the absolute value of vein_toggle mapped from 0.4 - 0.6 to 0.1 - 0.3, with values outside of this range clamped, an ore block will be placed, with a 2% chance for the ore block to be a raw metal block. Otherwise, the ore type's stone block will be placed.
-     *      temperature: The temperature values for biome placement. This field and the following five fields are used for biome placement.
-     *      vegetation: The humidity values for biome placement.
-     *      continents: The continentalness values for terrain generation and biome placement.
-     *      erosion: The erosion values for terrain generation and biome placement.
-     *      depth: The depth values for terrain generation and biome placement.
-     *      ridges: The weirdness values for terrain generation and biome placement.
+     * @param initial_density_without_jaggedness Related to the generation of aquifer and surface rule. At a horizonal position, starting from the top of the world, the game searches from top to bottom with the precision of size_vertical*4 blocks. The first Y-level whose noise value greater than 25/64 is used as the initial terrain height for world generation. This height should be generally lower than the actual terrain height (determined by the final density).
+     * @param final_density Determines where there is an air or a default block. If positive, returns default block which will can be replaced by the  surface_rule. Otherwise, an air where aquifers can generate.
+     * @param barrier Affects whether to separate between aquifers and open areas in caves. Larger values leads to higher probability to separate.
+     * @param fluid_level_floodedness Affects the probability of generating liquid in an cave for aquifer. The larger value leads to higher probability. The noise value greater than 1.0 is regarded as 1.0, and value less than -1.0 is regarded as -1.0.
+     * @param fluid_level_spread Affects the height of the liquid surface at a horizonal position. Smaller value leads to higher probability for lower height.
+     * @param lava Affects whether an aquifer here uses lava instead of water. The threshold is 0.3.
+     * @param vein_toggle Affects ore vein type and vertical range. If the noise value is greater than 0.0, the vein will be a copper vein. If the noise value is less than or equal to 0.0, the vein will be an iron vein.
+     * @param vein_ridged Controls which blocks are part of a vein. If greater than or equal to 0.0, the block will not be part of a vein. If less than 0.0, the block will be either the vein type's stone block, or possibly an ore block.
+     * @param vein_gap Affects which blocks in a vein will be ore blocks. If greater than -0.3, and a random number is less than the absolute value of vein_toggle mapped from 0.4 - 0.6 to 0.1 - 0.3, with values outside of this range clamped, an ore block will be placed, with a 2% chance for the ore block to be a raw metal block. Otherwise, the ore type's stone block will be placed.
+     * @param temperature The temperature values for biome placement. This field and the following five fields are used for biome placement.
+     * @param vegetation The humidity values for biome placement.
+     * @param continents The continentalness values for terrain generation and biome placement.
+     * @param erosion The erosion values for terrain generation and biome placement.
+     * @param depth The depth values for terrain generation and biome placement.
+     * @param ridges The weirdness values for terrain generation and biome placement.
      */
     public record NoiseRouter(
             DensityFunction initial_density_without_jaggedness,
