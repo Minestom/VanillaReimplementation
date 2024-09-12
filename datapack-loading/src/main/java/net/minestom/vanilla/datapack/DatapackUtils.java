@@ -4,6 +4,7 @@ import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.worldgen.ConfiguredFeature;
 import net.minestom.vanilla.datapack.worldgen.DensityFunction;
 import net.minestom.vanilla.datapack.worldgen.ProcessorList;
+import net.minestom.vanilla.datapack.worldgen.StructureSet;
 import net.minestom.vanilla.datapack.worldgen.noise.Noise;
 import net.minestom.vanilla.files.FileSystem;
 import org.jetbrains.annotations.Nullable;
@@ -27,6 +28,10 @@ public class DatapackUtils {
 
     public static Optional<ProcessorList> findProcessorList(Datapack datapack, String file) {
         return findInJsonData(datapack, file, data -> data.world_gen().processor_list());
+    }
+
+    public static Optional<StructureSet> findStructureSet(Datapack datapack, String file) {
+        return findInJsonData(datapack, file, data -> data.world_gen().structure_set());
     }
 
     public static Optional<ConfiguredFeature> findConfiguredFeature(Datapack datapack, String file) {

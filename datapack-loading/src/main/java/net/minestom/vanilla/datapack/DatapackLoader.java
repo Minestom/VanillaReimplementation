@@ -11,6 +11,8 @@ import it.unimi.dsi.fastutil.doubles.DoubleLists;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntLists;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.utils.math.FloatRange;
 import net.minestom.vanilla.datapack.loot.NBTPath;
 import net.minestom.vanilla.datapack.trims.TrimMaterial;
@@ -39,8 +41,10 @@ import net.minestom.vanilla.datapack.number.NumberProvider;
 import net.minestom.vanilla.datapack.recipe.Recipe;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jglrxavpok.hephaistos.nbt.NBT;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTException;
+import org.jglrxavpok.hephaistos.nbt.NBTReader;
 import org.jglrxavpok.hephaistos.parser.SNBTParser;
 
 import java.io.IOException;
@@ -85,6 +89,7 @@ public class DatapackLoader {
 
         // Minestom
         register(builder, NBTCompound.class, DatapackLoader::nbtCompoundFromJson);
+        register(builder, Point.class, DatapackLoader::pointFromJson);
         register(builder, Block.class, DatapackLoader::blockFromJson);
         register(builder, Enchantment.class, DatapackLoader::enchantmentFromJson);
         register(builder, EntityType.class, DatapackLoader::entityTypeFromJson);
@@ -99,6 +104,7 @@ public class DatapackLoader {
         // Misc
         register(builder, DoubleList.class, DatapackLoader::doubleListFromJson);
         register(builder, IntList.class, DatapackLoader::intListFromJson);
+        register(builder, NBT.class, DatapackLoader::nbtFromJson);
 
         // VRI Datapack
         register(builder, Advancement.Trigger.class, Advancement.Trigger::fromJson);
@@ -156,6 +162,7 @@ public class DatapackLoader {
         register(builder, BlockStateProvider.DualNoiseProvider.Variety.class, BlockStateProvider.DualNoiseProvider.Variety::fromJson);
         register(builder, ProcessorList.Processor.class, ProcessorList.Processor::fromJson);
         register(builder, PosRuleTest.class, PosRuleTest::fromJson);
+        register(builder, StructureSet.Placement.class, StructureSet.Placement::fromJson);
 
         return builder.build();
     }
@@ -349,6 +356,15 @@ public class DatapackLoader {
         }
     }
 
+    private static Point pointFromJson(JsonReader reader) throws IOException {
+        reader.beginArray();
+        double x = reader.nextDouble();
+        double y = reader.nextDouble();
+        double z = reader.nextDouble();
+        reader.endArray();
+        return new Vec(x, y, z);
+    }
+
     private static NamespaceID namespaceFromJson(JsonReader reader) throws IOException {
         return NamespaceID.from(reader.nextString());
     }
@@ -417,6 +433,16 @@ public class DatapackLoader {
                 };
             default -> null;
         });
+    }
+
+    private static NBT nbtFromJson(JsonReader reader) throws IOException {
+        String nextSource = reader.nextSource().readUtf8();
+        SNBTParser snbtParser = new SNBTParser(new StringReader(nextSource));
+        try {
+            return snbtParser.parse();
+        } catch (NBTException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static final Pattern GENERICS = Pattern.compile("<.*>");

@@ -9,6 +9,7 @@ import net.minestom.vanilla.datapack.worldgen.util.Util;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -54,6 +55,11 @@ interface BiomeSources {
             return this.biome;
         }
 
+        @Override
+        public Set<NamespaceID> biomes() {
+            return Set.of(this.biome);
+        }
+
         public static FixedBiomeSource fromJson(Object obj) {
             JsonObject root = Util.jsonObject(obj);
             NamespaceID biome = NamespaceID.from(Util.jsonElse(root, "biome", "plains", JsonElement::getAsString));
@@ -61,7 +67,7 @@ interface BiomeSources {
         }
     }
 
-    record MultiNoiseBiomeSource(Climate.Parameters<NamespaceID> parameters) implements BiomeSource {
+    record MultiNoiseBiomeSource(Climate.Parameters<NamespaceID> parameters, Set<NamespaceID> biomes) implements BiomeSource {
 
         @Override
         public NamespaceID getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
@@ -73,7 +79,7 @@ interface BiomeSources {
             JsonObject root = Util.jsonObject(obj);
             JsonArray biomes = Util.jsonArray(root.get("biomes"));
 
-            var biomesList = StreamSupport.stream(biomes.spliterator(), false).map(b -> {
+            List<Map.Entry<NamespaceID, Climate.ParamPoint>> biomesList = StreamSupport.stream(biomes.spliterator(), false).map(b -> {
                 JsonObject json = Util.jsonObject(b);
                 var biomeName = NamespaceID.from(Util.jsonRequire(json, "biome", JsonElement::getAsString));
                 var parameters = Climate.ParamPoint.fromJson(json.get("parameters"));
@@ -85,7 +91,9 @@ interface BiomeSources {
                     e -> e::getKey
             ));
 
-            return new MultiNoiseBiomeSource(new Climate.Parameters<>(parameters));
+            return new MultiNoiseBiomeSource(new Climate.Parameters<>(parameters), biomesList.stream()
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toUnmodifiableSet()));
         }
     }
 
@@ -121,6 +129,11 @@ interface BiomeSources {
             } else {
                 return ISLANDS;
             }
+        }
+
+        @Override
+        public Set<NamespaceID> biomes() {
+            return Set.of(END, HIGHLANDS, MIDLANDS, ISLANDS, BARRENS);
         }
 
         public static TheEndBiomeSource fromJson(Object obj) {

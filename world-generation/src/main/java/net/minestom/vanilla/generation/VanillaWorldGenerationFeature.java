@@ -8,6 +8,8 @@ import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackLoadingFeature;
 import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
+import net.minestom.vanilla.datapack.worldgen.biome.BiomeSource;
+import net.minestom.vanilla.datapack.worldgen.biome.Climate;
 import net.minestom.vanilla.instance.SetupVanillaInstanceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,9 +33,20 @@ public class VanillaWorldGenerationFeature implements VanillaReimplementation.Fe
             }
 
             NoiseSettings settings = data.world_gen().noise_settings().file("overworld.json");
+            BiomeSource source = new BiomeSource() {
+                @Override
+                public NamespaceID getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
+                    return plains;
+                }
+
+                @Override
+                public Set<NamespaceID> biomes() {
+                    return Set.of(plains);
+                }
+            };
 //            BiomeSource.fromJson()
 
-            ThreadLocal<NoiseChunkGenerator> generators = ThreadLocal.withInitial(() -> new NoiseChunkGenerator(datapack, (x, y, z, sampler) -> plains, settings, event.getInstance().getDimensionType()));
+            ThreadLocal<NoiseChunkGenerator> generators = ThreadLocal.withInitial(() -> new NoiseChunkGenerator(source, settings));
             event.getInstance().setChunkGenerator(new ChunkGenerator() {
                 @Override
                 public void generateChunkData(@NotNull ChunkBatch batch, int chunkX, int chunkZ) {

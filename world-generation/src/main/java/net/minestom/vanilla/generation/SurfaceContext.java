@@ -26,13 +26,13 @@ public class SurfaceContext implements NoiseSettings.SurfaceRule.Context {
     public IntSupplier minSurfaceLevel = () -> 0;
 
     public final SurfaceSystem system;
-    public final NoiseChunkGenerator.TargetChunk chunk;
+    public final TargetChunk chunk;
     public final NoiseChunk noiseChunk;
     public final WorldgenContext context;
     private final Function<Point, NamespaceID> getBiome;
 
-    public SurfaceContext(SurfaceSystem system, NoiseChunkGenerator.TargetChunk chunk, NoiseChunk noiseChunk, WorldgenContext context,
-                   Function<Point, NamespaceID> getBiome) {
+    public SurfaceContext(SurfaceSystem system, TargetChunk chunk, NoiseChunk noiseChunk, WorldgenContext context,
+                          Function<Point, NamespaceID> getBiome) {
         this.system = system;
         this.chunk = chunk;
         this.noiseChunk = noiseChunk;

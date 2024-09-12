@@ -24,16 +24,16 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class Util {
-    public static double square(double x) {
-        return x * x;
+    public static double square(double value) {
+        return value * value;
     }
 
-    public static double cube(double x) {
-        return x * x * x;
+    public static double cube(double value) {
+        return value * value * value;
     }
 
-    public static double clamp(double x, double min, double max) {
-        return x < min ? min : Math.min(x, max);
+    public static double clamp(double value, double min, double max) {
+        return value < min ? min : Math.min(value, max);
     }
 
     public static double lerp(double a, double b, double c) {

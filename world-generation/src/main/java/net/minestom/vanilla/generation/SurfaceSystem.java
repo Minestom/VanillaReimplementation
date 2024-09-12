@@ -34,7 +34,7 @@ public class SurfaceSystem {
         this.defaultBlock = defaultBlock;
     }
 
-    public void buildSurface(NoiseChunkGenerator.TargetChunk chunk, NoiseChunk noiseChunk, WorldgenContext context, Function<Point, NamespaceID> getBiome) {
+    public void buildSurface(TargetChunk chunk, NoiseChunk noiseChunk, WorldgenContext context, Function<Point, NamespaceID> getBiome) {
         int minX = chunk.minX();
         int minZ = chunk.minZ();
         int minY = chunk.minY();

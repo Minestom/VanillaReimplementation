@@ -1,5 +1,6 @@
 package net.minestom.vanilla.datapack.worldgen;
 
+import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.files.ByteArray;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
@@ -50,7 +51,7 @@ import java.util.stream.Collectors;
  */
 public record Structure(int DataVersion, @Nullable String author, Point size,
                         @Nullable Set<BlockState> palette, @UnknownNullability Set<Set<BlockState>> palettes,
-                        List<Block> blocks, List<Entity> entities) {
+                        List<Block> blocks, List<Entity> entities, Set<NamespaceID> biomes) {
     public static Structure fromInput(ByteArray content) {
         try (NBTReader reader = new NBTReader(content.toStream())) {
 
@@ -73,7 +74,9 @@ public record Structure(int DataVersion, @Nullable String author, Point size,
             List<Block> blocks = parseBlocks(nbt_blocks);
             List<Entity> entities = parseEntities(nbt_entities);
 
-            return new Structure(DataVersion, author, size, palette, palettes, blocks, entities);
+            // TODO: Read biomes
+
+            return new Structure(DataVersion, author, size, palette, palettes, blocks, entities, Set.of());
         } catch (IOException | NBTException e) {
             throw new RuntimeException(e);
         }

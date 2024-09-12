@@ -163,7 +163,7 @@ public interface Datapack {
             FileSystem<PlacedFeature> placed_feature,
             FileSystem<ProcessorList> processor_list,
             FileSystem<ByteArray> structure,
-            FileSystem<ByteArray> structure_set,
+            FileSystem<StructureSet> structure_set,
             FileSystem<ByteArray> template_pool,
             FileSystem<ByteArray> world_preset
             ) {
@@ -180,7 +180,7 @@ public interface Datapack {
                     DatapackLoader.parseJsonFolder(worldgen, "placed_feature", DatapackLoader.adaptor(PlacedFeature.class)),
                     DatapackLoader.parseJsonFolder(worldgen, "processor_list", DatapackLoader.adaptor(ProcessorList.class)),
                     worldgen.folder("structure"),
-                    worldgen.folder("structure_set"),
+                    DatapackLoader.parseJsonFolder(worldgen, "structure_set", DatapackLoader.adaptor(StructureSet.class)),
                     worldgen.folder("template_pool"),
                     worldgen.folder("world_preset")
             );

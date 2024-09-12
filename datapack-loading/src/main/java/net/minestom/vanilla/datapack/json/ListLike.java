@@ -10,7 +10,7 @@ import java.util.ListIterator;
 public interface ListLike<T> extends List<T> {
 
     /**
-     * Returns a list containing all of the elements in this list, in proper sequence.
+     * Returns a list containing all the elements in this list, in proper sequence.
      */
     @NotNull List<T> list();
 

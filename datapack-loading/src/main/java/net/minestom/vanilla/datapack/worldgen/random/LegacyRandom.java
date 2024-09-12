@@ -58,6 +58,11 @@ public class LegacyRandom implements WorldgenRandom {
         return new LegacyPositionalRandom(this.nextLong());
     }
 
+    @Override
+    public WorldgenRandom withSeed(long seed) {
+        return WorldgenRandom.legacy(seed);
+    }
+
     public int next(int max) {
         long nextSeed = this.seed * 25214903917L + 11L & 281474976710655L;
         this.seed = nextSeed;

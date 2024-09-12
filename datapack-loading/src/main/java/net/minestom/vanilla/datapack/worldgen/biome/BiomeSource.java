@@ -5,12 +5,17 @@ import com.google.gson.JsonObject;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.worldgen.util.Util;
 
+import java.util.Collection;
+import java.util.Set;
+
 public interface BiomeSource extends BiomeSources {
 //    export interface BiomeSource {
 //        getBiome(x: number, y: number, z: number, climateSampler: Climate.Sampler): Identifier
 //    }
 
     NamespaceID getBiome(int x, int y, int z, Climate.Sampler climateSampler);
+
+    Collection<NamespaceID> biomes();
 
 //    export namespace BiomeSource {
 //        export function fromJson(obj: unknown): BiomeSource {
@@ -34,8 +39,8 @@ public interface BiomeSource extends BiomeSources {
         return new FixedBiomeSource(biome);
     }
 
-    static BiomeSource multiNoise(Climate.Parameters<NamespaceID> parameters) {
-        return new MultiNoiseBiomeSource(parameters);
+    static BiomeSource multiNoise(Climate.Parameters<NamespaceID> parameters, Set<NamespaceID> biomes) {
+        return new MultiNoiseBiomeSource(parameters, biomes);
     }
 
     static BiomeSource theEnd() {
@@ -51,7 +56,7 @@ public interface BiomeSource extends BiomeSources {
             case "checkerboard" -> CheckerboardBiomeSource.fromJson(obj);
             case "multi_noise" -> MultiNoiseBiomeSource.fromJson(obj);
             case "the_end" -> TheEndBiomeSource.fromJson(obj);
-            default -> (x, y, z, climateSampler) -> NamespaceID.from("plains");
+            default -> throw new IllegalStateException("Unexpected value: " + type);
         };
     }
 }

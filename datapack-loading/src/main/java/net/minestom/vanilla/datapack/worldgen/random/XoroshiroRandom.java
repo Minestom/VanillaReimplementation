@@ -71,6 +71,11 @@ public class XoroshiroRandom implements WorldgenRandom {
         return new XoroshiroPositionalRandom(xpp.nextLong(), xpp.nextLong());
     }
 
+    @Override
+    public WorldgenRandom withSeed(long seed) {
+        return new XoroshiroRandom(seed);
+    }
+
     private static class Xoroshiro128PlusPlus {
         private long seedLow;
         private long seedHigh;
@@ -87,11 +92,11 @@ public class XoroshiroRandom implements WorldgenRandom {
         public long nextLong() {
             long low = this.seedLow;
             long high = this.seedHigh;
-            long $$2 = Long.rotateLeft(low + high, 17) + low;
+            long result = Long.rotateLeft(low + high, 17) + low;
             high ^= low;
             this.seedLow = Long.rotateLeft(low, 49) ^ high ^ high << 21;
             this.seedHigh = Long.rotateLeft(high, 28);
-            return $$2;
+            return result;
         }
     }
 }

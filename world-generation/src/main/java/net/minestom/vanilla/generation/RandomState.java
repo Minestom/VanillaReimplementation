@@ -7,24 +7,32 @@ import net.minestom.vanilla.datapack.worldgen.random.LegacyRandom;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 import net.minestom.vanilla.datapack.worldgen.random.XoroshiroRandom;
 
-public class RandomState {
-
-    public final WorldgenRandom.Positional random;
-    public final WorldgenRandom.Positional aquiferRandom;
-    public final WorldgenRandom.Positional oreRandom;
-    public final SurfaceSystem surfaceSystem;
-    public final NoiseSettings.NoiseRouter router;
-    public final Climate.Sampler sampler;
-
-    public final long seed;
+public record RandomState(
+        long seed,
+        WorldgenRandom.Positional random,
+        WorldgenRandom.Positional aquiferRandom,
+        WorldgenRandom.Positional oreRandom,
+        SurfaceSystem surfaceSystem,
+        NoiseSettings.NoiseRouter router,
+        Climate.Sampler sampler) {
 
     public RandomState(NoiseSettings settings, long seed) {
-        this.seed = seed;
-        this.random = (settings.legacy_random_source() ? new LegacyRandom(seed) : new XoroshiroRandom(seed)).forkPositional();
-        this.aquiferRandom = this.random.fromHashOf(NamespaceID.from("aquifer").toString()).forkPositional();
-        this.oreRandom = this.random.fromHashOf(NamespaceID.from("ore").toString()).forkPositional();
-        this.surfaceSystem = new SurfaceSystem(settings.surface_rule(), settings.default_block().toMinestom(), seed);
-        this.router = settings.noise_router();
-        this.sampler = Climate.Sampler.fromRouter(this.router);
+        this(
+            settings,
+            seed,
+            (settings.legacy_random_source() ? new LegacyRandom(seed) : new XoroshiroRandom(seed)).forkPositional()
+        );
+    }
+
+    public RandomState(NoiseSettings settings, long seed, WorldgenRandom.Positional random) {
+        this(
+                seed,
+                random,
+                random.fromHashOf(NamespaceID.from("aquifer").toString()).forkPositional(),
+                random.fromHashOf(NamespaceID.from("ore").toString()).forkPositional(),
+                new SurfaceSystem(settings.surface_rule(), settings.default_block().toMinestom(), seed),
+                settings.noise_router(),
+                Climate.Sampler.fromRouter(settings.noise_router())
+        );
     }
 }

@@ -128,7 +128,7 @@ interface DensityFunctions {
         }
     }
 
-    interface Wrapped extends DensityFunction {
+    sealed interface Wrapped extends DensityFunction {
         DensityFunction wrapped();
 
         @Override
@@ -142,7 +142,7 @@ interface DensityFunctions {
         }
     }
 
-    class FlatCache implements Wrapped {
+    final class FlatCache implements Wrapped {
 
         private final DensityFunction argument;
 
@@ -171,7 +171,7 @@ interface DensityFunctions {
         }
     }
 
-    class Interpolated implements Wrapped {
+    final class Interpolated implements Wrapped {
         private final DensityFunction argument;
 
         @Json(ignore = true)
@@ -198,14 +198,18 @@ interface DensityFunctions {
             int blockX = context.blockX();
             int blockY = context.blockY();
             int blockZ = context.blockZ();
+
             int w = 4;
             int h = 4;
+
             double x = ((blockX % w + w) % w) / (double) w;
             double y = ((blockY % h + h) % h) / (double) h;
             double z = ((blockZ % w + w) % w) / (double) w;
+
             int firstX = Math.floorDiv(blockX, w) * w;
             int firstY = Math.floorDiv(blockY, h) * h;
             int firstZ = Math.floorDiv(blockZ, w) * w;
+
             DoubleSupplier noise000 = () -> this.computeCorner(firstX, firstY, firstZ);
             DoubleSupplier noise001 = () -> this.computeCorner(firstX, firstY, firstZ + w);
             DoubleSupplier noise010 = () -> this.computeCorner(firstX, firstY + h, firstZ);
@@ -214,6 +218,7 @@ interface DensityFunctions {
             DoubleSupplier noise101 = () -> this.computeCorner(firstX + w, firstY, firstZ + w);
             DoubleSupplier noise110 = () -> this.computeCorner(firstX + w, firstY + h, firstZ);
             DoubleSupplier noise111 = () -> this.computeCorner(firstX + w, firstY + h, firstZ + w);
+
             return Util.lazyLerp3(x, y, z, noise000, noise100, noise010, noise110, noise001, noise101, noise011, noise111);
         }
 
@@ -226,7 +231,7 @@ interface DensityFunctions {
         }
     }
 
-    class Cache2D implements Wrapped {
+    final class Cache2D implements Wrapped {
         // Only computes the input density once per horizonal position.
 
         private final DensityFunction argument;
@@ -258,7 +263,7 @@ interface DensityFunctions {
         }
     }
 
-    class CacheOnce implements Wrapped {
+    final class CacheOnce implements Wrapped {
 
         private final DensityFunction argument;
 

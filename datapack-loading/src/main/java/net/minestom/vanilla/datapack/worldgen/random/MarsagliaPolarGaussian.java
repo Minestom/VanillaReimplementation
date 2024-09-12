@@ -20,21 +20,21 @@ class MarsagliaPolarGaussian {
             this.hasNextGaussian = false;
             return this.nextGaussian;
         } else {
-            double a;
-            double b;
-            double c;
+            double x;
+            double y;
+            double z;
             do {
                 do {
-                    a = 2.0 * random.nextDouble() - 1.0;
-                    b = 2.0 * random.nextDouble() - 1.0;
-                    c = Util.square(a) + Util.square(b);
-                } while(c >= 1.0);
-            } while(c == 0.0);
+                    x = 2.0 * random.nextDouble() - 1.0;
+                    y = 2.0 * random.nextDouble() - 1.0;
+                    z = Util.square(x) + Util.square(y);
+                } while(z >= 1.0);
+            } while(z == 0.0);
 
-            double $$3 = Math.sqrt(-2.0 * Math.log(c) / c);
-            this.nextGaussian = b * $$3;
+            double gaussianFactor = Math.sqrt(-2.0 * Math.log(z) / z);
+            this.nextGaussian = y * gaussianFactor;
             this.hasNextGaussian = true;
-            return a * $$3;
+            return x * gaussianFactor;
         }
     }
 }

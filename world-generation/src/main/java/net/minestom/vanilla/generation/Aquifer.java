@@ -3,6 +3,7 @@ package net.minestom.vanilla.generation;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.vanilla.datapack.worldgen.DensityFunction;
 import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
 import net.minestom.vanilla.datapack.worldgen.util.Util;
@@ -36,6 +37,10 @@ public interface Aquifer {
         };
     }
 
+    static Aquifer create(NoiseChunk noiseChunk, long chunkIndex, NoiseSettings.NoiseRouter router, WorldgenRandom.Positional positional, int minY, int height, FluidPicker fluidPicker) {
+        return new NoiseAquifer(noiseChunk, chunkIndex, router, positional, minY, height, fluidPicker);
+    }
+
     class NoiseAquifer implements Aquifer {
         private static final int X_SPACING = 16;
         private static final int Y_SPACING = 12;
@@ -65,7 +70,7 @@ public interface Aquifer {
 
         public NoiseAquifer(
                 NoiseChunk noiseChunk,
-                Point chunkPos,
+                long chunkIndex,
                 NoiseSettings.NoiseRouter router,
                 WorldgenRandom.Positional random,
                 int minY,
@@ -75,11 +80,11 @@ public interface Aquifer {
             this.router = router;
             this.random = random;
             this.globalFluidPicker = globalFluidPicker;
-            this.minGridX = this.gridX(Util.chunkMinX(chunkPos)) - 1;
-            this.gridSizeX = this.gridX(Util.chunkMaxX(chunkPos)) + 1 - this.minGridX + 1;
+            this.minGridX = this.gridX(ChunkUtils.getChunkCoordX(chunkIndex)) - 1;
+            this.gridSizeX = this.gridX(ChunkUtils.getChunkCoordX(chunkIndex) + 15) + 1 - this.minGridX + 1;
             this.minGridY = this.gridY(minY) - 1;
-            this.minGridZ = this.gridZ(Util.chunkMinZ(chunkPos)) - 1;
-            this.gridSizeZ = this.gridZ(Util.chunkMaxZ(chunkPos)) + 1 - this.minGridZ + 1;
+            this.minGridZ = this.gridZ(ChunkUtils.getChunkCoordZ(chunkIndex)) - 1;
+            this.gridSizeZ = this.gridZ(ChunkUtils.getChunkCoordZ(chunkIndex) + 15) + 1 - this.minGridZ + 1;
             int gridSizeY = this.gridY(minY + height) + 1 - this.minGridY + 1;
             this.gridSize = this.gridSizeX * gridSizeY * this.gridSizeZ;
             this.aquiferCache = new HashMap<>();
