@@ -21,3 +21,7 @@ Once you have added your modules to your classpath, you can initiate vri in your
 `VanillaReimplementation vri = VanillaReimplementation.hook(MinecraftServer.process());`.
 
 See [here](https://github.com/Minestom/VanillaReimplementation/blob/93f29ab67ffff7d78e34b12ab5f00619109c84c7/server/src/main/java/net/minestom/vanilla/server/VanillaServer.java#L44) for an example.
+
+# How to contribute
+
+See [the github project](https://github.com/orgs/Minestom/projects/1) for a list of relevant tasks that need to be done.
