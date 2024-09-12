@@ -167,7 +167,7 @@ public enum VanillaBlocks {
     private final @NotNull Context2Handler context2handler;
 
     VanillaBlocks(@NotNull Block minestomBlock, @NotNull Context2Handler context2handler) {
-        this.stateId = minestomBlock.stateId();
+        this.stateId = (short) minestomBlock.stateId();
         this.context2handler = context -> {
             if (context.stateId() != minestomBlock.stateId()) {
                 throw new IllegalStateException("Block registry mismatch. Registered block: " + minestomBlock.stateId() +
@@ -235,7 +235,7 @@ public enum VanillaBlocks {
             VanillaBlockBehaviour behaviour = vb.context2handler.apply(context);
 
             for (Block possibleState : Objects.requireNonNull(Block.fromStateId(vb.stateId)).possibleStates()) {
-                short possibleStateId = possibleState.stateId();
+                short possibleStateId = (short) possibleState.stateId();
                 stateId2behaviour.put(possibleStateId, behaviour);
             }
 
@@ -253,9 +253,9 @@ public enum VanillaBlocks {
 
     private static void registerEvents(EventNode<Event> node, Short2ObjectMap<VanillaBlockBehaviour> behaviours) {
         node.addListener(EventListener.builder(PlayerBlockPlaceEvent.class)
-                .filter(event -> behaviours.containsKey(event.getBlock().stateId()))
+                .filter(event -> behaviours.containsKey((short) event.getBlock().stateId()))
                 .handler(event -> {
-                    short stateId = event.getBlock().stateId();
+                    short stateId = (short) event.getBlock().stateId();
                     Block block = Objects.requireNonNull(Block.fromStateId(stateId));
                     var behaviour = behaviours.get(stateId);
 

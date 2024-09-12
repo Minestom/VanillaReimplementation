@@ -15,7 +15,7 @@ public abstract class WaxableBlockBehaviour extends VanillaBlockBehaviour {
     protected final short waxedBlock;
     protected WaxableBlockBehaviour(VanillaBlocks.@NotNull BlockContext context, Block waxedTarget) {
         super(context);
-        this.waxedBlock = waxedTarget.stateId();
+        this.waxedBlock = (short) waxedTarget.stateId();
     }
 
     @Override

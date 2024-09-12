@@ -1,5 +1,6 @@
 package net.minestom.vanilla.entities;
 
+import net.minestom.server.collision.Aerodynamics;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.other.PrimedTntMeta;
@@ -21,7 +22,7 @@ public class PrimedTNTEntity extends Entity {
 
     public PrimedTNTEntity(int fuseTime) {
         super(EntityType.TNT);
-        setGravity(0.025f, getGravityAcceleration());
+        setAerodynamics(getAerodynamics().withVerticalAirResistance(0.98f));
         setBoundingBox(0.98f, 0.98f, 0.98f);
         this.fuseTime = fuseTime;
 

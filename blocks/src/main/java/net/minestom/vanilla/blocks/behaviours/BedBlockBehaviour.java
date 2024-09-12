@@ -11,6 +11,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.MathUtils;
 import net.minestom.server.utils.time.TimeUnit;
+import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.instance.VanillaExplosion;
@@ -71,8 +72,10 @@ public class BedBlockBehaviour extends VanillaBlockBehaviour {
         Instance instance = interaction.getInstance();
         Point pos = interaction.getBlockPosition();
         Player player = interaction.getPlayer();
+        var dimensionKey = instance.getDimensionType();
+        DimensionType dimension = MinecraftServer.getDimensionTypeRegistry().get(dimensionKey);
 
-        if (instance.getDimensionType().isBedSafe()) {
+        if (dimension.bedWorks()) {
             // TODO: make player sleep
             // TODO: checks for mobs
             // TODO: check for day

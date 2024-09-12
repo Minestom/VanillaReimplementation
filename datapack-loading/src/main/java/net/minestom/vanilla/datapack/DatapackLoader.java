@@ -4,7 +4,14 @@ import com.squareup.moshi.*;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.doubles.DoubleLists;
+import net.kyori.adventure.nbt.BinaryTagIO;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.TagStringIO;
+import net.kyori.adventure.text.StorageNBTComponent;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.item.enchant.Enchantment;
 import net.minestom.server.utils.math.FloatRange;
+import net.minestom.vanilla.datapack.dimension.DimensionType;
 import net.minestom.vanilla.datapack.loot.NBTPath;
 import net.minestom.vanilla.datapack.trims.TrimMaterial;
 import net.minestom.vanilla.datapack.trims.TrimPattern;
@@ -18,10 +25,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.item.Enchantment;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.datapack.advancement.Advancement;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.loot.LootTable;
@@ -32,9 +37,6 @@ import net.minestom.vanilla.datapack.number.NumberProvider;
 import net.minestom.vanilla.datapack.recipe.Recipe;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.jglrxavpok.hephaistos.nbt.NBTException;
-import org.jglrxavpok.hephaistos.parser.SNBTParser;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -77,7 +79,7 @@ public class DatapackLoader {
         });
 
         // Minestom
-        register(builder, NBTCompound.class, DatapackLoader::nbtCompoundFromJson);
+        register(builder, CompoundBinaryTag.class, DatapackLoader::nbtCompoundFromJson);
         register(builder, Block.class, DatapackLoader::blockFromJson);
         register(builder, Enchantment.class, DatapackLoader::enchantmentFromJson);
         register(builder, EntityType.class, DatapackLoader::entityTypeFromJson);
@@ -315,14 +317,9 @@ public class DatapackLoader {
         return (JsonUtils.IoFunction<JsonReader, T>) function;
     }
 
-    private static NBTCompound nbtCompoundFromJson(JsonReader reader) throws IOException {
+    private static CompoundBinaryTag nbtCompoundFromJson(JsonReader reader) throws IOException {
         String json = reader.nextSource().readUtf8();
-        SNBTParser parser = new SNBTParser(new StringReader(json));
-        try {
-            return (NBTCompound) parser.parse();
-        } catch (NBTException e) {
-            throw new RuntimeException(e);
-        }
+        return TagStringIO.get().asCompound(json);
     }
 
     private static NamespaceID namespaceFromJson(JsonReader reader) throws IOException {
@@ -341,7 +338,7 @@ public class DatapackLoader {
     }
 
     private static Enchantment enchantmentFromJson(JsonReader reader) throws IOException {
-        return Enchantment.fromNamespaceId(Objects.requireNonNull(namespaceFromJson(reader)));
+        return MinecraftServer.getEnchantmentRegistry().get(NamespaceID.from(reader.nextString()));
     }
 
     private static EntityType entityTypeFromJson(JsonReader reader) throws IOException {
@@ -349,7 +346,21 @@ public class DatapackLoader {
     }
 
     private static Material materialFromJson(JsonReader reader) throws IOException {
-        return Material.fromNamespaceId(Objects.requireNonNull(namespaceFromJson(reader)));
+        NamespaceID namespace = namespaceFromJson(reader);
+        Material mat = Material.fromNamespaceId(Objects.requireNonNull(namespace));
+
+        // TODO: Remove these legacy updates
+        Map<NamespaceID, Material> legacy = Map.of(
+                NamespaceID.from("scute"), Material.TURTLE_SCUTE
+        );
+
+        if (mat == null) {
+            if (legacy.containsKey(namespace)) {
+                return legacy.get(namespace);
+            }
+            throw new IllegalStateException("Material not found: " + namespace);
+        }
+        return mat;
     }
 
     private static FloatRange floatRangeFromJson(JsonReader reader) throws IOException {

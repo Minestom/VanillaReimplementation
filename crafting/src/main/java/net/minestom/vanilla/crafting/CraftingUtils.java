@@ -7,7 +7,6 @@ import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.StackingRule;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackUtils;
@@ -214,8 +213,8 @@ public record CraftingUtils(Datapack datapack) {
             // If the cursor is not empty:
 
             // if the cursor and output slot are compatible, merge the items
-            StackingRule stackingRule = StackingRule.get();
-            if (stackingRule.canBeStacked(cursor, output)) {
+            if (cursor.material() == output.material()) {
+                // TODO: Handle overflow
                 ItemStack newCursor = cursor.withAmount(amount -> amount + output.amount());
 
                 // I know these look swapped around, but it's correct

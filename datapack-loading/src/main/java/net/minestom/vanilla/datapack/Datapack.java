@@ -1,6 +1,7 @@
 package net.minestom.vanilla.datapack;
 
 import com.squareup.moshi.JsonReader;
+import net.minestom.vanilla.datapack.dimension.DimensionType;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.json.Optional;
 import net.minestom.vanilla.datapack.trims.TrimMaterial;
@@ -10,7 +11,6 @@ import net.minestom.vanilla.datapack.worldgen.noise.Noise;
 import net.minestom.vanilla.files.ByteArray;
 import net.minestom.vanilla.files.FileSystem;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.datapack.advancement.Advancement;
 import net.minestom.vanilla.datapack.loot.LootTable;
 import net.minestom.vanilla.datapack.loot.function.LootFunction;

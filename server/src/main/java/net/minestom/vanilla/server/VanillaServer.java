@@ -10,9 +10,11 @@ import net.minestom.server.extras.lan.OpenToLAN;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.ConnectionManager;
+import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.VanillaReimplementation;
+import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.logging.Level;
 import net.minestom.vanilla.logging.Loading;
 import net.minestom.vanilla.logging.Logger;
@@ -61,13 +63,6 @@ class VanillaServer {
         this.minecraftServer = minecraftServer;
         this.serverProperties = getOrGenerateServerProperties();
         this.vri = vri;
-
-
-        // Register all dimension types before making the worlds:
-        for (DimensionType dimension : VanillaDimensionTypes.values()) {
-            vri.process().dimension().addDimension(dimension);
-        }
-
         this.overworld = vri.createInstance(NamespaceID.from("world"), VanillaDimensionTypes.OVERWORLD);
 
         // Try to get server properties
@@ -78,31 +73,32 @@ class VanillaServer {
         EventNode<Event> eventHandler = MinecraftServer.getGlobalEventHandler();
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
 
-        vri.process().eventHandler()
-                .addListener(AsyncPlayerConfigurationEvent.class, event -> {
-                    event.setSpawningInstance(overworld);
-                    event.getPlayer().setGameMode(GameMode.SPECTATOR);
-                    overworld.loadChunk(0, 0).join();
-                    // TODO: Find the first block that is not air
-                    int y = overworld.getDimensionType().getMaxY();
-                    while (Block.AIR.compare(overworld.getBlock(0, y, 0))) {
-                        y--;
-                        if (y == overworld.getDimensionType().getMinY()) {
-                            break;
-                        }
-                    }
-                    event.getPlayer().setRespawnPoint(new Pos(0, y, 0));
-                });
+        DimensionType overworldDimension = VanillaDimensionTypes.OVERWORLD;
 
         vri.process().scheduler().scheduleNextTick(OpenToLAN::open);
 
         // Register systems
         {
-            // dimension types
-
             // Events
             VanillaEvents.register(this, serverProperties, eventHandler);
         }
+
+        overworld.loadChunk(0, 0).join();
+        int y = overworldDimension.maxY();
+        while (Block.AIR.compare(overworld.getBlock(0, y, 0))) {
+            y--;
+            if (y == overworldDimension.minY()) {
+                break;
+            }
+        }
+        int finalY = y;
+
+        vri.process().eventHandler()
+                .addListener(AsyncPlayerConfigurationEvent.class, event -> {
+                    event.setSpawningInstance(overworld);
+                    event.getPlayer().setGameMode(GameMode.SPECTATOR);
+                    event.getPlayer().setRespawnPoint(new Pos(0, finalY, 0));
+                });
 
         MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
             connectionManager.getOnlinePlayers().forEach(player -> {

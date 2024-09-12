@@ -1,10 +1,10 @@
 package net.minestom.vanilla.datapack.loot.context;
 
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.Map;
 import java.util.Set;
@@ -42,7 +42,7 @@ public class ContextGroups {
             .map(trait -> Map.entry(trait.id(), trait))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-    private static final Map<String, LootContext.Trait<NBTCompound>> nbtTraits = Set.of(
+    private static final Map<String, LootContext.Trait<CompoundBinaryTag>> nbtTraits = Set.of(
                     Traits.BLOCK_ENTITY.map(Block::nbt),
                     Traits.THIS.map(entity -> entity.tagHandler().asCompound()),
                     Traits.KILLER_ENTITY.map(entity -> entity.tagHandler().asCompound()),

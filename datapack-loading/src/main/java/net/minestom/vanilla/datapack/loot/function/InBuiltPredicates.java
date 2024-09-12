@@ -4,14 +4,19 @@ import com.squareup.moshi.JsonReader;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.item.Enchantment;
-import net.minestom.server.item.ItemMeta;
+import net.minestom.server.item.ItemComponent;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.component.EnchantmentList;
+import net.minestom.server.item.enchant.Enchantment;
+import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.json.Optional;
 import net.minestom.vanilla.datapack.loot.context.LootContext;
 import net.minestom.vanilla.datapack.number.NumberProvider;
 import net.minestom.vanilla.datapack.tags.ConditionsFor;
+import net.minestom.vanilla.utils.MinestomUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -298,8 +303,10 @@ interface InBuiltPredicates {
 
             Player player = context.get(LootContext.KILLER_PLAYER);
             if (player != null) {
-                ItemMeta meta = player.getItemInMainHand().meta();
-                looting = meta.getEnchantmentMap().getOrDefault(Enchantment.LOOTING, (short) 0);
+                EnchantmentList enchants = player.getItemInMainHand().get(ItemComponent.ENCHANTMENTS);
+                if (enchants != null && enchants.has(Enchantment.LOOTING)) {
+                    looting = enchants.level(Enchantment.LOOTING);
+                }
             }
 
             return random < chance + (looting * looting_multiplier);
@@ -345,7 +352,7 @@ interface InBuiltPredicates {
      * • enchantment: Resource location of enchantment.
      * • chances: List of probabilities for enchantment power, indexed from 0.
      */
-    record TableBonus(Enchantment enchantment, List<Float> chances) implements Predicate {
+    record TableBonus(NamespaceID enchantment, List<Float> chances) implements Predicate {
         @Override
         public String condition() {
             return "table_bonus";
@@ -353,8 +360,11 @@ interface InBuiltPredicates {
 
         @Override
         public boolean test(LootContext context) {
-            ItemMeta meta = context.getOrThrow(LootContext.TOOL).meta();
-            int level = meta.getEnchantmentMap().getOrDefault(enchantment, (short) 0);
+            ItemStack item = context.getOrThrow(LootContext.TOOL);
+            EnchantmentList enchants = item.get(ItemComponent.ENCHANTMENTS);
+            DynamicRegistry.Key<Enchantment> enchantment = MinestomUtils.getEnchantKey(this.enchantment);
+            int level = enchants == null || !enchants.has(enchantment) ? 0 : enchants.level(enchantment);
+
             return ThreadLocalRandom.current().nextFloat() < chances.get(level);
         }
     }

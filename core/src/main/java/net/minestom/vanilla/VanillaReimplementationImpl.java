@@ -5,13 +5,15 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
-import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.LightingChunk;
+import net.minestom.server.instance.anvil.AnvilLoader;
+import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import net.minestom.server.tag.TagWritable;
+import net.minestom.server.tag.Taggable;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
@@ -115,19 +117,9 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
     }
 
     private record EntityContextImpl(@NotNull EntityType type, @NotNull Pos position,
-                                     @NotNull TagHandler tagHandler) implements VanillaRegistry.EntityContext, TagWritable {
+                                     @NotNull TagHandler tagHandler) implements VanillaRegistry.EntityContext, Taggable {
         public EntityContextImpl(@NotNull EntityType type, @NotNull Pos position) {
             this(type, position, TagHandler.newHandler());
-        }
-
-        @Override
-        public <T> @UnknownNullability T getTag(@NotNull Tag<T> tag) {
-            return tagHandler.getTag(tag);
-        }
-
-        @Override
-        public <T> void setTag(@NotNull Tag<T> tag, @Nullable T value) {
-            tagHandler.setTag(tag, value);
         }
     }
 
@@ -167,7 +159,9 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
      * Creates a vanilla instance.
      */
     public @NotNull Instance createInstance(@NotNull NamespaceID name, @NotNull DimensionType dimension) {
-        InstanceContainer instance = process().instance().createInstanceContainer(dimension);
+        DynamicRegistry.Key<DimensionType> key = process().dimensionType().getKey(dimension);
+        Objects.requireNonNull(key, "Dimension type " + dimension + " is not registered!");
+        InstanceContainer instance = process().instance().createInstanceContainer(key);
         worlds.put(name, instance);
 
         // Anvil directory
@@ -269,6 +263,6 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
     }
 
     private void hookCoreLibrary() {
-        VanillaDimensionTypes.registerAll(process().dimension());
+        VanillaDimensionTypes.registerAll(process().dimensionType());
     }
 }

@@ -3,8 +3,6 @@ package net.minestom.vanilla.generation;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minestom.server.instance.Chunk;
-import net.minestom.server.instance.ChunkGenerator;
-import net.minestom.server.instance.ChunkPopulator;
 import net.minestom.server.instance.batch.ChunkBatch;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.NamespaceID;
@@ -22,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class NoiseChunkGenerator implements ChunkGenerator {
+public class NoiseChunkGenerator {
     private final Map<Long, NoiseChunk> noiseChunkCache = new HashMap<>();
     private final Aquifer.FluidPicker globalFluidPicker;
 
@@ -173,12 +171,11 @@ public class NoiseChunkGenerator implements ChunkGenerator {
         });
     }
 
-    @Override
     public synchronized void generateChunkData(@NotNull ChunkBatch batch, int chunkX, int chunkZ) {
         TargetChunkImpl chunk = new TargetChunkImpl(batch,
                 chunkX, chunkZ,
-                dimensionType.getMinY() / Chunk.CHUNK_SECTION_SIZE,
-                dimensionType.getMaxY() / Chunk.CHUNK_SECTION_SIZE);
+                dimensionType.minY() / Chunk.CHUNK_SECTION_SIZE,
+                dimensionType.maxY() / Chunk.CHUNK_SECTION_SIZE);
         RandomState randomState = new RandomState(settings, 125);
         fill(this.datapack, randomState, chunk);
     }
@@ -276,10 +273,5 @@ public class NoiseChunkGenerator implements ChunkGenerator {
         default int maxY() {
             return (maxSection() + 1) * Chunk.CHUNK_SECTION_SIZE;
         }
-    }
-
-    @Override
-    public @Nullable List<ChunkPopulator> getPopulators() {
-        return null;
     }
 }

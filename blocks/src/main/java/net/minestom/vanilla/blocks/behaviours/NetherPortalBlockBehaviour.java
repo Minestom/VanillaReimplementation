@@ -133,23 +133,30 @@ public class NetherPortalBlockBehaviour extends VanillaBlockBehaviour implements
     }
 
     private void attemptTeleport(Instance instance, Entity touching, Block block, long ticksSpentInPortal, NetherPortal portal) {
-        DimensionType targetDimension = VanillaDimensionTypes.NETHER;
+        DimensionType targetDimension;
         Point position = touching.getPosition();
 
         double targetX = position.x() / 8;
         double targetY = position.y();
         double targetZ = position.z() / 8;
 
-        if (instance.getDimensionType() == VanillaDimensionTypes.NETHER) {
-            targetDimension = DimensionType.OVERWORLD;
+        var key = instance.getDimensionType();
+        DimensionType dimension = MinecraftServer.getDimensionTypeRegistry().get(key);
+        if (dimension.effects().equals("nether")) {
+            targetDimension = MinecraftServer.getDimensionTypeRegistry().get(DimensionType.OVERWORLD);
             targetX = position.x() * 8;
             targetZ = position.z() * 8;
+        } else {
+            targetDimension = VanillaDimensionTypes.OVERWORLD;
         }
 
         // TODO: event to change portal linking
         final DimensionType finalTargetDimension = targetDimension;
         Optional<Instance> potentialTargetInstance = MinecraftServer.getInstanceManager().getInstances().stream()
-                .filter(in -> in.getDimensionType() == finalTargetDimension)
+                .filter(in -> {
+                    var key1 = in.getDimensionType();
+                    return MinecraftServer.getDimensionTypeRegistry().get(key1) == targetDimension;
+                })
                 .findFirst();
 
         if (potentialTargetInstance.isEmpty()) {

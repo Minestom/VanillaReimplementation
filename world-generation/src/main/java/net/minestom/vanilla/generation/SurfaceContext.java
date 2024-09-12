@@ -3,7 +3,7 @@ package net.minestom.vanilla.generation;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.server.world.biomes.Biome;
+import net.minestom.server.world.biome.Biome;
 import net.minestom.vanilla.datapack.worldgen.*;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 import net.minestom.vanilla.datapack.worldgen.util.Util;
@@ -21,7 +21,7 @@ public class SurfaceContext implements NoiseSettings.SurfaceRule.Context {
     public int surfaceDepth;
     public int waterHeight;
 
-    public Supplier<NamespaceID> fetchBiome = Biome.PLAINS::name;
+    public Supplier<NamespaceID> fetchBiome = Biome.PLAINS::namespace;
     public IntSupplier surfaceSecondary = () -> 0;
     public IntSupplier minSurfaceLevel = () -> 0;
 

@@ -53,7 +53,7 @@ public class VanillaEvents {
         VanillaTestGenerator noiseTestGenerator = new VanillaTestGenerator();
         Instance overworld = server.overworld();
 //        overworld.enableAutoChunkLoad(true);
-//        overworld.setGenerator(noiseTestGenerator);
+        overworld.setGenerator(noiseTestGenerator);
 //        overworld.setExplosionSupplier(explosionGenerator);
 //        overworld.setChunkLoader(new AnvilChunkLoader(storageManager.getLocation(worldName + "/region")));
 //
@@ -169,9 +169,15 @@ public class VanillaEvents {
 
                             player.getInstance().loadChunk(player.getPosition()).join();
 
-                            int y = player.getInstance().getDimensionType().getMaxY();
+                            var dimensionType = MinecraftServer.getDimensionTypeRegistry().get(player.getInstance().getDimensionType());
+                            int y = dimensionType.maxY();
                             while (player.getInstance().getBlock(1, y, 1).isAir()) {
                                 y--;
+
+                                if (y < dimensionType.minY()) {
+                                    y = dimensionType.maxY();
+                                    break;
+                                }
                             }
 
                             player.teleport(new Pos(1, y + 1, 1));

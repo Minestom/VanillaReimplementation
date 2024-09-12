@@ -1,7 +1,5 @@
 package net.minestom.vanilla.generation;
 
-import net.minestom.server.instance.ChunkGenerator;
-import net.minestom.server.instance.ChunkPopulator;
 import net.minestom.server.instance.batch.ChunkBatch;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaReimplementation;
@@ -33,18 +31,18 @@ public class VanillaWorldGenerationFeature implements VanillaReimplementation.Fe
             NoiseSettings settings = data.world_gen().noise_settings().file("overworld.json");
 //            BiomeSource.fromJson()
 
-            ThreadLocal<NoiseChunkGenerator> generators = ThreadLocal.withInitial(() -> new NoiseChunkGenerator(datapack, (x, y, z, sampler) -> plains, settings, event.getInstance().getDimensionType()));
-            event.getInstance().setChunkGenerator(new ChunkGenerator() {
-                @Override
-                public void generateChunkData(@NotNull ChunkBatch batch, int chunkX, int chunkZ) {
-                    generators.get().generateChunkData(batch, chunkX, chunkZ);
-                }
-
-                @Override
-                public @Nullable List<ChunkPopulator> getPopulators() {
-                    return null;
-                }
-            });
+//            ThreadLocal<NoiseChunkGenerator> generators = ThreadLocal.withInitial(() -> new NoiseChunkGenerator(datapack, (x, y, z, sampler) -> plains, settings, event.getInstance().getDimensionType()));
+//            event.getInstance().setChunkGenerator(new ChunkGenerator() {
+//                @Override
+//                public void generateChunkData(@NotNull ChunkBatch batch, int chunkX, int chunkZ) {
+//                    generators.get().generateChunkData(batch, chunkX, chunkZ);
+//                }
+//
+//                @Override
+//                public @Nullable List<ChunkPopulator> getPopulators() {
+//                    return null;
+//                }
+//            });
         });
     }
 

@@ -10,6 +10,7 @@ import java.util.OptionalInt;
 import java.util.Random;
 import java.util.stream.IntStream;
 
+import net.minestom.server.recipe.RecipeType;
 import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,7 +24,6 @@ import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.recipe.CampfireCookingRecipe;
-import net.minestom.server.recipe.Recipe.Type;
 import net.minestom.server.recipe.RecipeManager;
 import net.minestom.server.tag.Tag;
 import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
@@ -206,7 +206,7 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
             return Optional.empty();
         return recipeManager
                 .getRecipes().stream()
-                .filter(recipe -> recipe.getRecipeType() == Type.CAMPFIRE_COOKING)
+                .filter(recipe -> recipe.type() == RecipeType.CAMPFIRE_COOKING)
                 .map(CampfireCookingRecipe.class::cast)
                 .filter(recipe -> {
                     List<ItemStack> items = recipe.getIngredient().items();

@@ -3,7 +3,7 @@ plugins {
     `java-library`
     `maven-publish`
     id("com.github.harbby.gradle.serviceloader") version ("1.1.8")
-    id("com.github.johnrengelman.shadow") version ("7.1.2")
+    id("io.github.goooler.shadow") version ("8.1.8")
 }
 
 subprojects {
@@ -12,14 +12,14 @@ subprojects {
     plugins.apply("java-library")
     plugins.apply("maven-publish")
     plugins.apply("com.github.harbby.gradle.serviceloader")
-    plugins.apply("com.github.johnrengelman.shadow")
+    plugins.apply("io.github.goooler.shadow")
 
     group = "net.minestom.vanilla"
     version = "indev"
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
 
 //        withJavadocJar()
         withSourcesJar()

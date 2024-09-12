@@ -15,7 +15,7 @@ public class WaxedBlockBehaviour extends OxidatedBlockBehaviour {
 
     public WaxedBlockBehaviour(VanillaBlocks.@NotNull BlockContext context, Block unWaxed, int oxidisedLevel) {
         super(context, Block.fromStateId(context.stateId()), oxidisedLevel);
-        this.unWaxed = unWaxed.stateId();
+        this.unWaxed = (short) unWaxed.stateId();
     }
 
     @Override

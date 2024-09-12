@@ -1,13 +1,14 @@
 package net.minestom.vanilla.datapack.worldgen;
 
 import com.squareup.moshi.JsonReader;
+import net.kyori.adventure.nbt.BinaryTag;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.json.Optional;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.io.IOException;
 import java.util.List;
@@ -190,7 +191,7 @@ public record Biome(
                     /**
                      * Represents the value of an item particle.
                      */
-                    record Value(NamespaceID id, int count, NBTCompound tag) {
+                    record Value(NamespaceID id, int count, CompoundBinaryTag tag) {
 
                     }
 

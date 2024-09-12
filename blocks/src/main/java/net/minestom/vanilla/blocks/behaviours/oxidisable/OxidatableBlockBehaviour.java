@@ -51,8 +51,8 @@ public class OxidatableBlockBehaviour extends WaxableBlockBehaviour implements R
 
     public OxidatableBlockBehaviour(VanillaBlocks.@NotNull BlockContext context, Block previous, Block oxidised, Block waxed, int oxidisedLevel) {
         super(context, waxed);
-        this.previous = previous.stateId();
-        this.oxidised = oxidised.stateId();
+        this.previous = (short) previous.stateId();
+        this.oxidised = (short) oxidised.stateId();
         this.oxidisedLevel = oxidisedLevel;
     }
 

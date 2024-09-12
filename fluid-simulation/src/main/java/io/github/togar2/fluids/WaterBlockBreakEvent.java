@@ -1,5 +1,6 @@
 package io.github.togar2.fluids;
 
+import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.event.trait.BlockEvent;
 import net.minestom.server.event.trait.CancellableEvent;
@@ -10,12 +11,12 @@ import org.jetbrains.annotations.NotNull;
 
 public class WaterBlockBreakEvent implements InstanceEvent, BlockEvent, CancellableEvent {
     private final Instance instance;
-    private final Point blockPosition;
+    private final BlockVec blockPosition;
     private final Block block;
 
     private boolean cancelled;
 
-    public WaterBlockBreakEvent(@NotNull Instance instance, @NotNull Point blockPosition, @NotNull Block block) {
+    public WaterBlockBreakEvent(@NotNull Instance instance, @NotNull BlockVec blockPosition, @NotNull Block block) {
         this.instance = instance;
         this.blockPosition = blockPosition;
         this.block = block;
@@ -26,7 +27,7 @@ public class WaterBlockBreakEvent implements InstanceEvent, BlockEvent, Cancella
         return instance;
     }
 
-    public @NotNull Point getBlockPosition() {
+    public @NotNull BlockVec getBlockPosition() {
         return blockPosition;
     }
 

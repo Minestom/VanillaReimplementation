@@ -35,7 +35,7 @@ public class FireBlockBehaviour extends VanillaBlockBehaviour {
         }
 
         livingEntity.damage(DamageType.IN_FIRE, 1.0f);
-        livingEntity.setFireForDuration(8000, TimeUnit.MILLISECOND);
+        livingEntity.setFireTicks(8 * 20);
     }
 
     public void checkForPortal(Instance instance, Point pos, Block block) {

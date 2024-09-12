@@ -74,7 +74,7 @@ public class RandomTickManager {
         Point pos = new Vec(x, y, z);
 
         Block block = instance.getBlock(x, y, z);
-        RandomTickable randomTickable = randomTickables.get(block.stateId());
+        RandomTickable randomTickable = randomTickables.get((short) block.stateId());
         if (randomTickable == null) return;
         randomTickable.randomTick(new RandomTick(instance, pos, block));
     }

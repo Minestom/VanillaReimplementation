@@ -1,11 +1,15 @@
 package net.minestom.vanilla.inventory;
 
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
+
+import java.util.Objects;
 
 public class InventoryManipulation {
     public static void consumeItemIfNotCreative(Player player, ItemStack itemStack, Player.Hand hand) {
-        if (player.isCreative()) {
+        if (player.getGameMode() == GameMode.CREATIVE) {
             return;
         }
 
@@ -18,7 +22,7 @@ public class InventoryManipulation {
      * @return true if there was enough items to consume, false otherwise.
      */
     public static boolean consumeItemIfNotCreative(Player player, Player.Hand hand, int amount) {
-        if (player.isCreative()) {
+        if (player.getGameMode() == GameMode.CREATIVE) {
             return true;
         }
 
@@ -31,14 +35,14 @@ public class InventoryManipulation {
     }
 
     public static void damageItemIfNotCreative(Player player, Player.Hand hand, int amount) {
-        if (player.isCreative()) {
+        if (player.getGameMode() == GameMode.CREATIVE) {
             return;
         }
 
         ItemStack itemStack = player.getItemInHand(hand);
-        int damage = itemStack.meta().getDamage();
-        int maxDamage = itemStack.material().registry().maxDamage();
-        ItemStack newItem = itemStack.withMeta(meta -> meta.damage(damage + amount));
+        int damage = Objects.requireNonNullElse(itemStack.get(ItemComponent.DAMAGE), 0);
+        int maxDamage = Objects.requireNonNull(itemStack.material().registry().prototype().get(ItemComponent.MAX_DAMAGE));
+        ItemStack newItem = itemStack.with(ItemComponent.DAMAGE, damage + amount);
         if (damage + amount >= maxDamage) {
             newItem = ItemStack.AIR;
             // TODO: Item Break Event

@@ -1,9 +1,9 @@
 package net.minestom.vanilla.datapack.loot;
 
 import com.squareup.moshi.JsonReader;
+import net.kyori.adventure.nbt.BinaryTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBT;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -21,7 +21,7 @@ public interface NBTPath {
      * @param nbt the NBT to index
      * @return a map of the path to the resulting NBT
      */
-    @NotNull Map<NBTPath.Single, NBT> get(NBT nbt);
+    @NotNull Map<NBTPath.Single, BinaryTag> get(BinaryTag nbt);
 
     /**
      * A single path returns either a single NBT value or nothing.
@@ -38,12 +38,12 @@ public interface NBTPath {
          * @param nbt the NBT to index
          * @return the single result, or null if there is not exactly one result
          */
-        @Nullable NBT getSingle(NBT nbt);
+        @Nullable BinaryTag getSingle(BinaryTag nbt);
 
         @Override
         @Deprecated
-        default @NotNull Map<Single, NBT> get(NBT nbt) {
-            NBT single = getSingle(nbt);
+        default @NotNull Map<Single, BinaryTag> get(BinaryTag nbt) {
+            BinaryTag single = getSingle(nbt);
             return single == null ? Map.of() : Map.of(this, single);
         }
 
@@ -53,6 +53,6 @@ public interface NBTPath {
          * @param value the value to set
          * @return the new NBT, or null if the value could not be set i.e. the path did not exist
          */
-        @Nullable NBT set(NBT nbt, NBT value);
+        @Nullable BinaryTag set(BinaryTag nbt, BinaryTag value);
     }
 }

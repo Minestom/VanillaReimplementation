@@ -28,11 +28,15 @@ public class EndPortalBlockBehaviour extends VanillaBlockBehaviour {
     public void onTouch(@NotNull Touch touch) {
         Instance instance = touch.getInstance();
         Entity touching = touch.getTouching();
+        var key = instance.getDimensionType();
+        DimensionType dimension = MinecraftServer.getDimensionTypeRegistry().get(key);
 
-
-        DimensionType targetDimension = instance.getDimensionType() == VanillaDimensionTypes.END ? VanillaDimensionTypes.OVERWORLD : VanillaDimensionTypes.END;
+        DimensionType targetDimension = VanillaDimensionTypes.OVERWORLD;
         Optional<Instance> potentialTargetInstance = MinecraftServer.getInstanceManager().getInstances().stream()
-                .filter(in -> in.getDimensionType() == targetDimension)
+                .filter(in -> {
+                    var key1 = in.getDimensionType();
+                    return MinecraftServer.getDimensionTypeRegistry().get(key1) == targetDimension;
+                })
                 .findFirst();
 
         // TODO: event
@@ -55,7 +59,7 @@ public class EndPortalBlockBehaviour extends VanillaBlockBehaviour {
                 spawnPoint = new Pos(obsidianPlatformX, yLevel, obsidianPlatformZ);
             }
 
-            if (targetDimension == VanillaDimensionTypes.END) {
+            if (targetDimension.effects().equals("the_end")) {
                 for (int x = -1; x <= 1; x++) {
                     for (int z = -1; z <= 1; z++) {
                         targetInstance.loadChunk(obsidianPlatformX / 16 + x, obsidianPlatformZ / 16 + z);

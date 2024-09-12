@@ -1,9 +1,11 @@
 package net.minestom.vanilla.datapack.nbt;
 
+import net.kyori.adventure.nbt.BinaryTag;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.ListBinaryTag;
+import net.kyori.adventure.nbt.TagStringIO;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.*;
-import org.jglrxavpok.hephaistos.parser.SNBTParser;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -24,7 +26,7 @@ public class NBTUtils {
      *                        false, the comparison is checked to see if it contains each item in the guarantee.
      * @return true if the comparison fits the guarantee, otherwise false
      */
-    public static boolean compareNBT(@Nullable NBT guarantee, @Nullable NBT comparison, boolean assureListOrder) {
+    public static boolean compareNBT(@Nullable BinaryTag guarantee, @Nullable BinaryTag comparison, boolean assureListOrder) {
         if (guarantee == null) {
             // If there's no guarantee, it must always pass
             return true;
@@ -33,19 +35,19 @@ public class NBTUtils {
             // If it's null at this point, we already assured that guarantee is not null, so it must be invalid
             return false;
         }
-        if (!guarantee.getID().equals(comparison.getID())) {
+        if (!guarantee.type().equals(comparison.type())) {
             // If the types aren't equal it can't fulfill the guarantee anyway
             return false;
         }
         // If the list order is assured, it will be handled with the simple #equals call later in the method
-        if (!assureListOrder && guarantee instanceof NBTList<?> guaranteeList) {
-            NBTList<?> comparisonList = ((NBTList<?>) comparison);
-            if (guaranteeList.isEmpty()) {
-                return comparisonList.isEmpty();
+        if (!assureListOrder && guarantee instanceof ListBinaryTag guaranteeList) {
+            ListBinaryTag comparisonList = ((ListBinaryTag) comparison);
+            if (guaranteeList.size() == 0) {
+                return comparisonList.size() == 0;
             }
-            for (NBT nbt : guaranteeList) {
+            for (BinaryTag nbt : guaranteeList) {
                 boolean contains = false;
-                for (NBT compare : comparisonList) {
+                for (BinaryTag compare : comparisonList) {
                     if (compareNBT(nbt, compare, false)) {
                         contains = true;
                         break;
@@ -58,9 +60,9 @@ public class NBTUtils {
             return true;
         }
 
-        if (guarantee instanceof NBTCompound guaranteeCompound) {
-            NBTCompound comparisonCompound = ((NBTCompound) comparison);
-            for (String key : guaranteeCompound.getKeys()) {
+        if (guarantee instanceof CompoundBinaryTag guaranteeCompound) {
+            CompoundBinaryTag comparisonCompound = ((CompoundBinaryTag) comparison);
+            for (String key : guaranteeCompound.keySet()) {
                 if (!compareNBT(guaranteeCompound.get(key), comparisonCompound.get(key), assureListOrder)) {
                     return false;
                 }
@@ -75,7 +77,7 @@ public class NBTUtils {
      * Reads a NBT compound from the provided reader.<br>
      * This implementation may be slow, as it may try to parse NBT many times, but this is unavoidable for now.
      */
-    public static @Nullable NBTCompound readCompoundSNBT(@NotNull StringReader reader) throws IOException {
+    public static @Nullable CompoundBinaryTag readCompoundSNBT(@NotNull StringReader reader) throws IOException {
         if (reader.read() != '{') {
             return null;
         }
@@ -97,11 +99,8 @@ public class NBTUtils {
             } while (next != '}');
 
             try {
-                var nbt = new SNBTParser(new StringReader(string.toString())).parse();
-                return nbt instanceof NBTCompound compound ? compound : null;
-            } catch (NBTException ignored) {}
-
+                return TagStringIO.get().asCompound(string.toString());
+            } catch (IOException ignored) {}
         }
-
     }
 }

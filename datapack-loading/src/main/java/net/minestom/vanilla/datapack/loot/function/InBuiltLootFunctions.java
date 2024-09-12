@@ -1,22 +1,25 @@
 package net.minestom.vanilla.datapack.loot.function;
 
 import com.squareup.moshi.JsonReader;
+import net.kyori.adventure.nbt.*;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.attribute.Attribute;
-import net.minestom.server.attribute.AttributeOperation;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.color.DyeColor;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.EquipmentSlotGroup;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.attribute.Attribute;
+import net.minestom.server.entity.attribute.AttributeOperation;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
-import net.minestom.server.item.Enchantment;
+import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.attribute.AttributeSlot;
-import net.minestom.server.item.attribute.ItemAttribute;
-import net.minestom.server.item.metadata.PlayerHeadMeta;
-import net.minestom.server.tag.Tag;
+import net.minestom.server.item.component.AttributeList;
+import net.minestom.server.item.component.EnchantmentList;
+import net.minestom.server.item.enchant.Enchantment;
+import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.loot.LootTable;
@@ -26,12 +29,8 @@ import net.minestom.vanilla.datapack.loot.context.LootContext;
 import net.minestom.vanilla.datapack.number.NumberProvider;
 import net.minestom.vanilla.tag.Tags;
 import net.minestom.vanilla.utils.JavaUtils;
+import net.minestom.vanilla.utils.MinestomUtils;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBT;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.jglrxavpok.hephaistos.nbt.NBTList;
-import org.jglrxavpok.hephaistos.nbt.NBTType;
-import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
 
 import java.io.IOException;
 import java.util.*;
@@ -48,7 +47,7 @@ interface InBuiltLootFunctions {
             return NamespaceID.from("minecraft:apply_bonus");
         }
 
-        Enchantment enchantment();
+        NamespaceID enchantment();
 
         NamespaceID formula();
 
@@ -60,7 +59,7 @@ interface InBuiltLootFunctions {
             ));
         }
 
-        record BinomialWithBonusCount(Enchantment enchantment, Parameters parameters) implements ApplyBonus {
+        record BinomialWithBonusCount(NamespaceID enchantment, Parameters parameters) implements ApplyBonus {
             @Override
             public NamespaceID formula() {
                 return NamespaceID.from("minecraft:binomial_with_bonus_count");
@@ -71,7 +70,7 @@ interface InBuiltLootFunctions {
 
             @Override
             public ItemStack apply(Context context) {
-                int enchantLevel = context.itemStack().meta().getEnchantmentMap().get(enchantment);
+                int enchantLevel = MinestomUtils.getEnchantLevel(context.itemStack(), enchantment, 0);
                 double n = enchantLevel + parameters().extra();
 
                 RandomGenerator random = context.random();
@@ -85,7 +84,7 @@ interface InBuiltLootFunctions {
             }
         }
 
-        record UniformBonusCount(Enchantment enchantment, Parameters parameters) implements ApplyBonus {
+        record UniformBonusCount(NamespaceID enchantment, Parameters parameters) implements ApplyBonus {
 
             @Override
             public NamespaceID formula() {
@@ -97,14 +96,14 @@ interface InBuiltLootFunctions {
 
             @Override
             public ItemStack apply(Context context) {
-                int enchantLevel = context.itemStack().meta().getEnchantmentMap().getOrDefault(enchantment, (short) 0);
+                int enchantLevel = MinestomUtils.getEnchantLevel(context.itemStack(), enchantment, 0);
                 double n = enchantLevel * parameters.bonusMultiplier();
                 int count = (int) context.random().nextDouble(n);
                 return context.itemStack().withAmount(count);
             }
         }
 
-        record OreDrops(Enchantment enchantment) implements ApplyBonus {
+        record OreDrops(NamespaceID enchantment) implements ApplyBonus {
 
             @Override
             public NamespaceID formula() {
@@ -113,7 +112,7 @@ interface InBuiltLootFunctions {
 
             @Override
             public ItemStack apply(Context context) {
-                int enchantLevel = context.itemStack().meta().getEnchantmentMap().get(enchantment);
+                int enchantLevel = MinestomUtils.getEnchantLevel(context.itemStack(), enchantment, 0);
                 int itemCount = context.itemStack().amount() * (1 + context.random().nextInt(enchantLevel + 2));
                 return context.itemStack().withAmount(itemCount);
             }
@@ -142,7 +141,7 @@ interface InBuiltLootFunctions {
                 name = Component.text(handler.getNamespaceId().value());
             }
             if (name == null) return context.itemStack();
-            return context.itemStack().withDisplayName(name);
+            return context.itemStack().withCustomName(name);
         }
     }
 
@@ -156,8 +155,8 @@ interface InBuiltLootFunctions {
 
         @Override
         public ItemStack apply(Context context) {
-            NBT sourceNbt = source.nbt(context);
-            NBT itemStackTagNbt = context.itemStack().getTag(Tags.Items.TAG);
+            BinaryTag sourceNbt = source.nbt(context);
+            BinaryTag itemStackTagNbt = context.itemStack().getTag(Tags.Items.TAG);
             for (Operation operation : operations) {
                 itemStackTagNbt = operation.applyOperation(sourceNbt, itemStackTagNbt);
             }
@@ -168,7 +167,7 @@ interface InBuiltLootFunctions {
 
             String type();
 
-            NBT nbt(LootFunction.Context context);
+            BinaryTag nbt(LootFunction.Context context);
 
             static Source fromJson(JsonReader reader) throws IOException {
                 return JsonUtils.<Source>typeMap(reader, token -> switch (token) {
@@ -183,7 +182,7 @@ interface InBuiltLootFunctions {
                 });
             }
 
-            record Context(LootContext.Trait<NBTCompound> target) implements Source {
+            record Context(LootContext.Trait<CompoundBinaryTag> target) implements Source {
 
                 @Override
                 public String type() {
@@ -191,7 +190,7 @@ interface InBuiltLootFunctions {
                 }
 
                 @Override
-                public NBTCompound nbt(LootFunction.Context context) {
+                public CompoundBinaryTag nbt(LootFunction.Context context) {
                     return context.getOrThrow(target);
                 }
             }
@@ -204,9 +203,9 @@ interface InBuiltLootFunctions {
                 }
 
                 @Override
-                public NBTCompound nbt(LootFunction.Context context) {
+                public CompoundBinaryTag nbt(LootFunction.Context context) {
                     // TODO: Fetch command storage?
-                    return NBTCompound.EMPTY;
+                    return CompoundBinaryTag.empty();
                 }
             }
         }
@@ -219,12 +218,12 @@ interface InBuiltLootFunctions {
 
             String op();
 
-            NBT apply(NBT source, NBT target);
+            BinaryTag apply(BinaryTag source, BinaryTag target);
 
-            default NBT applyOperation(NBT source, NBT itemStackNbt) {
-                NBT sourceNbt = source().getSingle(source);
-                NBT targetNbt = target().getSingle(itemStackNbt);
-                NBT newNbt = apply(sourceNbt, targetNbt);
+            default BinaryTag applyOperation(BinaryTag source, BinaryTag itemStackNbt) {
+                BinaryTag sourceNbt = source().getSingle(source);
+                BinaryTag targetNbt = target().getSingle(itemStackNbt);
+                BinaryTag newNbt = apply(sourceNbt, targetNbt);
                 return target().set(itemStackNbt, newNbt);
             }
 
@@ -244,7 +243,7 @@ interface InBuiltLootFunctions {
                 }
 
                 @Override
-                public NBT apply(NBT source, NBT target) {
+                public BinaryTag apply(BinaryTag source, BinaryTag target) {
                     return source;
                 }
             }
@@ -256,12 +255,18 @@ interface InBuiltLootFunctions {
                 }
 
                 @Override
-                public NBT apply(NBT source, NBT target) {
-                    if (!(source instanceof NBTCompound sourceCompound && target instanceof NBTCompound targetCompound)) {
+                public BinaryTag apply(BinaryTag source, BinaryTag target) {
+                    if (!(source instanceof CompoundBinaryTag sourceCompound && target instanceof CompoundBinaryTag targetCompound)) {
                         throw new IllegalArgumentException("Cannot merge non-compound NBT types");
                     }
-                    //noinspection unchecked
-                    return targetCompound.withEntries(sourceCompound.getEntries().toArray(Map.Entry[]::new));
+                    Map<String, BinaryTag> output = new HashMap<>();
+                    for (Map.Entry<String, ? extends BinaryTag> entry : targetCompound) {
+                        output.put(entry.getKey(), entry.getValue());
+                    }
+                    for (Map.Entry<String, ? extends BinaryTag> entry : sourceCompound) {
+                        output.put(entry.getKey(), entry.getValue());
+                    }
+                    return CompoundBinaryTag.from(output);
                 }
             }
 
@@ -272,23 +277,23 @@ interface InBuiltLootFunctions {
                 }
 
                 @Override
-                public NBT apply(NBT source, NBT target) {
-                    if (!(source instanceof NBTList<?> sourceList && target instanceof NBTList<?> targetList)) {
+                public BinaryTag apply(BinaryTag source, BinaryTag target) {
+                    if (!(source instanceof ListBinaryTag sourceList && target instanceof ListBinaryTag targetList)) {
                         throw new IllegalArgumentException("Cannot append non-list NBT types");
                     }
 
-                    NBTType<?> sourceType = sourceList.getSubtagType();
-                    NBTType<?> targetType = targetList.getSubtagType();
+                    BinaryTagType<?> sourceType = sourceList.elementType();
+                    BinaryTagType<?> targetType = targetList.elementType();
 
                     if (sourceType != targetType) {
                         throw new IllegalArgumentException("Cannot append lists of different types");
                     }
 
-                    List<NBT> values = new ArrayList<>(targetList.asListView());
-                    for (NBT nbt : sourceList) {
+                    List<BinaryTag> values = new ArrayList<>(targetList.stream().toList());
+                    for (BinaryTag nbt : sourceList) {
                         values.add(nbt);
                     }
-                    return new NBTList<>(targetType, values);
+                    return ListBinaryTag.listBinaryTag(targetType, values);
                 }
             }
         }
@@ -307,16 +312,16 @@ interface InBuiltLootFunctions {
             Block blockState = context.getOrThrow(LootContext.BLOCK_STATE);
             Map<String, String> blockProperties = blockState.properties();
 
-            NBTCompound nbt = context.itemStack().getTag(Tags.Items.BLOCKSTATE);
-            MutableNBTCompound mutable = nbt.toMutableCompound();
+            CompoundBinaryTag nbt = context.itemStack().getTag(Tags.Items.BLOCKSTATE);
+            Map<String, BinaryTag> propertiesMap = new HashMap<>();
             for (String property : properties) {
                 String value = blockProperties.get(property);
                 if (value == null) {
                     throw new IllegalArgumentException("Block " + blockState + " does not have property " + property);
                 }
-                mutable.setString(property, value);
+                propertiesMap.put(property, StringBinaryTag.stringBinaryTag(value));
             }
-            return context.itemStack().withTag(Tags.Items.BLOCKSTATE, mutable.toCompound());
+            return context.itemStack().withTag(Tags.Items.BLOCKSTATE, CompoundBinaryTag.from(propertiesMap));
         }
     }
 
@@ -336,14 +341,20 @@ interface InBuiltLootFunctions {
                 itemStack = itemStack.withMaterial(Material.ENCHANTED_BOOK);
             }
 
-            // TODO: Find discoverable enchantments
-            // For now we will just use all possible enchantments, with level 1-3
-            Map<Enchantment, Short> enchantmentMap = new HashMap<>();
-            for (Enchantment enchantment : Enchantment.values()) {
-                enchantmentMap.put(enchantment, (short) context.random().nextInt(1, 4));
+            EnchantmentList list = itemStack.get(ItemComponent.ENCHANTMENTS);
+
+            for (Enchantment enchantment : enchantments) {
+                var key = MinecraftServer.getEnchantmentRegistry().getKey(enchantment);
+                if (key == null) {
+                    throw new IllegalArgumentException("Invalid enchantment: " + enchantment);
+                }
+                // random level 1-3
+                int level = context.random().nextInt(1, 4);
+
+                list = list.with(key, level);
             }
 
-            return itemStack.withMeta(builder -> builder.enchantments(enchantmentMap));
+            return itemStack.with(ItemComponent.ENCHANTMENTS, list);
         }
     }
 
@@ -366,10 +377,11 @@ interface InBuiltLootFunctions {
             NumberProvider.Context numberContext = context::random;
 
             // TODO: Proper enchanting system
-            int level = levels.asInt().apply(numberContext) / 10;
-            Enchantment randomEnchant = JavaUtils.randomElement(context.random(), Enchantment.values());
-
-            return itemStack.withMeta(builder -> builder.enchantment(randomEnchant, (short) level));
+//            int level = levels.asInt().apply(numberContext) / 10;
+//            Enchantment randomEnchant = JavaUtils.randomElement(context.random(), Enchantment.values());
+//
+//            return itemStack.withMeta(builder -> builder.enchantment(randomEnchant, (short) level));
+            return itemStack;
         }
     }
 
@@ -457,8 +469,10 @@ interface InBuiltLootFunctions {
                 throw new IllegalArgumentException("Entity must be a player");
             }
 
+            // TODO: Player head
             //noinspection UnstableApiUsage
-            return itemStack.withMeta(PlayerHeadMeta.class, builder -> builder.skullOwner(player.getUuid()));
+//            return itemStack.withMeta(PlayerHeadMeta.class, builder -> builder.skullOwner(player.getUuid()));
+            return itemStack;
         }
     }
 
@@ -540,8 +554,8 @@ interface InBuiltLootFunctions {
             int looting;
             if (killer instanceof Player player) {
                 ItemStack mainHand = player.getItemInMainHand();
-                Short lootingValue = mainHand.meta().getEnchantmentMap().get(Enchantment.LOOTING);
-                if (lootingValue == null) return itemStack;
+                int lootingValue = MinestomUtils.getEnchantLevel(mainHand, Enchantment.LOOTING.namespace(), 0);
+                if (lootingValue == 0) return itemStack;
                 looting = lootingValue;
             } else {
                 // TODO: Other entities that hold an item
@@ -564,12 +578,13 @@ interface InBuiltLootFunctions {
 
         @Override
         public ItemStack apply(Context context) {
-            List<ItemAttribute> newAttributes = modifiers().stream()
-                    .map(modifier -> modifier.apply(context))
-                    .toList();
-            List<ItemAttribute> oldAttributes = new ArrayList<>(context.itemStack().meta().getAttributes());
-            oldAttributes.addAll(newAttributes);
-            return context.itemStack().withMeta(builder -> builder.attributes(oldAttributes));
+            AttributeList list = context.itemStack().get(ItemComponent.ATTRIBUTE_MODIFIERS);
+            if (list == null) list = AttributeList.EMPTY;
+
+            for (AttributeModifier modifier : modifiers()) {
+                list = list.with(modifier.apply(context));
+            }
+            return context.itemStack().with(ItemComponent.ATTRIBUTE_MODIFIERS, list);
         }
 
         public enum Operation {
@@ -589,7 +604,7 @@ interface InBuiltLootFunctions {
 
             public AttributeOperation toMinestom() {
                 return switch (this) {
-                    case ADDITION -> AttributeOperation.ADDITION;
+                    case ADDITION -> AttributeOperation.ADD_VALUE;
                     case MULTIPLY_BASE -> AttributeOperation.MULTIPLY_BASE;
                     case MULTIPLY_TOTAL -> AttributeOperation.MULTIPLY_TOTAL;
                 };
@@ -614,14 +629,14 @@ interface InBuiltLootFunctions {
                 return id;
             }
 
-            public AttributeSlot toMinestom() {
+            public EquipmentSlotGroup toMinestom() {
                 return switch (this) {
-                    case MAINHAND -> AttributeSlot.MAINHAND;
-                    case OFFHAND -> AttributeSlot.OFFHAND;
-                    case FEET -> AttributeSlot.FEET;
-                    case LEGS -> AttributeSlot.LEGS;
-                    case CHEST -> AttributeSlot.CHEST;
-                    case HEAD -> AttributeSlot.HEAD;
+                    case MAINHAND -> EquipmentSlotGroup.MAIN_HAND;
+                    case OFFHAND -> EquipmentSlotGroup.OFF_HAND;
+                    case FEET -> EquipmentSlotGroup.FEET;
+                    case LEGS -> EquipmentSlotGroup.LEGS;
+                    case CHEST -> EquipmentSlotGroup.CHEST;
+                    case HEAD -> EquipmentSlotGroup.HEAD;
                 };
             }
         }
@@ -634,17 +649,19 @@ interface InBuiltLootFunctions {
                 this(name, attribute, operation, amount, id, List.of(slot));
             }
 
-            public ItemAttribute apply(Context context) {
+            public AttributeList.Modifier apply(Context context) {
                 UUID uuid = Objects.requireNonNullElseGet(id(), UUID::randomUUID);
-                Attribute attribute = Attribute.fromKey(attribute().path());
+                Attribute attribute = Attribute.fromNamespaceId(attribute().path());
                 AttributeOperation operation = operation().toMinestom();
                 double amount = amount().asDouble().apply(context::random);
-                AttributeSlot slot = JavaUtils.randomElement(context.random(), slot()).toMinestom();
+                net.minestom.server.entity.attribute.AttributeModifier modifier = new net.minestom.server.entity.attribute.AttributeModifier(name(), amount, operation);
+                EquipmentSlotGroup slot = JavaUtils.randomElement(context.random(), slot()).toMinestom();
 
                 if (attribute == null) {
                     throw new IllegalArgumentException("Invalid attribute: " + attribute());
                 }
-                return new ItemAttribute(uuid, name, attribute, operation, amount, slot);
+
+                return new AttributeList.Modifier(attribute, modifier, slot);
             }
         }
     }
@@ -747,11 +764,11 @@ interface InBuiltLootFunctions {
 
             int damage;
             if (add) {
-                damage = itemStack.meta().getDamage() + this.damage.asInt().apply(context::random);
+                damage = Objects.requireNonNullElse(itemStack.get(ItemComponent.DAMAGE), 0) + this.damage.asInt().apply(context::random);
             } else {
                 damage = this.damage.asInt().apply(context::random);
             }
-            return itemStack.withMeta(builder -> builder.damage(damage));
+            return itemStack.with(ItemComponent.DAMAGE, damage);
         }
     }
 
@@ -769,22 +786,25 @@ interface InBuiltLootFunctions {
             boolean add = Objects.requireNonNullElse(this.add, false);
             ItemStack itemStack = context.itemStack();
 
-            Map<Enchantment, Short> previous = itemStack.meta().getEnchantmentMap();
+            EnchantmentList list = itemStack.get(ItemComponent.ENCHANTMENTS);
+            if (list == null) list = EnchantmentList.EMPTY;
 
             for (var entry : enchantments.entrySet()) {
                 Enchantment enchantment = entry.getKey();
                 int count = entry.getValue().asInt().apply(context::random);
 
+                DynamicRegistry.Key<Enchantment> key = MinestomUtils.getEnchantKey(enchantment);
+
                 if (add) {
-                    int previousValue = previous.getOrDefault(enchantment, (short) 0);
+                    int previousValue = list.has(key) ? list.level(key) : 0;
                     int newValue = previousValue + count;
-                    itemStack = itemStack.withMeta(builder -> builder.enchantment(enchantment, (short) newValue));
+                    list = list.with(key, newValue);
                 } else {
-                    itemStack = itemStack.withMeta(builder -> builder.enchantment(enchantment, (short) count));
+                    list = list.with(key, count);
                 }
             }
 
-            return itemStack;
+            return itemStack.with(ItemComponent.ENCHANTMENTS, list);
         }
     }
 
@@ -839,10 +859,11 @@ interface InBuiltLootFunctions {
             if (replace) {
                 newLore = lore();
             } else {
-                newLore = new ArrayList<>(itemStack.meta().getLore());
+                List<Component> lore = itemStack.get(ItemComponent.LORE);
+                newLore = lore == null ? new ArrayList<>() : new ArrayList<>(lore);
                 newLore.addAll(lore());
             }
-            return itemStack.withMeta(builder -> builder.lore(newLore));
+            return itemStack.with(ItemComponent.LORE, newLore);
         }
     }
 
@@ -856,12 +877,12 @@ interface InBuiltLootFunctions {
 
         @Override
         public ItemStack apply(Context context) {
-            return context.itemStack().withMeta(builder -> builder.displayName(name));
+            return context.itemStack().withCustomName(name);
         }
     }
 
     // Adds or changes NBT data of the item.
-    record SetNBT(NBTCompound nbt) implements LootFunction {
+    record SetNBT(CompoundBinaryTag nbt) implements LootFunction {
 
         @Override
         public NamespaceID function() {
@@ -870,11 +891,12 @@ interface InBuiltLootFunctions {
 
         @Override
         public ItemStack apply(Context context) {
-            return context.itemStack().withMeta(builder -> {
-                for (var entry : nbt) {
-                    builder = builder.set(Tag.NBT(entry.getKey()), entry.getValue());
-                }
-            });
+            CompoundBinaryTag currentNbt = context.itemStack().toItemNBT();
+            CompoundBinaryTag newNbt = CompoundBinaryTag.builder()
+                    .put(currentNbt)
+                    .put(nbt)
+                    .build();
+            return ItemStack.fromItemNBT(newNbt);
         }
     }
 

@@ -23,7 +23,7 @@ public class SaveAllCommand extends Command {
     private void execute(CommandSender player, CommandContext arguments) {
         MinecraftServer.getInstanceManager().getInstances().forEach(i -> {
             i.saveChunksToStorage();
-            Logger.info("Saved dimension " + i.getDimensionType().getName());
+            Logger.info("Saved dimension " + i.getDimensionType().name());
         });
     }
 }

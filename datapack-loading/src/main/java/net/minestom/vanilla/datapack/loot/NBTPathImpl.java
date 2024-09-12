@@ -1,15 +1,11 @@
 package net.minestom.vanilla.datapack.loot;
 
 import it.unimi.dsi.fastutil.ints.IntSet;
+import net.kyori.adventure.nbt.*;
 import net.minestom.vanilla.datapack.nbt.NBTUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBT;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.jglrxavpok.hephaistos.nbt.NBTList;
-import org.jglrxavpok.hephaistos.nbt.NBTType;
-import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -17,6 +13,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
 
 interface NBTPathImpl extends NBTPath {
 
@@ -31,13 +28,13 @@ interface NBTPathImpl extends NBTPath {
         return single;
     }
 
-    interface NbtPathCollector<T extends NBT> extends BiConsumer<SingleSelector<T>, NBT> {
+    interface NbtPathCollector<T extends BinaryTag> extends BiConsumer<SingleSelector<T>, BinaryTag> {
     }
 
     /**
      * Selects an arbitrary number of elements from a provided NBT element.
      */
-    interface Selector<T extends NBT> {
+    interface Selector<T extends BinaryTag> {
 
         /**
          * Provides each selected NBT element from {@code source} into {@code selectedElements}.
@@ -53,14 +50,14 @@ interface NBTPathImpl extends NBTPath {
          * @param type the type to check
          * @return true if this selector can be used to select the provided {@code type}
          */
-        boolean fitsGeneric(@NotNull NBTType<?> type);
+        boolean fitsGeneric(@NotNull BinaryTagType<?> type);
     }
 
     /**
      * Selects a single element (or none) from a provided NBT element.
      * @param <T>
      */
-    interface SingleSelector<T extends NBT> extends Selector<T> {
+    interface SingleSelector<T extends BinaryTag> extends Selector<T> {
 
         /**
          * Provides the selected NBT element from {@code source}.
@@ -68,11 +65,11 @@ interface NBTPathImpl extends NBTPath {
          * @param source the reference that is the source NBT element
          * @return the selected NBT element
          */
-        @Nullable NBT get(@NotNull T source);
+        @Nullable BinaryTag get(@NotNull T source);
 
         @Override
         default void get(@NotNull T source, @NotNull NbtPathCollector<T> selectedElements) {
-            NBT selected = get(source);
+            BinaryTag selected = get(source);
             if (selected != null) selectedElements.accept(this, selected);
         }
     }
@@ -80,16 +77,16 @@ interface NBTPathImpl extends NBTPath {
 
 record NBTPathMultiImpl(@NotNull List<NBTPathImpl.Selector<?>> selectors) implements NBTPathImpl {
 
-    public @NotNull Map<Single, NBT> get(@NotNull NBT source) {
-        Map<List<NBTPathImpl.SingleSelector<?>>, NBT> references = Map.of(List.of(), source);
+    public @NotNull Map<Single, BinaryTag> get(@NotNull BinaryTag source) {
+        Map<List<NBTPathImpl.SingleSelector<?>>, BinaryTag> references = Map.of(List.of(), source);
         for (var selector : selectors()) {
-            Map<List<NBTPathImpl.SingleSelector<?>>, NBT> newReferences = new HashMap<>();
+            Map<List<NBTPathImpl.SingleSelector<?>>, BinaryTag> newReferences = new HashMap<>();
 
             references.forEach((list, nbt) -> {
-                if (!selector.fitsGeneric(nbt.getID())) return;
+                if (!selector.fitsGeneric(nbt.type())) return;
 
                 //noinspection unchecked
-                ((NBTPathImpl.Selector<NBT>) selector).get(nbt, (newSelector, newNbt) -> {
+                ((NBTPathImpl.Selector<BinaryTag>) selector).get(nbt, (newSelector, newNbt) -> {
                     List<NBTPathImpl.SingleSelector<?>> newKey = new ArrayList<>(list);
                     newKey.add(newSelector);
                     newReferences.put(newKey, newNbt);
@@ -102,7 +99,7 @@ record NBTPathMultiImpl(@NotNull List<NBTPathImpl.Selector<?>> selectors) implem
         return references.entrySet().stream()
                 .map(entry -> {
                     NBTPath.Single path = new NBTPathSingleImpl(Collections.unmodifiableList(entry.getKey()));
-                    NBT nbt = entry.getValue();
+                    BinaryTag nbt = entry.getValue();
                     return Map.entry(path, nbt);
                 }).collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
     }
@@ -118,20 +115,20 @@ record NBTPathMultiImpl(@NotNull List<NBTPathImpl.Selector<?>> selectors) implem
 record NBTPathSingleImpl(List<NBTPathImpl.SingleSelector<?>> selectors) implements NBTPathImpl, NBTPath.Single {
 
     @Override
-    public @Nullable NBT getSingle(NBT nbt) {
+    public @Nullable BinaryTag getSingle(BinaryTag nbt) {
         for (var selector : selectors()) {
-            if (nbt == null || !selector.fitsGeneric(nbt.getID())) {
+            if (nbt == null || !selector.fitsGeneric(nbt.type())) {
                 // path has failed
                 return null;
             }
             //noinspection unchecked
-            nbt = ((NBTPathImpl.SingleSelector<NBT>) selector).get(nbt);
+            nbt = ((NBTPathImpl.SingleSelector<BinaryTag>) selector).get(nbt);
         }
         return nbt;
     }
 
     @Override
-    public @Nullable NBT set(NBT nbt, NBT value) {
+    public @Nullable BinaryTag set(BinaryTag nbt, BinaryTag value) {
         return retrieveModified(0, nbt, value);
     }
 
@@ -142,20 +139,20 @@ record NBTPathSingleImpl(List<NBTPathImpl.SingleSelector<?>> selectors) implemen
      * @param value the value to set
      * @return the modified version of the container
      */
-    private @Nullable NBT retrieveModified(int i, NBT container, NBT value) {
+    private @Nullable BinaryTag retrieveModified(int i, BinaryTag container, BinaryTag value) {
         if (i == selectors.size()) return value;
         if (container == null) return null;
 
         SingleSelector<?> selector = selectors.get(i);
-        if (!selector.fitsGeneric(container.getID())) return null;
+        if (!selector.fitsGeneric(container.type())) return null;
 
         //noinspection unchecked
-        NBT nbt = ((SingleSelector<NBT>) selector).get(container);
+        BinaryTag nbt = ((SingleSelector<BinaryTag>) selector).get(container);
         if (nbt == null) return null;
 
         // handle the next id on a per-type basis
-        if (nbt.getID() == NBTType.TAG_Compound) {
-            NBTCompound compound = (NBTCompound) nbt;
+        if (nbt.type() == BinaryTagTypes.COMPOUND) {
+            CompoundBinaryTag compound = (CompoundBinaryTag) nbt;
 
             String key;
             { // find the key
@@ -171,15 +168,16 @@ record NBTPathSingleImpl(List<NBTPathImpl.SingleSelector<?>> selectors) implemen
             }
 
             // key is not null, which means that we need to set the value in the compound
-            NBT nextValue = retrieveModified(i + 1, compound.get(key), value);
+            BinaryTag nextValue = retrieveModified(i + 1, compound.get(key), value);
             if (nextValue == null) return null;
-            MutableNBTCompound mutCompound = compound.toMutableCompound();
-            mutCompound.set(key, nextValue);
-            return mutCompound.toCompound();
+            Map<String, BinaryTag> mutCompound = StreamSupport.stream(compound.spliterator(), false)
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            mutCompound.put(key, nextValue);
+            return CompoundBinaryTag.from(mutCompound);
         }
 
-        if (nbt.getID() == NBTType.TAG_List) {
-            NBTList<?> list = (NBTList<?>) nbt;
+        if (nbt.type() == BinaryTagTypes.LIST) {
+            ListBinaryTag list = (ListBinaryTag) nbt;
 
             int index;
             { // find the index
@@ -187,14 +185,14 @@ record NBTPathSingleImpl(List<NBTPathImpl.SingleSelector<?>> selectors) implemen
                 else throw new IllegalStateException("Unknown selector type: " + selector.getClass());
             }
 
-            if (index < 0 || index >= list.getSize()) return null;
+            if (index < 0 || index >= list.size()) return null;
 
-            NBT nextValue = retrieveModified(i + 1, list.get(index), value);
+            BinaryTag nextValue = retrieveModified(i + 1, list.get(index), value);
             if (nextValue == null) return null;
 
-            List<NBT> javaList = new ArrayList<>(list.asListView());
+            List<BinaryTag> javaList = new ArrayList<>(list.stream().toList());
             javaList.set(index, nextValue);
-            return new NBTList<>(list.getSubtagType(), javaList);
+            return ListBinaryTag.listBinaryTag(list.elementType(), javaList);
         }
 
         // the current nbt container is a value, which means we replace it directly with the value param
@@ -210,17 +208,17 @@ record NBTPathSingleImpl(List<NBTPathImpl.SingleSelector<?>> selectors) implemen
  *
  * @param key the key to select
  */
-record RootKey(@NotNull String key) implements NBTPathImpl.SingleSelector<NBTCompound> {
+record RootKey(@NotNull String key) implements NBTPathImpl.SingleSelector<CompoundBinaryTag> {
 
     @Override
-    public @Nullable NBT get(@NotNull NBTCompound source) {
-        if (!source.contains(key)) return null;
+    public @Nullable BinaryTag get(@NotNull CompoundBinaryTag source) {
+        if (!source.keySet().contains(key)) return null;
         return source.get(key);
     }
 
     @Override
-    public boolean fitsGeneric(@NotNull NBTType<?> type) {
-        return type == NBTType.TAG_Compound;
+    public boolean fitsGeneric(@NotNull BinaryTagType<?> type) {
+        return type == BinaryTagTypes.COMPOUND;
     }
 
     @Override
@@ -234,17 +232,17 @@ record RootKey(@NotNull String key) implements NBTPathImpl.SingleSelector<NBTCom
  *
  * @param key the key to select
  */
-record CompoundKey(@NotNull String key) implements NBTPathImpl.SingleSelector<NBTCompound> {
+record CompoundKey(@NotNull String key) implements NBTPathImpl.SingleSelector<CompoundBinaryTag> {
 
     @Override
-    public @Nullable NBT get(@NotNull NBTCompound source) {
-        if (!source.contains(key)) return null;
+    public @Nullable BinaryTag get(@NotNull CompoundBinaryTag source) {
+        if (!source.keySet().contains(key)) return null;
         return source.get(key);
     }
 
     @Override
-    public boolean fitsGeneric(@NotNull NBTType<?> type) {
-        return type == NBTType.TAG_Compound;
+    public boolean fitsGeneric(@NotNull BinaryTagType<?> type) {
+        return type == BinaryTagTypes.COMPOUND;
     }
 
     @Contract(pure = true)
@@ -259,21 +257,25 @@ record CompoundKey(@NotNull String key) implements NBTPathImpl.SingleSelector<NB
  *
  * @param filter the filter to use
  */
-record CompoundFilter(@NotNull NBTCompound filter) implements NBTPathImpl.SingleSelector<NBT> {
+record CompoundFilter(@NotNull CompoundBinaryTag filter) implements NBTPathImpl.SingleSelector<BinaryTag> {
 
     @Override
-    public @Nullable NBT get(@NotNull NBT source) {
+    public @Nullable BinaryTag get(@NotNull BinaryTag source) {
         return NBTUtils.compareNBT(filter, source, false) ? source : null;
     }
 
     @Override
-    public boolean fitsGeneric(@NotNull NBTType<?> type) {
+    public boolean fitsGeneric(@NotNull BinaryTagType<?> type) {
         return true;
     }
 
     @Override
     public @NotNull String toString() {
-        return filter.toSNBT();
+        try {
+            return TagStringIO.get().asString(filter);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 
@@ -283,19 +285,19 @@ record CompoundFilter(@NotNull NBTCompound filter) implements NBTPathImpl.Single
  *
  * @param index the index to select, or negative to select starting from the end
  */
-record ListIndex(int index) implements NBTPathImpl.SingleSelector<NBTList<?>> {
+record ListIndex(int index) implements NBTPathImpl.SingleSelector<ListBinaryTag> {
 
     @Override
-    public @Nullable NBT get(@NotNull NBTList<?> source) {
-        var newIndex = index >= 0 ? index : source.getSize() + index;
+    public @Nullable BinaryTag get(@NotNull ListBinaryTag source) {
+        var newIndex = index >= 0 ? index : source.size() + index;
         if (newIndex < 0) return null;
-        if (newIndex >= source.getSize()) return null;
+        if (newIndex >= source.size()) return null;
         return source.get(newIndex);
     }
 
     @Override
-    public boolean fitsGeneric(@NotNull NBTType<?> type) {
-        return type == NBTType.TAG_List;
+    public boolean fitsGeneric(@NotNull BinaryTagType<?> type) {
+        return type == BinaryTagTypes.LIST;
     }
 
     @Contract(pure = true)
@@ -310,50 +312,54 @@ record ListIndex(int index) implements NBTPathImpl.SingleSelector<NBTList<?>> {
  *
  * @param filter the filter for each element in the list
  */
-record ListFilter(@NotNull NBTCompound filter) implements NBTPathImpl.Selector<NBTList<?>> {
+record ListFilter(@NotNull CompoundBinaryTag filter) implements NBTPathImpl.Selector<ListBinaryTag> {
 
     @Override
-    public void get(@NotNull NBTList<?> source, NBTPathImpl.@NotNull NbtPathCollector<NBTList<?>> selectedElements) {
-        IntStream.range(0, source.getSize())
+    public void get(@NotNull ListBinaryTag source, NBTPathImpl.@NotNull NbtPathCollector<ListBinaryTag> selectedElements) {
+        IntStream.range(0, source.size())
                 .mapToObj(i -> Map.entry(i, source.get(i)))
                 .filter(entry -> NBTUtils.compareNBT(filter, entry.getValue(), false))
                 .forEach(entry -> {
                     int i = entry.getKey();
-                    NBT nbt = entry.getValue();
+                    BinaryTag nbt = entry.getValue();
                     selectedElements.accept(new ListIndex(i), nbt);
                 });
     }
 
     @Override
-    public boolean fitsGeneric(@NotNull NBTType<?> type) {
-        return type == NBTType.TAG_List;
+    public boolean fitsGeneric(@NotNull BinaryTagType<?> type) {
+        return type == BinaryTagTypes.LIST;
     }
 
     @Override
     public @NotNull String toString() {
-        return "[" + filter.toSNBT() + "]";
+        try {
+            return "[" + TagStringIO.get().asString(filter) + "]";
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 
 /**
  * Selects, if possible, every item from the provided list.<br>
  */
-record EntireList() implements NBTPathImpl.Selector<NBTList<?>> {
+record EntireList() implements NBTPathImpl.Selector<ListBinaryTag> {
 
     @Override
-    public void get(@NotNull NBTList<?> source, NBTPathImpl.@NotNull NbtPathCollector<NBTList<?>> selectedElements) {
-        IntStream.range(0, source.getSize())
+    public void get(@NotNull ListBinaryTag source, NBTPathImpl.@NotNull NbtPathCollector<ListBinaryTag> selectedElements) {
+        IntStream.range(0, source.size())
                 .mapToObj(i -> Map.entry(i, source.get(i)))
                 .forEach(entry -> {
                     int i = entry.getKey();
-                    NBT nbt = entry.getValue();
+                    BinaryTag nbt = entry.getValue();
                     selectedElements.accept(new ListIndex(i), nbt);
                 });
     }
 
     @Override
-    public boolean fitsGeneric(@NotNull NBTType<?> type) {
-        return type == NBTType.TAG_List;
+    public boolean fitsGeneric(@NotNull BinaryTagType<?> type) {
+        return type == BinaryTagTypes.LIST;
     }
 
     @Contract(pure = true)

@@ -1,6 +1,7 @@
 package net.minestom.vanilla.blocks.behaviours.recipe;
 
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
@@ -45,7 +46,7 @@ public class FurnaceBehaviour extends InventoryBlockBehaviour {
         Instance instance = tick.getInstance();
         Point pos = tick.getBlockPosition();
         Inventory inventory = BlockInventory.from(instance, pos, InventoryType.FURNACE, Component.text("Furnace"));
-        FurnaceTickEvent event = new FurnaceTickEvent(tick.getBlock(), tick.getInstance(), tick.getBlockPosition(), inventory);
+        FurnaceTickEvent event = new FurnaceTickEvent(tick.getBlock(), tick.getInstance(), new BlockVec(tick.getBlockPosition()), inventory);
         events.call(event);
     }
 }

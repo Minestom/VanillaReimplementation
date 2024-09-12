@@ -68,7 +68,7 @@ public class BlockUpdateManager {
                     for (int z = minZ; z < minZ + Chunk.CHUNK_SIZE_Z; z++) {
                         for (int y = minY; y < maxY; y++) {
                             Block block = chunk.getBlock(x, y, z);
-                            BlockUpdatable updatable = blockUpdatables.get(block.stateId());
+                            BlockUpdatable updatable = blockUpdatables.get((short) block.stateId());
                             if (updatable == null) continue;
                             updatable.blockUpdate(instance, new Vec(x, y, z), BlockUpdateInfo.CHUNK_LOAD());
                         }

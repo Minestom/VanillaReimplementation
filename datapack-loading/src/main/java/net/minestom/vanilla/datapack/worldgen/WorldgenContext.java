@@ -9,10 +9,10 @@ public interface WorldgenContext {
     }
 
     default int minY() {
-        return dimension().getMinY();
+        return dimension().minY();
     }
     default int maxY() {
-        return dimension().getMaxY();
+        return dimension().maxY();
     }
 
     DimensionType dimension();

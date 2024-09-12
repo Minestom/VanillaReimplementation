@@ -11,7 +11,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.packet.server.play.EffectPacket;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
-import net.minestom.server.particle.ParticleCreator;
+import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import org.jetbrains.annotations.Nullable;
 
@@ -105,10 +105,12 @@ public final class NetherPortal {
             int y = pos.blockY();
             int z = pos.blockZ();
 
-            ParticlePacket particlePacket = ParticleCreator.createParticlePacket(Particle.BLOCK, false,
+            ParticlePacket particlePacket = new ParticlePacket(
+                    Particle.BLOCK.withBlock(Block.NETHER_PORTAL),
                     x + 0.5f, y, z + 0.5f,
                     0.4f, 0.5f, 0.4f,
-                    0.3f, 10, writer -> writer.writeVarInt(Block.NETHER_PORTAL.id()));
+                    0.3f, 10
+            );
 
             EffectPacket effectPacket = new EffectPacket(
                     Effects.BLOCK_BREAK.getId(),
@@ -126,7 +128,7 @@ public final class NetherPortal {
     }
 
     public boolean tryFillFrame(Instance instance) {
-        if (instance.getDimensionType() == VanillaDimensionTypes.END) {
+        if (instance.getDimensionType().namespace().equals(NamespaceID.from("the_end"))) {
             return false;
         }
 
