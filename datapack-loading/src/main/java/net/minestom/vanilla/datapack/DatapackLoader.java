@@ -88,7 +88,11 @@ public class DatapackLoader {
             GsonComponentSerializer serializer = GsonComponentSerializer.gson();
             return serializer.deserialize(reader.nextSource().readUtf8());
         });
-        register(builder, NamespaceID.class, reader -> NamespaceID.from(reader.nextString()));
+        register(builder, NamespaceID.class, reader -> {
+            String next = reader.nextString();
+            if (next.startsWith("#")) next = next.substring(1);
+            return NamespaceID.from(next);
+        });
         register(builder, FloatRange.class, DatapackLoader::floatRangeFromJson);
 
         // Misc
@@ -144,11 +148,15 @@ public class DatapackLoader {
     public static <T> Function<String, T> adaptor(Class<T> clazz) {
         return str -> {
             try {
-                return moshi.adapter(clazz).fromJson(str);
+                return jsonAdaptor(clazz).fromJson(str);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         };
+    }
+
+    public static <T> JsonAdapter<T> jsonAdaptor(Class<T> clazz) {
+        return moshi.adapter(clazz);
     }
 
     private static final ThreadLocal<LoadingContext> contextPool = new ThreadLocal<>();

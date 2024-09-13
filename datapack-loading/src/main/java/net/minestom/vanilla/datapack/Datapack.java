@@ -131,12 +131,9 @@ public interface Datapack {
 
             record ObjectOrTagReference(NamespaceID tag) implements TagValue {
                 public static ObjectOrTagReference fromJson(JsonReader reader) throws IOException {
-                    return JsonUtils.typeMap(reader, token -> {
-                        if (JsonReader.Token.STRING == token) {
-                            return json -> new ObjectOrTagReference(NamespaceID.from(json.nextString()));
-                        }
-                        return null;
-                    });
+                    return JsonUtils.typeMapMapped(reader, Map.of(
+                            JsonReader.Token.STRING, json -> new ObjectOrTagReference(DatapackLoader.jsonAdaptor(NamespaceID.class).fromJson(json))
+                    ));
                 }
             }
 

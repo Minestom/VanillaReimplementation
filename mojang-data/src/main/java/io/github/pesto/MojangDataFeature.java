@@ -23,7 +23,7 @@ public class MojangDataFeature implements VanillaReimplementation.Feature {
 
     @Override
     public @NotNull NamespaceID namespaceId() {
-        return NamespaceID.from("io.github.pesto:mojang_data");
+        return NamespaceID.from("io_github_pesto:mojang_data");
     }
 
     public FileSystem<ByteArray> latestAssets() {

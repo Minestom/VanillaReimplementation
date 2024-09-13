@@ -165,22 +165,6 @@ public class VanillaEvents {
                             Player player = event.getPlayer();
 
                             player.setPermissionLevel(4);
-                            player.setGameMode(GameMode.CREATIVE);
-
-                            player.getInstance().loadChunk(player.getPosition()).join();
-
-                            var dimensionType = MinecraftServer.getDimensionTypeRegistry().get(player.getInstance().getDimensionType());
-                            int y = dimensionType.maxY();
-                            while (player.getInstance().getBlock(1, y, 1).isAir()) {
-                                y--;
-
-                                if (y < dimensionType.minY()) {
-                                    y = dimensionType.maxY();
-                                    break;
-                                }
-                            }
-
-                            player.teleport(new Pos(1, y + 1, 1));
                             PlayerInventory inventory = player.getInventory();
 
                             inventory.addItemStack(ItemStack.of(Material.OBSIDIAN, 1));
