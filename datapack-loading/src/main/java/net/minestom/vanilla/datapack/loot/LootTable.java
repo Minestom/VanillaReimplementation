@@ -19,11 +19,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public record LootTable(@Nullable String type, @Nullable List<LootFunction> functions, List<Pool> pools) {
-    public record Pool(List<Predicate> conditions,
+/**
+ * Represents a loot table.
+ * @param type Specifies the loot context in which the loot table should be invoked. All item modifiers, predicates and number providers are then validated to ensure the parameters of the context type specified here cover all requirements, and prints a warning message in the output log if any modifier or predicate requires a context parameter that is not covered.
+ * @param functions Applies item modifiers in order, onto all item stacks dropped by this table.
+ * @param pools A list of all pools for this loot table. Pools are applied in order.
+ * @param random_sequence A resource location specifying the name of the random sequence that is used to generate loot from this loot table. If only one loot table uses a specific random sequence, the order of the randomized sets of items generated is the same for every world using the same world seed. If multiple loot tables use the same random sequence, the loot generated from any one of them changes depending on how many times and in what order any of the other loot tables were invoked.
+ */
+public record LootTable(@Nullable String type, @Nullable List<LootFunction> functions, @Nullable List<Pool> pools, @Nullable NamespaceID random_sequence) {
+    public record Pool(@Nullable List<Predicate> conditions,
                        @Nullable List<LootFunction> functions,
-                       NumberProvider rolls,
-                       NumberProvider bonus_rolls,
+                       NumberProvider.Int rolls,
+                       NumberProvider.Double bonus_rolls,
                        List<Pool.Entry> entries) {
 
         public sealed interface Entry {

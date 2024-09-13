@@ -98,7 +98,7 @@ interface InBuiltLootFunctions {
             public ItemStack apply(Context context) {
                 int enchantLevel = MinestomUtils.getEnchantLevel(context.itemStack(), enchantment, 0);
                 double n = enchantLevel * parameters.bonusMultiplier();
-                int count = (int) context.random().nextDouble(n);
+                int count = n == 0.0 ? 0 : (int) context.random().nextDouble(n);
                 return context.itemStack().withAmount(count);
             }
         }
@@ -157,7 +157,7 @@ interface InBuiltLootFunctions {
         public ItemStack apply(Context context) {
             BinaryTag sourceNbt = source.nbt(context);
             BinaryTag itemStackTagNbt = context.itemStack().getTag(Tags.Items.TAG);
-            for (Operation operation : operations) {
+            for (Operation operation : Objects.requireNonNullElse(operations, List.<Operation>of())) {
                 itemStackTagNbt = operation.applyOperation(sourceNbt, itemStackTagNbt);
             }
             return context.itemStack().withTag(Tags.Items.TAG, itemStackTagNbt);

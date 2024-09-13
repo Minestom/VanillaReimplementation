@@ -8,6 +8,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation(project(":core"))
     testImplementation(project(":datapack-loading"))
+    testImplementation(project(":blocks"))
+    testImplementation(project(":block-update-system"))
+    testImplementation(project(":mojang-data"))
 }
 
 tasks.test {

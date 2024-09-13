@@ -52,7 +52,18 @@ public record VanillaBlockLoot(VanillaReimplementation vri, Datapack datapack) {
         });
     }
 
+    public List<ItemStack> getLoot(LootTable lootTable, LootContext context) {
+        return getLoot(lootTable, context, vri.random(0));
+    }
+
+    public List<ItemStack> getLoot(LootTable lootTable, LootContext context, Random random) {
+        List<ItemStack> items = new ArrayList<>();
+        generateLootItems(lootTable, context, random, items::add);
+        return items;
+    }
+
     private void generateLootItems(LootTable lootTable, LootContext context, Random random, Consumer<ItemStack> out) {
+        if (lootTable.pools() == null) return; // TODO: handle random_sequence
         for (LootTable.Pool pool : lootTable.pools()) {
 
             // Ensure all conditions are met
