@@ -15,7 +15,6 @@ build/*
 .mtj.tmp/
 
 # Package Files #
-*.jar
 *.war
 *.nar
 *.ear
@@ -39,3 +38,4 @@ out/
 server.properties
 world/
 /datapack-tests/mojang-data
+/mojang-data/1.20.4
