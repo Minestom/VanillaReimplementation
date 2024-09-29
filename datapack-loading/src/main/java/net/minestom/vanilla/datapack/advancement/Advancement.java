@@ -3,7 +3,7 @@ package net.minestom.vanilla.datapack.advancement;
 import com.squareup.moshi.JsonReader;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.NamespaceID;
+import net.kyori.adventure.key.Key;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.json.Optional;
 import net.minestom.vanilla.datapack.loot.function.Predicate;
@@ -24,7 +24,7 @@ public record Advancement(Display display,
     public record Display(Display.Icon icon, Component title, @Nullable String frame, String background,
                           Component description, @Nullable Boolean showToast, @Nullable Boolean announceToChat,
                           @Nullable Boolean hidden) {
-        public record Icon(NamespaceID item, String nbt) {
+        public record Icon(Key item, String nbt) {
         }
     }
 
@@ -325,7 +325,7 @@ public record Advancement(Display display,
         //
         //     conditions:
         //         potion: A brewed potion ID.
-        record BrewedPotion(NamespaceID potion) implements Conditions {
+        record BrewedPotion(Key potion) implements Conditions {
         }
 
         // Triggers after the player travels between two dimensions. Available extra conditions:
@@ -333,7 +333,7 @@ public record Advancement(Display display,
         //     conditions:
         //         from: The dimension the entity traveled from. This tag is a resource location for a dimension (only these in vanilla; more can be added with data packs).
         //         to: The dimension the entity traveled to. Same accepted values as above.
-        record ChangedDimension(NamespaceID from, NamespaceID to) implements Conditions {
+        record ChangedDimension(Key from, Key to) implements Conditions {
         }
 
         // Triggers after the player successfully uses the Channeling enchantment on an entity or a lightning rod. Available extra conditions:
@@ -426,7 +426,7 @@ public record Advancement(Display display,
         // source: Another format for "source". Specifies a list of predicates that must pass in order for the criterion to be granted. The checks are applied to the source, with the origin being the position of the player that would get the advancement.
         //
         //    : A single predicate.
-        record EffectsChanged(Map<NamespaceID, Effect> effects, JsonUtils.ObjectOrList<ConditionsFor.Entity, Predicate> source) implements Conditions {
+        record EffectsChanged(Map<Key, Effect> effects, JsonUtils.ObjectOrList<ConditionsFor.Entity, Predicate> source) implements Conditions {
 
             public record Effect(boolean ambient, Count amplifier, Count duration, boolean visible) {
                 public interface Count {
@@ -839,7 +839,7 @@ public record Advancement(Display display,
         //
         //     conditions:
         //         loot_table*: The resource location of the generated loot table.
-        record PlayerGeneratesContainerLoot(NamespaceID loot_table) implements Conditions {
+        record PlayerGeneratesContainerLoot(Key loot_table) implements Conditions {
         }
 
         // minecraft:player_hurt_entity
@@ -914,7 +914,7 @@ public record Advancement(Display display,
         //
         //     conditions:
         //         recipe*: The recipe that was unlocked.
-        record RecipeUnlocked(NamespaceID recipe) implements Conditions {
+        record RecipeUnlocked(Key recipe) implements Conditions {
         }
 
         // minecraft:ride_entity_in_lava
@@ -1154,6 +1154,6 @@ public record Advancement(Display display,
         }
     }
 
-    public record Rewards(List<NamespaceID> recipes, List<NamespaceID> loot, @Optional Integer experience, String function) {
+    public record Rewards(List<Key> recipes, List<Key> loot, @Optional Integer experience, String function) {
     }
 }

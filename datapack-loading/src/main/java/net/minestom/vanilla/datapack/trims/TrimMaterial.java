@@ -1,7 +1,7 @@
 package net.minestom.vanilla.datapack.trims;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.json.Optional;
 
 import java.util.Map;
@@ -16,5 +16,5 @@ import java.util.Map;
  item_model_index: A value between 0 and 1, used in the item models (see below).
  override_armor_materials: Optional. Map of armor material to override color palette.
  */
-public record TrimMaterial(String asset_name, Component description, NamespaceID ingredient, float item_model_index, @Optional Map<NamespaceID, String> override_armor_materials) {
+public record TrimMaterial(String asset_name, Component description, Key ingredient, float item_model_index, @Optional Map<Key, String> override_armor_materials) {
 }

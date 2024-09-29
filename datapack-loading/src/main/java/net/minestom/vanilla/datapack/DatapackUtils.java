@@ -1,6 +1,7 @@
 package net.minestom.vanilla.datapack;
 
-import net.minestom.server.utils.NamespaceID;
+import net.kyori.adventure.key.Key;
+import net.minestom.vanilla.datapack.tags.Tag;
 import net.minestom.vanilla.datapack.worldgen.DensityFunction;
 import net.minestom.vanilla.datapack.worldgen.noise.Noise;
 import net.minestom.vanilla.files.FileSystem;
@@ -22,7 +23,8 @@ public class DatapackUtils {
         return findInJsonData(file, datapack, data -> data.world_gen().density_function());
     }
 
-    public static Set<NamespaceID> findTags(Datapack datapack, String tagType, NamespaceID namespaceID) {
+    /** Finds the tag items for the given tag type and namespace ID */
+    public static Set<Key> findTags(Datapack datapack, String tagType, Key namespaceID) {
         Datapack.NamespacedData data = datapack.namespacedData().get(namespaceID.namespace());
         if (data == null) return Set.of();
 
@@ -34,26 +36,23 @@ public class DatapackUtils {
     }
 
 
-    private static Set<NamespaceID> resolveTagItems(Datapack datapack, Datapack.Tag tag) {
-        Set<NamespaceID> materials = new HashSet<>();
+    private static Set<Key> resolveTagItems(Datapack datapack, Datapack.Tag tag) {
+        Set<Key> materials = new HashSet<>();
         for (Datapack.Tag.TagValue value : tag.values()) {
             resolveTagValue(datapack, value, materials::add);
         }
         return Set.copyOf(materials);
     }
 
-    private static void resolveTagValue(Datapack datapack, Datapack.Tag.TagValue value, Consumer<NamespaceID> out) {
+    private static void resolveTagValue(Datapack datapack, Datapack.Tag.TagValue value, Consumer<Key> out) {
         if (value instanceof Datapack.Tag.TagValue.ObjectOrTagReference objectOrTagReference) {
-            if (objectOrTagReference.tag().domain().startsWith("#")) {
-                // starting with a hashtag means this is a reference to another tag
-                // first remove the hashtag
-                NamespaceID newNamespace = NamespaceID.from(objectOrTagReference.tag().domain().substring(1), objectOrTagReference.tag().path());
-                var mats = resolveReferenceTag(datapack, newNamespace);
+            if (objectOrTagReference.tag() instanceof Tag tag) {
+                var mats = resolveReferenceTag(datapack, tag);
                 if (mats != null) {
                     mats.forEach(out);
                     return;
                 }
-                throw new UnsupportedOperationException("Unable to resolve where tag " + objectOrTagReference.tag() + " is pointing to");
+                throw new UnsupportedOperationException("Unable to resolve where tag " + tag + " is pointing to");
             }
 
             // found the material
@@ -73,18 +72,18 @@ public class DatapackUtils {
         throw new UnsupportedOperationException("Unknown tag value type " + value.getClass().getName());
     }
 
-    private static @Nullable Set<NamespaceID> resolveReferenceTag(Datapack datapack, NamespaceID tagNamespace) {
+    private static @Nullable Set<Key> resolveReferenceTag(Datapack datapack, Key tagNamespace) {
         // otherwise resolve to another tag
         for (var entry : datapack.namespacedData().entrySet()) {
             String namespace = entry.getKey();
             Datapack.NamespacedData data = entry.getValue();
-            var itemTags = data.tags().folder("items");
+            var itemTags = data.tags().folder("item");
             for (var itemEntry : itemTags.files().stream()
                     .collect(Collectors.toUnmodifiableMap(Function.identity(), itemTags::file)).entrySet()) {
                 String tagName = itemEntry.getKey().replace(".json", "");
                 Datapack.Tag itemTag = itemEntry.getValue();
 
-                NamespaceID namespacedTag = NamespaceID.from(namespace, tagName);
+                Key namespacedTag = Key.key(namespace, tagName);
                 if (namespacedTag.equals(tagNamespace)) {
                     return resolveTagItems(datapack, itemTag);
                 }
@@ -95,7 +94,7 @@ public class DatapackUtils {
     }
 
     private static <T> Optional<T> findInJsonData(String file, Datapack datapack, Function<Datapack.NamespacedData, FileSystem<T>> getFolder) {
-        NamespaceID namespaceID = NamespaceID.from(file);
+        Key namespaceID = Key.key(file);
         for (var entry : datapack.namespacedData().entrySet()) {
 
             // Ensure the namespaces match

@@ -1,6 +1,7 @@
 package net.minestom.vanilla.crafting;
 
 import dev.goldenstack.window.InventoryView;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.inventory.Inventory;
@@ -140,9 +141,9 @@ public record CraftingUtils(Datapack datapack) {
 
     public @NotNull Set<Material> ingredientToMaterials(Recipe.Ingredient ingredient) {
         if (ingredient instanceof Recipe.Ingredient.Tag tag) {
-            return DatapackUtils.findTags(datapack, "items", tag.tag())
+            return DatapackUtils.findTags(datapack, "item", tag.tag())
                     .stream()
-                    .map(NamespaceID::value)
+                    .map(NamespaceID::from)
                     .map(Material::fromNamespaceId)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toUnmodifiableSet());

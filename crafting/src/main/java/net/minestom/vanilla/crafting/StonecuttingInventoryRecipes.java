@@ -1,7 +1,7 @@
 package net.minestom.vanilla.crafting;
 
 import dev.goldenstack.window.InventoryView;
-import dev.goldenstack.window.v1_19.Views;
+import dev.goldenstack.window.Views;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -41,7 +41,7 @@ public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplement
 
             if (input.isValidExternal(slot)) {
                 if (!event.getClickedItem().material().equals(event.getCursorItem().material())) {
-                    // the player has changed the input item. the output should be cleared.
+                    // the player has changed the input id. the output should be cleared.
                     output.set(inv, ItemStack.AIR);
                 }
             }
@@ -54,7 +54,7 @@ public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplement
                 }
                 input.set(inv, input.get(inv).withAmount(prev -> prev - 1));
                 if (input.get(inv).amount() > 0) {
-                    output.set(inv, ItemStack.of(recipe.result(), recipe.count()));
+                    output.set(inv, ItemStack.of(recipe.result().id(), recipe.result().count()));
                 }
             }
 
@@ -75,7 +75,7 @@ public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplement
             if (index < 0 || index >= recipes.size()) return;
             Recipe.Stonecutting recipe = recipes.get(packet.buttonId());
 
-            output.set(inv, ItemStack.of(recipe.result(), recipe.count()));
+            output.set(inv, ItemStack.of(recipe.result().id(), recipe.result().count()));
         });
 
         CraftingUtils.addOutputSlotEventHandler(node, Views.stonecutter().output(), InventoryType.STONE_CUTTER);
@@ -103,14 +103,14 @@ public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplement
             }
         }
 
-        recipes.sort(Comparator.comparing(o -> o.result().name()));
+        recipes.sort(Comparator.comparing(o -> o.result().id().name()));
 
         return List.copyOf(recipes);
     }
 
     private @Nullable Recipe.Stonecutting getRecipe(Material input, Material output, int count) {
         for (Recipe.Stonecutting recipe : getRecipes(input)) {
-            if (output.equals(recipe.result()) && recipe.count() == count) {
+            if (output.equals(recipe.result().id()) && recipe.result().count() == count) {
                 return recipe;
             }
         }

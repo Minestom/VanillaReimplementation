@@ -54,14 +54,14 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
     }
 
     /**
-     * Appends an item to the first available slot in the campfire.
-     * @return the index of the slot the item was appended to.
+     * Appends an id to the first available slot in the campfire.
+     * @return the index of the slot the id was appended to.
      */
     public int appendItem(BlockItems items, @NotNull CampfireCookingRecipe recipe) {
         OptionalInt freeSlot = findFirstFreeSlot(items.itemStacks());
 
         if (freeSlot.isEmpty())
-            throw new IllegalArgumentException("Campfire doesn't have free slot for appending an item in CampfireBehaviour#appendItem");
+            throw new IllegalArgumentException("Campfire doesn't have free slot for appending an id in CampfireBehaviour#appendItem");
 
         List<ItemStack> ingredients = recipe.getIngredient().items();
 

@@ -2,6 +2,7 @@ package net.minestom.vanilla.generation;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.batch.ChunkBatch;
 import net.minestom.server.instance.block.Block;
@@ -136,7 +137,7 @@ public class NoiseChunkGenerator {
         randomState.surfaceSystem.buildSurface(chunk, noiseChunk, context, point -> biome);
     }
 
-    public NamespaceID computeBiome(RandomState randomState, int quartX, int quartY, int quartZ) {
+    public Key computeBiome(RandomState randomState, int quartX, int quartY, int quartZ) {
         return this.biomeSource.getBiome(quartX, quartY, quartZ, randomState.sampler);
     }
 

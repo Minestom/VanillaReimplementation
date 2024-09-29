@@ -1,6 +1,7 @@
 package net.minestom.vanilla.crafting.smelting;
 
 import dev.goldenstack.window.InventoryView;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.item.ItemStack;
@@ -89,7 +90,7 @@ public record SmeltingHandler(Datapack datapack, int speed, Map<Material, Intege
         }
 
         if (lastCookedItemBurnTicks == null) {
-            throw new IllegalStateException("Last cooked item " + lastCookedItem + " has no burn time");
+            throw new IllegalStateException("Last cooked id " + lastCookedItem + " has no burn time");
         }
 
         int recipeCompleteTicks = Objects.requireNonNullElse(recipeCookingTime, 100);
@@ -203,8 +204,8 @@ public record SmeltingHandler(Datapack datapack, int speed, Map<Material, Intege
     }
 
     private static void addItemTags(Datapack datapack, Map<Material, Integer> material2burnTicks, String tagName, int burnTime) {
-        for (NamespaceID item : DatapackUtils.findTags(datapack, "items", NamespaceID.from(tagName))) {
-            Material mat = Material.fromNamespaceId(item);
+        for (Key item : DatapackUtils.findTags(datapack, "item", NamespaceID.from(tagName))) {
+            Material mat = Material.fromNamespaceId(item.asString());
             material2burnTicks.put(mat, burnTime);
         }
     }

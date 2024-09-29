@@ -1,7 +1,7 @@
 package net.minestom.vanilla.datapack.trims;
 
 import net.kyori.adventure.text.Component;
-import net.minestom.server.utils.NamespaceID;
+import net.kyori.adventure.key.Key;
 import net.minestom.vanilla.datapack.json.Optional;
 
 /**
@@ -12,5 +12,5 @@ import net.minestom.vanilla.datapack.json.Optional;
  template_item: The item representing this pattern.
  decal: Optional, defaults to false. If true, the pattern texture will be masked based on the underlying armor.
  */
-public record TrimPattern(NamespaceID asset_id, Component description, NamespaceID template_item, @Optional Boolean decal) {
+public record TrimPattern(Key asset_id, Component description, Key template_item, @Optional Boolean decal) {
 }

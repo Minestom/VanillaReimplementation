@@ -2,7 +2,7 @@ package net.minestom.vanilla.datapack.worldgen;
 
 import com.squareup.moshi.JsonReader;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.NamespaceID;
+import net.kyori.adventure.key.Key;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.json.Optional;
@@ -13,7 +13,7 @@ import java.io.IOException;
 //
 //     type: The ID of carver type.
 //     config: Configuration values for the carver.
-public record Carver(NamespaceID type, BaseConfig config) {
+public record Carver(Key type, BaseConfig config) {
 
     public static Carver fromJson(JsonReader reader) throws IOException {
         // carvers are a special case since the config object depends on the type of carver
@@ -37,7 +37,7 @@ public record Carver(NamespaceID type, BaseConfig config) {
         if (config == null) {
             throw new IOException("Missing config");
         }
-        return new Carver(NamespaceID.from(type), config);
+        return new Carver(Key.key(type), config);
     }
 
     //     cave - Carves a cave. A cave is a long tunnel that sometimes branches. Somtimes one or more tunnels start from a circular void.

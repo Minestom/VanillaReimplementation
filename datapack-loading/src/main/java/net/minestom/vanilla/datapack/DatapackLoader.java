@@ -10,9 +10,11 @@ import net.kyori.adventure.nbt.TagStringIO;
 import net.kyori.adventure.text.StorageNBTComponent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.item.enchant.Enchantment;
+import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.math.FloatRange;
 import net.minestom.vanilla.datapack.dimension.DimensionType;
 import net.minestom.vanilla.datapack.loot.NBTPath;
+import net.minestom.vanilla.datapack.tags.Tag;
 import net.minestom.vanilla.datapack.trims.TrimMaterial;
 import net.minestom.vanilla.datapack.trims.TrimPattern;
 import net.minestom.vanilla.datapack.worldgen.*;
@@ -26,7 +28,7 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
-import net.minestom.server.utils.NamespaceID;
+import net.kyori.adventure.key.Key;
 import net.minestom.vanilla.datapack.advancement.Advancement;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.loot.LootTable;
@@ -35,6 +37,7 @@ import net.minestom.vanilla.datapack.loot.function.LootFunction;
 import net.minestom.vanilla.datapack.loot.function.Predicate;
 import net.minestom.vanilla.datapack.number.NumberProvider;
 import net.minestom.vanilla.datapack.recipe.Recipe;
+import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -88,10 +91,9 @@ public class DatapackLoader {
             GsonComponentSerializer serializer = GsonComponentSerializer.gson();
             return serializer.deserialize(reader.nextSource().readUtf8());
         });
-        register(builder, NamespaceID.class, reader -> {
-            String next = reader.nextString();
-            if (next.startsWith("#")) next = next.substring(1);
-            return NamespaceID.from(next);
+        register(builder, Key.class, reader -> {
+            String str = reader.nextString();
+            return str.startsWith("#") ? new Tag(str.substring(1)) : Key.key(str);
         });
         register(builder, FloatRange.class, DatapackLoader::floatRangeFromJson);
 
@@ -128,8 +130,8 @@ public class DatapackLoader {
         register(builder, VerticalAnchor.class, VerticalAnchor::fromJson);
         register(builder, CubicSpline.class, CubicSpline::fromJson);
         register(builder, DensityFunction.OldBlendedNoise.class, DensityFunction.OldBlendedNoise::fromJson);
-        register(builder, Tag.TagValue.class, Tag.TagValue::fromJson);
-        register(builder, Tag.TagValue.ObjectOrTagReference.class, Tag.TagValue.ObjectOrTagReference::fromJson);
+        register(builder, Datapack.Tag.TagValue.class, Datapack.Tag.TagValue::fromJson);
+        register(builder, Datapack.Tag.TagValue.ObjectOrTagReference.class, Datapack.Tag.TagValue.ObjectOrTagReference::fromJson);
         register(builder, Biome.Effects.Particle.Options.class, Biome.Effects.Particle.Options::fromJson);
         register(builder, Biome.Sound.class, Biome.Sound::fromJson);
         register(builder, Carver.class, Carver::fromJson);
@@ -231,16 +233,16 @@ public class DatapackLoader {
             for (String namespace : source.folders()) {
                 FileSystem<ByteArray> dataFolder = source.folder(namespace).inMemory();
 
-                FileSystem<Advancement> advancements = parseJsonFolder(dataFolder, "advancements", adaptor(Advancement.class));
+                FileSystem<Advancement> advancements = parseJsonFolder(dataFolder, "advancement", adaptor(Advancement.class));
                 FileSystem<McFunction> functions = parseJsonFolder(dataFolder, "functions", McFunction::fromString);
                 FileSystem<LootFunction> item_modifiers = parseJsonFolder(dataFolder, "item_modifiers", adaptor(LootFunction.class));
                 FileSystem<LootTable> loot_tables = parseJsonFolder(dataFolder, "loot_tables", adaptor(LootTable.class));
                 FileSystem<Predicate> predicates = parseJsonFolder(dataFolder, "predicates", adaptor(Predicate.class));
-                FileSystem<Recipe> recipes = parseJsonFolder(dataFolder, "recipes", adaptor(Recipe.class));
+                FileSystem<Recipe> recipes = parseJsonFolder(dataFolder, "recipe", adaptor(Recipe.class));
                 FileSystem<Structure> structures = dataFolder.folder("structures").map(Structure::fromInput);
                 FileSystem<ChatType> chat_type = parseJsonFolder(dataFolder, "chat_type", adaptor(ChatType.class));
                 FileSystem<DamageType> damage_type = parseJsonFolder(dataFolder, "damage_type", adaptor(DamageType.class));
-                FileSystem<Tag> tags = parseJsonFolder(dataFolder, "tags", adaptor(Tag.class));
+                FileSystem<Datapack.Tag> tags = parseJsonFolder(dataFolder, "tags", adaptor(Datapack.Tag.class));
                 FileSystem<Dimension> dimensions = parseJsonFolder(dataFolder, "dimension", adaptor(Dimension.class));
                 FileSystem<DimensionType> dimension_type = parseJsonFolder(dataFolder, "dimension_type", adaptor(DimensionType.class));
                 FileSystem<TrimPattern> trim_pattern = parseJsonFolder(dataFolder, "trim_pattern", adaptor(TrimPattern.class));
@@ -330,8 +332,8 @@ public class DatapackLoader {
         return TagStringIO.get().asCompound(json);
     }
 
-    private static NamespaceID namespaceFromJson(JsonReader reader) throws IOException {
-        return NamespaceID.from(reader.nextString());
+    private static Key namespaceFromJson(JsonReader reader) throws IOException {
+        return Key.key(reader.nextString());
     }
 
     private static UUID uuidFromJson(JsonReader reader) throws IOException {
@@ -350,16 +352,16 @@ public class DatapackLoader {
     }
 
     private static EntityType entityTypeFromJson(JsonReader reader) throws IOException {
-        return EntityType.fromNamespaceId(Objects.requireNonNull(namespaceFromJson(reader)));
+        return EntityType.fromNamespaceId(NamespaceID.from(namespaceFromJson(reader)));
     }
 
     private static Material materialFromJson(JsonReader reader) throws IOException {
-        NamespaceID namespace = namespaceFromJson(reader);
-        Material mat = Material.fromNamespaceId(Objects.requireNonNull(namespace));
+        Key namespace = namespaceFromJson(reader);
+        Material mat = Material.fromNamespaceId(NamespaceID.from(namespace));
 
         // TODO: Remove these legacy updates
-        Map<NamespaceID, Material> legacy = Map.of(
-                NamespaceID.from("scute"), Material.TURTLE_SCUTE
+        Map<Key, Material> legacy = Map.of(
+                Key.key("scute"), Material.TURTLE_SCUTE
         );
 
         if (mat == null) {

@@ -1,13 +1,13 @@
 package net.minestom.vanilla.datapack.worldgen;
 
 import com.squareup.moshi.JsonReader;
-import net.minestom.server.utils.NamespaceID;
+import net.kyori.adventure.key.Key;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 
 import java.io.IOException;
 
 public interface FloatProvider {
-    NamespaceID type();
+    Key type();
 
     static FloatProvider fromJson(JsonReader reader) throws IOException {
         return JsonUtils.<FloatProvider>typeMap(reader, token -> switch (token) {
@@ -26,8 +26,8 @@ public interface FloatProvider {
     //     value: The constant value to use.
     record Constant(float value) implements FloatProvider {
         @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:constant");
+        public Key type() {
+            return Key.key("minecraft:constant");
         }
     }
 
@@ -39,8 +39,8 @@ public interface FloatProvider {
         public record Value(float min_inclusive, float max_exclusive) {}
 
         @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:uniform");
+        public Key type() {
+            return Key.key("minecraft:uniform");
         }
     }
 
@@ -54,8 +54,8 @@ public interface FloatProvider {
         public record Value(float mean, float deviation, float min, float max) {}
 
         @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:clamped_normal");
+        public Key type() {
+            return Key.key("minecraft:clamped_normal");
         }
     }
 
@@ -66,8 +66,8 @@ public interface FloatProvider {
         public record Value(float min, float max, float plateau) {}
 
         @Override
-        public NamespaceID type() {
-            return NamespaceID.from("minecraft:trapezoid");
+        public Key type() {
+            return Key.key("minecraft:trapezoid");
         }
     }
 }

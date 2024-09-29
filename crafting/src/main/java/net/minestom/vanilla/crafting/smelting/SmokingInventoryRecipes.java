@@ -1,6 +1,6 @@
 package net.minestom.vanilla.crafting.smelting;
 
-import dev.goldenstack.window.v1_19.Views;
+import dev.goldenstack.window.Views;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.block.Block;
@@ -36,7 +36,7 @@ public record SmokingInventoryRecipes(Datapack datapack, VanillaReimplementation
 
             Block newBlock = recipe == null ?
                     smeltingHandler.handle(inventory, block, null, null) :
-                    smeltingHandler.handle(inventory, block, recipe.result(), recipe.cookingTime());
+                    smeltingHandler.handle(inventory, block, recipe.result().id(), recipe.cookingTime());
 
             if (newBlock != null) {
                 event.getInstance().setBlock(event.getBlockPosition(), newBlock);

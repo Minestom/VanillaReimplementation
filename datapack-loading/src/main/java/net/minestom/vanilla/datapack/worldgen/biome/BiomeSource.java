@@ -2,7 +2,7 @@ package net.minestom.vanilla.datapack.worldgen.biome;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minestom.server.utils.NamespaceID;
+import net.kyori.adventure.key.Key;
 import net.minestom.vanilla.datapack.worldgen.util.Util;
 
 public interface BiomeSource extends BiomeSources {
@@ -10,7 +10,7 @@ public interface BiomeSource extends BiomeSources {
 //        getBiome(x: number, y: number, z: number, climateSampler: Climate.Sampler): Identifier
 //    }
 
-    NamespaceID getBiome(int x, int y, int z, Climate.Sampler climateSampler);
+    Key getBiome(int x, int y, int z, Climate.Sampler climateSampler);
 
 //    export namespace BiomeSource {
 //        export function fromJson(obj: unknown): BiomeSource {
@@ -26,15 +26,15 @@ public interface BiomeSource extends BiomeSources {
 //        }
 //    }
 
-    static BiomeSource checkerBoard(int shift, NamespaceID... biomes) {
+    static BiomeSource checkerBoard(int shift, Key... biomes) {
         return new CheckerboardBiomeSource(shift, biomes);
     }
 
-    static BiomeSource fixed(NamespaceID biome) {
+    static BiomeSource fixed(Key biome) {
         return new FixedBiomeSource(biome);
     }
 
-    static BiomeSource multiNoise(Climate.Parameters<NamespaceID> parameters) {
+    static BiomeSource multiNoise(Climate.Parameters<Key> parameters) {
         return new MultiNoiseBiomeSource(parameters);
     }
 
@@ -51,7 +51,7 @@ public interface BiomeSource extends BiomeSources {
             case "checkerboard" -> CheckerboardBiomeSource.fromJson(obj);
             case "multi_noise" -> MultiNoiseBiomeSource.fromJson(obj);
             case "the_end" -> TheEndBiomeSource.fromJson(obj);
-            default -> (x, y, z, climateSampler) -> NamespaceID.from("plains");
+            default -> (x, y, z, climateSampler) -> Key.key("plains");
         };
     }
 }

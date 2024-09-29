@@ -1,7 +1,7 @@
 package net.minestom.vanilla.crafting;
 
 import dev.goldenstack.window.InventoryView;
-import dev.goldenstack.window.v1_20.Views.Smithing;
+import dev.goldenstack.window.Views.Smithing;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.StringBinaryTag;
@@ -65,7 +65,7 @@ public record SmithingInventoryRecipes(Datapack datapack, VanillaReimplementatio
             }
 
             if (recipe instanceof Recipe.SmithingTransform transform) {
-                Smithing.OUTPUT.set(inv,Smithing.BASE.get(inv).withMaterial(transform.result().item()));
+                Smithing.OUTPUT.set(inv,Smithing.BASE.get(inv).withMaterial(transform.result().id()));
             }
             else if (recipe instanceof Recipe.SmithingTrim trim) {
                 String trimPatternName = getTrimPatternFromTemplate(Smithing.TEMPLATE.get(inv).material());
@@ -145,7 +145,7 @@ public record SmithingInventoryRecipes(Datapack datapack, VanillaReimplementatio
                 var trimMaterial = data.trim_material().file(file);
                 trimMaterials.put(NamespaceID.from(file), TrimMaterial.create(
                         trimMaterial.asset_name(),
-                        Objects.requireNonNull(Material.fromNamespaceId(trimMaterial.ingredient())),
+                        Objects.requireNonNull(Material.fromNamespaceId(trimMaterial.ingredient().asString())),
                         trimMaterial.item_model_index(),
                         Objects.requireNonNullElse(trimMaterial.override_armor_materials(), new HashMap<NamespaceID, String>())
                                 .entrySet().stream().collect(Collectors.toMap(
@@ -158,8 +158,8 @@ public record SmithingInventoryRecipes(Datapack datapack, VanillaReimplementatio
             for (String file : data.trim_pattern().files()) {
                 var trimPattern = data.trim_pattern().file(file);
                 trimPatterns.put(NamespaceID.from(file), TrimPattern.create(
-                        trimPattern.asset_id(),
-                        Objects.requireNonNull(Material.fromNamespaceId(trimPattern.template_item())),
+                        NamespaceID.from(trimPattern.asset_id()),
+                        Objects.requireNonNull(Material.fromNamespaceId(trimPattern.template_item().asString())),
                         trimPattern.description(),
                         trimPattern.decal()
                 ));

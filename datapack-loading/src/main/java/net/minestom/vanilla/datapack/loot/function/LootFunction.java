@@ -2,7 +2,7 @@ package net.minestom.vanilla.datapack.loot.function;
 
 import com.squareup.moshi.JsonReader;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.utils.NamespaceID;
+import net.kyori.adventure.key.Key;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.loot.context.LootContext;
 
@@ -17,7 +17,7 @@ public interface LootFunction extends InBuiltLootFunctions {
     /**
      * @return The function id.
      */
-    NamespaceID function();
+    Key function();
 
     /**
      * Applies the function to the item stack.

@@ -10,7 +10,7 @@ import net.minestom.vanilla.datapack.worldgen.*;
 import net.minestom.vanilla.datapack.worldgen.noise.Noise;
 import net.minestom.vanilla.files.ByteArray;
 import net.minestom.vanilla.files.FileSystem;
-import net.minestom.server.utils.NamespaceID;
+import net.kyori.adventure.key.Key;
 import net.minestom.vanilla.datapack.advancement.Advancement;
 import net.minestom.vanilla.datapack.loot.LootTable;
 import net.minestom.vanilla.datapack.loot.function.LootFunction;
@@ -68,7 +68,7 @@ public interface Datapack {
                           FileSystem<Structure> structures,
                           FileSystem<ChatType> chat_type,
                           FileSystem<DamageType> damage_type,
-                          FileSystem<Tag> tags,
+                          FileSystem<Datapack.Tag> tags,
                           FileSystem<Dimension> dimensions,
                           FileSystem<DimensionType> dimension_type,
                           FileSystem<TrimPattern> trim_pattern,
@@ -129,10 +129,10 @@ public interface Datapack {
                 });
             }
 
-            record ObjectOrTagReference(NamespaceID tag) implements TagValue {
+            record ObjectOrTagReference(Key tag) implements TagValue {
                 public static ObjectOrTagReference fromJson(JsonReader reader) throws IOException {
                     return JsonUtils.typeMapMapped(reader, Map.of(
-                            JsonReader.Token.STRING, json -> new ObjectOrTagReference(DatapackLoader.jsonAdaptor(NamespaceID.class).fromJson(json))
+                            JsonReader.Token.STRING, json -> new ObjectOrTagReference(DatapackLoader.jsonAdaptor(Key.class).fromJson(json))
                     ));
                 }
             }
@@ -145,7 +145,7 @@ public interface Datapack {
         }
     }
 
-    record Dimension(NamespaceID type) {
+    record Dimension(Key type) {
     }
 
     record WorldGen(

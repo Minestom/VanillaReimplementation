@@ -1,7 +1,7 @@
 package net.minestom.vanilla.crafting;
 
 import dev.goldenstack.window.InventoryView;
-import dev.goldenstack.window.v1_19.Views;
+import dev.goldenstack.window.Views;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -69,7 +69,7 @@ public record SurvivalInventoryRecipes(Datapack datapack, VanillaReimplementatio
                 if (recipe.type().equals(NamespaceID.from("minecraft:crafting_shapeless"))) {
                     Recipe.Shapeless shapeless = (Recipe.Shapeless) recipe;
                     if (utils.recipeMatchesShapeless(shapeless, List.of(topLeft, topRight, bottomLeft, bottomRight))) {
-                        return ItemStack.of(shapeless.result().item(), shapeless.result().count() == null ? 1 : shapeless.result().count());
+                        return ItemStack.of(shapeless.result().id(), shapeless.result().count() == null ? 1 : shapeless.result().count());
                     }
                 }
 
@@ -84,7 +84,7 @@ public record SurvivalInventoryRecipes(Datapack datapack, VanillaReimplementatio
                             Slot.MID_MID, bottomRight
                     );
                     if (utils.recipeMatchesShapedNxN(shaped, materials, 2)) {
-                        return ItemStack.of(shaped.result().item(), shaped.result().count() == null ? 1 : shaped.result().count());
+                        return ItemStack.of(shaped.result().id(), shaped.result().count() == null ? 1 : shaped.result().count());
                     }
                 }
             }

@@ -1,7 +1,7 @@
 package net.minestom.vanilla.datapack.json;
 
 import com.squareup.moshi.JsonReader;
-import net.minestom.server.utils.NamespaceID;
+import net.kyori.adventure.key.Key;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import okio.Buffer;
 import org.jetbrains.annotations.NotNull;
@@ -116,7 +116,7 @@ public class JsonUtils {
         return unionMapType(reader, key, json -> {
             String value = json.nextString();
             if (value == null) return null;
-            return NamespaceID.from(value).toString();
+            return Key.key(value).toString();
         }, findReader);
     }
 

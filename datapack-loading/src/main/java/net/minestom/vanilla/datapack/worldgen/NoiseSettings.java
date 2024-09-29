@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.squareup.moshi.JsonReader;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.NamespaceID;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.utils.math.FloatRange;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.worldgen.noise.NormalNoise;
@@ -159,12 +159,12 @@ public record NoiseSettings(
      *  then_run: A surface rule.
      */
     public interface SurfaceRule {
-        NamespaceID type();
+        Key type();
 
         Pos2Block apply(Context context);
 
         interface Context extends VerticalAnchor.Context {
-            NamespaceID biome();
+            Key biome();
 
             int minY();
             int maxY();
@@ -200,8 +200,8 @@ public record NoiseSettings(
 
         record Bandlands() implements SurfaceRule {
             @Override
-            public NamespaceID type() {
-                return NamespaceID.from("bandlands");
+            public Key type() {
+                return Key.key("bandlands");
             }
 
             @Override
@@ -213,8 +213,8 @@ public record NoiseSettings(
 
         record Blocks(BlockState result_state) implements SurfaceRule {
             @Override
-            public NamespaceID type() {
-                return NamespaceID.from("blocks");
+            public Key type() {
+                return Key.key("blocks");
             }
 
             @Override
@@ -225,8 +225,8 @@ public record NoiseSettings(
 
         record Sequence(List<SurfaceRule> sequence) implements SurfaceRule {
             @Override
-            public NamespaceID type() {
-                return NamespaceID.from("sequence");
+            public Key type() {
+                return Key.key("sequence");
             }
 
             @Override
@@ -246,8 +246,8 @@ public record NoiseSettings(
 
         record Condition(SurfaceRuleCondition if_true, SurfaceRule then_run) implements SurfaceRule {
             @Override
-            public NamespaceID type() {
-                return NamespaceID.from("condition");
+            public Key type() {
+                return Key.key("condition");
             }
 
             @Override
@@ -300,7 +300,7 @@ public record NoiseSettings(
          *  surface_type: Either floor or ceiling. If ceiling, checks the distance to the upper surface of cave below (technically, it is the distance to the nearest liquid or air block directly below). For example, if where Y=-1 is water, and where Y=0 is stone, when applied to the stone, the distance to the nearest liquid or air block directly below (in this case, the water at Y=-1) is 0. If it isfloor, checks the distance to the terrain surface or the lower surface of cave above (technically, it is the number of non-liquid blocks between current block and the lowest air block directly above. If there is liquid between current block and the air block above, this value may be less than the actual distance to the surface of terrain or cave). For example, where Y=2 is air, Y=1 is water, and Y=0 is stone, when applying this condition at the stone, the number of non-liquid blocks between current block and the lowest air block directly above (in this case, air at Y=2) is 0.
          */
         interface SurfaceRuleCondition {
-            NamespaceID type();
+            Key type();
 
             boolean test(SurfaceRule.Context context);
 
@@ -321,10 +321,10 @@ public record NoiseSettings(
                 });
             }
 
-            record Biome(List<NamespaceID> biome_is) implements SurfaceRuleCondition {
+            record Biome(List<Key> biome_is) implements SurfaceRuleCondition {
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("biome");
+                public Key type() {
+                    return Key.key("biome");
                 }
 
                 @Override
@@ -333,10 +333,10 @@ public record NoiseSettings(
                 }
             }
 
-            record NoiseThreshold(NamespaceID noise, double min_threshold, double max_threshold) implements SurfaceRuleCondition {
+            record NoiseThreshold(Key noise, double min_threshold, double max_threshold) implements SurfaceRuleCondition {
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("noise_threshold");
+                public Key type() {
+                    return Key.key("noise_threshold");
                 }
 
                 @Override
@@ -346,10 +346,10 @@ public record NoiseSettings(
                 }
             }
 
-            record VerticalGradient(NamespaceID random_name, VerticalAnchor true_at_and_below, VerticalAnchor false_at_and_above) implements SurfaceRuleCondition {
+            record VerticalGradient(Key random_name, VerticalAnchor true_at_and_below, VerticalAnchor false_at_and_above) implements SurfaceRuleCondition {
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("vertical_gradient");
+                public Key type() {
+                    return Key.key("vertical_gradient");
                 }
 
                 @Override
@@ -370,8 +370,8 @@ public record NoiseSettings(
 
             record YAbove(VerticalAnchor anchor, int surface_depth_multiplier, boolean add_stone_depth) implements SurfaceRuleCondition {
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("y_above");
+                public Key type() {
+                    return Key.key("y_above");
                 }
 
                 @Override
@@ -383,8 +383,8 @@ public record NoiseSettings(
 
             record Water(int offset, int surface_depth_multiplier, boolean add_stone_depth) implements SurfaceRuleCondition {
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("water");
+                public Key type() {
+                    return Key.key("water");
                 }
 
                 @Override
@@ -399,8 +399,8 @@ public record NoiseSettings(
 
             record Temperature() implements SurfaceRuleCondition {
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("temperature");
+                public Key type() {
+                    return Key.key("temperature");
                 }
 
                 @Override
@@ -412,8 +412,8 @@ public record NoiseSettings(
 
             record Steep() implements SurfaceRuleCondition {
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("steep");
+                public Key type() {
+                    return Key.key("steep");
                 }
 
                 @Override
@@ -425,8 +425,8 @@ public record NoiseSettings(
 
             record Not(SurfaceRuleCondition invert) implements SurfaceRuleCondition {
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("not");
+                public Key type() {
+                    return Key.key("not");
                 }
 
                 @Override
@@ -437,8 +437,8 @@ public record NoiseSettings(
 
             record Hole() implements SurfaceRuleCondition {
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("hole");
+                public Key type() {
+                    return Key.key("hole");
                 }
 
                 @Override
@@ -450,8 +450,8 @@ public record NoiseSettings(
 
             record AbovePreliminarySurface() implements SurfaceRuleCondition {
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("above_preliminary_surface");
+                public Key type() {
+                    return Key.key("above_preliminary_surface");
                 }
 
                 @Override
@@ -462,8 +462,8 @@ public record NoiseSettings(
 
             record StoneDepth(int offset, boolean add_surface_depth, int secondary_depth_range, SurfaceType surface_type) implements SurfaceRuleCondition {
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("stone_depth");
+                public Key type() {
+                    return Key.key("stone_depth");
                 }
 
                 @Override

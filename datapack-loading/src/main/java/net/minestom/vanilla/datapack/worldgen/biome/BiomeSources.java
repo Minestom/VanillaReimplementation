@@ -3,7 +3,7 @@ package net.minestom.vanilla.datapack.worldgen.biome;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minestom.server.utils.NamespaceID;
+import net.kyori.adventure.key.Key;
 import net.minestom.vanilla.datapack.worldgen.DensityFunction;
 import net.minestom.vanilla.datapack.worldgen.util.Util;
 
@@ -15,9 +15,9 @@ import java.util.stream.StreamSupport;
 
 interface BiomeSources {
 
-    record CheckerboardBiomeSource(int n, int shift, List<NamespaceID> biomes) implements BiomeSource {
+    record CheckerboardBiomeSource(int n, int shift, List<Key> biomes) implements BiomeSource {
 
-        public CheckerboardBiomeSource(int shift, NamespaceID[] biomes) {
+        public CheckerboardBiomeSource(int shift, Key[] biomes) {
             this(biomes.length, shift, List.of(biomes));
         }
 
@@ -28,18 +28,18 @@ interface BiomeSources {
         }
 
         @Override
-        public NamespaceID getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
+        public Key getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
             int i = (((x >> this.shift) + (z >> this.shift)) % this.n + this.n) % this.n;
             return this.biomes.get(i);
         }
 
         public static CheckerboardBiomeSource fromJson(Object obj) {
             int scale = Util.jsonElse(Util.jsonObject(obj), "scale", 2, JsonElement::getAsInt);
-            NamespaceID[] biomes;
+            Key[] biomes;
             if (obj instanceof String) {
-                biomes = new NamespaceID[]{NamespaceID.from((String) obj)};
+                biomes = new Key[]{Key.key((String) obj)};
             } else if (obj instanceof JsonElement) {
-                biomes = Util.jsonArray((JsonElement) obj, element -> NamespaceID.from(element.getAsString())).toArray(new NamespaceID[0]);
+                biomes = Util.jsonArray((JsonElement) obj, element -> Key.key(element.getAsString())).toArray(new Key[0]);
             } else {
                 throw new IllegalArgumentException("Cannot parse biome source from " + obj);
             }
@@ -47,24 +47,24 @@ interface BiomeSources {
         }
     }
 
-    record FixedBiomeSource(NamespaceID biome) implements BiomeSource {
+    record FixedBiomeSource(Key biome) implements BiomeSource {
 
         @Override
-        public NamespaceID getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
+        public Key getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
             return this.biome;
         }
 
         public static FixedBiomeSource fromJson(Object obj) {
             JsonObject root = Util.jsonObject(obj);
-            NamespaceID biome = NamespaceID.from(Util.jsonElse(root, "biome", "plains", JsonElement::getAsString));
+            Key biome = Key.key(Util.jsonElse(root, "biome", "plains", JsonElement::getAsString));
             return new FixedBiomeSource(biome);
         }
     }
 
-    record MultiNoiseBiomeSource(Climate.Parameters<NamespaceID> parameters) implements BiomeSource {
+    record MultiNoiseBiomeSource(Climate.Parameters<Key> parameters) implements BiomeSource {
 
         @Override
-        public NamespaceID getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
+        public Key getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
             Climate.TargetPoint target = climateSampler.sample(x, y, z);
             return this.parameters.find(target);
         }
@@ -75,12 +75,12 @@ interface BiomeSources {
 
             var biomesList = StreamSupport.stream(biomes.spliterator(), false).map(b -> {
                 JsonObject json = Util.jsonObject(b);
-                var biomeName = NamespaceID.from(Util.jsonRequire(json, "biome", JsonElement::getAsString));
+                var biomeName = Key.key(Util.jsonRequire(json, "biome", JsonElement::getAsString));
                 var parameters = Climate.ParamPoint.fromJson(json.get("parameters"));
                 return Map.entry(biomeName, parameters);
             }).toList();
 
-            Map<Climate.ParamPoint, Supplier<NamespaceID>> parameters = biomesList.stream().collect(Collectors.toMap(
+            Map<Climate.ParamPoint, Supplier<Key>> parameters = biomesList.stream().collect(Collectors.toMap(
                     Map.Entry::getValue,
                     e -> e::getKey
             ));
@@ -90,14 +90,14 @@ interface BiomeSources {
     }
 
     record TheEndBiomeSource() implements BiomeSource {
-        private static final NamespaceID END = NamespaceID.from("the_end");
-        private static final NamespaceID HIGHLANDS = NamespaceID.from("end_highlands");
-        private static final NamespaceID MIDLANDS = NamespaceID.from("end_midlands");
-        private static final NamespaceID ISLANDS = NamespaceID.from("small_end_islands");
-        private static final NamespaceID BARRENS = NamespaceID.from("end_barrens");
+        private static final Key END = Key.key("the_end");
+        private static final Key HIGHLANDS = Key.key("end_highlands");
+        private static final Key MIDLANDS = Key.key("end_midlands");
+        private static final Key ISLANDS = Key.key("small_end_islands");
+        private static final Key BARRENS = Key.key("end_barrens");
 
         @Override
-        public NamespaceID getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
+        public Key getBiome(int x, int y, int z, Climate.Sampler climateSampler) {
             int blockX = x << 2;
             int blockY = y << 2;
             int blockZ = z << 2;

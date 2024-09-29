@@ -1,9 +1,10 @@
 package net.minestom.vanilla.datapack;
 
 import io.github.pesto.MojangDataFeature;
+import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.files.ByteArray;
 import net.minestom.vanilla.files.FileSystem;
-import net.minestom.server.utils.NamespaceID;
+import net.kyori.adventure.key.Key;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.logging.Loading;
 import net.minestom.vanilla.logging.Logger;

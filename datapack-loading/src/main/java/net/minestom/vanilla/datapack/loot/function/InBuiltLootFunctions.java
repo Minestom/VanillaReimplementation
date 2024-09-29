@@ -20,6 +20,7 @@ import net.minestom.server.item.component.AttributeList;
 import net.minestom.server.item.component.EnchantmentList;
 import net.minestom.server.item.enchant.Enchantment;
 import net.minestom.server.registry.DynamicRegistry;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.loot.LootTable;
@@ -43,13 +44,13 @@ interface InBuiltLootFunctions {
     interface ApplyBonus extends LootFunction {
 
         @Override
-        default NamespaceID function() {
-            return NamespaceID.from("minecraft:apply_bonus");
+        default Key function() {
+            return Key.key("minecraft:apply_bonus");
         }
 
-        NamespaceID enchantment();
+        Key enchantment();
 
-        NamespaceID formula();
+        Key formula();
 
         static ApplyBonus fromJson(JsonReader reader) throws IOException {
             return JsonUtils.unionStringTypeMapAdapted(reader, "formula", Map.of(
@@ -59,10 +60,10 @@ interface InBuiltLootFunctions {
             ));
         }
 
-        record BinomialWithBonusCount(NamespaceID enchantment, Parameters parameters) implements ApplyBonus {
+        record BinomialWithBonusCount(Key enchantment, Parameters parameters) implements ApplyBonus {
             @Override
-            public NamespaceID formula() {
-                return NamespaceID.from("minecraft:binomial_with_bonus_count");
+            public Key formula() {
+                return Key.key("minecraft:binomial_with_bonus_count");
             }
 
             public record Parameters(int extra, double probability) {
@@ -70,7 +71,7 @@ interface InBuiltLootFunctions {
 
             @Override
             public ItemStack apply(Context context) {
-                int enchantLevel = MinestomUtils.getEnchantLevel(context.itemStack(), enchantment, 0);
+                int enchantLevel = MinestomUtils.getEnchantLevel(context.itemStack(), NamespaceID.from(enchantment), 0);
                 double n = enchantLevel + parameters().extra();
 
                 RandomGenerator random = context.random();
@@ -84,11 +85,11 @@ interface InBuiltLootFunctions {
             }
         }
 
-        record UniformBonusCount(NamespaceID enchantment, Parameters parameters) implements ApplyBonus {
+        record UniformBonusCount(Key enchantment, Parameters parameters) implements ApplyBonus {
 
             @Override
-            public NamespaceID formula() {
-                return NamespaceID.from("minecraft:uniform_bonus_count");
+            public Key formula() {
+                return Key.key("minecraft:uniform_bonus_count");
             }
 
             public record Parameters(double bonusMultiplier) {
@@ -96,23 +97,23 @@ interface InBuiltLootFunctions {
 
             @Override
             public ItemStack apply(Context context) {
-                int enchantLevel = MinestomUtils.getEnchantLevel(context.itemStack(), enchantment, 0);
+                int enchantLevel = MinestomUtils.getEnchantLevel(context.itemStack(), NamespaceID.from(enchantment), 0);
                 double n = enchantLevel * parameters.bonusMultiplier();
                 int count = n == 0.0 ? 0 : (int) context.random().nextDouble(n);
                 return context.itemStack().withAmount(count);
             }
         }
 
-        record OreDrops(NamespaceID enchantment) implements ApplyBonus {
+        record OreDrops(Key enchantment) implements ApplyBonus {
 
             @Override
-            public NamespaceID formula() {
-                return NamespaceID.from("minecraft:ore_drops");
+            public Key formula() {
+                return Key.key("minecraft:ore_drops");
             }
 
             @Override
             public ItemStack apply(Context context) {
-                int enchantLevel = MinestomUtils.getEnchantLevel(context.itemStack(), enchantment, 0);
+                int enchantLevel = MinestomUtils.getEnchantLevel(context.itemStack(), NamespaceID.from(enchantment), 0);
                 int itemCount = context.itemStack().amount() * (1 + context.random().nextInt(enchantLevel + 2));
                 return context.itemStack().withAmount(itemCount);
             }
@@ -123,8 +124,8 @@ interface InBuiltLootFunctions {
     record CopyName(LootContext.Trait<?> source) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:copy_name");
+        public Key function() {
+            return Key.key("minecraft:copy_name");
         }
 
         @Override
@@ -149,8 +150,8 @@ interface InBuiltLootFunctions {
     record CopyNbt(Source source, List<Operation> operations) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:copy_nbt");
+        public Key function() {
+            return Key.key("minecraft:copy_nbt");
         }
 
         @Override
@@ -195,7 +196,7 @@ interface InBuiltLootFunctions {
                 }
             }
 
-            record Storage(NamespaceID storageID) implements Source {
+            record Storage(Key storageID) implements Source {
 
                 @Override
                 public String type() {
@@ -303,8 +304,8 @@ interface InBuiltLootFunctions {
     record CopyState(Block block, List<String> properties) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:copy_state");
+        public Key function() {
+            return Key.key("minecraft:copy_state");
         }
 
         @Override
@@ -330,8 +331,8 @@ interface InBuiltLootFunctions {
     record EnchantRandomly(List<Enchantment> enchantments) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:enchant_randomly");
+        public Key function() {
+            return Key.key("minecraft:enchant_randomly");
         }
 
         @Override
@@ -363,8 +364,8 @@ interface InBuiltLootFunctions {
     record EnchantWithLevels(boolean treasure, NumberProvider levels) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:enchant_with_levels");
+        public Key function() {
+            return Key.key("minecraft:enchant_with_levels");
         }
 
         @Override
@@ -392,8 +393,8 @@ interface InBuiltLootFunctions {
                           @Nullable Boolean skip_existing_chunks) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:exploration_map");
+        public Key function() {
+            return Key.key("minecraft:exploration_map");
         }
 
         @Override
@@ -423,8 +424,8 @@ interface InBuiltLootFunctions {
     record ExplosionDecay() implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:explosion_decay");
+        public Key function() {
+            return Key.key("minecraft:explosion_decay");
         }
 
         @Override
@@ -453,8 +454,8 @@ interface InBuiltLootFunctions {
     record FillPlayerHead(LootContext.Trait<Entity> entity) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:fill_player_head");
+        public Key function() {
+            return Key.key("minecraft:fill_player_head");
         }
 
         @Override
@@ -480,8 +481,8 @@ interface InBuiltLootFunctions {
     record FurnaceSmelt() implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:furnace_smelt");
+        public Key function() {
+            return Key.key("minecraft:furnace_smelt");
         }
 
         @Override
@@ -495,8 +496,8 @@ interface InBuiltLootFunctions {
     record LimitCount(Limit limit) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:limit_count");
+        public Key function() {
+            return Key.key("minecraft:limit_count");
         }
 
         @Override
@@ -538,8 +539,8 @@ interface InBuiltLootFunctions {
     record LootingEnchant(NumberProvider count, @Nullable Integer limit) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:looting_enchant");
+        public Key function() {
+            return Key.key("minecraft:looting_enchant");
         }
 
         @Override
@@ -572,8 +573,8 @@ interface InBuiltLootFunctions {
     record SetAttributes(List<AttributeModifier> modifiers) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:set_attributes");
+        public Key function() {
+            return Key.key("minecraft:set_attributes");
         }
 
         @Override
@@ -641,17 +642,17 @@ interface InBuiltLootFunctions {
             }
         }
 
-        public record AttributeModifier(String name, NamespaceID attribute, Operation operation, NumberProvider amount,
+        public record AttributeModifier(String name, Key attribute, Operation operation, NumberProvider amount,
                                         @Nullable UUID id, List<Slot> slot) {
 
-            public AttributeModifier(String name, NamespaceID attribute, Operation operation, NumberProvider amount,
+            public AttributeModifier(String name, Key attribute, Operation operation, NumberProvider amount,
                                      @Nullable UUID id, Slot slot) {
                 this(name, attribute, operation, amount, id, List.of(slot));
             }
 
             public AttributeList.Modifier apply(Context context) {
                 UUID uuid = Objects.requireNonNullElseGet(id(), UUID::randomUUID);
-                Attribute attribute = Attribute.fromNamespaceId(attribute().path());
+                Attribute attribute = Attribute.fromNamespaceId(attribute().namespace());
                 AttributeOperation operation = operation().toMinestom();
                 double amount = amount().asDouble().apply(context::random);
                 net.minestom.server.entity.attribute.AttributeModifier modifier = new net.minestom.server.entity.attribute.AttributeModifier(name(), amount, operation);
@@ -670,8 +671,8 @@ interface InBuiltLootFunctions {
     record SetBannerPattern(List<Pattern> patterns, boolean append) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:set_banner_pattern");
+        public Key function() {
+            return Key.key("minecraft:set_banner_pattern");
         }
 
         public record Pattern(String pattern, String color) {
@@ -707,8 +708,8 @@ interface InBuiltLootFunctions {
     record SetContents(List<LootTable.Pool.Entry> entries, EntityType type) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:set_contents");
+        public Key function() {
+            return Key.key("minecraft:set_contents");
         }
 
         @Override
@@ -722,8 +723,8 @@ interface InBuiltLootFunctions {
     record SetCount(NumberProvider count, @Nullable Boolean add) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:set_count");
+        public Key function() {
+            return Key.key("minecraft:set_count");
         }
 
         @Override
@@ -749,8 +750,8 @@ interface InBuiltLootFunctions {
     record SetDamage(NumberProvider damage, @Nullable Boolean add) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:set_damage");
+        public Key function() {
+            return Key.key("minecraft:set_damage");
         }
 
         @Override
@@ -777,8 +778,8 @@ interface InBuiltLootFunctions {
                            @Nullable Boolean add) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:set_enchantments");
+        public Key function() {
+            return Key.key("minecraft:set_enchantments");
         }
 
         @Override
@@ -809,11 +810,11 @@ interface InBuiltLootFunctions {
     }
 
     // Sets the item tags for instrument items to a random value from a tag.
-    record SetInstrument(NamespaceID options) implements LootFunction {
+    record SetInstrument(Key options) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:set_instrument");
+        public Key function() {
+            return Key.key("minecraft:set_instrument");
         }
 
         @Override
@@ -824,11 +825,11 @@ interface InBuiltLootFunctions {
     }
 
     // Sets the loot table for a container block when placed and opened.
-    record SetLootTable(NamespaceID name, @Nullable Integer seed, String type) implements LootFunction {
+    record SetLootTable(Key name, @Nullable Integer seed, String type) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:set_loot_table");
+        public Key function() {
+            return Key.key("minecraft:set_loot_table");
         }
 
         @Override
@@ -842,8 +843,8 @@ interface InBuiltLootFunctions {
     record SetLore(List<Component> lore, String entity, @Nullable Boolean replace) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:set_lore");
+        public Key function() {
+            return Key.key("minecraft:set_lore");
         }
 
         @Override
@@ -871,8 +872,8 @@ interface InBuiltLootFunctions {
     record SetName(Component name, String entity) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:set_name");
+        public Key function() {
+            return Key.key("minecraft:set_name");
         }
 
         @Override
@@ -885,8 +886,8 @@ interface InBuiltLootFunctions {
     record SetNBT(CompoundBinaryTag nbt) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:set_nbt");
+        public Key function() {
+            return Key.key("minecraft:set_nbt");
         }
 
         @Override
@@ -901,16 +902,16 @@ interface InBuiltLootFunctions {
     }
 
     // Sets the Potion tag of an item.
-    record SetPotion(NamespaceID potion) implements LootFunction {
+    record SetPotion(Key potion) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:set_potion");
+        public Key function() {
+            return Key.key("minecraft:set_potion");
         }
 
         @Override
         public ItemStack apply(Context context) {
-            return context.itemStack().withTag(Tags.Items.Potion.POTION, potion);
+            return context.itemStack().withTag(Tags.Items.Potion.POTION, NamespaceID.from(potion));
         }
     }
 
@@ -918,8 +919,8 @@ interface InBuiltLootFunctions {
     record SetStewEffect(List<Effect> effects) implements LootFunction {
 
         @Override
-        public NamespaceID function() {
-            return NamespaceID.from("minecraft:set_stew_effect");
+        public Key function() {
+            return Key.key("minecraft:set_stew_effect");
         }
 
         public record Effect(String type, NumberProvider duration) {

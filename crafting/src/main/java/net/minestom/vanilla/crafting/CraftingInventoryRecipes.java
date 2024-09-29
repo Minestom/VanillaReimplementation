@@ -1,7 +1,7 @@
 package net.minestom.vanilla.crafting;
 
 import dev.goldenstack.window.InventoryView;
-import dev.goldenstack.window.v1_19.Views;
+import dev.goldenstack.window.Views;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryClickEvent;
@@ -32,7 +32,7 @@ public record CraftingInventoryRecipes(Datapack datapack, VanillaReimplementatio
             InventoryView input = table.input();
             InventoryView.Singular output = table.output();
 
-            // if we are clicking on the output slot, remove one from all of the input slots
+            // if we are clicking on the output slot, remove one from all the input slots
             if (output.isValidExternal(slot)) {
                 for (int i = 0; i < input.size(); i++) {
                     input.set(inv, i, input.get(inv, i).withAmount(prev -> prev - 1));
@@ -88,13 +88,13 @@ public record CraftingInventoryRecipes(Datapack datapack, VanillaReimplementatio
 
                 if (recipe instanceof Recipe.Shapeless shapeless) {
                     if (utils.recipeMatchesShapeless(shapeless, materialValues)) {
-                        return ItemStack.of(shapeless.result().item(), shapeless.result().count() == null ? 1 : shapeless.result().count());
+                        return ItemStack.of(shapeless.result().id(), shapeless.result().count() == null ? 1 : shapeless.result().count());
                     }
                 }
 
                 if (recipe instanceof Recipe.Shaped shaped) {
                     if (utils.recipeMatchesShapedNxN(shaped, materials, 3)) {
-                        return ItemStack.of(shaped.result().item(), shaped.result().count() == null ? 1 : shaped.result().count());
+                        return ItemStack.of(shaped.result().id(), shaped.result().count() == null ? 1 : shaped.result().count());
                     }
                 }
             }

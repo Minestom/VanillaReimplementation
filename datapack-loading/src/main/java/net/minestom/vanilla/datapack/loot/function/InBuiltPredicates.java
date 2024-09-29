@@ -9,6 +9,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.component.EnchantmentList;
 import net.minestom.server.item.enchant.Enchantment;
 import net.minestom.server.registry.DynamicRegistry;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
@@ -352,7 +353,7 @@ interface InBuiltPredicates {
      * • enchantment: Resource location of enchantment.
      * • chances: List of probabilities for enchantment power, indexed from 0.
      */
-    record TableBonus(NamespaceID enchantment, List<Float> chances) implements Predicate {
+    record TableBonus(Key enchantment, List<Float> chances) implements Predicate {
         @Override
         public String condition() {
             return "table_bonus";
@@ -362,7 +363,7 @@ interface InBuiltPredicates {
         public boolean test(LootContext context) {
             ItemStack item = context.getOrThrow(LootContext.TOOL);
             EnchantmentList enchants = item.get(ItemComponent.ENCHANTMENTS);
-            DynamicRegistry.Key<Enchantment> enchantment = MinestomUtils.getEnchantKey(this.enchantment);
+            DynamicRegistry.Key<Enchantment> enchantment = MinestomUtils.getEnchantKey(NamespaceID.from(this.enchantment));
             int level = enchants == null || !enchants.has(enchantment) ? 0 : enchants.level(enchantment);
 
             return ThreadLocalRandom.current().nextFloat() < chances.get(level);

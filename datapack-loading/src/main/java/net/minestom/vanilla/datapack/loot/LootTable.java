@@ -4,6 +4,7 @@ import com.squareup.moshi.JsonReader;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackUtils;
@@ -26,7 +27,7 @@ import java.util.Objects;
  * @param pools A list of all pools for this loot table. Pools are applied in order.
  * @param random_sequence A resource location specifying the name of the random sequence that is used to generate loot from this loot table. If only one loot table uses a specific random sequence, the order of the randomized sets of items generated is the same for every world using the same world seed. If multiple loot tables use the same random sequence, the loot generated from any one of them changes depending on how many times and in what order any of the other loot tables were invoked.
  */
-public record LootTable(@Nullable String type, @Nullable List<LootFunction> functions, @Nullable List<Pool> pools, @Nullable NamespaceID random_sequence) {
+public record LootTable(@Nullable String type, @Nullable List<LootFunction> functions, @Nullable List<Pool> pools, @Nullable Key random_sequence) {
     public record Pool(@Nullable List<Predicate> conditions,
                        @Nullable List<LootFunction> functions,
                        NumberProvider.Int rolls,
@@ -36,7 +37,7 @@ public record LootTable(@Nullable String type, @Nullable List<LootFunction> func
         public sealed interface Entry {
             @Nullable List<Predicate> conditions();
 
-            NamespaceID type();
+            Key type();
 
             static Pool.Entry fromJson(JsonReader reader) throws IOException {
                 return JsonUtils.unionStringTypeAdapted(reader, "type", type -> switch(type) {
@@ -75,18 +76,18 @@ public record LootTable(@Nullable String type, @Nullable List<LootFunction> func
                         List<LootFunction> functions,
                         NumberProvider weight,
                         NumberProvider quality,
-                        NamespaceID name,
+                        Key name,
                         @Nullable Integer count) implements ItemGenerator {
 
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("minecraft:item");
+                public Key type() {
+                    return Key.key("minecraft:item");
                 }
 
                 @Override
                 public List<List<ItemStack>> apply(Datapack datapack, LootContext context) {
                     return List.of(List.of(
-                            ItemStack.of(Objects.requireNonNull(Material.fromNamespaceId(name)), count == null ? 1 : count)
+                            ItemStack.of(Objects.requireNonNull(Material.fromNamespaceId(NamespaceID.from(name))), count == null ? 1 : count)
                     ));
                 }
             }
@@ -104,21 +105,22 @@ public record LootTable(@Nullable String type, @Nullable List<LootFunction> func
                        List<LootFunction> functions,
                        NumberProvider weight,
                        NumberProvider quality,
-                       NamespaceID name,
+                       Key name,
                        boolean expand) implements ItemGenerator {
 
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("minecraft:tag");
+                public Key type() {
+                    return Key.key("minecraft:tag");
                 }
 
                 @Override
                 public List<List<ItemStack>> apply(Datapack datapack, LootContext context) {
                     List<List<ItemStack>> result = new ArrayList<>();
 
-                    var itemTags = DatapackUtils.findTags(datapack, "items", name);
+                    var itemTags = DatapackUtils.findTags(datapack, "item", name);
 
                     var items = itemTags.stream()
+                            .map(NamespaceID::from)
                             .map(Material::fromNamespaceId)
                             .filter(Objects::nonNull)
                             .map(material -> ItemStack.of(material, 1))
@@ -148,11 +150,11 @@ public record LootTable(@Nullable String type, @Nullable List<LootFunction> func
                                    List<LootFunction> functions,
                                    NumberProvider weight,
                                    NumberProvider quality,
-                                   NamespaceID name) implements Pool.Entry {
+                                   Key name) implements Pool.Entry {
 
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("minecraft:loot_table");
+                public Key type() {
+                    return Key.key("minecraft:loot_table");
                 }
             }
 
@@ -171,8 +173,8 @@ public record LootTable(@Nullable String type, @Nullable List<LootFunction> func
                            String name) implements ItemGenerator {
 
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("minecraft:dynamic");
+                public Key type() {
+                    return Key.key("minecraft:dynamic");
                 }
 
                 @Override
@@ -196,8 +198,8 @@ public record LootTable(@Nullable String type, @Nullable List<LootFunction> func
                          NumberProvider quality) implements ItemGenerator {
 
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("minecraft:empty");
+                public Key type() {
+                    return Key.key("minecraft:empty");
                 }
 
                 @Override
@@ -215,8 +217,8 @@ public record LootTable(@Nullable String type, @Nullable List<LootFunction> func
                          List<Pool.Entry> children) implements Pool.Entry {
 
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("minecraft:group");
+                public Key type() {
+                    return Key.key("minecraft:group");
                 }
             }
 
@@ -229,8 +231,8 @@ public record LootTable(@Nullable String type, @Nullable List<LootFunction> func
                                 List<Pool.Entry> children) implements Pool.Entry {
 
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("minecraft:alternatives");
+                public Key type() {
+                    return Key.key("minecraft:alternatives");
                 }
             }
 
@@ -243,8 +245,8 @@ public record LootTable(@Nullable String type, @Nullable List<LootFunction> func
                             List<Pool.Entry> children) implements Pool.Entry {
 
                 @Override
-                public NamespaceID type() {
-                    return NamespaceID.from("minecraft:sequence");
+                public Key type() {
+                    return Key.key("minecraft:sequence");
                 }
             }
         }

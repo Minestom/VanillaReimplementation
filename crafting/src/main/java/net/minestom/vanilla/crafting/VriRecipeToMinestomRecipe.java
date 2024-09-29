@@ -5,6 +5,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.DeclareRecipesPacket;
 import net.minestom.server.recipe.*;
+import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackUtils;
 import net.minestom.vanilla.datapack.recipe.Recipe;
@@ -28,7 +29,7 @@ record VriRecipeToMinestomRecipe(Datapack datapack) {
         String group = Objects.requireNonNullElseGet(vr.group(), () -> "core" + ThreadLocalRandom.current().nextInt());
 
         return switch (vr.type().value()) {
-            case "blasting" -> use(vr, (Recipe.Blasting recipe) -> new BlastingRecipe(id, group, RecipeCategory.Cooking.MISC, ItemStack.of(recipe.result()), (float) recipe.experience(), recipe.cookingTime() == null ? 100 : recipe.cookingTime()) {
+            case "blasting" -> use(vr, (Recipe.Blasting recipe) -> new BlastingRecipe(id, group, RecipeCategory.Cooking.MISC, ItemStack.of(recipe.result().id()), (float) recipe.experience(), recipe.cookingTime() == null ? 100 : recipe.cookingTime()) {
                 {
                     this.setIngredient(toMinestom(recipe.ingredient()));
                 }
@@ -37,7 +38,7 @@ record VriRecipeToMinestomRecipe(Datapack datapack) {
                     return shouldShow.test(player);
                 }
             });
-            case "campfire_cooking" -> use(vr, (Recipe.CampfireCooking recipe) -> new CampfireCookingRecipe(id, group, RecipeCategory.Cooking.MISC, toItemstack(recipe.result()), (float) recipe.experience(), recipe.cookingTime() == null ? 100 : recipe.cookingTime()) {
+            case "campfire_cooking" -> use(vr, (Recipe.CampfireCooking recipe) -> new CampfireCookingRecipe(id, group, RecipeCategory.Cooking.MISC, toItemstack(recipe.result().id()), (float) recipe.experience(), recipe.cookingTime() == null ? 100 : recipe.cookingTime()) {
                 {
                     this.setIngredient(toMinestom(recipe.ingredient()));
                 }
@@ -116,7 +117,7 @@ record VriRecipeToMinestomRecipe(Datapack datapack) {
                     }
                 };
             });
-            case "smelting" -> use(vr, (Recipe.Smelting recipe) -> new SmeltingRecipe(id, group, RecipeCategory.Cooking.MISC, toItemstack(recipe.result()), (float) recipe.experience(), recipe.cookingTime() == null ? 100 : recipe.cookingTime()) {
+            case "smelting" -> use(vr, (Recipe.Smelting recipe) -> new SmeltingRecipe(id, group, RecipeCategory.Cooking.MISC, toItemstack(recipe.result().id()), (float) recipe.experience(), recipe.cookingTime() == null ? 100 : recipe.cookingTime()) {
                 {
                     this.setIngredient(toMinestom(recipe.ingredient()));
                 }
@@ -125,7 +126,7 @@ record VriRecipeToMinestomRecipe(Datapack datapack) {
                     return shouldShow.test(player);
                 }
             });
-            case "smoking" -> use(vr, (Recipe.Smoking recipe) -> new SmokingRecipe(id, group, RecipeCategory.Cooking.MISC, toItemstack(recipe.result()), (float) recipe.experience(), recipe.cookingTime() == null ? 100 : recipe.cookingTime()) {
+            case "smoking" -> use(vr, (Recipe.Smoking recipe) -> new SmokingRecipe(id, group, RecipeCategory.Cooking.MISC, toItemstack(recipe.result().id()), (float) recipe.experience(), recipe.cookingTime() == null ? 100 : recipe.cookingTime()) {
                 {
                     this.setIngredient(toMinestom(recipe.ingredient()));
                 }
@@ -134,7 +135,7 @@ record VriRecipeToMinestomRecipe(Datapack datapack) {
                     return shouldShow.test(player);
                 }
             });
-            case "stonecutting" -> use(vr, (Recipe.Stonecutting recipe) -> new StonecutterRecipe(id, group, toMinestom(recipe.ingredient()), ItemStack.of(recipe.result(), recipe.count())) {
+            case "stonecutting" -> use(vr, (Recipe.Stonecutting recipe) -> new StonecutterRecipe(id, group, toMinestom(recipe.ingredient()), ItemStack.of(recipe.result().id(), recipe.result().count())) {
                 @Override
                 public boolean shouldShow(@NotNull Player player) {
                     return shouldShow.test(player);
@@ -164,7 +165,7 @@ record VriRecipeToMinestomRecipe(Datapack datapack) {
     }
 
     private ItemStack toItemstack(Recipe.Result result) {
-        return ItemStack.of(result.item(), result.count() == null ? 1 : result.count());
+        return ItemStack.of(result.id(), result.count() == null ? 1 : result.count());
     }
 
     private ItemStack toItemstack(Material result) {
@@ -191,7 +192,8 @@ record VriRecipeToMinestomRecipe(Datapack datapack) {
         if (ingredient instanceof Recipe.Ingredient.Item item) {
             return List.of(toItemstack(item.item()));
         } else if (ingredient instanceof Recipe.Ingredient.Tag tag) {
-            return DatapackUtils.findTags(datapack, "items", tag.tag()).stream()
+            return DatapackUtils.findTags(datapack, "item", tag.tag()).stream()
+                    .map(NamespaceID::from)
                     .map(Material::fromNamespaceId)
                     .filter(Objects::nonNull)
                     .map(ItemStack::of)
