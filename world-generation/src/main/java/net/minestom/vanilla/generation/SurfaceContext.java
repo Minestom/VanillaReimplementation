@@ -1,10 +1,12 @@
 package net.minestom.vanilla.generation;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.biome.Biome;
-import net.minestom.vanilla.datapack.worldgen.*;
+import net.minestom.vanilla.datapack.worldgen.DensityFunction;
+import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
+import net.minestom.vanilla.datapack.worldgen.WorldgenContext;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 import net.minestom.vanilla.datapack.worldgen.util.Util;
 
@@ -21,7 +23,7 @@ public class SurfaceContext implements NoiseSettings.SurfaceRule.Context {
     public int surfaceDepth;
     public int waterHeight;
 
-    public Supplier<NamespaceID> fetchBiome = Biome.PLAINS::namespace;
+    public Supplier<Key> fetchBiome = Biome.PLAINS::key;
     public IntSupplier surfaceSecondary = () -> 0;
     public IntSupplier minSurfaceLevel = () -> 0;
 
@@ -29,10 +31,10 @@ public class SurfaceContext implements NoiseSettings.SurfaceRule.Context {
     public final NoiseChunkGenerator.TargetChunk chunk;
     public final NoiseChunk noiseChunk;
     public final WorldgenContext context;
-    private final Function<Point, NamespaceID> getBiome;
+    private final Function<Point, Key> getBiome;
 
     public SurfaceContext(SurfaceSystem system, NoiseChunkGenerator.TargetChunk chunk, NoiseChunk noiseChunk, WorldgenContext context,
-                   Function<Point, NamespaceID> getBiome) {
+                   Function<Point, Key> getBiome) {
         this.system = system;
         this.chunk = chunk;
         this.noiseChunk = noiseChunk;
@@ -72,7 +74,7 @@ public class SurfaceContext implements NoiseSettings.SurfaceRule.Context {
     }
 
     @Override
-    public NamespaceID biome() {
+    public Key biome() {
         return this.fetchBiome.get();
     }
 

@@ -1,8 +1,8 @@
 package net.minestom.vanilla.datapack.loot.function;
 
 import com.squareup.moshi.JsonReader;
-import net.minestom.server.item.ItemStack;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.item.ItemStack;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.loot.context.LootContext;
 

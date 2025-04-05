@@ -2,6 +2,7 @@ package net.minestom.vanilla.items;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -21,7 +22,7 @@ public class FlintAndSteelHandler implements VanillaItemHandler {
         Player player = event.getPlayer();
         Instance instance = player.getInstance();
         ItemStack itemStack = event.getItemStack();
-        Player.Hand hand = event.getHand();
+        PlayerHand hand = event.getHand();
         Direction blockDir = event.getBlockFace().toDirection();
 
         // Find block in direction

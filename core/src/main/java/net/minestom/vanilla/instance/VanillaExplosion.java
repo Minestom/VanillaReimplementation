@@ -126,7 +126,7 @@ public class VanillaExplosion extends Explosion {
 //                            table = customBlock.getLootTable(lootTableManager);
 //                        }
 //                        if (table == null) {
-//                            table = lootTableManager.load(NamespaceID.from("blocks/" + block.name().toLowerCase()));
+//                            table = lootTableManager.load(Key.key("blocks/" + block.name().toLowerCase()));
 //                        }
 //                        List<ItemStack> output = table.generate(lootTableArguments);
 //                        for (ItemStack out : output) {

@@ -1,21 +1,15 @@
 package net.minestom.vanilla.blocks.behaviours.chestlike;
 
 import net.kyori.adventure.text.Component;
-import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.block.Block;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.tag.Tag;
 import net.minestom.vanilla.blocks.behaviours.InventoryBlockBehaviour;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

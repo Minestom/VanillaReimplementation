@@ -2,8 +2,8 @@ package net.minestom.vanilla.datapack.recipe;
 
 import com.squareup.moshi.Json;
 import com.squareup.moshi.JsonReader;
-import net.minestom.server.item.Material;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.item.Material;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.json.Optional;
@@ -11,7 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public interface Recipe {
@@ -26,6 +27,7 @@ public interface Recipe {
             case "minecraft:campfire_cooking" -> CampfireCooking.class;
             case "minecraft:crafting_shaped" -> Shaped.class;
             case "minecraft:crafting_shapeless" -> Shapeless.class;
+            case "minecraft:crafting_transmute" -> Transmute.class;
             case "minecraft:crafting_special_armordye" -> Special.ArmorDye.class;
             case "minecraft:crafting_special_bannerduplicate" -> Special.BannerDuplicate.class;
             case "minecraft:crafting_special_bookcloning" -> Special.BookCloning.class;
@@ -36,7 +38,6 @@ public interface Recipe {
             case "minecraft:crafting_special_mapextending" -> Special.MapExtending.class;
             case "minecraft:crafting_special_repairitem" -> Special.RepairItem.class;
             case "minecraft:crafting_special_shielddecoration" -> Special.ShieldDecoration.class;
-            case "minecraft:crafting_special_shulkerboxcoloring" -> Special.ShulkerBoxColoring.class;
             case "minecraft:crafting_special_tippedarrow" -> Special.TippedArrow.class;
             case "minecraft:crafting_special_suspiciousstew" -> Special.SuspiciousStew.class;
             case "minecraft:crafting_decorated_pot" -> DecoratedPot.class;
@@ -70,7 +71,7 @@ public interface Recipe {
                         json.endArray();
                         return new Multi(items.build().toList());
                     },
-                    JsonReader.Token.BEGIN_OBJECT, DatapackLoader.moshi(Single.class),
+                    JsonReader.Token.STRING, DatapackLoader.moshi(Single.class),
                     JsonReader.Token.NULL, json -> {
                         json.nextNull();
                         return new None();
@@ -81,17 +82,12 @@ public interface Recipe {
         // single means within an array, not necessarily a singular item
         interface Single extends Ingredient {
             static Single fromJson(JsonReader reader) throws IOException {
-                JsonReader peek = reader.peekJson();
-                peek.beginObject();
-                boolean isTag = JsonUtils.hasProperty(peek, "tag");
+                String content = reader.nextString();
+                boolean isTag = content.startsWith("#");
                 if (isTag) {
-                    return DatapackLoader.moshi(Tag.class).apply(reader);
+                    return new Tag(Key.key(content.substring(1)));
                 }
-                boolean isItem = JsonUtils.hasProperty(peek, "item");
-                if (isItem) {
-                    return DatapackLoader.moshi(Item.class).apply(reader);
-                }
-                throw new IOException("Ingredient must have either tag or item");
+                return new Item(Material.fromKey(content));
             }
         }
 
@@ -114,7 +110,7 @@ public interface Recipe {
     record SingleResult(Material id) {
     }
 
-    record Blasting(String group, JsonUtils.SingleOrList<Ingredient> ingredient, SingleResult result,
+    record Blasting(String group, @Optional String category, JsonUtils.SingleOrList<Ingredient> ingredient, SingleResult result,
                     double experience, @Optional @Json(name = "cookingtime") Integer cookingTime) implements CookingRecipe {
         @Override
         public @NotNull Key type() {
@@ -130,17 +126,25 @@ public interface Recipe {
         }
     }
 
-    record Shaped(String group, List<String> pattern, Map<Character, Ingredient> key, Result result) implements Recipe {
+    record Shaped(String group, @Optional String category, List<String> pattern, Map<Character, Ingredient> key, Result result) implements Recipe {
         @Override
         public @NotNull Key type() {
             return Key.key("minecraft:crafting_shaped");
         }
     }
 
-    record Shapeless(String group, JsonUtils.SingleOrList<Ingredient> ingredients, Result result) implements Recipe {
+    record Shapeless(String group, @Optional String category, JsonUtils.SingleOrList<Ingredient> ingredients, Result result) implements Recipe {
         @Override
         public @NotNull Key type() {
             return Key.key("minecraft:crafting_shapeless");
+        }
+    }
+
+    record Transmute(String group, @Optional String category, JsonUtils.SingleOrList<Ingredient> input,
+                     JsonUtils.SingleOrList<Ingredient> material, Result result) implements Recipe {
+        @Override
+        public @NotNull Key type() {
+            return Key.key("minecraft:crafting_transmute");
         }
     }
 
@@ -216,13 +220,6 @@ public interface Recipe {
             }
         }
 
-        record ShulkerBoxColoring(String group) implements Special {
-            @Override
-            public @NotNull Key type() {
-                return Key.key("minecraft:crafting_special_shulkerboxcoloring");
-            }
-        }
-
         record TippedArrow(String group) implements Special {
             @Override
             public @NotNull Key type() {
@@ -246,7 +243,7 @@ public interface Recipe {
         }
     }
 
-    record Smelting(String group, JsonUtils.SingleOrList<Ingredient> ingredient, SingleResult result,
+    record Smelting(String group, @Optional String category, JsonUtils.SingleOrList<Ingredient> ingredient, SingleResult result,
                     double experience, @Optional @Json(name = "cookingtime") Integer cookingTime) implements CookingRecipe {
         @Override
         public @NotNull Key type() {
@@ -279,7 +276,7 @@ public interface Recipe {
         }
     }
 
-    record SmithingTrim(String group, Ingredient.Single base, Ingredient.Single addition, Result result,
+    record SmithingTrim(String group, Ingredient.Single base, Ingredient.Single addition, String pattern,
                         Ingredient.Single template) implements Smithing {
         @Override
         public @NotNull Key type() {

@@ -1,7 +1,7 @@
 package net.minestom.vanilla.datapack.worldgen.noise;
 
-import net.minestom.vanilla.datapack.worldgen.util.Util;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
+import net.minestom.vanilla.datapack.worldgen.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 public class BlendedNoise implements Noise {

@@ -4,14 +4,15 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.effects.Effects;
 import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.worldevent.WorldEvent;
 import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.inventory.InventoryManipulation;
@@ -28,7 +29,7 @@ import java.util.Random;
  */
 public class JukeboxBlockBehaviour extends VanillaBlockBehaviour {
 
-    public static final Tag<ItemStack> DISC_KEY = Tag.ItemStack("minestom:jokebox_disc");
+    public static final Tag<ItemStack> DISC_KEY = Tag.ItemStack("minestom:jukebox_disc");
 
     public JukeboxBlockBehaviour(@NotNull VanillaBlocks.BlockContext context) {
         super(context);
@@ -61,11 +62,11 @@ public class JukeboxBlockBehaviour extends VanillaBlockBehaviour {
     @Override
     public boolean onInteract(@NotNull Interaction interaction) {
         Player player = interaction.getPlayer();
-        Player.Hand hand = interaction.getHand();
+        PlayerHand hand = interaction.getHand();
         Instance instance = interaction.getInstance();
         Block block = interaction.getBlock();
         Point pos = interaction.getBlockPosition();
-        ItemStack heldItem = player.getInventory().getItemInMainHand();
+        ItemStack heldItem = player.getItemInMainHand();
 
         ItemStack stack = this.getDisc(block);
 
@@ -92,7 +93,7 @@ public class JukeboxBlockBehaviour extends VanillaBlockBehaviour {
                 .filter(player1 -> player1.getDistance(pos) < 64)
                 .forEach(player1 ->
                         player1.playEffect(
-                                Effects.PLAY_RECORD,
+                                WorldEvent.SOUND_PLAY_JUKEBOX_SONG,
                                 pos.blockX(),
                                 pos.blockY(),
                                 pos.blockZ(),
@@ -169,7 +170,7 @@ public class JukeboxBlockBehaviour extends VanillaBlockBehaviour {
         instance.getPlayers().forEach(playerInInstance -> {
             // stop playback
             playerInInstance.playEffect(
-                    Effects.PLAY_RECORD,
+                    WorldEvent.SOUND_STOP_JUKEBOX_SONG,
                     pos.blockX(),
                     pos.blockY(),
                     pos.blockZ(),

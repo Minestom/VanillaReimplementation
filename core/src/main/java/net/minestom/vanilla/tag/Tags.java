@@ -1,14 +1,13 @@
 package net.minestom.vanilla.tag;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.*;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.NamespaceID;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -38,9 +37,9 @@ public interface Tags {
         }
 
         interface Potion {
-            Tag<NamespaceID> POTION = TAG.path("Potion")
+            Tag<Key> POTION = TAG.path("Potion")
                     .map(nbt -> nbt instanceof StringBinaryTag nbts ?
-                            NamespaceID.from(nbts.value()) : NamespaceID.from("minecraft:empty"),
+                            Key.key(nbts.value()) : Key.key("minecraft:empty"),
                             nbt -> StringBinaryTag.stringBinaryTag(nbt.toString()));
         }
     }
@@ -51,7 +50,7 @@ public interface Tags {
                     .map(nbt -> nbt instanceof CompoundBinaryTag compound ? compound : CompoundBinaryTag.empty(), nbt -> nbt)
                     .list()
                     .map(nbtList -> nbtList.stream()
-                                    .map(nbt -> ItemStack.of(Material.fromNamespaceId(nbt.getString("id"))))
+                                    .map(nbt -> ItemStack.of(Material.fromKey(nbt.getString("id"))))
                                     .collect(Collectors.toList()),
                             items -> IntStream.range(0, items.size())
                                     .mapToObj(slot -> CompoundBinaryTag.from(Map.of(
@@ -71,7 +70,7 @@ public interface Tags {
 
             // The last fuel item that was used. Null if this furnace is not currently burning
             Tag<Material> LAST_COOKED_ITEM = Tag.String("vri:furnace:last_cooked_item")
-                    .map(Material::fromNamespaceId, mat -> mat.namespace().toString())
+                    .map(Material::fromKey, mat -> mat.key().toString())
                     .defaultValue(Material.AIR);
 
             // The number of ticks that the furnace has been cooking for

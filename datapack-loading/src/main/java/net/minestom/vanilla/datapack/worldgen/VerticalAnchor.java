@@ -1,7 +1,6 @@
 package net.minestom.vanilla.datapack.worldgen;
 
 import com.squareup.moshi.JsonReader;
-import net.minestom.vanilla.datapack.json.JsonUtils;
 
 import java.io.IOException;
 

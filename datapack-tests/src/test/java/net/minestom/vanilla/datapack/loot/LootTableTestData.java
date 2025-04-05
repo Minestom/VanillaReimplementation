@@ -1,7 +1,6 @@
 package net.minestom.vanilla.datapack.loot;
 
 import net.kyori.adventure.nbt.CompoundBinaryTag;
-import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.vanilla.datapack.loot.context.LootContext;

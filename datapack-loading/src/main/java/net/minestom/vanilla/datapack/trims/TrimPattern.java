@@ -1,7 +1,7 @@
 package net.minestom.vanilla.datapack.trims;
 
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
 import net.minestom.vanilla.datapack.json.Optional;
 
 /**

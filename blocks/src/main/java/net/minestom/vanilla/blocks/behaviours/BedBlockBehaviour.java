@@ -2,7 +2,7 @@ package net.minestom.vanilla.blocks.behaviours;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EntityPose;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.PlayerMeta;
 import net.minestom.server.instance.Instance;
@@ -89,7 +89,7 @@ public class BedBlockBehaviour extends VanillaBlockBehaviour {
             // Make player sleep
             PlayerMeta meta = player.getPlayerMeta();
             meta.setBedInWhichSleepingPosition(pos);
-            meta.setPose(Entity.Pose.SLEEPING);
+            meta.setPose(EntityPose.SLEEPING);
 
             // Schedule player getting out of bed
             MinecraftServer.getSchedulerManager().buildTask(() -> {
@@ -98,7 +98,7 @@ public class BedBlockBehaviour extends VanillaBlockBehaviour {
                         }
 
                         meta.setBedInWhichSleepingPosition(null);
-                        meta.setPose(Entity.Pose.STANDING);
+                        meta.setPose(EntityPose.STANDING);
                     })
                     .delay(101, TimeUnit.SERVER_TICK)
                     .schedule();

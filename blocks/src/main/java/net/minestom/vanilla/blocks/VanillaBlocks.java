@@ -16,7 +16,6 @@ import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.blocks.behaviours.*;
 import net.minestom.vanilla.blocks.behaviours.oxidisable.OxidatableBlockBehaviour;
 import net.minestom.vanilla.blocks.behaviours.oxidisable.WaxedBlockBehaviour;
-import net.minestom.vanilla.blocks.behaviours.recipe.CampfireBehaviour;
 import net.minestom.vanilla.blocks.behaviours.recipe.*;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdatable;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdateManager;
@@ -138,8 +137,8 @@ public enum VanillaBlocks {
     BLAST_FURNACE(Block.BLAST_FURNACE, BlastingFurnaceBehaviour::new),
 
     STONE_CUTTER(Block.STONECUTTER, StonecutterBehaviour::new),
-    CAMPFIRE(Block.CAMPFIRE, CampfireBehaviour::new),
-    SOUL_CAMPFIRE(Block.SOUL_CAMPFIRE, CampfireBehaviour::new),
+//    CAMPFIRE(Block.CAMPFIRE, CampfireBehaviour::new), // TODO
+//    SOUL_CAMPFIRE(Block.SOUL_CAMPFIRE, CampfireBehaviour::new), // TODO
     SMITHING_TABLE(Block.SMITHING_TABLE, SmithingTableBehaviour::new),
 
     // Start of cakes

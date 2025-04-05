@@ -1,6 +1,7 @@
 package net.minestom.vanilla.blocks.behaviours.oxidisable;
 
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -20,14 +21,13 @@ public class WaxedBlockBehaviour extends OxidatedBlockBehaviour {
 
     @Override
     public boolean onInteract(@NotNull Interaction interaction) {
-        Player.Hand hand = interaction.getHand();
+        PlayerHand hand = interaction.getHand();
         Player player = interaction.getPlayer();
-        Block interactionBlock = interaction.getBlock();
 
-        ItemStack item = player.getInventory().getItemInHand(hand);
+        ItemStack item = player.getItemInHand(hand);
         Material material = item.material();
 
-        if (material.namespace().value().toLowerCase().contains("_axe")) { // TODO: Better way to check if it's an axe
+        if (material.key().value().toLowerCase().contains("_axe")) { // TODO: Better way to check if it's an axe
             Block previousBlock = Block.fromStateId(unWaxed);
             Objects.requireNonNull(previousBlock, "Previous block with state id " + unWaxed + " was not found");
             interaction.getInstance().setBlock(interaction.getBlockPosition(), previousBlock);

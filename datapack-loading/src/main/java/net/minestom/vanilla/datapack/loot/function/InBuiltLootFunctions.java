@@ -1,10 +1,12 @@
 package net.minestom.vanilla.datapack.loot.function;
 
 import com.squareup.moshi.JsonReader;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.*;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.color.DyeColor;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.EquipmentSlotGroup;
@@ -13,18 +15,15 @@ import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.attribute.AttributeOperation;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.AttributeList;
 import net.minestom.server.item.component.EnchantmentList;
 import net.minestom.server.item.enchant.Enchantment;
 import net.minestom.server.registry.DynamicRegistry;
-import net.kyori.adventure.key.Key;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.DatapackLoader;
-import net.minestom.vanilla.datapack.loot.LootTable;
 import net.minestom.vanilla.datapack.json.JsonUtils;
+import net.minestom.vanilla.datapack.loot.LootTable;
 import net.minestom.vanilla.datapack.loot.NBTPath;
 import net.minestom.vanilla.datapack.loot.context.LootContext;
 import net.minestom.vanilla.datapack.number.NumberProvider;
@@ -71,7 +70,7 @@ interface InBuiltLootFunctions {
 
             @Override
             public ItemStack apply(Context context) {
-                int enchantLevel = MinestomUtils.getEnchantLevel(context.itemStack(), NamespaceID.from(enchantment), 0);
+                int enchantLevel = MinestomUtils.getEnchantLevel(context.itemStack(), enchantment, 0);
                 double n = enchantLevel + parameters().extra();
 
                 RandomGenerator random = context.random();
@@ -97,7 +96,7 @@ interface InBuiltLootFunctions {
 
             @Override
             public ItemStack apply(Context context) {
-                int enchantLevel = MinestomUtils.getEnchantLevel(context.itemStack(), NamespaceID.from(enchantment), 0);
+                int enchantLevel = MinestomUtils.getEnchantLevel(context.itemStack(), enchantment, 0);
                 double n = enchantLevel * parameters.bonusMultiplier();
                 int count = n == 0.0 ? 0 : (int) context.random().nextDouble(n);
                 return context.itemStack().withAmount(count);
@@ -113,7 +112,7 @@ interface InBuiltLootFunctions {
 
             @Override
             public ItemStack apply(Context context) {
-                int enchantLevel = MinestomUtils.getEnchantLevel(context.itemStack(), NamespaceID.from(enchantment), 0);
+                int enchantLevel = MinestomUtils.getEnchantLevel(context.itemStack(), enchantment, 0);
                 int itemCount = context.itemStack().amount() * (1 + context.random().nextInt(enchantLevel + 2));
                 return context.itemStack().withAmount(itemCount);
             }
@@ -139,7 +138,7 @@ interface InBuiltLootFunctions {
                 BlockHandler handler = blockEntity.handler();
                 if (handler == null) return context.itemStack();
                 // TODO: This is not the correct way to get the block entity's name
-                name = Component.text(handler.getNamespaceId().value());
+                name = Component.text(handler.getKey().value());
             }
             if (name == null) return context.itemStack();
             return context.itemStack().withCustomName(name);
@@ -342,7 +341,7 @@ interface InBuiltLootFunctions {
                 itemStack = itemStack.withMaterial(Material.ENCHANTED_BOOK);
             }
 
-            EnchantmentList list = itemStack.get(ItemComponent.ENCHANTMENTS);
+            EnchantmentList list = itemStack.get(DataComponents.ENCHANTMENTS);
 
             for (Enchantment enchantment : enchantments) {
                 var key = MinecraftServer.getEnchantmentRegistry().getKey(enchantment);
@@ -355,7 +354,7 @@ interface InBuiltLootFunctions {
                 list = list.with(key, level);
             }
 
-            return itemStack.with(ItemComponent.ENCHANTMENTS, list);
+            return itemStack.with(DataComponents.ENCHANTMENTS, list);
         }
     }
 
@@ -555,7 +554,7 @@ interface InBuiltLootFunctions {
             int looting;
             if (killer instanceof Player player) {
                 ItemStack mainHand = player.getItemInMainHand();
-                int lootingValue = MinestomUtils.getEnchantLevel(mainHand, Enchantment.LOOTING.namespace(), 0);
+                int lootingValue = MinestomUtils.getEnchantLevel(mainHand, Enchantment.LOOTING.key(), 0);
                 if (lootingValue == 0) return itemStack;
                 looting = lootingValue;
             } else {
@@ -579,13 +578,13 @@ interface InBuiltLootFunctions {
 
         @Override
         public ItemStack apply(Context context) {
-            AttributeList list = context.itemStack().get(ItemComponent.ATTRIBUTE_MODIFIERS);
+            AttributeList list = context.itemStack().get(DataComponents.ATTRIBUTE_MODIFIERS);
             if (list == null) list = AttributeList.EMPTY;
 
             for (AttributeModifier modifier : modifiers()) {
                 list = list.with(modifier.apply(context));
             }
-            return context.itemStack().with(ItemComponent.ATTRIBUTE_MODIFIERS, list);
+            return context.itemStack().with(DataComponents.ATTRIBUTE_MODIFIERS, list);
         }
 
         public enum Operation {
@@ -606,8 +605,8 @@ interface InBuiltLootFunctions {
             public AttributeOperation toMinestom() {
                 return switch (this) {
                     case ADDITION -> AttributeOperation.ADD_VALUE;
-                    case MULTIPLY_BASE -> AttributeOperation.MULTIPLY_BASE;
-                    case MULTIPLY_TOTAL -> AttributeOperation.MULTIPLY_TOTAL;
+                    case MULTIPLY_BASE -> AttributeOperation.ADD_MULTIPLIED_BASE;
+                    case MULTIPLY_TOTAL -> AttributeOperation.ADD_MULTIPLIED_TOTAL;
                 };
             }
         }
@@ -652,7 +651,7 @@ interface InBuiltLootFunctions {
 
             public AttributeList.Modifier apply(Context context) {
                 UUID uuid = Objects.requireNonNullElseGet(id(), UUID::randomUUID);
-                Attribute attribute = Attribute.fromNamespaceId(attribute().namespace());
+                Attribute attribute = Attribute.fromKey(attribute().key());
                 AttributeOperation operation = operation().toMinestom();
                 double amount = amount().asDouble().apply(context::random);
                 net.minestom.server.entity.attribute.AttributeModifier modifier = new net.minestom.server.entity.attribute.AttributeModifier(name(), amount, operation);
@@ -765,11 +764,11 @@ interface InBuiltLootFunctions {
 
             int damage;
             if (add) {
-                damage = Objects.requireNonNullElse(itemStack.get(ItemComponent.DAMAGE), 0) + this.damage.asInt().apply(context::random);
+                damage = Objects.requireNonNullElse(itemStack.get(DataComponents.DAMAGE), 0) + this.damage.asInt().apply(context::random);
             } else {
                 damage = this.damage.asInt().apply(context::random);
             }
-            return itemStack.with(ItemComponent.DAMAGE, damage);
+            return itemStack.with(DataComponents.DAMAGE, damage);
         }
     }
 
@@ -787,7 +786,7 @@ interface InBuiltLootFunctions {
             boolean add = Objects.requireNonNullElse(this.add, false);
             ItemStack itemStack = context.itemStack();
 
-            EnchantmentList list = itemStack.get(ItemComponent.ENCHANTMENTS);
+            EnchantmentList list = itemStack.get(DataComponents.ENCHANTMENTS);
             if (list == null) list = EnchantmentList.EMPTY;
 
             for (var entry : enchantments.entrySet()) {
@@ -805,7 +804,7 @@ interface InBuiltLootFunctions {
                 }
             }
 
-            return itemStack.with(ItemComponent.ENCHANTMENTS, list);
+            return itemStack.with(DataComponents.ENCHANTMENTS, list);
         }
     }
 
@@ -860,11 +859,11 @@ interface InBuiltLootFunctions {
             if (replace) {
                 newLore = lore();
             } else {
-                List<Component> lore = itemStack.get(ItemComponent.LORE);
+                List<Component> lore = itemStack.get(DataComponents.LORE);
                 newLore = lore == null ? new ArrayList<>() : new ArrayList<>(lore);
                 newLore.addAll(lore());
             }
-            return itemStack.with(ItemComponent.LORE, newLore);
+            return itemStack.with(DataComponents.LORE, newLore);
         }
     }
 
@@ -911,7 +910,7 @@ interface InBuiltLootFunctions {
 
         @Override
         public ItemStack apply(Context context) {
-            return context.itemStack().withTag(Tags.Items.Potion.POTION, NamespaceID.from(potion));
+            return context.itemStack().withTag(Tags.Items.Potion.POTION, potion);
         }
     }
 

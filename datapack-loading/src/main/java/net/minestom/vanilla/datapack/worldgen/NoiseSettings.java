@@ -4,9 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.squareup.moshi.JsonReader;
-import net.minestom.server.instance.block.Block;
 import net.kyori.adventure.key.Key;
-import net.minestom.server.utils.math.FloatRange;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.utils.Range;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.worldgen.noise.NormalNoise;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
@@ -44,12 +44,12 @@ public record NoiseSettings(
     }
 
     // Noise parameter for biome
-    public record SpawnTarget(FloatRange temperature,
-                              FloatRange humidity,
-                              FloatRange continentalness,
-                              FloatRange erosion,
-                              FloatRange weirdness,
-                              FloatRange depth,
+    public record SpawnTarget(Range.Float temperature,
+                              Range.Float humidity,
+                              Range.Float continentalness,
+                              Range.Float erosion,
+                              Range.Float weirdness,
+                              Range.Float depth,
                               float offset) {
     }
 

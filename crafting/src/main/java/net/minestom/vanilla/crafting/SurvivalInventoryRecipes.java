@@ -1,7 +1,8 @@
 package net.minestom.vanilla.crafting;
 
-import dev.goldenstack.window.InventoryView;
-import dev.goldenstack.window.Views;
+import net.goldenstack.window.InventoryView;
+import net.goldenstack.window.Views;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -9,7 +10,6 @@ import net.minestom.server.event.inventory.InventoryClickEvent;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.recipe.Recipe;
@@ -28,7 +28,7 @@ public record SurvivalInventoryRecipes(Datapack datapack, VanillaReimplementatio
             Player player = event.getPlayer();
             PlayerInventory inv = player.getInventory();
             int slot = event.getSlot();
-            if (event.getInventory() != null) return; // we only are dealing with player inventories
+            if (event.getInventory() != event.getPlayer().getInventory()) return; // we only are dealing with player inventories
 
             var crafting = Views.player().crafting();
 
@@ -66,14 +66,14 @@ public record SurvivalInventoryRecipes(Datapack datapack, VanillaReimplementatio
             for (String file : data.recipes().files()) {
                 Recipe recipe = data.recipes().file(file);
 
-                if (recipe.type().equals(NamespaceID.from("minecraft:crafting_shapeless"))) {
+                if (recipe.type().equals(Key.key("minecraft:crafting_shapeless"))) {
                     Recipe.Shapeless shapeless = (Recipe.Shapeless) recipe;
                     if (utils.recipeMatchesShapeless(shapeless, List.of(topLeft, topRight, bottomLeft, bottomRight))) {
                         return ItemStack.of(shapeless.result().id(), shapeless.result().count() == null ? 1 : shapeless.result().count());
                     }
                 }
 
-                if (recipe.type().equals(NamespaceID.from("minecraft:crafting_shaped"))) {
+                if (recipe.type().equals(Key.key("minecraft:crafting_shaped"))) {
                     Recipe.Shaped shaped = (Recipe.Shaped) recipe;
 
                     // collect materials for pattern matching

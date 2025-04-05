@@ -1,5 +1,6 @@
 package net.minestom.vanilla;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -10,11 +11,9 @@ import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.anvil.AnvilLoader;
 import net.minestom.server.registry.DynamicRegistry;
-import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import net.minestom.server.tag.TagWritable;
 import net.minestom.server.tag.Taggable;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
 import net.minestom.vanilla.instance.SetupVanillaInstanceEvent;
@@ -25,7 +24,6 @@ import net.minestom.vanilla.utils.DependencySorting;
 import net.minestom.vanilla.utils.MinestomUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,7 +34,7 @@ import java.util.stream.Collectors;
 class VanillaReimplementationImpl implements VanillaReimplementation {
 
     private final ServerProcess process;
-    private final Map<NamespaceID, Instance> worlds = new ConcurrentHashMap<>();
+    private final Map<Key, Instance> worlds = new ConcurrentHashMap<>();
     private final Map<EntityType, VanillaRegistry.EntitySpawner> entity2Spawner = new ConcurrentHashMap<>();
     private final Map<Class<Feature>, Feature> class2Feature = new ConcurrentHashMap<>();
     private final Map<Object, Random> randoms = Collections.synchronizedMap(new WeakHashMap<>());
@@ -158,7 +156,7 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
     /**
      * Creates a vanilla instance.
      */
-    public @NotNull Instance createInstance(@NotNull NamespaceID name, @NotNull DimensionType dimension) {
+    public @NotNull Instance createInstance(@NotNull Key name, @NotNull DimensionType dimension) {
         DynamicRegistry.Key<DimensionType> key = process().dimensionType().getKey(dimension);
         Objects.requireNonNull(key, "Dimension type " + dimension + " is not registered!");
         InstanceContainer instance = process().instance().createInstanceContainer(key);
@@ -177,7 +175,7 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
     }
 
     @Override
-    public @NotNull Instance getInstance(NamespaceID dimensionId) {
+    public @NotNull Instance getInstance(Key dimensionId) {
         return worlds.get(dimensionId);
     }
 
@@ -229,7 +227,7 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
 
         for (Feature feature : sortedByDependencies) {
             if (!predicate.test(feature)) {
-                Logger.info("Skipping feature %s...", feature.namespaceId());
+                Logger.info("Skipping feature %s...", feature.key());
                 continue;
             }
 
@@ -238,7 +236,7 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
                 //noinspection unchecked
                 class2Feature.put((Class<Feature>) feature.getClass(), feature);
             } catch (Exception e) {
-                Logger.error("Failed to load feature: " + feature.namespaceId(), e);
+                Logger.error("Failed to load feature: " + feature.key(), e);
                 throw new RuntimeException(e);
             }
         }
@@ -246,11 +244,11 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
 
     private void instructHook(Feature feature, VanillaRegistry registry) {
         try {
-            Loading.start("" + feature.namespaceId());
+            Loading.start("" + feature.key());
             Feature.HookContext context = new HookContextImpl(this, registry, Loading.updater());
             feature.hook(context);
         } catch (Exception e) {
-            Logger.error(e, "Failed to load feature: %s%n", feature.namespaceId());
+            Logger.error(e, "Failed to load feature: %s%n", feature.key());
             throw new RuntimeException(e);
         } finally {
             Loading.finish();

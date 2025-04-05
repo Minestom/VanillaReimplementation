@@ -6,7 +6,6 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.system.NetherPortal;

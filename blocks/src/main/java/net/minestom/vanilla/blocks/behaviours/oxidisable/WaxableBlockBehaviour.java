@@ -1,6 +1,7 @@
 package net.minestom.vanilla.blocks.behaviours.oxidisable;
 
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -20,10 +21,10 @@ public abstract class WaxableBlockBehaviour extends VanillaBlockBehaviour {
 
     @Override
     public boolean onInteract(@NotNull Interaction interaction) {
-        Player.Hand hand = interaction.getHand();
+        PlayerHand hand = interaction.getHand();
         Player player = interaction.getPlayer();
 
-        ItemStack item = player.getInventory().getItemInHand(hand);
+        ItemStack item = player.getItemInHand(hand);
         Material material = item.material();
 
         if (Material.HONEYCOMB.equals(material)) {

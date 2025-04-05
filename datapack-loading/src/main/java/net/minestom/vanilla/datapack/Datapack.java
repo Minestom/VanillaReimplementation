@@ -1,26 +1,27 @@
 package net.minestom.vanilla.datapack;
 
 import com.squareup.moshi.JsonReader;
+import net.kyori.adventure.key.Key;
+import net.minestom.vanilla.datapack.advancement.Advancement;
 import net.minestom.vanilla.datapack.dimension.DimensionType;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.json.Optional;
+import net.minestom.vanilla.datapack.loot.LootTable;
+import net.minestom.vanilla.datapack.loot.function.LootFunction;
+import net.minestom.vanilla.datapack.loot.function.Predicate;
+import net.minestom.vanilla.datapack.recipe.Recipe;
 import net.minestom.vanilla.datapack.trims.TrimMaterial;
 import net.minestom.vanilla.datapack.trims.TrimPattern;
 import net.minestom.vanilla.datapack.worldgen.*;
 import net.minestom.vanilla.datapack.worldgen.noise.Noise;
 import net.minestom.vanilla.files.ByteArray;
 import net.minestom.vanilla.files.FileSystem;
-import net.kyori.adventure.key.Key;
-import net.minestom.vanilla.datapack.advancement.Advancement;
-import net.minestom.vanilla.datapack.loot.LootTable;
-import net.minestom.vanilla.datapack.loot.function.LootFunction;
-import net.minestom.vanilla.datapack.loot.function.Predicate;
-import net.minestom.vanilla.datapack.recipe.Recipe;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 public interface Datapack {
 

@@ -1,6 +1,6 @@
 package net.minestom.vanilla.crafting;
 
-import dev.goldenstack.window.InventoryView;
+import net.goldenstack.window.InventoryView;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
@@ -8,7 +8,6 @@ import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackUtils;
 import net.minestom.vanilla.datapack.recipe.Recipe;
@@ -143,8 +142,8 @@ public record CraftingUtils(Datapack datapack) {
         if (ingredient instanceof Recipe.Ingredient.Tag tag) {
             return DatapackUtils.findTags(datapack, "item", tag.tag())
                     .stream()
-                    .map(NamespaceID::from)
-                    .map(Material::fromNamespaceId)
+                    .map(Key::key)
+                    .map(Material::fromKey)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toUnmodifiableSet());
         }
@@ -183,15 +182,8 @@ public record CraftingUtils(Datapack datapack) {
         node.addListener(InventoryPreClickEvent.class, event -> {
             // for stacking items from an output slot
             int slot = event.getSlot();
-            Inventory inventory = event.getInventory();
-            if (inventory == null) {
-                if (inventoryType != null) {
-                    // survival inventory, but we want to handle a different inventory type
-                    return;
-                }
-            } else if (inventory.getInventoryType() != inventoryType) {
-                return;
-            }
+            if (!(event.getInventory() instanceof Inventory inventory)) return;
+            if (inventory.getInventoryType() != inventoryType) return; // todo what about the player's inventory?
             if (!outputSlot.isValidExternal(slot)) return;
 
             ItemStack cursor = event.getCursorItem();

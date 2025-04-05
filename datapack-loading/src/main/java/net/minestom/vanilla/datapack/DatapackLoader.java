@@ -4,16 +4,27 @@ import com.squareup.moshi.*;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.doubles.DoubleLists;
-import net.kyori.adventure.nbt.BinaryTagIO;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.TagStringIO;
-import net.kyori.adventure.text.StorageNBTComponent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.EntityType;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.Material;
 import net.minestom.server.item.enchant.Enchantment;
-import net.minestom.server.utils.NamespaceID;
-import net.minestom.server.utils.math.FloatRange;
+import net.minestom.server.utils.Range;
+import net.minestom.vanilla.datapack.advancement.Advancement;
 import net.minestom.vanilla.datapack.dimension.DimensionType;
+import net.minestom.vanilla.datapack.json.JsonUtils;
+import net.minestom.vanilla.datapack.loot.LootTable;
 import net.minestom.vanilla.datapack.loot.NBTPath;
+import net.minestom.vanilla.datapack.loot.context.LootContext;
+import net.minestom.vanilla.datapack.loot.function.LootFunction;
+import net.minestom.vanilla.datapack.loot.function.Predicate;
+import net.minestom.vanilla.datapack.number.NumberProvider;
+import net.minestom.vanilla.datapack.recipe.Recipe;
 import net.minestom.vanilla.datapack.tags.Tag;
 import net.minestom.vanilla.datapack.trims.TrimMaterial;
 import net.minestom.vanilla.datapack.trims.TrimPattern;
@@ -23,26 +34,10 @@ import net.minestom.vanilla.datapack.worldgen.noise.Noise;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
 import net.minestom.vanilla.files.ByteArray;
 import net.minestom.vanilla.files.FileSystem;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.minestom.server.entity.EntityType;
-import net.minestom.server.instance.block.Block;
-import net.minestom.server.item.Material;
-import net.kyori.adventure.key.Key;
-import net.minestom.vanilla.datapack.advancement.Advancement;
-import net.minestom.vanilla.datapack.json.JsonUtils;
-import net.minestom.vanilla.datapack.loot.LootTable;
-import net.minestom.vanilla.datapack.loot.context.LootContext;
-import net.minestom.vanilla.datapack.loot.function.LootFunction;
-import net.minestom.vanilla.datapack.loot.function.Predicate;
-import net.minestom.vanilla.datapack.number.NumberProvider;
-import net.minestom.vanilla.datapack.recipe.Recipe;
-import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Consumer;
@@ -95,7 +90,7 @@ public class DatapackLoader {
             String str = reader.nextString();
             return str.startsWith("#") ? new Tag(str.substring(1)) : Key.key(str);
         });
-        register(builder, FloatRange.class, DatapackLoader::floatRangeFromJson);
+        register(builder, Range.Float.class, DatapackLoader::floatRangeFromJson);
 
         // Misc
         register(builder, DoubleList.class, DatapackLoader::doubleListFromJson);
@@ -332,7 +327,7 @@ public class DatapackLoader {
         return TagStringIO.get().asCompound(json);
     }
 
-    private static Key namespaceFromJson(JsonReader reader) throws IOException {
+    private static Key keyFromJson(JsonReader reader) throws IOException {
         return Key.key(reader.nextString());
     }
 
@@ -342,22 +337,22 @@ public class DatapackLoader {
 
     private static Block blockFromJson(JsonReader reader) throws IOException {
         return JsonUtils.typeMapMapped(reader, Map.of(
-                JsonReader.Token.STRING, json -> Block.fromNamespaceId(json.nextString()),
+                JsonReader.Token.STRING, json -> Block.fromKey(json.nextString()),
                 JsonReader.Token.BEGIN_OBJECT, json -> DatapackLoader.moshi(BlockState.class).apply(json).toMinestom()
         ));
     }
 
     private static Enchantment enchantmentFromJson(JsonReader reader) throws IOException {
-        return MinecraftServer.getEnchantmentRegistry().get(NamespaceID.from(reader.nextString()));
+        return MinecraftServer.getEnchantmentRegistry().get(Key.key(reader.nextString()));
     }
 
     private static EntityType entityTypeFromJson(JsonReader reader) throws IOException {
-        return EntityType.fromNamespaceId(NamespaceID.from(namespaceFromJson(reader)));
+        return EntityType.fromKey(keyFromJson(reader));
     }
 
     private static Material materialFromJson(JsonReader reader) throws IOException {
-        Key namespace = namespaceFromJson(reader);
-        Material mat = Material.fromNamespaceId(NamespaceID.from(namespace));
+        Key key = keyFromJson(reader);
+        Material mat = Material.fromKey(key);
 
         // TODO: Remove these legacy updates
         Map<Key, Material> legacy = Map.of(
@@ -365,23 +360,23 @@ public class DatapackLoader {
         );
 
         if (mat == null) {
-            if (legacy.containsKey(namespace)) {
-                return legacy.get(namespace);
+            if (legacy.containsKey(key)) {
+                return legacy.get(key);
             }
-            throw new IllegalStateException("Material not found: " + namespace);
+            throw new IllegalStateException("Material not found: " + key);
         }
         return mat;
     }
 
-    private static FloatRange floatRangeFromJson(JsonReader reader) throws IOException {
+    private static Range.Float floatRangeFromJson(JsonReader reader) throws IOException {
         return JsonUtils.typeMap(reader, token -> switch (token) {
             case BEGIN_ARRAY -> json -> {
                     json.beginArray();
-                    var range = new FloatRange((float) json.nextDouble(), (float) json.nextDouble());
+                    var range = new Range.Float((float) json.nextDouble(), (float) json.nextDouble());
                     json.endArray();
                     return range;
                 };
-            case NUMBER -> json -> new FloatRange((float) json.nextDouble());
+            case NUMBER -> json -> new Range.Float((float) json.nextDouble());
             default -> null;
         });
     }

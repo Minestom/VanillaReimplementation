@@ -15,10 +15,10 @@ import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdatable;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdateInfo;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
+import net.minestom.vanilla.system.NetherPortal;
 import net.minestom.vanilla.system.nether.EntityEnterNetherPortalEvent;
 import net.minestom.vanilla.system.nether.NetherPortalTeleportEvent;
 import net.minestom.vanilla.system.nether.NetherPortalUpdateEvent;
-import net.minestom.vanilla.system.NetherPortal;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

@@ -2,7 +2,7 @@ package net.minestom.vanilla.datapack.worldgen.storage;
 
 import it.unimi.dsi.fastutil.longs.Long2DoubleMap;
 import it.unimi.dsi.fastutil.longs.Long2DoubleOpenHashMap;
-import net.minestom.server.utils.chunk.ChunkUtils;
+import net.minestom.server.coordinate.CoordConversion;
 
 class DoubleStorageCache2d implements DoubleStorage {
 
@@ -19,6 +19,6 @@ class DoubleStorageCache2d implements DoubleStorage {
     }
 
     private long getIndex(int x, int z) {
-        return ChunkUtils.getChunkIndex(x, z);
+        return CoordConversion.chunkIndex(x, z);
     }
 }

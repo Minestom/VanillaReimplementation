@@ -8,10 +8,14 @@ import io.github.pesto.MojangDataFeature;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.TagStringIO;
 import net.minecraft.SharedConstants;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.context.ContextKeySet;
+import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.item.ItemStack;
@@ -29,9 +33,9 @@ import org.junit.jupiter.api.BeforeAll;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class LootTableTests {
 
@@ -84,7 +88,7 @@ public class LootTableTests {
 //            if (expected == null) {
 //                String testDataValue = "List.of(" + minestom.stream()
 //                        .map(Item::minestom)
-//                        .map(stack -> "ItemStack.of(Material." + stack.material().namespace().value().toUpperCase(Locale.ROOT) + ", " + stack.amount() + ")")
+//                        .map(stack -> "ItemStack.of(Material." + stack.material().key().value().toUpperCase(Locale.ROOT) + ", " + stack.amount() + ")")
 //                        .collect(Collectors.joining(", ")) + ")";
 //                String testDataLine = "expected.put(\"" + filename + "\", " + testDataValue + ");";
 //                System.out.println(testDataLine);
@@ -123,7 +127,7 @@ public class LootTableTests {
             // we somehow need to acquire a "ServerLevel" instance. Hopefully we don't need to actually run a vanilla server.
             // check out net.minecraft.server.Main if we need to run a server
             ServerLevel level = new ServerLevel(null, null, null, null, null, null, null, false, 0, List.of(), false, null);
-            LootParams params = new LootParams(level, Map.of(), Map.of(), 0.0f);
+            LootParams params = new LootParams(level, new ContextMap.Builder().create(new ContextKeySet.Builder().build()), Map.of(), 0.0f);
             var items = vanilla.getRandomItems(params);
             return items.stream().map(LootTableTests::item).toList();
         }
@@ -146,7 +150,7 @@ public class LootTableTests {
     private Table table(String src) {
         Gson gson = new Gson();
         JsonElement json = gson.fromJson(src, JsonElement.class);
-        net.minecraft.world.level.storage.loot.LootTable vanilla = net.minecraft.world.level.storage.loot.LootTable.CODEC.parse(JsonOps.INSTANCE, json).result().orElseThrow();
+        net.minecraft.world.level.storage.loot.LootTable vanilla = net.minecraft.world.level.storage.loot.LootTable.CODEC.parse(JsonOps.INSTANCE, json).result().orElseThrow().value();
         LootTable minestom = DatapackLoader.adaptor(LootTable.class).apply(src);
         return new Table(vanilla, minestom);
     }
@@ -166,8 +170,8 @@ public class LootTableTests {
     }
 
     private static Item item(net.minecraft.world.item.ItemStack vanilla) {
-        CompoundTag tag = vanilla.save(new CompoundTag());
-        return new SNBTItem(tag.getAsString());
+        Tag tag = vanilla.save(HolderLookup.Provider.create(Stream.empty()), new CompoundTag());
+        return new SNBTItem(tag.toString());
     }
 }
 
@@ -175,8 +179,8 @@ record SNBTItem(String item) implements LootTableTests.Item {
     @Override
     public net.minecraft.world.item.ItemStack vanilla() {
         try {
-            CompoundTag tag = TagParser.parseTag(item);
-            return net.minecraft.world.item.ItemStack.of(tag);
+            CompoundTag tag = TagParser.parseCompoundFully(item);
+            return net.minecraft.world.item.ItemStack.parse(HolderLookup.Provider.create(Stream.empty()), tag).get();
         } catch (CommandSyntaxException e) {
             throw new RuntimeException(e);
         }
