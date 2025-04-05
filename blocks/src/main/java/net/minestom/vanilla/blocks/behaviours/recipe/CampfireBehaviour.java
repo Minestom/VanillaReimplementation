@@ -64,7 +64,6 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
 
     @Override
     public boolean onInteract(@NotNull BlockHandler.Interaction interaction) {
-        // TODO: onInteract is never called when right-clicking the campfire while holding food. Instead, the eating animation plays.
         Instance instance = interaction.getInstance();
         Point pos = interaction.getBlockPosition();
         Block block = interaction.getBlock();
@@ -200,6 +199,14 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
     private Material getRecipeResult(Recipe recipe) {
         RecipeDisplay d = recipe.createRecipeDisplays().getFirst();
         if (d instanceof RecipeDisplay.Furnace f) {
+            return getMaterialFromSlotDisplay(f.result());
+        }
+        return null;
+    }
+
+    private Material getRecipeInput(Recipe recipe) {
+        RecipeDisplay d = recipe.createRecipeDisplays().getFirst();
+        if (d instanceof RecipeDisplay.Furnace f) {
             return getMaterialFromSlotDisplay(f.ingredient());
         }
         return null;
@@ -219,6 +226,6 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
         return recipeManager
                 .getRecipes().stream()
                 .filter(r -> r.recipeBookCategory() == RecipeBookCategory.CAMPFIRE)
-                .filter(recipe -> input.material().equals(getRecipeResult(recipe))).findFirst();
+                .filter(recipe -> input.material().equals(getRecipeInput(recipe))).findFirst();
     }
 }

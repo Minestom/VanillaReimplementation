@@ -137,8 +137,8 @@ public enum VanillaBlocks {
     BLAST_FURNACE(Block.BLAST_FURNACE, BlastingFurnaceBehaviour::new),
 
     STONE_CUTTER(Block.STONECUTTER, StonecutterBehaviour::new),
-//    CAMPFIRE(Block.CAMPFIRE, CampfireBehaviour::new), // TODO
-//    SOUL_CAMPFIRE(Block.SOUL_CAMPFIRE, CampfireBehaviour::new), // TODO
+    CAMPFIRE(Block.CAMPFIRE, CampfireBehaviour::new),
+    SOUL_CAMPFIRE(Block.SOUL_CAMPFIRE, CampfireBehaviour::new),
     SMITHING_TABLE(Block.SMITHING_TABLE, SmithingTableBehaviour::new),
 
     // Start of cakes
