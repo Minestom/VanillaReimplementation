@@ -50,21 +50,25 @@ public class BedBlockBehaviour extends VanillaBlockBehaviour {
         Block blockAtPotentialBedHead = instance.getBlock(bedHeadPosition);
 
         if (isReplaceable(blockAtPotentialBedHead)) {
-            placeBed(instance, bedBlock, pos, bedHeadPosition, playerDirection);
+            Block foot = placeBed(instance, bedBlock, bedHeadPosition, playerDirection);
+            placement.blockToPlace(foot);
+        } else {
+            placement.blockToPlace(placement.instance().getBlock(placement.position()));
         }
+
     }
 
     private boolean isReplaceable(Block blockAtPosition) {
         return blockAtPosition.isAir() || blockAtPosition.isLiquid();
     }
 
-    private void placeBed(Instance instance, Block bedBlock, Point footPosition, Point headPosition, Direction facing) {
+    private Block placeBed(Instance instance, Block bedBlock, Point headPosition, Direction facing) {
         Block correctFacing = bedBlock.withProperty("facing", facing.name().toLowerCase());
 
         Block footBlock = correctFacing.withProperty("part", "foot");
-        Block headBlock = correctFacing.withProperty("part", "head");
-        instance.setBlock(footPosition, footBlock);
+        Block headBlock = correctFacing.withProperty("part", "head").withHandler(new BedBlockBehaviour(this.context));
         instance.setBlock(headPosition, headBlock);
+        return footBlock;
     }
 
     @Override
@@ -118,16 +122,14 @@ public class BedBlockBehaviour extends VanillaBlockBehaviour {
         Block block = destroy.getBlock();
         Point pos = destroy.getBlockPosition();
 
-        System.out.println(block.name());
-
-        boolean isFoot = "foot".equals(block.getProperty("part"));
+        boolean isHead = "head".equals(block.getProperty("part"));
         Direction facing = Direction.valueOf(block.getProperty("facing").toUpperCase());
 
-        if (isFoot) {
+        if (isHead) {
             facing = facing.opposite();
         }
 
-        Point otherPartPosition = pos.add(facing.normalX(), facing.normalY(), facing.normalZ()); // TODO: Investigate why direction is wrong
+        Point otherPartPosition = pos.add(facing.normalX(), facing.normalY(), facing.normalZ());
         instance.setBlock(pos, Block.AIR);
         instance.setBlock(otherPartPosition, Block.AIR);
     }
