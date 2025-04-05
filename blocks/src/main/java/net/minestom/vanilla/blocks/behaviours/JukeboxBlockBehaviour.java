@@ -1,6 +1,7 @@
 package net.minestom.vanilla.blocks.behaviours;
 
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -9,8 +10,9 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.jukebox.JukeboxSong;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
+import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.worldevent.WorldEvent;
 import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
@@ -37,6 +39,7 @@ public class JukeboxBlockBehaviour extends VanillaBlockBehaviour {
 
     @Override
     public void onDestroy(@NotNull Destroy destroy) {
+        if (!(destroy instanceof PlayerDestroy)) return;
         stopPlayback(destroy.getInstance(), destroy.getBlockPosition(), destroy.getBlock());
     }
 
@@ -45,18 +48,14 @@ public class JukeboxBlockBehaviour extends VanillaBlockBehaviour {
     }
 
     public @NotNull Block withDisc(Block block, @NotNull ItemStack disc) {
-        if (isNotMusicDisc(disc.material())) {
+        if (isNotMusicDisc(disc)) {
             throw new IllegalArgumentException("disc passed to JukeboxBlockHandle#withDisc was not a music disc.");
         }
         return block.withTag(DISC_KEY, disc);
     }
 
     private boolean isNotMusicDisc(ItemStack itemStack) {
-        return isNotMusicDisc(itemStack.material());
-    }
-
-    private boolean isNotMusicDisc(Material material) {
-        return !material.name().startsWith("minecraft:music_disc"); // TODO: better recognition than based on the name?
+        return !itemStack.has(DataComponents.JUKEBOX_PLAYABLE);
     }
 
     @Override
@@ -70,14 +69,12 @@ public class JukeboxBlockBehaviour extends VanillaBlockBehaviour {
 
         ItemStack stack = this.getDisc(block);
 
-        if (stack != null) {
+        if (stack != null && !stack.isAir()) {
             stopPlayback(instance, pos, block);
             block = block.withTag(DISC_KEY, ItemStack.AIR);
             instance.setBlock(pos, block.withProperty("has_record", "false"));
-            // TODO: Drop disc
             return true;
         }
-
 
         if (isNotMusicDisc(heldItem)) {
             return true;
@@ -86,6 +83,10 @@ public class JukeboxBlockBehaviour extends VanillaBlockBehaviour {
         instance.setBlock(pos, withDisc(block, heldItem).withProperty("has_record", "true"));
 
         InventoryManipulation.consumeItemIfNotCreative(player, heldItem, hand);
+
+        JukeboxSong song = heldItem.get(DataComponents.JUKEBOX_PLAYABLE).holder().resolve(MinecraftServer.getJukeboxSongRegistry());
+        DynamicRegistry.Key<JukeboxSong> songKey = MinecraftServer.getJukeboxSongRegistry().getKey(song);
+        int songId = MinecraftServer.getJukeboxSongRegistry().getId(songKey);
 
         // TODO: Group packet?
         instance.getPlayers()
@@ -97,7 +98,7 @@ public class JukeboxBlockBehaviour extends VanillaBlockBehaviour {
                                 pos.blockX(),
                                 pos.blockY(),
                                 pos.blockZ(),
-                                heldItem.material().id(),
+                                songId,
                                 false
                         )
                 );
