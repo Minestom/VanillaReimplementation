@@ -3,6 +3,7 @@ package net.minestom.vanilla.entities;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.other.PrimedTntMeta;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.entitymeta.EntityTags;
@@ -30,6 +31,7 @@ public class PrimedTNTEntity extends Entity {
     }
 
     private void explode() {
+        Instance instance = this.instance;
         remove();
 
         Block block = instance.getBlock(this.getPosition());
@@ -44,7 +46,7 @@ public class PrimedTNTEntity extends Entity {
     @Override
     public void update(long time) {
         super.update(time);
-        if (fuseTime-- <= 20) {
+        if (fuseTime-- <= 0) {
             explode();
         }
     }
