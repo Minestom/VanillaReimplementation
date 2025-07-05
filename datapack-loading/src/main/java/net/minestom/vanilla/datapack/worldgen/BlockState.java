@@ -10,7 +10,7 @@ import java.util.Objects;
 
 public record BlockState(String name, Map<String, String> properties) {
     public Block toMinestom() {
-        return Objects.requireNonNull(Block.fromNamespaceId(name), () -> "Unknown block: " + name)
+        return Objects.requireNonNull(Block.fromKey(name), () -> "Unknown block: " + name)
                 .withProperties(properties);
     }
 

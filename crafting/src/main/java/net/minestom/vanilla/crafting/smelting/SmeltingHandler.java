@@ -1,6 +1,6 @@
 package net.minestom.vanilla.crafting.smelting;
 
-import dev.goldenstack.window.InventoryView;
+import net.goldenstack.window.InventoryView;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.inventory.Inventory;
@@ -8,8 +8,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.WindowPropertyPacket;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.NamespaceID;
-import net.minestom.server.utils.PacketUtils;
+import net.minestom.server.utils.PacketSendingUtils;
 import net.minestom.vanilla.crafting.CraftingUtils;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackUtils;
@@ -44,7 +43,7 @@ public record SmeltingHandler(Datapack datapack, int speed, Map<Material, Intege
             if (!Material.AIR.equals(lastCookedItem)) {
                 // this means that the furnace was cooking, but ran out of fuel
                 WindowPropertyPacket clearProgress = new WindowPropertyPacket(inventory.getWindowId(), (short) 0, (short) 0);
-                PacketUtils.sendGroupedPacket(inventory.getViewers(), clearProgress);
+                PacketSendingUtils.sendGroupedPacket(inventory.getViewers(), clearProgress);
                 return block.withTag(Tags.Blocks.Smelting.LAST_COOKED_ITEM, Material.AIR);
             }
 
@@ -53,7 +52,7 @@ public record SmeltingHandler(Datapack datapack, int speed, Map<Material, Intege
                 // we've stopped cooking, but we can't start cooking again
                 // reset the current progress
                 WindowPropertyPacket clearProgress = new WindowPropertyPacket(inventory.getWindowId(), (short) 2, (short) 0);
-                PacketUtils.sendGroupedPacket(inventory.getViewers(), clearProgress);
+                PacketSendingUtils.sendGroupedPacket(inventory.getViewers(), clearProgress);
                 return block.withTag(Tags.Blocks.Smelting.COOKING_PROGRESS, 0);
             }
 
@@ -74,13 +73,13 @@ public record SmeltingHandler(Datapack datapack, int speed, Map<Material, Intege
             Block newBlock = block.withTag(Tags.Blocks.Smelting.COOKING_TICKS, cookingTicks);
             if (cookingProgress != 0) {
                 WindowPropertyPacket clearProgress = new WindowPropertyPacket(inventory.getWindowId(), (short) 2, (short) 0);
-                PacketUtils.sendGroupedPacket(inventory.getViewers(), clearProgress);
+                PacketSendingUtils.sendGroupedPacket(inventory.getViewers(), clearProgress);
                 newBlock = newBlock.withTag(Tags.Blocks.Smelting.COOKING_PROGRESS, 0);
             }
             WindowPropertyPacket maximumFuelBurnTime = new WindowPropertyPacket(inventory.getWindowId(), (short) 1, lastCookedItemBurnTicks == null ? (short) 0 : lastCookedItemBurnTicks.shortValue());
             WindowPropertyPacket fuelBurnTime = new WindowPropertyPacket(inventory.getWindowId(), (short) 0, (short) cookingTicks);
-            PacketUtils.sendGroupedPacket(inventory.getViewers(), maximumFuelBurnTime);
-            PacketUtils.sendGroupedPacket(inventory.getViewers(), fuelBurnTime);
+            PacketSendingUtils.sendGroupedPacket(inventory.getViewers(), maximumFuelBurnTime);
+            PacketSendingUtils.sendGroupedPacket(inventory.getViewers(), fuelBurnTime);
             return newBlock;
         }
 
@@ -109,10 +108,10 @@ public record SmeltingHandler(Datapack datapack, int speed, Map<Material, Intege
 
         // TODO: Bundle these packets together
 
-        PacketUtils.sendGroupedPacket(inventory.getViewers(), maximumFuelBurnTime);
-        PacketUtils.sendGroupedPacket(inventory.getViewers(), fuelBurnTime);
-        PacketUtils.sendGroupedPacket(inventory.getViewers(), maximumProgress);
-        PacketUtils.sendGroupedPacket(inventory.getViewers(), progress);
+        PacketSendingUtils.sendGroupedPacket(inventory.getViewers(), maximumFuelBurnTime);
+        PacketSendingUtils.sendGroupedPacket(inventory.getViewers(), fuelBurnTime);
+        PacketSendingUtils.sendGroupedPacket(inventory.getViewers(), maximumProgress);
+        PacketSendingUtils.sendGroupedPacket(inventory.getViewers(), progress);
 
         if (cookingProgress >= recipeCompleteTicks) {
             // recipe complete
@@ -127,7 +126,7 @@ public record SmeltingHandler(Datapack datapack, int speed, Map<Material, Intege
 
             // clear cooking progress
             WindowPropertyPacket clearProgress = new WindowPropertyPacket(inventory.getWindowId(), (short) 2, (short) 0);
-            PacketUtils.sendGroupedPacket(inventory.getViewers(), clearProgress);
+            PacketSendingUtils.sendGroupedPacket(inventory.getViewers(), clearProgress);
         }
 
         return block.withTag(Tags.Blocks.Smelting.COOKING_PROGRESS, cookingProgress)
@@ -204,8 +203,8 @@ public record SmeltingHandler(Datapack datapack, int speed, Map<Material, Intege
     }
 
     private static void addItemTags(Datapack datapack, Map<Material, Integer> material2burnTicks, String tagName, int burnTime) {
-        for (Key item : DatapackUtils.findTags(datapack, "item", NamespaceID.from(tagName))) {
-            Material mat = Material.fromNamespaceId(item.asString());
+        for (Key item : DatapackUtils.findTags(datapack, "item", Key.key(tagName))) {
+            Material mat = Material.fromKey(item.asString());
             material2burnTicks.put(mat, burnTime);
         }
     }

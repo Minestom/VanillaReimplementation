@@ -1,11 +1,11 @@
 package net.minestom.vanilla.blocks;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -17,12 +17,12 @@ public abstract class VanillaBlockBehaviour implements BlockHandler {
 
     protected final @NotNull VanillaBlocks.BlockContext context;
     protected final short baseBlock;
-    protected final @NotNull NamespaceID namespaceID;
+    protected final @NotNull Key key;
 
     protected VanillaBlockBehaviour(@NotNull VanillaBlocks.BlockContext context) {
         this.context = context;
         this.baseBlock = context.stateId();
-        this.namespaceID = Objects.requireNonNull(Block.fromStateId(context.stateId())).namespace();
+        this.key = Objects.requireNonNull(Block.fromStateId(context.stateId())).key();
     }
 
     /**
@@ -38,8 +38,8 @@ public abstract class VanillaBlockBehaviour implements BlockHandler {
     }
 
     @Override
-    public @NotNull NamespaceID getNamespaceId() {
-        return namespaceID;
+    public @NotNull Key getKey() {
+        return key;
     }
 
     public interface VanillaPlacement {

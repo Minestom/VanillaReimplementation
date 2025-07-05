@@ -1,11 +1,11 @@
 package net.minestom.vanilla.itemplaceables;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaReimplementation;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,7 +36,7 @@ public class ItemPlaceablesFeature implements VanillaReimplementation.Feature {
     }
 
     @Override
-    public @NotNull NamespaceID namespaceId() {
-        return NamespaceID.from("vri:item-placeables");
+    public @NotNull Key key() {
+        return Key.key("vri:item-placeables");
     }
 }

@@ -1,7 +1,6 @@
 package net.minestom.vanilla.events;
 
 import net.minestom.server.coordinate.BlockVec;
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.trait.BlockEvent;
 import net.minestom.server.event.trait.InstanceEvent;

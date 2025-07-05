@@ -1,7 +1,7 @@
 package net.minestom.vanilla.crafting;
 
-import dev.goldenstack.window.InventoryView;
-import dev.goldenstack.window.Views;
+import net.goldenstack.window.InventoryView;
+import net.goldenstack.window.Views;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryClickEvent;
@@ -14,7 +14,10 @@ import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.recipe.Recipe;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
 
 public record CraftingInventoryRecipes(Datapack datapack, VanillaReimplementation vri) {
 
@@ -23,9 +26,8 @@ public record CraftingInventoryRecipes(Datapack datapack, VanillaReimplementatio
 
         node.addListener(InventoryClickEvent.class, event -> {
             int slot = event.getSlot();
-            if (event.getInventory() == null) return;
-            Inventory inv = event.getInventory();
-            if (event.getInventory().getInventoryType() != InventoryType.CRAFTING) return;
+            if (!(event.getInventory() instanceof Inventory inv)) return;
+            if (inv.getInventoryType() != InventoryType.CRAFTING) return;
 
             var table = Views.CRAFTING_TABLE;
 

@@ -1,6 +1,7 @@
 package net.minestom.vanilla.generation;
 
-import net.minestom.server.utils.NamespaceID;
+
+import net.kyori.adventure.key.Key;
 import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
 import net.minestom.vanilla.datapack.worldgen.biome.Climate;
 import net.minestom.vanilla.datapack.worldgen.random.LegacyRandom;
@@ -21,8 +22,8 @@ public class RandomState {
     public RandomState(NoiseSettings settings, long seed) {
         this.seed = seed;
         this.random = (settings.legacy_random_source() ? new LegacyRandom(seed) : new XoroshiroRandom(seed)).forkPositional();
-        this.aquiferRandom = this.random.fromHashOf(NamespaceID.from("aquifer").toString()).forkPositional();
-        this.oreRandom = this.random.fromHashOf(NamespaceID.from("ore").toString()).forkPositional();
+        this.aquiferRandom = this.random.fromHashOf(Key.key("aquifer").toString()).forkPositional();
+        this.oreRandom = this.random.fromHashOf(Key.key("ore").toString()).forkPositional();
         this.surfaceSystem = new SurfaceSystem(settings.surface_rule(), settings.default_block().toMinestom(), seed);
         this.router = settings.noise_router();
         this.sampler = Climate.Sampler.fromRouter(this.router);

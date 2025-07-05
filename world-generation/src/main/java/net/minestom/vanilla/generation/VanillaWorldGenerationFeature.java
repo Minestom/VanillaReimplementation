@@ -1,16 +1,13 @@
 package net.minestom.vanilla.generation;
 
-import net.minestom.server.instance.batch.ChunkBatch;
-import net.minestom.server.utils.NamespaceID;
+import net.kyori.adventure.key.Key;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackLoadingFeature;
 import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
 import net.minestom.vanilla.instance.SetupVanillaInstanceEvent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Set;
 
 public class VanillaWorldGenerationFeature implements VanillaReimplementation.Feature {
@@ -19,7 +16,7 @@ public class VanillaWorldGenerationFeature implements VanillaReimplementation.Fe
     public void hook(@NotNull HookContext context) {
         context.vri().process().eventHandler().addListener(SetupVanillaInstanceEvent.class, event -> {
 
-            NamespaceID plains = NamespaceID.from("minecraft:plains");
+            Key plains = Key.key("minecraft:plains");
             DatapackLoadingFeature datapackLoading = context.vri().feature(DatapackLoadingFeature.class);
             Datapack datapack = datapackLoading.current();
 
@@ -47,8 +44,8 @@ public class VanillaWorldGenerationFeature implements VanillaReimplementation.Fe
     }
 
     @Override
-    public @NotNull NamespaceID namespaceId() {
-        return NamespaceID.from("vri:worldgeneration");
+    public @NotNull Key key() {
+        return Key.key("vri:worldgeneration");
     }
 
     @Override

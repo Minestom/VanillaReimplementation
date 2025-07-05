@@ -7,7 +7,10 @@ import net.minestom.vanilla.datapack.worldgen.DensityFunction;
 import net.minestom.vanilla.datapack.worldgen.util.Util;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 public interface CubicSpline extends NumberFunction<DensityFunction.Context> {
 

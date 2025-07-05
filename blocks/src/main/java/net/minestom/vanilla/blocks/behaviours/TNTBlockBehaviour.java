@@ -6,9 +6,9 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.item.Material;
 import net.minestom.vanilla.VanillaRegistry;
 import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
@@ -35,10 +35,9 @@ public class TNTBlockBehaviour extends VanillaBlockBehaviour {
     public boolean onInteract(@NotNull Interaction interaction) {
         Point blockPosition = interaction.getBlockPosition();
         Player player = interaction.getPlayer();
-        Player.Hand hand = interaction.getHand();
-        PlayerInventory inventory = player.getInventory();
+        PlayerHand hand = interaction.getHand();
 
-        if (inventory.getItemInHand(hand).material() != Material.FLINT_AND_STEEL) {
+        if (player.getItemInHand(hand).material() != Material.FLINT_AND_STEEL) {
             return true;
         }
 

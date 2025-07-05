@@ -1,8 +1,8 @@
 package net.minestom.vanilla.instancemeta;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.event.instance.InstanceTickEvent;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.instancemeta.tickets.TicketManager;
 import org.jetbrains.annotations.NotNull;
@@ -20,8 +20,8 @@ public class InstanceMetaFeature implements VanillaReimplementation.Feature {
     }
 
     @Override
-    public @NotNull NamespaceID namespaceId() {
-        return NamespaceID.from("vri:instancemeta");
+    public @NotNull Key key() {
+        return Key.key("vri:instancemeta");
     }
 
     private static class Logic {

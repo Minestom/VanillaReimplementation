@@ -8,11 +8,11 @@ import it.unimi.dsi.fastutil.objects.Object2ShortMap;
 import it.unimi.dsi.fastutil.objects.Object2ShortOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.Short2IntMap;
 import it.unimi.dsi.fastutil.shorts.Short2IntOpenHashMap;
+import net.minestom.server.coordinate.CoordConversion;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.tag.TagSerializer;
 import net.minestom.server.tag.TagWritable;
-import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -137,8 +137,8 @@ public class TicketManager {
 
         // Add values to surrounding external
         short currentSourceValue = value;
-        int originX = ChunkUtils.getChunkCoordX(chunk);
-        int originZ = ChunkUtils.getChunkCoordZ(chunk);
+        int originX = CoordConversion.chunkIndexGetX(chunk);
+        int originZ = CoordConversion.chunkIndexGetZ(chunk);
 
         while (currentSourceValue > 1) {
             // Find starting positions + starting external value
@@ -165,25 +165,25 @@ public class TicketManager {
             for (int offset = 0; offset < ((halfWidth * 2) + 1); offset++) {
 
                 { // Left side
-                    long chunkIndex = ChunkUtils.getChunkIndex(leftX, leftZ - offset);
+                    long chunkIndex = CoordConversion.chunkIndex(leftX, leftZ - offset);
                     externalTicketValues.put(new Source2Target(chunkIndex, chunk), externalValue);
                     recalculateChunkValue(chunkIndex);
                 }
 
                 { // Top side
-                    long chunkIndex = ChunkUtils.getChunkIndex(topX + offset, topZ);
+                    long chunkIndex = CoordConversion.chunkIndex(topX + offset, topZ);
                     externalTicketValues.put(new Source2Target(chunkIndex, chunk), externalValue);
                     recalculateChunkValue(chunkIndex);
                 }
 
                 { // Right side
-                    long chunkIndex = ChunkUtils.getChunkIndex(rightX, rightZ + offset);
+                    long chunkIndex = CoordConversion.chunkIndex(rightX, rightZ + offset);
                     externalTicketValues.put(new Source2Target(chunkIndex, chunk), externalValue);
                     recalculateChunkValue(chunkIndex);
                 }
 
                 { // Downside
-                    long chunkIndex = ChunkUtils.getChunkIndex(downX - offset, downZ);
+                    long chunkIndex = CoordConversion.chunkIndex(downX - offset, downZ);
                     externalTicketValues.put(new Source2Target(chunkIndex, chunk), externalValue);
                     recalculateChunkValue(chunkIndex);
                 }
@@ -233,8 +233,8 @@ public class TicketManager {
         }
 
         short previousSourceValue = value;
-        int originX = ChunkUtils.getChunkCoordX(chunk);
-        int originZ = ChunkUtils.getChunkCoordZ(chunk);
+        int originX = CoordConversion.chunkIndexGetX(chunk);
+        int originZ = CoordConversion.chunkIndexGetZ(chunk);
 
         while (previousSourceValue > 1) {
             // Find starting positions + starting external value
@@ -260,7 +260,7 @@ public class TicketManager {
             for (int offset = 0; offset < ((halfWidth * 2) + 1); offset++) {
 
                 { // Left side
-                    long chunkIndex = ChunkUtils.getChunkIndex(leftX, leftZ - offset);
+                    long chunkIndex = CoordConversion.chunkIndex(leftX, leftZ - offset);
                     if (highestInternalValue <= 0) {
                         externalTicketValues.removeShort(new Source2Target(chunkIndex, chunk));
                     } else {
@@ -270,7 +270,7 @@ public class TicketManager {
                 }
 
                 { // Top side
-                    long chunkIndex = ChunkUtils.getChunkIndex(topX + offset, topZ);
+                    long chunkIndex = CoordConversion.chunkIndex(topX + offset, topZ);
                     if (highestInternalValue <= 0) {
                         externalTicketValues.removeShort(new Source2Target(chunkIndex, chunk));
                     } else {
@@ -280,7 +280,7 @@ public class TicketManager {
                 }
 
                 { // Right side
-                    long chunkIndex = ChunkUtils.getChunkIndex(rightX, rightZ + offset);
+                    long chunkIndex = CoordConversion.chunkIndex(rightX, rightZ + offset);
                     if (highestInternalValue <= 0) {
                         externalTicketValues.removeShort(new Source2Target(chunkIndex, chunk));
                     } else {
@@ -290,7 +290,7 @@ public class TicketManager {
                 }
 
                 { // Downside
-                    long chunkIndex = ChunkUtils.getChunkIndex(downX - offset, downZ);
+                    long chunkIndex = CoordConversion.chunkIndex(downX - offset, downZ);
                     if (highestInternalValue <= 0) {
                         externalTicketValues.removeShort(new Source2Target(chunkIndex, chunk));
                     } else {

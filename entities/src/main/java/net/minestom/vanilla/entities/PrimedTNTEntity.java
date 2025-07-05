@@ -1,6 +1,5 @@
 package net.minestom.vanilla.entities;
 
-import net.minestom.server.collision.Aerodynamics;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.other.PrimedTntMeta;

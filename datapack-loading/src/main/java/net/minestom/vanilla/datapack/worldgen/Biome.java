@@ -1,10 +1,8 @@
 package net.minestom.vanilla.datapack.worldgen;
 
 import com.squareup.moshi.JsonReader;
-import net.kyori.adventure.nbt.BinaryTag;
-import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.key.Key;
-import net.minestom.vanilla.datapack.Datapack;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.json.Optional;
@@ -36,7 +34,7 @@ public record Biome(
         @Optional TemperatureModifier temperature_modifier,
         float downfall,
         Effects effects,
-        Carvers carvers,
+        CarversList carvers,
         Object features,
         @Optional Float creature_spawn_probability,
         Map<MobCategory, List<SpawnerData>> spawners,
@@ -112,7 +110,7 @@ public record Biome(
             @Optional Sound ambient_sound,
             @Optional MoodSound mood_sound,
             @Optional AdditionsSound additions_sound,
-            @Optional Music music
+            @Optional List<Music> music
     ) {
 
         /**
@@ -316,11 +314,11 @@ public record Biome(
         /**
          * Represents music settings for a biome.
          */
-        public record Music(Sound sound, int min_delay, int max_delay, boolean replace_current_music) {
+        public record Music(MusicData data, double weight) {
         }
-    }
 
-    public record Carvers(@Optional CarversList air, @Optional CarversList liquid) {
+        public record MusicData(Sound sound, int min_delay, int max_delay, boolean replace_current_music) {
+        }
     }
 
     public interface CarversList {

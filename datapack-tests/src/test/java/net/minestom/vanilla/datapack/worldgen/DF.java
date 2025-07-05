@@ -18,7 +18,7 @@ interface DF {
     static DF vanilla(String source) {
         JsonElement element = new Gson().fromJson(source, JsonElement.class);
         var result = net.minecraft.world.level.levelgen.DensityFunction.HOLDER_HELPER_CODEC.parse(JsonOps.INSTANCE, element);
-        var df = result.getOrThrow(false, error -> { throw new RuntimeException(error); });
+        var df = result.getOrThrow(error -> { throw new RuntimeException(error); });
         return new VanillaDF(df);
     }
 

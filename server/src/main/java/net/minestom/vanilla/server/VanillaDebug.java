@@ -22,7 +22,7 @@ public class VanillaDebug {
     public static void hook(VanillaServer server) {
         VanillaReimplementation vri = server.vri();
         vri.process().eventHandler()
-                .addListener(PlayerChatEvent.class, event -> handleMessage(server, event.getPlayer(), event.getMessage()))
+                .addListener(PlayerChatEvent.class, event -> handleMessage(server, event.getPlayer(), event.getRawMessage()))
 //            .addListener(PlayerTickEvent.class, event -> {
 //                if (event.getPlayer().getInstance().getWorldAge() % 10 == 0) {
 //                    handleMessage(server, event.getPlayer(), "fallingblock");

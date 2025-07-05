@@ -1,6 +1,7 @@
 package net.minestom.vanilla;
 
-import net.minestom.server.utils.NamespaceID;
+
+import net.kyori.adventure.key.Key;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdateManager;
 import net.minestom.vanilla.logging.Loading;
 import net.minestom.vanilla.randomticksystem.RandomTickManager;
@@ -19,7 +20,7 @@ public class BlockUpdateFeature implements VanillaReimplementation.Feature {
     }
 
     @Override
-    public @NotNull NamespaceID namespaceId() {
-        return NamespaceID.from("vri:blockupdate");
+    public @NotNull Key key() {
+        return Key.key("vri:blockupdate");
     }
 }

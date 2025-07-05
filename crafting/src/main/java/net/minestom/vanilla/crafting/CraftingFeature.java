@@ -1,8 +1,8 @@
 package net.minestom.vanilla.crafting;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.crafting.smelting.BlastingInventoryRecipes;
 import net.minestom.vanilla.crafting.smelting.SmeltingInventoryRecipes;
@@ -30,11 +30,11 @@ public class CraftingFeature implements VanillaReimplementation.Feature {
             recipeFileSystem.files().stream().collect(Collectors.toMap(Function.identity(), recipeFileSystem::file)).forEach((id, recipe) -> {
                 var recipeManager = context.vri().process().recipe();
 
-                net.minestom.server.recipe.Recipe minestomRecipe = recipeConverter.convert(id, recipe, player -> true);
+                net.minestom.server.recipe.Recipe minestomRecipe = recipeConverter.convert(id, recipe);
                 if (minestomRecipe == null) {
                     return;
                 }
-                recipeManager.addRecipe(minestomRecipe);
+                recipeManager.addRecipe(minestomRecipe, player -> true);
             });
         });
 
@@ -61,8 +61,8 @@ public class CraftingFeature implements VanillaReimplementation.Feature {
     }
 
     @Override
-    public @NotNull NamespaceID namespaceId() {
-        return NamespaceID.from("vri:crafting");
+    public @NotNull Key key() {
+        return Key.key("vri:crafting");
     }
 
     @Override

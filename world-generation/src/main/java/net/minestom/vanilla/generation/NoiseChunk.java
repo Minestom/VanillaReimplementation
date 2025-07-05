@@ -1,11 +1,12 @@
 package net.minestom.vanilla.generation;
 
+import net.minestom.server.coordinate.CoordConversion;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.vanilla.datapack.Datapack;
-import net.minestom.vanilla.datapack.worldgen.*;
+import net.minestom.vanilla.datapack.worldgen.DensityFunction;
+import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -71,7 +72,7 @@ public class NoiseChunk {
     }
 
     public int getPreliminarySurfaceLevel(int quartX, int quartZ) {
-        return preliminarySurfaceLevel.computeIfAbsent(ChunkUtils.getChunkIndex(quartX, quartZ), (key) -> {
+        return preliminarySurfaceLevel.computeIfAbsent(CoordConversion.chunkIndex(quartX, quartZ), (key) -> {
             int x = quartX << 2;
             int z = quartZ << 2;
             for (int y = this.settings.noise().min_y() + this.settings.noise().height(); y >= this.settings.noise().min_y(); y -= this.cellHeight) {

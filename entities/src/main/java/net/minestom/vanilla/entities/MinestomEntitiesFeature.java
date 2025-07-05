@@ -1,7 +1,7 @@
 package net.minestom.vanilla.entities;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.EntityType;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaReimplementation;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,7 +14,7 @@ public class MinestomEntitiesFeature implements VanillaReimplementation.Feature 
     }
 
     @Override
-    public @NotNull NamespaceID namespaceId() {
-        return NamespaceID.from("vri:entities");
+    public @NotNull Key key() {
+        return Key.key("vri:entities");
     }
 }

@@ -44,7 +44,8 @@ public class DoubleChestInventory extends Inventory {
 
     public List<ItemStack> itemStacks() {
         return Stream.of(left, right)
-                .map(BlockInventory::itemStacks)
+                .map(BlockInventory::getItemStacks)
+                .map(List::of)
                 .flatMap(Collection::stream)
                 .toList();
     }
