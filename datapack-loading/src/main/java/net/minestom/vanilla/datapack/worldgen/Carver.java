@@ -1,8 +1,8 @@
 package net.minestom.vanilla.datapack.worldgen;
 
 import com.squareup.moshi.JsonReader;
-import net.minestom.server.instance.block.Block;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.json.Optional;

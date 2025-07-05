@@ -254,7 +254,7 @@ public abstract class FlowableFluid extends Fluid {
                 || block.compare(Block.SEAGRASS)
                 || block.compare(Block.TALL_SEAGRASS)
                 || block.compare(Block.SEA_PICKLE)
-                || Objects.requireNonNull(tags.getTag(Tag.BasicType.BLOCKS, "minecraft:signs")).contains(block.namespace())
+                || Objects.requireNonNull(tags.getTag(Tag.BasicType.BLOCKS, "minecraft:signs")).contains(block.key())
                 || block.name().contains("door")
                 || block.name().contains("coral")) {
             return false;

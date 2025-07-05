@@ -5,8 +5,8 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.datapack.worldgen.DensityFunction;
 import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
-import net.minestom.vanilla.datapack.worldgen.util.Util;
 import net.minestom.vanilla.datapack.worldgen.random.WorldgenRandom;
+import net.minestom.vanilla.datapack.worldgen.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;

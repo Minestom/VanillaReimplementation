@@ -1,6 +1,7 @@
 package net.minestom.vanilla.items;
 
-import net.minestom.server.utils.NamespaceID;
+
+import net.kyori.adventure.key.Key;
 import net.minestom.vanilla.VanillaReimplementation;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +18,7 @@ public class ItemsFeature implements VanillaReimplementation.Feature {
     }
 
     @Override
-    public @NotNull NamespaceID namespaceId() {
-        return NamespaceID.from("vri:items");
+    public @NotNull Key key() {
+        return Key.key("vri:items");
     }
 }

@@ -1,19 +1,5 @@
 package net.minestom.vanilla.blocks.behaviours.recipe;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.Random;
-import java.util.stream.IntStream;
-
-import net.minestom.server.recipe.RecipeType;
-import net.minestom.vanilla.logging.Logger;
-import org.jetbrains.annotations.NotNull;
-
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.ItemEntity;
@@ -23,14 +9,19 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.recipe.CampfireCookingRecipe;
-import net.minestom.server.recipe.RecipeManager;
+import net.minestom.server.recipe.*;
+import net.minestom.server.recipe.display.RecipeDisplay;
+import net.minestom.server.recipe.display.SlotDisplay;
 import net.minestom.server.tag.Tag;
 import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.blocks.behaviours.chestlike.BlockItems;
 import net.minestom.vanilla.inventory.InventoryManipulation;
 import net.minestom.vanilla.tag.Tags.Blocks.Campfire;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.*;
+import java.util.stream.IntStream;
 
 public class CampfireBehaviour extends VanillaBlockBehaviour {
 
@@ -57,19 +48,16 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
      * Appends an id to the first available slot in the campfire.
      * @return the index of the slot the id was appended to.
      */
-    public int appendItem(BlockItems items, @NotNull CampfireCookingRecipe recipe) {
+    public int appendItem(BlockItems items, @NotNull Material material) {
         OptionalInt freeSlot = findFirstFreeSlot(items.itemStacks());
 
         if (freeSlot.isEmpty())
             throw new IllegalArgumentException("Campfire doesn't have free slot for appending an id in CampfireBehaviour#appendItem");
 
-        List<ItemStack> ingredients = recipe.getIngredient().items();
-
-        if (ingredients == null || ingredients.size() != 1)
-            throw new IllegalArgumentException("CampfireCookingRecipe has invalid ingredients in CampfireBehaviour#appendItem.");
+        ItemStack ingredient = ItemStack.of(material);
 
         int index = freeSlot.getAsInt();
-        items.set(index, ingredients.get(0));
+        items.set(index, ingredient);
 
         return index;
     }
@@ -81,7 +69,7 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
         Block block = interaction.getBlock();
         Player player = interaction.getPlayer();
         ItemStack input = player.getItemInHand(interaction.getHand());
-        Optional<CampfireCookingRecipe> recipeOptional = findCampfireCookingRecipe(input);
+        Optional<Recipe> recipeOptional = findCampfireCookingRecipe(input);
 
         if (recipeOptional.isEmpty())
             return true;
@@ -95,9 +83,12 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
         if (itemNotConsumed)
             return true;
 
-        CampfireCookingRecipe recipe = recipeOptional.get();
-        int index = appendItem(items, recipe);
-        block = withCookingProgress(block, index, recipe.getCookingTime());
+        Recipe recipe = recipeOptional.get();
+        if (!(recipe.createRecipeDisplays().getFirst() instanceof RecipeDisplay.Furnace furnaceRecipe)) return false;
+        Material material = getMaterialFromSlotDisplay(furnaceRecipe.ingredient());
+        if (material == null) return false;
+        int index = appendItem(items, material);
+        block = withCookingProgress(block, index, furnaceRecipe.duration());
         instance.setBlock(pos, items.apply(block));
         return false;
     }
@@ -185,10 +176,14 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
     }
 
     private void endCampfireCookingProgress(Instance instance, Point pos, ItemStack input) {
-        Optional<CampfireCookingRecipe> recipeOptional = findCampfireCookingRecipe(input);
+        Optional<Recipe> recipeOptional = findCampfireCookingRecipe(input);
         if (recipeOptional.isEmpty())
             throw new IllegalArgumentException("Cannot end campfire cooking progress because input recipe doesn't found");
-        dropItem(instance, pos, recipeOptional.get().getResult());
+        Material material = getRecipeResult(recipeOptional.get());
+        if (material == null) {
+            return;
+        }
+        dropItem(instance, pos, ItemStack.of(material));
     }
 
     private void dropItem(Instance instance, Point pos, ItemStack item) {
@@ -201,21 +196,36 @@ public class CampfireBehaviour extends VanillaBlockBehaviour {
         return IntStream.range(0, items.size()).filter(index -> items.get(index).isAir()).findFirst();
     }
 
-    private Optional<CampfireCookingRecipe> findCampfireCookingRecipe(ItemStack input) {
+    private Material getRecipeResult(Recipe recipe) {
+        RecipeDisplay d = recipe.createRecipeDisplays().getFirst();
+        if (d instanceof RecipeDisplay.Furnace f) {
+            return getMaterialFromSlotDisplay(f.result());
+        }
+        return null;
+    }
+
+    private Material getRecipeInput(Recipe recipe) {
+        RecipeDisplay d = recipe.createRecipeDisplays().getFirst();
+        if (d instanceof RecipeDisplay.Furnace f) {
+            return getMaterialFromSlotDisplay(f.ingredient());
+        }
+        return null;
+    }
+
+    private Material getMaterialFromSlotDisplay(SlotDisplay slotDisplay) {
+        return switch (slotDisplay) {
+            case SlotDisplay.Item i -> i.material();
+            case SlotDisplay.ItemStack i -> i.itemStack().material();
+            default -> null;
+        };
+    }
+
+    private Optional<Recipe> findCampfireCookingRecipe(ItemStack input) {
         if (input == null)
             return Optional.empty();
         return recipeManager
                 .getRecipes().stream()
-                .filter(recipe -> recipe.type() == RecipeType.CAMPFIRE_COOKING)
-                .map(CampfireCookingRecipe.class::cast)
-                .filter(recipe -> {
-                    List<ItemStack> items = recipe.getIngredient().items();
-                    if (items == null)
-                        return false;
-                    if (items.size() != 1)
-                        return false;
-                    return items.get(0).material().equals(input.material());
-                }).findFirst();
+                .filter(r -> r.recipeBookCategory() == RecipeBookCategory.CAMPFIRE)
+                .filter(recipe -> input.material().equals(getRecipeInput(recipe))).findFirst();
     }
-
 }

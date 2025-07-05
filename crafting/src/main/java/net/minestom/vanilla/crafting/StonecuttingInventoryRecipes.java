@@ -1,7 +1,7 @@
 package net.minestom.vanilla.crafting;
 
-import dev.goldenstack.window.InventoryView;
-import dev.goldenstack.window.Views;
+import net.goldenstack.window.InventoryView;
+import net.goldenstack.window.Views;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -35,9 +35,8 @@ public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplement
 
         node.addListener(InventoryClickEvent.class, event -> {
             int slot = event.getSlot();
-            if (event.getInventory() == null) return;
-            Inventory inv = event.getInventory();
-            if (event.getInventory().getInventoryType() != InventoryType.STONE_CUTTER) return;
+            if (!(event.getInventory() instanceof Inventory inv)) return;
+            if (inv.getInventoryType() != InventoryType.STONE_CUTTER) return;
 
             if (input.isValidExternal(slot)) {
                 if (!event.getClickedItem().material().equals(event.getCursorItem().material())) {
@@ -66,8 +65,7 @@ public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplement
 
         node.addListener(PlayerPacketEvent.class, event -> {
             if (!(event.getPacket() instanceof ClientClickWindowButtonPacket packet)) return;
-            Inventory inv = event.getPlayer().getOpenInventory();
-            if (inv == null) return;
+            if (!(event.getPlayer().getOpenInventory() instanceof Inventory inv)) return;
             if (inv.getInventoryType() != InventoryType.STONE_CUTTER) return;
             int index = packet.buttonId();
 
@@ -82,6 +80,7 @@ public record StonecuttingInventoryRecipes(Datapack datapack, VanillaReimplement
 
         return node;
     }
+
     private @NotNull List<Recipe.Stonecutting> getRecipes(Material material) {
         CraftingUtils utils = new CraftingUtils(datapack);
         List<Recipe.Stonecutting> recipes = new ArrayList<>();

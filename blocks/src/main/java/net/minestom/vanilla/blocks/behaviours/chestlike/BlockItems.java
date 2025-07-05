@@ -1,18 +1,14 @@
 package net.minestom.vanilla.blocks.behaviours.chestlike;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import net.minestom.server.item.Material;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.tag.Tag;
 import net.minestom.vanilla.tag.Tags;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import net.minestom.server.instance.block.Block;
-import net.minestom.server.item.ItemStack;
-import net.minestom.server.tag.Tag;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The key difference between BlockItems and BlockInventory is that BlockItems

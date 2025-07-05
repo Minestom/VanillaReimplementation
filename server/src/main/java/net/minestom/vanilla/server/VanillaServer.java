@@ -1,5 +1,6 @@
 package net.minestom.vanilla.server;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
@@ -10,8 +11,6 @@ import net.minestom.server.extras.lan.OpenToLAN;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.ConnectionManager;
-import net.minestom.server.timer.TaskSchedule;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
@@ -63,7 +62,7 @@ class VanillaServer {
         this.minecraftServer = minecraftServer;
         this.serverProperties = getOrGenerateServerProperties();
         this.vri = vri;
-        this.overworld = vri.createInstance(NamespaceID.from("world"), VanillaDimensionTypes.OVERWORLD);
+        this.overworld = vri.createInstance(Key.key("world"), VanillaDimensionTypes.OVERWORLD);
 
         // Try to get server properties
 

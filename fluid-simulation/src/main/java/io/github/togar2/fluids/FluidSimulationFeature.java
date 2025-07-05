@@ -1,6 +1,7 @@
 package io.github.togar2.fluids;
 
-import net.minestom.server.utils.NamespaceID;
+
+import net.kyori.adventure.key.Key;
 import net.minestom.vanilla.BlockUpdateFeature;
 import net.minestom.vanilla.VanillaReimplementation;
 import org.jetbrains.annotations.NotNull;
@@ -16,8 +17,8 @@ public class FluidSimulationFeature implements VanillaReimplementation.Feature {
     }
 
     @Override
-    public @NotNull NamespaceID namespaceId() {
-        return NamespaceID.from("io.github.togar2:fluids");
+    public @NotNull Key key() {
+        return Key.key("io.github.togar2:fluids");
     }
 
     @NotNull

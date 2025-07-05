@@ -16,7 +16,6 @@ import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.blocks.behaviours.*;
 import net.minestom.vanilla.blocks.behaviours.oxidisable.OxidatableBlockBehaviour;
 import net.minestom.vanilla.blocks.behaviours.oxidisable.WaxedBlockBehaviour;
-import net.minestom.vanilla.blocks.behaviours.recipe.CampfireBehaviour;
 import net.minestom.vanilla.blocks.behaviours.recipe.*;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdatable;
 import net.minestom.vanilla.blockupdatesystem.BlockUpdateManager;

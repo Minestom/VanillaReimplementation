@@ -1,9 +1,9 @@
 package net.minestom.vanilla.datapack.advancement;
 
 import com.squareup.moshi.JsonReader;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.instance.block.Block;
-import net.kyori.adventure.key.Key;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.json.Optional;
 import net.minestom.vanilla.datapack.loot.function.Predicate;

@@ -1,12 +1,12 @@
 package net.minestom.vanilla;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.TagWritable;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.logging.StatusUpdater;
 import net.minestom.vanilla.utils.DependencySorting;
@@ -102,7 +102,7 @@ public interface VanillaReimplementation {
     /**
      * Creates and registers a vanilla instance.
      */
-    @NotNull Instance createInstance(@NotNull NamespaceID namespace, @NotNull DimensionType dimension);
+    @NotNull Instance createInstance(@NotNull Key namespace, @NotNull DimensionType dimension);
 
     /**
      * Gets a registered vanilla instance.
@@ -110,7 +110,7 @@ public interface VanillaReimplementation {
      * @param namespace the namespace of the instance
      * @return the instance, or null if not found
      */
-    @Nullable Instance getInstance(NamespaceID namespace);
+    @Nullable Instance getInstance(Key namespace);
 
     /**
      * Retrieves or generates a random object unique to the given object.
@@ -167,9 +167,9 @@ public interface VanillaReimplementation {
         }
 
         /**
-         * @return a unique {@link NamespaceID} for this feature
+         * @return a unique {@link Key} for this feature
          */
-        @NotNull NamespaceID namespaceId();
+        @NotNull Key key();
 
         /**
          * @return a unique {@link Class} for this feature

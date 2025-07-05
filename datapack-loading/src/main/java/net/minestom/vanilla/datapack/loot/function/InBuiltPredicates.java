@@ -1,16 +1,15 @@
 package net.minestom.vanilla.datapack.loot.function;
 
 import com.squareup.moshi.JsonReader;
+import net.kyori.adventure.key.Key;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.component.EnchantmentList;
 import net.minestom.server.item.enchant.Enchantment;
 import net.minestom.server.registry.DynamicRegistry;
-import net.kyori.adventure.key.Key;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.json.Optional;
@@ -304,7 +303,7 @@ interface InBuiltPredicates {
 
             Player player = context.get(LootContext.KILLER_PLAYER);
             if (player != null) {
-                EnchantmentList enchants = player.getItemInMainHand().get(ItemComponent.ENCHANTMENTS);
+                EnchantmentList enchants = player.getItemInMainHand().get(DataComponents.ENCHANTMENTS);
                 if (enchants != null && enchants.has(Enchantment.LOOTING)) {
                     looting = enchants.level(Enchantment.LOOTING);
                 }
@@ -362,8 +361,8 @@ interface InBuiltPredicates {
         @Override
         public boolean test(LootContext context) {
             ItemStack item = context.getOrThrow(LootContext.TOOL);
-            EnchantmentList enchants = item.get(ItemComponent.ENCHANTMENTS);
-            DynamicRegistry.Key<Enchantment> enchantment = MinestomUtils.getEnchantKey(NamespaceID.from(this.enchantment));
+            EnchantmentList enchants = item.get(DataComponents.ENCHANTMENTS);
+            DynamicRegistry.Key<Enchantment> enchantment = MinestomUtils.getEnchantKey(this.enchantment);
             int level = enchants == null || !enchants.has(enchantment) ? 0 : enchants.level(enchantment);
 
             return ThreadLocalRandom.current().nextFloat() < chances.get(level);

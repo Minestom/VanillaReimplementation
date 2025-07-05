@@ -3,22 +3,19 @@ package net.minestom.vanilla.generation;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.coordinate.CoordConversion;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.batch.ChunkBatch;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.NamespaceID;
-import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
 import net.minestom.vanilla.datapack.worldgen.WorldgenContext;
 import net.minestom.vanilla.datapack.worldgen.biome.BiomeSource;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class NoiseChunkGenerator {
@@ -131,7 +128,7 @@ public class NoiseChunkGenerator {
 //        const context = WorldgenContext.create(this.settings.noise.minY, this.settings.noise.height)
 //        randomState.surfaceSystem.buildSurface(chunk, noiseChunk, context, () => biome)
 //    }
-    public void buildSurface(Datapack datapack, RandomState randomState, TargetChunk chunk, NamespaceID biome) {
+    public void buildSurface(Datapack datapack, RandomState randomState, TargetChunk chunk, Key biome) {
         NoiseChunk noiseChunk = this.getOrCreateNoiseChunk(randomState, chunk);
         WorldgenContext context = WorldgenContext.create(this.dimensionType);
         randomState.surfaceSystem.buildSurface(chunk, noiseChunk, context, point -> biome);
@@ -223,7 +220,7 @@ public class NoiseChunkGenerator {
 
         @Override
         public @UnknownNullability Block getBlock(int x, int y, int z, @NotNull Condition condition) {
-            int index = ChunkUtils.getBlockIndex(x, y, z);
+            int index = CoordConversion.chunkBlockIndex(x, y, z);
             return this.blocks.getOrDefault(index, Block.STONE);
         }
 
@@ -232,7 +229,7 @@ public class NoiseChunkGenerator {
             if (x < minX() || x >= maxX() || y < minY() || y >= maxY() || z < minZ() || z >= maxZ()) {
                 return;
             }
-            int index = ChunkUtils.getBlockIndex(x, y, z);
+            int index = CoordConversion.chunkBlockIndex(x, y, z);
             this.blocks.put(index, block);
             batch.setBlock(x - minX(), y, z - minZ(), block);
         }
@@ -260,7 +257,7 @@ public class NoiseChunkGenerator {
         }
 
         default long index() {
-            return ChunkUtils.getChunkIndex(chunkX(), chunkZ());
+            return CoordConversion.chunkIndex(chunkX(), chunkZ());
         }
 
         int minSection();

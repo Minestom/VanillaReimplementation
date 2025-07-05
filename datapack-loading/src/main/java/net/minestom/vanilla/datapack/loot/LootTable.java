@@ -1,11 +1,10 @@
 package net.minestom.vanilla.datapack.loot;
 
 import com.squareup.moshi.JsonReader;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.kyori.adventure.key.Key;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.DatapackUtils;
 import net.minestom.vanilla.datapack.json.JsonUtils;
@@ -87,7 +86,7 @@ public record LootTable(@Nullable String type, @Nullable List<LootFunction> func
                 @Override
                 public List<List<ItemStack>> apply(Datapack datapack, LootContext context) {
                     return List.of(List.of(
-                            ItemStack.of(Objects.requireNonNull(Material.fromNamespaceId(NamespaceID.from(name))), count == null ? 1 : count)
+                            ItemStack.of(Objects.requireNonNull(Material.fromKey(name)), count == null ? 1 : count)
                     ));
                 }
             }
@@ -120,8 +119,7 @@ public record LootTable(@Nullable String type, @Nullable List<LootFunction> func
                     var itemTags = DatapackUtils.findTags(datapack, "item", name);
 
                     var items = itemTags.stream()
-                            .map(NamespaceID::from)
-                            .map(Material::fromNamespaceId)
+                            .map(Material::fromKey)
                             .filter(Objects::nonNull)
                             .map(material -> ItemStack.of(material, 1))
                             .toList();

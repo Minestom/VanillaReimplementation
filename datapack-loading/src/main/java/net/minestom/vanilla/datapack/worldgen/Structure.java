@@ -1,9 +1,9 @@
 package net.minestom.vanilla.datapack.worldgen;
 
 import net.kyori.adventure.nbt.*;
-import net.minestom.vanilla.files.ByteArray;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.vanilla.files.ByteArray;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 

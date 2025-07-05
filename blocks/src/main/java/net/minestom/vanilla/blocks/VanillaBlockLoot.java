@@ -17,7 +17,10 @@ import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 import java.util.function.Consumer;
 import java.util.random.RandomGenerator;
 
@@ -27,7 +30,7 @@ public record VanillaBlockLoot(VanillaReimplementation vri, Datapack datapack) {
     }
 
     public void spawnLoot(@NotNull PlayerBlockBreakEvent event) {
-        String blockName = event.getBlock().namespace().value();
+        String blockName = event.getBlock().key().value();
         datapack.namespacedData().forEach((namespace, data) -> {
             FileSystem<LootTable> blocks = data.loot_tables().folder("blocks");
             var lootTable = blocks.file(blockName + ".json");
@@ -35,7 +38,7 @@ public record VanillaBlockLoot(VanillaReimplementation vri, Datapack datapack) {
 
             Block blockState = event.getBlock();
             Point origin = event.getBlockPosition();
-            ItemStack tool = event.getPlayer().getInventory().getItemInMainHand();
+            ItemStack tool = event.getPlayer().getItemInMainHand();
             Player entity = event.getPlayer();
             Block blockEntity = blockState.registry().blockEntity() == null ? null : blockState;
             Random random = vri.random(entity);

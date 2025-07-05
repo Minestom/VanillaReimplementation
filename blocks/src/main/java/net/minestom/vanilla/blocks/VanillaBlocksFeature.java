@@ -1,10 +1,10 @@
 package net.minestom.vanilla.blocks;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.BlockUpdateFeature;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.datapack.DatapackLoadingFeature;
@@ -60,8 +60,8 @@ public class VanillaBlocksFeature implements VanillaReimplementation.Feature {
     }
 
     @Override
-    public @NotNull NamespaceID namespaceId() {
-        return NamespaceID.from("vri:blocks");
+    public @NotNull Key key() {
+        return Key.key("vri:blocks");
     }
 
     @Override

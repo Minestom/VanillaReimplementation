@@ -4,10 +4,10 @@ import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.ArgumentType;
+import net.minestom.server.coordinate.CoordConversion;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.utils.location.RelativeVec;
 import net.minestom.vanilla.instancemeta.tickets.TicketManager;
 import net.minestom.vanilla.instancemeta.tickets.TicketUtils;
@@ -24,7 +24,6 @@ import java.util.List;
  * BE_EE_OP_Level: 0
  * MP_Only: false
  */
-@SuppressWarnings("UnstableApiUsage")
 public class ForceloadCommand extends Command {
 
     public ForceloadCommand() {
@@ -60,7 +59,7 @@ public class ForceloadCommand extends Command {
     }
 
     private void addForceLoad(Instance instance, int chunkX, int chunkZ) {
-        addForceLoad(instance, ChunkUtils.getChunkIndex(chunkX, chunkZ));
+        addForceLoad(instance, CoordConversion.chunkIndex(chunkX, chunkZ));
     }
 
     private void addForceLoad(Instance instance, long chunkIndex) {
@@ -69,7 +68,7 @@ public class ForceloadCommand extends Command {
     }
 
     private void removeForceLoad(Instance instance, int chunkX, int chunkZ) {
-        removeForceLoad(instance, ChunkUtils.getChunkIndex(chunkX, chunkZ));
+        removeForceLoad(instance, CoordConversion.chunkIndex(chunkX, chunkZ));
     }
 
     private void removeForceLoad(Instance instance, long chunkIndex) {
@@ -87,8 +86,8 @@ public class ForceloadCommand extends Command {
         Vec position = fromVec.from(player.getPosition());
 
         // Get chunk position
-        int chunkX = ChunkUtils.getChunkCoordinate(position.x());
-        int chunkZ = ChunkUtils.getChunkCoordinate(position.z());
+        int chunkX = CoordConversion.globalToChunk(position.x());
+        int chunkZ = CoordConversion.globalToChunk(position.z());
 
         // Add the force load
         Instance instance = player.getInstance();
@@ -115,8 +114,8 @@ public class ForceloadCommand extends Command {
         for (int offX = startX; offX < endX; offX += 16) {
             for (int offZ = startZ; offZ < endZ; offZ += 16) {
                 // Get chunk position
-                int chunkX = ChunkUtils.getChunkCoordinate(offX);
-                int chunkZ = ChunkUtils.getChunkCoordinate(offZ);
+                int chunkX = CoordConversion.globalToChunk(offX);
+                int chunkZ = CoordConversion.globalToChunk(offZ);
                 removeForceLoad(instance, chunkX, chunkZ);
             }
         }
@@ -131,8 +130,8 @@ public class ForceloadCommand extends Command {
         Vec position = fromVec.from(player.getPosition());
 
         // Get chunk position
-        int chunkX = ChunkUtils.getChunkCoordinate(position.x());
-        int chunkZ = ChunkUtils.getChunkCoordinate(position.z());
+        int chunkX = CoordConversion.globalToChunk(position.x());
+        int chunkZ = CoordConversion.globalToChunk(position.z());
 
         // Remove force load
         Instance instance = player.getInstance();
@@ -160,8 +159,8 @@ public class ForceloadCommand extends Command {
         for (int offX = minX; offX <= maxX; offX += 16) {
             for (int offZ = minZ; offZ <= maxZ; offZ += 16) {
                 // Get chunk position
-                int chunkX = ChunkUtils.getChunkCoordinate(offX);
-                int chunkZ = ChunkUtils.getChunkCoordinate(offZ);
+                int chunkX = CoordConversion.globalToChunk(offX);
+                int chunkZ = CoordConversion.globalToChunk(offZ);
 
                 // Remove the force load
                 removeForceLoad(instance, chunkX, chunkZ);

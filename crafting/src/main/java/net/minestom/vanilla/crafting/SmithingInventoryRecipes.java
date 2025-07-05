@@ -1,7 +1,8 @@
 package net.minestom.vanilla.crafting;
 
-import dev.goldenstack.window.InventoryView;
-import dev.goldenstack.window.Views.Smithing;
+import net.goldenstack.window.InventoryView;
+import net.goldenstack.window.Views.Smithing;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.StringBinaryTag;
@@ -15,7 +16,6 @@ import net.minestom.server.item.Material;
 import net.minestom.server.item.armor.TrimMaterial;
 import net.minestom.server.item.armor.TrimPattern;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.VanillaReimplementation;
 import net.minestom.vanilla.datapack.Datapack;
 import net.minestom.vanilla.datapack.recipe.Recipe;
@@ -23,7 +23,9 @@ import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public record SmithingInventoryRecipes(Datapack datapack, VanillaReimplementation vri) {
@@ -43,9 +45,8 @@ public record SmithingInventoryRecipes(Datapack datapack, VanillaReimplementatio
 
         node.addListener(InventoryClickEvent.class, event -> {
             int slot = event.getSlot();
-            Inventory inv = event.getPlayer().getOpenInventory();
-            if (inv == null) return;
-            if (event.getPlayer().getOpenInventory().getInventoryType() != InventoryType.SMITHING) return;
+            if (!(event.getPlayer().getOpenInventory() instanceof Inventory inv)) return;
+            if (inv.getInventoryType() != InventoryType.SMITHING) return;
             if (Smithing.OUTPUT.isValidExternal(slot) && !event.getClickedItem().isAir()) {
                 InventoryView.Singular input;
                 for (int i = 0; i < 3; i++) {
@@ -92,14 +93,14 @@ public record SmithingInventoryRecipes(Datapack datapack, VanillaReimplementatio
     }
 
     private @Nullable String getTrimMaterialFromIngredient(Material material) {
-        TrimMaterial trimMaterial = vri.process().trimMaterial().get(material.namespace());
+        TrimMaterial trimMaterial = vri.process().trimMaterial().get(material.key());
         if (trimMaterial == null) {
             return null;
         }
         return trimMaterial.assetName();
     }
     private @Nullable String getTrimPatternFromTemplate(Material template) {
-        TrimPattern trimPattern = vri.process().trimPattern().get(template.namespace());
+        TrimPattern trimPattern = vri.process().trimPattern().get(template.key());
         if (trimPattern == null) {
             return null;
         }
@@ -132,22 +133,20 @@ public record SmithingInventoryRecipes(Datapack datapack, VanillaReimplementatio
         return null;
     }
 
-    public record Trims(Map<NamespaceID, TrimMaterial> materials, Map<NamespaceID, TrimPattern> patterns) {
+    public record Trims(Map<Key, TrimMaterial> materials, Map<Key, TrimPattern> patterns) {
     }
 
     public @NotNull Trims getTrims() {
-        Map<NamespaceID, TrimMaterial> trimMaterials = new HashMap<>();
-        Map<NamespaceID, TrimPattern> trimPatterns = new HashMap<>();
+        Map<Key, TrimMaterial> trimMaterials = new HashMap<>();
+        Map<Key, TrimPattern> trimPatterns = new HashMap<>();
 
         for (var entry : datapack.namespacedData().entrySet()) {
             Datapack.NamespacedData data = entry.getValue();
             for (String file : data.trim_material().files()) {
                 var trimMaterial = data.trim_material().file(file);
-                trimMaterials.put(NamespaceID.from(file), TrimMaterial.create(
+                trimMaterials.put(Key.key(file), TrimMaterial.create(
                         trimMaterial.asset_name(),
-                        Objects.requireNonNull(Material.fromNamespaceId(trimMaterial.ingredient().asString())),
-                        trimMaterial.item_model_index(),
-                        Objects.requireNonNullElse(trimMaterial.override_armor_materials(), new HashMap<NamespaceID, String>())
+                        Objects.requireNonNullElse(trimMaterial.override_armor_materials(), new HashMap<Key, String>())
                                 .entrySet().stream().collect(Collectors.toMap(
                                         mapEntry -> mapEntry.getKey().asString(), Map.Entry::getValue
                                 )),
@@ -157,9 +156,8 @@ public record SmithingInventoryRecipes(Datapack datapack, VanillaReimplementatio
 
             for (String file : data.trim_pattern().files()) {
                 var trimPattern = data.trim_pattern().file(file);
-                trimPatterns.put(NamespaceID.from(file), TrimPattern.create(
-                        NamespaceID.from(trimPattern.asset_id()),
-                        Objects.requireNonNull(Material.fromNamespaceId(trimPattern.template_item().asString())),
+                trimPatterns.put(Key.key(file), TrimPattern.create(
+                        trimPattern.asset_id(),
                         trimPattern.description(),
                         trimPattern.decal()
                 ));

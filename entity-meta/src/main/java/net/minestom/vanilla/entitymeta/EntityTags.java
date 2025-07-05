@@ -8,7 +8,7 @@ public interface EntityTags {
 
     interface FallingBlock {
         @NotNull Tag<Block> BLOCK = Tag.String("vri:entity-meta.falling_block.block")
-                .map(Block::fromNamespaceId, block -> block.namespace().toString());
+                .map(Block::fromKey, block -> block.key().toString());
     }
 
     interface PrimedTnt {

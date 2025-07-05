@@ -1,18 +1,17 @@
 package net.minestom.vanilla.system;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.effects.Effects;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.network.packet.server.play.EffectPacket;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
+import net.minestom.server.network.packet.server.play.WorldEventPacket;
 import net.minestom.server.particle.Particle;
-import net.minestom.server.utils.NamespaceID;
-import net.minestom.vanilla.dimensions.VanillaDimensionTypes;
+import net.minestom.server.worldevent.WorldEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -112,8 +111,8 @@ public final class NetherPortal {
                     0.3f, 10
             );
 
-            EffectPacket effectPacket = new EffectPacket(
-                    Effects.BLOCK_BREAK.getId(),
+            WorldEventPacket effectPacket = new WorldEventPacket(
+                    WorldEvent.PARTICLES_DESTROY_BLOCK.id(),
                     pos,
                     Block.NETHER_PORTAL.id(),
                     false
@@ -128,7 +127,7 @@ public final class NetherPortal {
     }
 
     public boolean tryFillFrame(Instance instance) {
-        if (instance.getDimensionType().namespace().equals(NamespaceID.from("the_end"))) {
+        if (instance.getDimensionType().key().equals(Key.key("the_end"))) {
             return false;
         }
 

@@ -1,10 +1,10 @@
 package net.minestom.vanilla.generation;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.vanilla.datapack.worldgen.NoiseSettings;
 import net.minestom.vanilla.datapack.worldgen.WorldgenContext;
 import net.minestom.vanilla.datapack.worldgen.WorldgenRegistries;
@@ -34,7 +34,7 @@ public class SurfaceSystem {
         this.defaultBlock = defaultBlock;
     }
 
-    public void buildSurface(NoiseChunkGenerator.TargetChunk chunk, NoiseChunk noiseChunk, WorldgenContext context, Function<Point, NamespaceID> getBiome) {
+    public void buildSurface(NoiseChunkGenerator.TargetChunk chunk, NoiseChunk noiseChunk, WorldgenContext context, Function<Point, Key> getBiome) {
         int minX = chunk.minX();
         int minZ = chunk.minZ();
         int minY = chunk.minY();

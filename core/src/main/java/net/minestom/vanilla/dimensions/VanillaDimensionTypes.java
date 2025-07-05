@@ -1,11 +1,9 @@
 package net.minestom.vanilla.dimensions;
 
-import net.minestom.server.MinecraftServer;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.registry.DynamicRegistry;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.DimensionType;
 
-import java.util.List;
 import java.util.Map;
 
 public class VanillaDimensionTypes {
@@ -13,9 +11,9 @@ public class VanillaDimensionTypes {
     public static final DimensionType OVERWORLD = DimensionType.builder()
             .build();
 
-    public static Map<DimensionType, NamespaceID> values() {
+    public static Map<DimensionType, Key> values() {
         return Map.of(
-                OVERWORLD, NamespaceID.from("vri:overworld")
+                OVERWORLD, Key.key("vri:overworld")
         );
     }
 
