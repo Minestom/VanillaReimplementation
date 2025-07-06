@@ -15,6 +15,7 @@ include("mojang-data")
 include("crafting")
 include("datapack-loading")
 include("datapack-tests")
+include("survival")
 
 pluginManagement {
     repositories {
