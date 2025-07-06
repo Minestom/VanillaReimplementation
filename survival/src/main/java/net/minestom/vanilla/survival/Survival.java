@@ -5,11 +5,15 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.InstanceContainer;
+import net.minestom.server.instance.LightingChunk;
+import net.minestom.server.instance.WorldBorder;
 import net.minestom.server.instance.anvil.AnvilLoader;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.logging.Logger;
@@ -30,19 +34,21 @@ public class Survival {
     }
 
     private final @NotNull ServerProcess process;
-    private final @NotNull Instance overworld;
+    private final @NotNull InstanceContainer overworld;
 
     Survival(@NotNull ServerProcess process) {
         this.process = process;
 
-        this.overworld = process.instance().createInstanceContainer(
-                DimensionType.OVERWORLD,
-                new AnvilLoader(Path.of("world"))
-        );
+        this.overworld = process.instance().createInstanceContainer(DimensionType.OVERWORLD);
+        this.overworld.setChunkLoader(new AnvilLoader(Path.of("world")));
+        this.overworld.setChunkSupplier(LightingChunk::new);
+        this.overworld.setWorldBorder(new WorldBorder(
+                32 * 16 * 2, 0, 0, 10, 500, 560
+        ));
     }
 
     /**
-     * Initializes the server (event handlers, etc).
+     * Initializes the server (event handlers, etc.).
      */
     public void initialize() {
 
@@ -54,6 +60,8 @@ public class Survival {
 
             event.setSpawningInstance(this.overworld);
             player.setRespawnPoint(respawnPoint);
+            player.setGameMode(GameMode.SURVIVAL);
+
         }).addListener(PlayerSpawnEvent.class, event -> {
             final Player player = event.getPlayer();
 
