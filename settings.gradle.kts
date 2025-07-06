@@ -16,6 +16,7 @@ include("crafting")
 include("datapack-loading")
 include("datapack-tests")
 include("survival")
+include("datapack")
 
 pluginManagement {
     repositories {

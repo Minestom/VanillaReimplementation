@@ -16,13 +16,18 @@ import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.WorldBorder;
 import net.minestom.server.instance.anvil.AnvilLoader;
 import net.minestom.server.world.DimensionType;
+import net.minestom.vanilla.datapack.Datapacks;
 import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 public class Survival {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        Path jar = Datapacks.ensureCurrentJarExists();
+        // Note: Also can use Datapacks.forEachFileInJar(jar, lootTables)
+
         // Initialize the server
         MinecraftServer minecraftServer = MinecraftServer.init();
 
