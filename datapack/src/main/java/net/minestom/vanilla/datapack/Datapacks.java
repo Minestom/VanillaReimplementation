@@ -227,6 +227,7 @@ public class Datapacks {
         throw new IOException("Could not iterate through JAR files!");
     }
 
+    @SuppressWarnings("PatternValidation")
     public static <T> @NotNull Map<Key, T> buildRegistryFromJar(@NotNull Path jarPath, @NotNull Path pathFilter, @NotNull ServerProcess process, @NotNull String fileSuffix, @NotNull Codec<T> codec) throws IOException {
         final Map<Key, T> map = new HashMap<>();
         final Transcoder<BinaryTag> coder = new RegistryTranscoder<>(Transcoder.NBT, process);
@@ -235,25 +236,26 @@ public class Datapacks {
             for (Path root : fileSystem.getRootDirectories()) {
                 Path relevantFiles = root.resolve(pathFilter.toString()); // Prevent provider mismatch
 
-                List<Path> files = Files.walk(relevantFiles).toList();
-                for (Path path : files) {
-                    if (!Files.isRegularFile(path)) continue;
-                    if (!path.toString().endsWith(".json")) continue;
+                try (Stream<Path> paths = Files.walk(relevantFiles)) {
+                    for (Path path : paths.toList()) {
+                        if (!Files.isRegularFile(path)) continue;
+                        if (!path.toString().endsWith(".json")) continue;
 
-                    String keyPath = pathFilter.relativize(Path.of(path.toString())).toString();
-                    keyPath = keyPath.substring(0, keyPath.length() - fileSuffix.length());
+                        String keyPath = path.subpath(pathFilter.getNameCount(), path.getNameCount()).toString();
+                        keyPath = keyPath.substring(0, keyPath.length() - fileSuffix.length());
 
-                    BinaryTag tag;
-                    try {
-                        tag = MinestomAdventure.tagStringIO().asTag(Files.readString(path));
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        BinaryTag tag;
+                        try {
+                            tag = MinestomAdventure.tagStringIO().asTag(Files.readString(path));
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                        map.put(
+                                Key.key(keyPath),
+                                codec.decode(coder, tag).orElseThrow("parsing " + path)
+                        );
                     }
-
-                    map.put(
-                            Key.key(keyPath),
-                            codec.decode(coder, tag).orElseThrow("parsing " + path)
-                    );
                 }
             }
         }
