@@ -1,6 +1,5 @@
 package net.minestom.vanilla.utils;
 
-import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.EntityType;
@@ -9,7 +8,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.EnchantmentList;
 import net.minestom.server.item.enchant.Enchantment;
-import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 
 public class MinestomUtils {
 
@@ -23,8 +22,8 @@ public class MinestomUtils {
         EntityType.values();
     }
 
-    public static int getEnchantLevel(ItemStack itemStack, Key enchantment, int defaultValue) {
-        DynamicRegistry.Key<Enchantment> enchant = getEnchantKey(enchantment);
+    public static int getEnchantLevel(ItemStack itemStack, Enchantment enchantment, int defaultValue) {
+        RegistryKey<Enchantment> enchant = getEnchantKey(enchantment);
         if (enchant == null) return defaultValue;
         EnchantmentList enchants = itemStack.get(DataComponents.ENCHANTMENTS);
         if (enchants == null) return defaultValue;
@@ -32,12 +31,7 @@ public class MinestomUtils {
         return enchants.level(enchant);
     }
 
-    public static DynamicRegistry.Key<Enchantment> getEnchantKey(Enchantment enchantment) {
+    public static RegistryKey<Enchantment> getEnchantKey(Enchantment enchantment) {
         return MinecraftServer.getEnchantmentRegistry().getKey(enchantment);
-    }
-
-    public static DynamicRegistry.Key<Enchantment> getEnchantKey(Key enchantment) {
-        int id = MinecraftServer.getEnchantmentRegistry().getId(enchantment);
-        return MinecraftServer.getEnchantmentRegistry().getKey(id);
     }
 }

@@ -1,6 +1,6 @@
 dependencies {
     // Minestom
-    api("net.minestom:minestom-snapshots:${project.property("minestom_version")}")
+    api("net.minestom:minestom:${project.property("minestom_version")}")
 
     // Raycasting
     api("com.github.EmortalMC:Rayfast:${project.property("rayfast_version")}")
@@ -10,6 +10,9 @@ dependencies {
 
     // Annotations
     api("org.jetbrains:annotations:${project.property("annotations_version")}")
+
+    // SLF4j
+    api("org.slf4j:slf4j-api:${project.property("slf4j_version")}")
 
     // Json
     api("com.squareup.moshi:moshi:1.14.0")

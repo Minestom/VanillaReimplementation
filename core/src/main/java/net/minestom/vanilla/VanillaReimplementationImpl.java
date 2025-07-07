@@ -10,7 +10,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.anvil.AnvilLoader;
-import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.tag.TagHandler;
 import net.minestom.server.tag.TagWritable;
 import net.minestom.server.tag.Taggable;
@@ -157,7 +157,7 @@ class VanillaReimplementationImpl implements VanillaReimplementation {
      * Creates a vanilla instance.
      */
     public @NotNull Instance createInstance(@NotNull Key name, @NotNull DimensionType dimension) {
-        DynamicRegistry.Key<DimensionType> key = process().dimensionType().getKey(dimension);
+        RegistryKey<DimensionType> key = process().dimensionType().getKey(dimension);
         Objects.requireNonNull(key, "Dimension type " + dimension + " is not registered!");
         InstanceContainer instance = process().instance().createInstanceContainer(key);
         worlds.put(name, instance);
