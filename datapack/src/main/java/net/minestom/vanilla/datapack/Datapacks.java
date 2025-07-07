@@ -226,7 +226,7 @@ public class Datapacks {
                         if (!Files.isRegularFile(path)) continue;
                         if (!path.toString().endsWith(".json")) continue;
 
-                        String keyPath = path.subpath(pathFilter.getNameCount(), path.getNameCount()).toString();
+                        String keyPath = relevantFiles.relativize(path).toString();
                         keyPath = keyPath.substring(0, keyPath.length() - fileSuffix.length());
 
                         BinaryTag tag;
