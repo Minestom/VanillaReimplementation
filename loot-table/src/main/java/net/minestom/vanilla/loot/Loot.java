@@ -58,6 +58,7 @@ public class Loot {
 
             if (!canDrop) return;
 
+            // TODO: Can be pre-converted to `LootTable[]` that turns block IDs into loot tables.
             Key key = Key.key("blocks/" + block.key().value());
             LootTable table = tables.get(key);
 
