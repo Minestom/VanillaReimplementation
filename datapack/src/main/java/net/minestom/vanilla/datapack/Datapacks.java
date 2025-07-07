@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 
 /**
  * Utilities for datapack loading. Primary functions are {@link Datapacks#ensureCurrentJarExists()} and {@link
- * Datapacks#forEachFileInJar(Path, Path)}
+ * Datapacks#buildRegistryFromJar(Path, Path, ServerProcess, String, Codec)}
  */
 @SuppressWarnings("UnstableApiUsage")
 public class Datapacks {
@@ -210,21 +210,6 @@ public class Datapacks {
      */
     public static @NotNull Path ensureCurrentJarExists() throws IOException {
         return Datapacks.discoverAndDownloadJar(MinecraftServer.VERSION_NAME, MOJANG_DATA_DIRECTORY);
-    }
-
-    /**
-     * Iterates through every file in the given {@code pathFilter} that exists within the provided JAR.
-     */
-    public static @NotNull Stream<Path> forEachFileInJar(@NotNull Path jarPath, @NotNull Path pathFilter) throws IOException {
-        try (FileSystem fileSystem = FileSystems.newFileSystem(jarPath)) {
-            for (Path root : fileSystem.getRootDirectories()) {
-                Path relevantFiles = root.resolve(pathFilter.toString()); // Prevent provider mismatch
-
-                return Files.walk(relevantFiles);
-            }
-        }
-
-        throw new IOException("Could not iterate through JAR files!");
     }
 
     @SuppressWarnings("PatternValidation")
