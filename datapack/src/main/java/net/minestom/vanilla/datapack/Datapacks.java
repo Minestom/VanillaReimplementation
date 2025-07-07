@@ -1,11 +1,16 @@
 package net.minestom.vanilla.datapack;
 
 import com.google.gson.JsonParser;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.nbt.BinaryTag;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.ServerProcess;
+import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.Result;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.codec.Transcoder;
+import net.minestom.server.registry.RegistryTranscoder;
 import net.minestom.vanilla.logging.Loading;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +26,9 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -218,6 +225,40 @@ public class Datapacks {
         }
 
         throw new IOException("Could not iterate through JAR files!");
+    }
+
+    public static <T> @NotNull Map<Key, T> buildRegistryFromJar(@NotNull Path jarPath, @NotNull Path pathFilter, @NotNull ServerProcess process, @NotNull String fileSuffix, @NotNull Codec<T> codec) throws IOException {
+        final Map<Key, T> map = new HashMap<>();
+        final Transcoder<BinaryTag> coder = new RegistryTranscoder<>(Transcoder.NBT, process);
+
+        try (FileSystem fileSystem = FileSystems.newFileSystem(jarPath)) {
+            for (Path root : fileSystem.getRootDirectories()) {
+                Path relevantFiles = root.resolve(pathFilter.toString()); // Prevent provider mismatch
+
+                List<Path> files = Files.walk(relevantFiles).toList();
+                for (Path path : files) {
+                    if (!Files.isRegularFile(path)) continue;
+                    if (!path.toString().endsWith(".json")) continue;
+
+                    String keyPath = pathFilter.relativize(Path.of(path.toString())).toString();
+                    keyPath = keyPath.substring(0, keyPath.length() - fileSuffix.length());
+
+                    BinaryTag tag;
+                    try {
+                        tag = MinestomAdventure.tagStringIO().asTag(Files.readString(path));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    map.put(
+                            Key.key(keyPath),
+                            codec.decode(coder, tag).orElseThrow("parsing " + path)
+                    );
+                }
+            }
+        }
+
+        return map;
     }
 
 }

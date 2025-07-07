@@ -1,12 +1,14 @@
 package net.minestom.vanilla.survival;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.ServerProcess;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.item.PickupItemEvent;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
@@ -15,19 +17,21 @@ import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.WorldBorder;
 import net.minestom.server.instance.anvil.AnvilLoader;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
+import net.minestom.server.item.component.EnchantmentList;
+import net.minestom.server.item.enchant.Enchantment;
 import net.minestom.server.world.DimensionType;
-import net.minestom.vanilla.datapack.Datapacks;
 import net.minestom.vanilla.logging.Logger;
+import net.minestom.vanilla.loot.Loot;
+import net.minestom.vanilla.loot.LootTable;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Map;
 
 public class Survival {
-    public static void main(String[] args) throws IOException {
-        Path jar = Datapacks.ensureCurrentJarExists();
-        // Note: Also can use Datapacks.forEachFileInJar(jar, lootTables)
-
+    public static void main(String[] args) {
         // Initialize the server
         MinecraftServer minecraftServer = MinecraftServer.init();
 
@@ -57,6 +61,9 @@ public class Survival {
      */
     public void initialize() {
 
+        Map<Key, LootTable> tables = Loot.loadTables(process);
+        process.eventHandler().addChild(Loot.createEventNode(tables));
+
         process.eventHandler().addListener(AsyncPlayerConfigurationEvent.class, event -> {
             final Player player = event.getPlayer();
 
@@ -65,7 +72,10 @@ public class Survival {
 
             event.setSpawningInstance(this.overworld);
             player.setRespawnPoint(respawnPoint);
-            player.setGameMode(GameMode.SURVIVAL);
+
+            player.getInventory().addItemStack(ItemStack.of(Material.DIAMOND_PICKAXE).with(DataComponents.ENCHANTMENTS, new EnchantmentList(
+                    Enchantment.FORTUNE, 3
+            )));
 
         }).addListener(PlayerSpawnEvent.class, event -> {
             final Player player = event.getPlayer();
@@ -77,6 +87,12 @@ public class Survival {
             final Player player = event.getPlayer();
 
             this.broadcast(Component.translatable("multiplayer.player.left", NamedTextColor.YELLOW).arguments(player.getName()));
+        }).addListener(PickupItemEvent.class, event -> {
+            if (!(event.getLivingEntity() instanceof Player player)) return;
+
+            // Cancel event if player does not have enough inventory space
+            ItemStack itemStack = event.getItemEntity().getItemStack();
+            event.setCancelled(!player.getInventory().addItemStack(itemStack));
         });
     }
 
