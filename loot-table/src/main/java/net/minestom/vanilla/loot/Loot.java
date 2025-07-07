@@ -7,6 +7,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.ExperienceOrb;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.event.EventFilter;
@@ -67,7 +68,7 @@ public class Loot {
 
             // Build a context and drop
             LootContext context = LootContext.from(Map.of(
-                    LootContext.RANDOM, new Random(),
+                    LootContext.RANDOM, new Random(), // TODO: Replace with sequence random
                     LootContext.BLOCK_STATE, block,
                     LootContext.ORIGIN, event.getBlockPosition(),
                     LootContext.TOOL, heldItem,
@@ -76,6 +77,12 @@ public class Loot {
 
             for (ItemStack drop : table.generate(context)) {
                 blockDrop(event.getInstance(), drop, event.getBlockPosition());
+            }
+
+            int experience = BlockExperience.getExperience(block, heldItem, ThreadLocalRandom.current());
+            if (experience != 0) {
+                ExperienceOrb orb = new ExperienceOrb((short) experience);
+                orb.setInstance(event.getInstance(), event.getBlockPosition().add(0.5, 0.5, 0.5));
             }
         });
     }
