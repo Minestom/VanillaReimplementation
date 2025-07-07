@@ -7,7 +7,10 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.ServerProcess;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.item.PickupItemEvent;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
@@ -21,6 +24,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.EnchantmentList;
 import net.minestom.server.item.enchant.Enchantment;
+import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.logging.Logger;
 import net.minestom.vanilla.loot.Loot;
@@ -28,6 +32,7 @@ import net.minestom.vanilla.loot.LootTable;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Map;
 
 public class Survival {
@@ -73,9 +78,13 @@ public class Survival {
             event.setSpawningInstance(this.overworld);
             player.setRespawnPoint(respawnPoint);
 
-            player.getInventory().addItemStack(ItemStack.of(Material.DIAMOND_PICKAXE).with(DataComponents.ENCHANTMENTS, new EnchantmentList(
+            var enchs = new EnchantmentList(Map.of(
+                    Enchantment.EFFICIENCY, 5,
                     Enchantment.FORTUNE, 3
-            )));
+            ));
+
+            player.getInventory().addItemStack(ItemStack.of(Material.DIAMOND_PICKAXE).with(DataComponents.ENCHANTMENTS, enchs));
+            player.getInventory().addItemStack(ItemStack.of(Material.DIAMOND_HOE).with(DataComponents.ENCHANTMENTS, enchs));
 
         }).addListener(PlayerSpawnEvent.class, event -> {
             final Player player = event.getPlayer();
@@ -93,6 +102,16 @@ public class Survival {
             // Cancel event if player does not have enough inventory space
             ItemStack itemStack = event.getItemEntity().getItemStack();
             event.setCancelled(!player.getInventory().addItemStack(itemStack));
+        }).addListener(ItemDropEvent.class, event -> {
+            final Player player = event.getPlayer();
+            ItemStack droppedItem = event.getItemStack();
+
+            Pos playerPos = player.getPosition();
+            ItemEntity itemEntity = new ItemEntity(droppedItem);
+            itemEntity.setPickupDelay(Duration.of(500, TimeUnit.MILLISECOND));
+            itemEntity.setInstance(player.getInstance(), playerPos.withY(y -> y + 1.5));
+            Vec velocity = playerPos.direction().mul(6);
+            itemEntity.setVelocity(velocity);
         });
     }
 
