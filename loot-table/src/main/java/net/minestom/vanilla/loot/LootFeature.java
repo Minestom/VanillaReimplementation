@@ -29,9 +29,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Loot {
+public class LootFeature {
 
-    public static @NotNull Map<Key, LootTable> loadTables(@NotNull ServerProcess process) {
+    public static @NotNull Map<Key, LootTable> buildFromDatapack(@NotNull ServerProcess process) {
         try {
             Path jar = Datapacks.ensureCurrentJarExists();
 

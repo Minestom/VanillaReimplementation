@@ -27,7 +27,7 @@ import net.minestom.server.item.enchant.Enchantment;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.logging.Logger;
-import net.minestom.vanilla.loot.Loot;
+import net.minestom.vanilla.loot.LootFeature;
 import net.minestom.vanilla.loot.LootTable;
 import org.jetbrains.annotations.NotNull;
 
@@ -66,8 +66,8 @@ public class Survival {
      */
     public void initialize() {
 
-        Map<Key, LootTable> tables = Loot.loadTables(process);
-        process.eventHandler().addChild(Loot.createEventNode(tables));
+        Map<Key, LootTable> tables = LootFeature.buildFromDatapack(process);
+        process.eventHandler().addChild(LootFeature.createEventNode(tables));
 
         process.eventHandler().addListener(AsyncPlayerConfigurationEvent.class, event -> {
             final Player player = event.getPlayer();
