@@ -69,6 +69,7 @@ public class Loot {
             // Build a context and drop
             LootContext context = LootContext.from(Map.of(
                     LootContext.RANDOM, new Random(), // TODO: Replace with sequence random
+                    LootContext.WORLD, event.getInstance(),
                     LootContext.BLOCK_STATE, block,
                     LootContext.ORIGIN, event.getBlockPosition(),
                     LootContext.TOOL, heldItem,

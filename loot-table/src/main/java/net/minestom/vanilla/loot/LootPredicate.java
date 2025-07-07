@@ -9,7 +9,7 @@ import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.Weather;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.predicate.BlockPredicate;
+import net.minestom.server.instance.block.predicate.PropertiesPredicate;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.enchant.Enchantment;
 import net.minestom.server.item.enchant.LevelBasedValue;
@@ -137,10 +137,10 @@ public interface LootPredicate extends Predicate<@NotNull LootContext> {
         }
     }
 
-    record BlockStateProperty(@NotNull Key block, @Nullable BlockPredicate properties) implements LootPredicate {
+    record BlockStateProperty(@NotNull Key block, @Nullable PropertiesPredicate properties) implements LootPredicate {
         public static final @NotNull StructCodec<BlockStateProperty> CODEC = StructCodec.struct(
                 "block", Codec.KEY, BlockStateProperty::block,
-                "properties", BlockPredicate.CODEC.optional(), BlockStateProperty::properties,
+                "properties", PropertiesPredicate.CODEC.optional(), BlockStateProperty::properties,
                 BlockStateProperty::new
         );
 
