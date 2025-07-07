@@ -102,6 +102,8 @@ record LootContextImpl(@NotNull Map<String, Object> data) implements LootContext
     static @NotNull LootContext from(@NotNull Map<Key<?>, Object> data) {
         Map<String, Object> mapped = new HashMap<>();
         for (Map.Entry<Key<?>, Object> entry : data.entrySet()) {
+            if (entry.getValue() == null) continue;
+
             mapped.put(entry.getKey().id(), entry.getValue());
         }
 

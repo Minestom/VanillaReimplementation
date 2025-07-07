@@ -16,15 +16,14 @@ import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.enchant.Enchantment;
+import net.minestom.server.item.component.Tool;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.vanilla.datapack.Datapacks;
+import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -43,37 +42,40 @@ public class Loot {
         }
     }
 
+    @SuppressWarnings("PatternValidation")
     public static @NotNull EventNode<InstanceEvent> createEventNode(@NotNull Map<Key, LootTable> tables) {
         return EventNode.type("loot-tables", EventFilter.INSTANCE).addListener(PlayerBlockBreakEvent.class, event -> {
-            if (event.getPlayer().getGameMode() == GameMode.CREATIVE) return;
+            if (event.getPlayer().getGameMode() == GameMode.CREATIVE) return; // No loot in creative mode
 
             final Block block = event.getBlock();
 
-            var material = block.registry().material();
-            if (material == null) return;
+            ItemStack heldItem = event.getPlayer().getItemInMainHand();
+            Tool tool = heldItem.get(DataComponents.TOOL);
 
-            var held = event.getPlayer().getItemInMainHand();
-            var enchs = held.get(DataComponents.ENCHANTMENTS);
-            var tool = held.get(DataComponents.TOOL);
+            // If the block doesn't require a tool, OR there is a tool and the block is explicitly allowed
+            boolean canDrop = !block.registry().requiresTool() || (tool != null && tool.isCorrectForDrops(block));
 
-            if (!block.registry().requiresTool() || (tool != null && tool.isCorrectForDrops(block))) {
-                Map<LootContext.Key<?>, Object> l = new HashMap<>();
-                l.put(LootContext.RANDOM, new Random());
+            if (!canDrop) return;
 
-                l.put(LootContext.TOOL, event.getPlayer().getItemInMainHand());
-                l.put(LootContext.BLOCK_STATE, event.getBlock());
-                l.put(LootContext.ORIGIN, event.getBlockPosition());
+            Key key = Key.key("blocks/" + block.key().value());
+            LootTable table = tables.get(key);
 
-                if (enchs.has(Enchantment.FORTUNE)) {
-                    l.put(LootContext.ENCHANTMENT_ACTIVE, true);
-                    l.put(LootContext.ENCHANTMENT_LEVEL, enchs.level(Enchantment.FORTUNE));
-                }
+            if (table == null) {
+                Logger.warn("Block " + block.key() + " does not have a corresponding loot table (would be at: " + key.asString() + ")");
+                return;
+            }
 
-                List<ItemStack> drops = tables.get(Key.key("blocks/" + event.getBlock().key().value())).generate(LootContext.from(l));
+            // Build a context and drop
+            LootContext context = LootContext.from(Map.of(
+                    LootContext.RANDOM, new Random(),
+                    LootContext.BLOCK_STATE, block,
+                    LootContext.ORIGIN, event.getBlockPosition(),
+                    LootContext.TOOL, heldItem,
+                    LootContext.THIS_ENTITY, event.getPlayer()
+            ));
 
-                for (var drop : drops) {
-                    blockDrop(event.getInstance(), drop, event.getBlockPosition());
-                }
+            for (ItemStack drop : table.generate(context)) {
+                blockDrop(event.getInstance(), drop, event.getBlockPosition());
             }
         });
     }
