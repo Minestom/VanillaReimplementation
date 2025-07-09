@@ -32,20 +32,25 @@ import java.util.concurrent.ThreadLocalRandom;
 public class LootFeature {
 
     public static @NotNull Map<Key, LootTable> buildFromDatapack(@NotNull ServerProcess process) {
+        final Path tablesPath = Path.of("/", "data", "minecraft", "loot_table");
+
+        Map<Key, LootTable> tables;
+
         try {
             Path jar = Datapacks.ensureCurrentJarExists();
 
-            Path tablesPath = Path.of("/", "data", "minecraft", "loot_table");
-
-            return Datapacks.buildRegistryFromJar(jar, tablesPath, process, ".json", LootTable.CODEC);
+            tables = Datapacks.buildRegistryFromJar(jar, tablesPath, process, ".json", LootTable.CODEC);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        Logger.info("Loaded and parsed " + tables.size() + " loot tables");
+        return tables;
     }
 
     @SuppressWarnings("PatternValidation")
     public static @NotNull EventNode<InstanceEvent> createEventNode(@NotNull Map<Key, LootTable> tables) {
-        return EventNode.type("loot-tables", EventFilter.INSTANCE).addListener(PlayerBlockBreakEvent.class, event -> {
+        return EventNode.type("vri:loot", EventFilter.INSTANCE).addListener(PlayerBlockBreakEvent.class, event -> {
             if (event.getPlayer().getGameMode() == GameMode.CREATIVE) return; // No loot in creative mode
 
             final Block block = event.getBlock();
