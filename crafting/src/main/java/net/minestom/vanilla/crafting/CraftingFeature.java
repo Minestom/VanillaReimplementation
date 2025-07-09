@@ -1,72 +1,138 @@
 package net.minestom.vanilla.crafting;
 
 import net.kyori.adventure.key.Key;
+import net.minestom.server.ServerProcess;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
-import net.minestom.vanilla.VanillaReimplementation;
-import net.minestom.vanilla.crafting.smelting.BlastingInventoryRecipes;
-import net.minestom.vanilla.crafting.smelting.SmeltingInventoryRecipes;
-import net.minestom.vanilla.crafting.smelting.SmokingInventoryRecipes;
-import net.minestom.vanilla.datapack.Datapack;
-import net.minestom.vanilla.datapack.DatapackLoadingFeature;
-import net.minestom.vanilla.datapack.recipe.Recipe;
-import net.minestom.vanilla.files.FileSystem;
+import net.minestom.server.event.player.PlayerBlockInteractEvent;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.inventory.Inventory;
+import net.minestom.server.inventory.InventoryType;
+import net.minestom.vanilla.datapack.Datapacks;
+import net.minestom.vanilla.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.*;
 
-public class CraftingFeature implements VanillaReimplementation.Feature {
+public class CraftingFeature {
 
-    @Override
-    public void hook(@NotNull HookContext context) {
-        DatapackLoadingFeature datapackData = context.vri().feature(DatapackLoadingFeature.class);
-        Datapack datapack = datapackData.current();
+    public record Recipes(@NotNull Crafting crafting,
+                          @NotNull Smelting smelting,
+                          @NotNull Smithing smithing,
+                          @NotNull Map<Key, Recipe.Stonecutting> stonecutting,
+                          @NotNull Map<Key, Recipe> special) {
+        public Recipes {
+            stonecutting = Map.copyOf(stonecutting);
+            special = Map.copyOf(special);
+        }
 
-        VriRecipeToMinestomRecipe recipeConverter = new VriRecipeToMinestomRecipe(datapack);
-        datapack.namespacedData().forEach((namespace, data) -> {
-            FileSystem<Recipe> recipeFileSystem = data.recipes();
-            recipeFileSystem.files().stream().collect(Collectors.toMap(Function.identity(), recipeFileSystem::file)).forEach((id, recipe) -> {
-                var recipeManager = context.vri().process().recipe();
+        public static @NotNull Recipes fromRaw(@NotNull Map<Key, Recipe> recipes) {
+            Set<Map.Entry<Key, Recipe>> entries = recipes.entrySet();
 
-                net.minestom.server.recipe.Recipe minestomRecipe = recipeConverter.convert(id, recipe);
-                if (minestomRecipe == null) {
-                    return;
+            Recipes parsedRecipes = new Recipes(
+                    new Recipes.Crafting(
+                            filterRecipes(entries, Recipe.Crafting.Shaped.class),
+                            filterRecipes(entries, Recipe.Crafting.Shapeless.class),
+                            filterRecipes(entries, Recipe.Crafting.Transmute.class)
+                    ),
+                    new Recipes.Smelting(
+                            filterRecipes(entries, Recipe.Cooking.Smelting.class),
+                            filterRecipes(entries, Recipe.Cooking.Smoking.class),
+                            filterRecipes(entries, Recipe.Cooking.Blasting.class),
+                            filterRecipes(entries, Recipe.Cooking.Campfire.class)
+                    ),
+                    new Recipes.Smithing(
+                            filterRecipes(entries, Recipe.Smithing.Transform.class),
+                            filterRecipes(entries, Recipe.Smithing.Trim.class)
+                    ),
+                    filterRecipes(entries, Recipe.Stonecutting.class),
+                    filterRecipes(entries, Recipe.class) // All remaining
+            );
+
+            if (!entries.isEmpty()) throw new RuntimeException("Entries should be empty!");
+
+            return parsedRecipes;
+        }
+
+        @SuppressWarnings("unchecked")
+        private static <T extends Recipe> @NotNull Map<Key, T> filterRecipes(@NotNull Iterable<Map.Entry<Key, Recipe>> entries, @NotNull Class<T> clazz) {
+            Map<Key, T> map = new HashMap<>();
+
+            var iter = entries.iterator();
+            while (iter.hasNext()) {
+                var entry = iter.next();
+
+                if (clazz.isInstance(entry.getValue())) {
+                    map.put(entry.getKey(), (T) entry.getValue());
+                    iter.remove();
                 }
-                recipeManager.addRecipe(minestomRecipe, player -> true);
-            });
-        });
+            }
 
-        EventNode<Event> survival = new SurvivalInventoryRecipes(datapack, context.vri()).init();
-        context.vri().process().eventHandler().addChild(survival);
+            return map;
+        }
 
-        EventNode<Event> crafting = new CraftingInventoryRecipes(datapack, context.vri()).init();
-        context.vri().process().eventHandler().addChild(crafting);
+        public record Crafting(@NotNull Map<Key, Recipe.Crafting.Shaped> shaped,
+                               @NotNull Map<Key, Recipe.Crafting.Shapeless> shapeless,
+                               @NotNull Map<Key, Recipe.Crafting.Transmute> transmute) {
+            public Crafting {
+                shaped = Map.copyOf(shaped);
+                shapeless = Map.copyOf(shapeless);
+                transmute = Map.copyOf(transmute);
+            }
+        }
 
-        EventNode<Event> smelting = new SmeltingInventoryRecipes(datapack, context.vri()).init();
-        context.vri().process().eventHandler().addChild(smelting);
+        public record Smelting(@NotNull Map<Key, Recipe.Cooking.Smelting> smelting,
+                               @NotNull Map<Key, Recipe.Cooking.Smoking> smoking,
+                               @NotNull Map<Key, Recipe.Cooking.Blasting> blasting,
+                               @NotNull Map<Key, Recipe.Cooking.Campfire> campfire) {
+            public Smelting {
+                smelting = Map.copyOf(smelting);
+                smoking = Map.copyOf(smoking);
+                blasting = Map.copyOf(blasting);
+                campfire = Map.copyOf(campfire);
+            }
+        }
 
-        EventNode<Event> smoking = new SmokingInventoryRecipes(datapack, context.vri()).init();
-        context.vri().process().eventHandler().addChild(smoking);
-
-        EventNode<Event> blasting = new BlastingInventoryRecipes(datapack, context.vri()).init();
-        context.vri().process().eventHandler().addChild(blasting);
-
-        EventNode<Event> stonecutting = new StonecuttingInventoryRecipes(datapack, context.vri()).init();
-        context.vri().process().eventHandler().addChild(stonecutting);
-
-        EventNode<Event> smithing = new SmithingInventoryRecipes(datapack, context.vri()).init();
-        context.vri().process().eventHandler().addChild(smithing);
+        public record Smithing(@NotNull Map<Key, Recipe.Smithing.Transform> transform,
+                               @NotNull Map<Key, Recipe.Smithing.Trim> trim) {
+            public Smithing {
+                transform = Map.copyOf(transform);
+                trim = Map.copyOf(trim);
+            }
+        }
     }
 
-    @Override
-    public @NotNull Key key() {
-        return Key.key("vri:crafting");
+    public static @NotNull Map<Key, Recipe> buildFromDatapack(@NotNull ServerProcess process) {
+        final Path recipesPath = Path.of("/", "data", "minecraft", "recipe");
+
+        Map<Key, Recipe> recipes;
+
+        try {
+            Path jar = Datapacks.ensureCurrentJarExists();
+
+            recipes = Datapacks.buildRegistryFromJar(jar, recipesPath, process, ".json", Recipe.CODEC);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        Logger.info("Loaded and parsed " + recipes.size() + " recipes");
+        return recipes;
     }
 
-    @Override
-    public @NotNull Set<Class<? extends VanillaReimplementation.Feature>> dependencies() {
-        return Set.of(DatapackLoadingFeature.class);
+    public static @NotNull EventNode<Event> createEventNode(@NotNull Map<Key, Recipe> recipeMap, @NotNull ServerProcess process) {
+        // Register recipes
+        recipeMap.values().forEach(process.recipe()::addRecipe);
+
+        // Parse recipes into usable form
+        Recipes recipes = Recipes.fromRaw(recipeMap);
+
+        return EventNode.all("vri:recipes")
+                .addChild(new CraftingRecipes(recipes, process).init())
+                .addListener(PlayerBlockInteractEvent.class, event -> {
+                    if (event.getBlock().compare(Block.CRAFTING_TABLE)) event.getPlayer().openInventory(new Inventory(InventoryType.CRAFTING, "Crafting"));
+                });
     }
+
 }
