@@ -18,6 +18,7 @@ include("datapack-tests")
 include("survival")
 include("datapack")
 include("loot-table")
+include("entity")
 
 pluginManagement {
     repositories {

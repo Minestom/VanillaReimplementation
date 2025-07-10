@@ -19,7 +19,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.WorldBorder;
-import net.minestom.server.instance.anvil.AnvilLoader;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.EnchantmentList;
@@ -28,6 +27,7 @@ import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.server.world.DimensionType;
 import net.minestom.vanilla.crafting.CraftingFeature;
 import net.minestom.vanilla.crafting.Recipe;
+import net.minestom.vanilla.loader.EntityAnvilLoader;
 import net.minestom.vanilla.logging.Logger;
 import net.minestom.vanilla.loot.LootFeature;
 import net.minestom.vanilla.loot.LootTable;
@@ -56,7 +56,7 @@ public class Survival {
         this.process = process;
 
         this.overworld = process.instance().createInstanceContainer(DimensionType.OVERWORLD);
-        this.overworld.setChunkLoader(new AnvilLoader(Path.of("world")));
+        this.overworld.setChunkLoader(new EntityAnvilLoader(Path.of("world")));
         this.overworld.setChunkSupplier(LightingChunk::new);
         this.overworld.setWorldBorder(new WorldBorder(
                 32 * 16 * 2, 0, 0, 10, 500, 560
