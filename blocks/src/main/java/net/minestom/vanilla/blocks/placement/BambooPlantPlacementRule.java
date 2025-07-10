@@ -15,7 +15,7 @@ public class BambooPlantPlacementRule extends BlockPlacementRule {
     public BambooPlantPlacementRule(Block block) {
         super(block);
         this.plantableOn = BlockTags.getInstance().getTaggedWith("minecraft:bamboo_plantable_on");
-        this.bamboo = BlockTags.getInstance().getTaggedWith("blocksandstuff:bamboo");
+        this.bamboo = BlockTags.getInstance().getTaggedWith("vri:bamboo");
     }
 
     @Override

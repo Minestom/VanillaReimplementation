@@ -55,7 +55,7 @@ public class CopperOxidationRule implements BlockHandler {
 
     @Override
     public Key getKey() {
-        return Key.key("blocksandstuff:copper_oxidation");
+        return Key.key("vri:copper_oxidation");
     }
 
     public Block getNextOxidationStage() {

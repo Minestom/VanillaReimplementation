@@ -31,7 +31,7 @@ public abstract class RegistryTagProvider<T> implements TagProvider<T> {
      */
     private void ensureInitialized() {
         if (!initialized) {
-            loadAdditionalTags("blocksandstuff", RegistryTagProvider.class);
+            loadAdditionalTags("vri", RegistryTagProvider.class);
             initialized = true;
         }
     }

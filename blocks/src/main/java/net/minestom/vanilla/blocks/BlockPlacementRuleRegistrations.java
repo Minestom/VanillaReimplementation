@@ -9,27 +9,61 @@ public class BlockPlacementRuleRegistrations {
     private static final ComponentLogger logger = MinecraftServer.LOGGER;
 
     public static void registerDefault() {
-        register(VanillaPlacementRules.ROTATED_PILLARS);
-        register(VanillaPlacementRules.SLAB);
-        register(VanillaPlacementRules.VERTICALLYROTATED);
-        register(VanillaPlacementRules.ROTATED_WORKSTATIONS);
-        register(VanillaPlacementRules.AMETHYST);
-        register(VanillaPlacementRules.BAMBOO);
-        register(VanillaPlacementRules.BANNER);
-        register(VanillaPlacementRules.FACING);
-        register(VanillaPlacementRules.OBSERVER);
-        register(VanillaPlacementRules.SIMPLE_WATERLOGGABLE);
-        register(VanillaPlacementRules.BEDS);
-        register(VanillaPlacementRules.CROPS);
-        register(VanillaPlacementRules.BELL);
-        register(VanillaPlacementRules.BIG_DRIPLEAF);
-        register(VanillaPlacementRules.BOTTOM_SUPPORTED);
-        register(VanillaPlacementRules.PIN_BOTTOM_SUPPORTED);
-        register(VanillaPlacementRules.BUTTONS);
-        register(VanillaPlacementRules.CACTUS);
-        register(VanillaPlacementRules.CAMPFIRE);
-        register(VanillaPlacementRules.CANDLES);
-        register(VanillaPlacementRules.VINES_TOP);
+        register(
+          VanillaPlacementRules.ROTATED_PILLARS,
+          VanillaPlacementRules.SLAB,
+          VanillaPlacementRules.VERTICALLY_ROTATED,
+          VanillaPlacementRules.ROTATED_WORKSTATIONS,
+          VanillaPlacementRules.AMETHYST,
+          VanillaPlacementRules.BAMBOO,
+          VanillaPlacementRules.BANNER,
+          VanillaPlacementRules.FACING,
+          VanillaPlacementRules.OBSERVER,
+          VanillaPlacementRules.SIMPLE_WATERLOGGABLE,
+          VanillaPlacementRules.BEDS,
+          VanillaPlacementRules.CROPS,
+          VanillaPlacementRules.BELL,
+          VanillaPlacementRules.BIG_DRIPLEAF,
+          VanillaPlacementRules.BOTTOM_SUPPORTED,
+          VanillaPlacementRules.PIN_BOTTOM_SUPPORTED,
+          VanillaPlacementRules.BUTTONS,
+          VanillaPlacementRules.CACTUS,
+          VanillaPlacementRules.CAMPFIRE,
+          VanillaPlacementRules.CANDLES,
+          VanillaPlacementRules.VINES_TOP,
+          VanillaPlacementRules.TRAPDOOR,
+          VanillaPlacementRules.FENCE,
+          VanillaPlacementRules.FENCE_GATE,
+          VanillaPlacementRules.STAIRS,
+          VanillaPlacementRules.VERTICAL_SLIM,
+          VanillaPlacementRules.LADDERS,
+          VanillaPlacementRules.TORCHES,
+          VanillaPlacementRules.WALLS,
+          VanillaPlacementRules.DOORS,
+          VanillaPlacementRules.LANTERNS,
+          VanillaPlacementRules.GLAZED_TERRACOTTA,
+          VanillaPlacementRules.CHAINS,
+          VanillaPlacementRules.TALL_FLOWERS,
+          VanillaPlacementRules.SIGNS,
+          VanillaPlacementRules.CHESTS,
+          VanillaPlacementRules.HOPPERS,
+          VanillaPlacementRules.SHULKERBOXES,
+          VanillaPlacementRules.FLOOR_FLOWER,
+          VanillaPlacementRules.CORALS,
+          VanillaPlacementRules.WALL_CORALS,
+          VanillaPlacementRules.HEADS,
+          VanillaPlacementRules.SUGAR_CANE,
+          VanillaPlacementRules.GROUNDED_PLANTS,
+          VanillaPlacementRules.CRAFTER,
+          VanillaPlacementRules.LEVER,
+          VanillaPlacementRules.REDSTONE_STUFF,
+          VanillaPlacementRules.FARMLAND,
+          VanillaPlacementRules.SNOWY,
+          VanillaPlacementRules.MUSHROOM,
+          VanillaPlacementRules.RAIL,
+          VanillaPlacementRules.FEATURE_RAIL,
+          VanillaPlacementRules.GRINDSTONE
+        );
     }
 
     public static void register(PlacementGroup... blockGroups) {
@@ -44,6 +78,6 @@ public class BlockPlacementRuleRegistrations {
             }
         }
 
-        logger.info("Registered " + count + " block placement rules");
+      logger.info("Registered {} block placement rules", count);
     }
 }

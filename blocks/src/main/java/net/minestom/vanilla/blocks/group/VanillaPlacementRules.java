@@ -38,7 +38,7 @@ public class VanillaPlacementRules extends VanillaRuleset<PlacementGroup, Functi
         SlabPlacementRule::new
     );
 
-    public static final PlacementGroup VERTICALLYROTATED = INSTANCE.group(
+    public static final PlacementGroup VERTICALLY_ROTATED = INSTANCE.group(
         INSTANCE.all(
             INSTANCE.byBlock(Block.FURNACE),
             INSTANCE.byBlock(Block.BLAST_FURNACE),
@@ -203,6 +203,280 @@ public class VanillaPlacementRules extends VanillaRuleset<PlacementGroup, Functi
             INSTANCE.byBlock(Block.WEEPING_VINES)
         ),
         TopAttachedVinePlacementRule::new
+    );
+
+    public static final PlacementGroup TRAPDOOR = INSTANCE.group(
+        INSTANCE.all(
+          INSTANCE.byTag("minecraft:trapdoors")
+        ),
+        TrapdoorPlacementRule::new
+    );
+
+    public static final PlacementGroup FENCE = INSTANCE.group(
+        INSTANCE.all(
+          INSTANCE.byTag("minecraft:fences")
+        ),
+        FencePlacementRule::new
+    );
+
+    public static final PlacementGroup FENCE_GATE = INSTANCE.group(
+        INSTANCE.all(
+          INSTANCE.byTag("minecraft:fence_gates")
+        ),
+        FenceGatePlacementRule::new
+    );
+
+    public static final PlacementGroup STAIRS = INSTANCE.group(
+        INSTANCE.all(
+          INSTANCE.byTag("minecraft:stairs")
+        ),
+        StairsPlacementRule::new
+    );
+
+    public static final PlacementGroup VERTICAL_SLIM = INSTANCE.group(
+        INSTANCE.all(
+          INSTANCE.byBlock(Block.IRON_BARS),
+          INSTANCE.byTag("vri:glass_panes")
+        ),
+        VerticalSlimBlockPlacementRule::new
+    );
+
+    public static final PlacementGroup LADDERS = INSTANCE.group(
+        INSTANCE.all(
+          INSTANCE.byTag("minecraft:ladders")
+        ),
+        LadderPlacementRule::new
+    );
+
+    public static final PlacementGroup TORCHES = INSTANCE.group(
+        INSTANCE.all(
+            INSTANCE.byBlock(Block.TORCH),
+            INSTANCE.byBlock(Block.SOUL_TORCH),
+            INSTANCE.byBlock(Block.REDSTONE_TORCH),
+            INSTANCE.byBlock(Block.WALL_TORCH),
+            INSTANCE.byBlock(Block.SOUL_WALL_TORCH),
+            INSTANCE.byBlock(Block.SOUL_FIRE)
+        ),
+      TorchPlacementRule::new
+    );
+
+
+    public static final PlacementGroup WALLS = INSTANCE.group(
+        INSTANCE.byTag("minecraft:walls"),
+        WallBlockPlacementRule::new
+    );
+
+    public static final PlacementGroup DOORS = INSTANCE.group(
+        INSTANCE.byTag("minecraft:doors"),
+        DoorPlacementRule::new
+    );
+
+    public static final PlacementGroup LANTERNS = INSTANCE.group(
+        INSTANCE.all(
+          INSTANCE.byBlock(Block.LANTERN),
+          INSTANCE.byBlock(Block.SOUL_LANTERN)
+        ),
+        LanternPlacementRule::new
+    );
+
+    public static final PlacementGroup GLAZED_TERRACOTTA = INSTANCE.group(
+        INSTANCE.all(
+            INSTANCE.byBlock(Block.MAGENTA_GLAZED_TERRACOTTA),
+            INSTANCE.byBlock(Block.WHITE_GLAZED_TERRACOTTA),
+            INSTANCE.byBlock(Block.LIGHT_GRAY_GLAZED_TERRACOTTA),
+            INSTANCE.byBlock(Block.GRAY_GLAZED_TERRACOTTA),
+            INSTANCE.byBlock(Block.BLACK_GLAZED_TERRACOTTA),
+            INSTANCE.byBlock(Block.BROWN_GLAZED_TERRACOTTA),
+            INSTANCE.byBlock(Block.RED_GLAZED_TERRACOTTA),
+            INSTANCE.byBlock(Block.ORANGE_GLAZED_TERRACOTTA),
+            INSTANCE.byBlock(Block.YELLOW_GLAZED_TERRACOTTA),
+            INSTANCE.byBlock(Block.LIME_GLAZED_TERRACOTTA),
+            INSTANCE.byBlock(Block.GREEN_GLAZED_TERRACOTTA),
+            INSTANCE.byBlock(Block.CYAN_GLAZED_TERRACOTTA),
+            INSTANCE.byBlock(Block.LIGHT_BLUE_GLAZED_TERRACOTTA),
+            INSTANCE.byBlock(Block.BLUE_GLAZED_TERRACOTTA),
+            INSTANCE.byBlock(Block.PURPLE_GLAZED_TERRACOTTA),
+            INSTANCE.byBlock(Block.MAGENTA_GLAZED_TERRACOTTA),
+            INSTANCE.byBlock(Block.PINK_GLAZED_TERRACOTTA)
+        ),
+        GlazedTerracottaPlacementRule::new
+    );
+
+    public static final PlacementGroup CHAINS = INSTANCE.group(
+        INSTANCE.byBlock(Block.CHAIN),
+        ChainPlacementRule::new
+    );
+
+    public static final PlacementGroup TALL_FLOWERS = INSTANCE.group(
+        INSTANCE.all(
+          INSTANCE.byBlock(Block.PEONY),
+          INSTANCE.byBlock(Block.TALL_GRASS),
+          INSTANCE.byBlock(Block.LARGE_FERN),
+          INSTANCE.byBlock(Block.SUNFLOWER),
+          INSTANCE.byBlock(Block.LILAC),
+          INSTANCE.byBlock(Block.ROSE_BUSH)
+        ),
+        TallFlowerPlacementRule::new
+    );
+
+    public static final PlacementGroup SIGNS = INSTANCE.group(
+      INSTANCE.all(
+        INSTANCE.byTag("minecraft:all_signs")
+      ),
+      SignPlacementRule::new
+    );
+
+    public static final PlacementGroup CHESTS = INSTANCE.group(
+      INSTANCE.all(
+        INSTANCE.byTag("minecraft:chests"),
+        INSTANCE.byBlock(Block.CHEST),
+        INSTANCE.byBlock(Block.TRAPPED_CHEST)
+      ),
+      ChestPlacementRule::new
+    );
+
+    public static final PlacementGroup HOPPERS = INSTANCE.group(
+      INSTANCE.all(
+        INSTANCE.byBlock(Block.HOPPER)
+      ),
+      HopperPlacementRule::new
+    );
+
+    public static final PlacementGroup SHULKERBOXES = INSTANCE.group(
+      INSTANCE.all(
+        INSTANCE.byTag("minecraft:shulker_boxes")
+      ),
+      ShulkerPlacementRule::new
+    );
+
+    public static final PlacementGroup FLOOR_FLOWER = INSTANCE.group(
+      INSTANCE.all(
+        INSTANCE.byBlock(Block.WILDFLOWERS),
+        INSTANCE.byBlock(Block.LEAF_LITTER),
+        INSTANCE.byBlock(Block.PINK_PETALS)
+      ),
+      FloorFillerPlacementRule::new
+    );
+
+    public static final PlacementGroup CORALS = INSTANCE.group(
+      INSTANCE.all(
+        INSTANCE.byTag("minecraft:corals"),
+        INSTANCE.byBlock(Block.DEAD_TUBE_CORAL),
+        INSTANCE.byBlock(Block.DEAD_BRAIN_CORAL),
+        INSTANCE.byBlock(Block.DEAD_BUBBLE_CORAL),
+        INSTANCE.byBlock(Block.DEAD_FIRE_CORAL),
+        INSTANCE.byBlock(Block.DEAD_HORN_CORAL),
+        INSTANCE.byBlock(Block.DEAD_TUBE_CORAL_FAN),
+        INSTANCE.byBlock(Block.DEAD_BRAIN_CORAL_FAN),
+        INSTANCE.byBlock(Block.DEAD_BUBBLE_CORAL_FAN),
+        INSTANCE.byBlock(Block.DEAD_FIRE_CORAL_FAN),
+        INSTANCE.byBlock(Block.DEAD_HORN_CORAL_FAN)
+      ),
+      CoralPlacementRule::new
+    );
+
+    public static final PlacementGroup WALL_CORALS = INSTANCE.group(
+      INSTANCE.all(
+        INSTANCE.byBlock(Block.TUBE_CORAL_WALL_FAN),
+        INSTANCE.byBlock(Block.BRAIN_CORAL_WALL_FAN),
+        INSTANCE.byBlock(Block.BUBBLE_CORAL_WALL_FAN),
+        INSTANCE.byBlock(Block.FIRE_CORAL_WALL_FAN),
+        INSTANCE.byBlock(Block.HORN_CORAL_WALL_FAN),
+        INSTANCE.byBlock(Block.DEAD_TUBE_CORAL_WALL_FAN),
+        INSTANCE.byBlock(Block.DEAD_BRAIN_CORAL_WALL_FAN),
+        INSTANCE.byBlock(Block.DEAD_BUBBLE_CORAL_WALL_FAN),
+        INSTANCE.byBlock(Block.DEAD_FIRE_CORAL_WALL_FAN),
+        INSTANCE.byBlock(Block.DEAD_HORN_CORAL_WALL_FAN)
+      ),
+      WallCoralPlacementRule::new
+    );
+
+    public static final PlacementGroup HEADS = INSTANCE.group(
+      INSTANCE.all(
+        INSTANCE.byBlock(Block.SKELETON_SKULL),
+        INSTANCE.byBlock(Block.WITHER_SKELETON_SKULL),
+        INSTANCE.byBlock(Block.ZOMBIE_HEAD),
+        INSTANCE.byBlock(Block.CREEPER_HEAD),
+        INSTANCE.byBlock(Block.DRAGON_HEAD),
+        INSTANCE.byBlock(Block.PLAYER_HEAD),
+        INSTANCE.byBlock(Block.PIGLIN_HEAD)
+      ),
+      HeadPlacementRule::new
+    );
+
+    public static final PlacementGroup SUGAR_CANE = INSTANCE.group(
+      INSTANCE.byBlock(Block.SUGAR_CANE),
+      SugarCanePlacementRule::new
+    );
+
+    public static final PlacementGroup GROUNDED_PLANTS = INSTANCE.group(
+      INSTANCE.all(
+        INSTANCE.byTag("minecraft:saplings"),
+        INSTANCE.byTag("minecraft:small_flowers")
+      ),
+      GroundedPlantBlockPlacementRule::new
+    );
+
+    public static final PlacementGroup CRAFTER = INSTANCE.group(
+      INSTANCE.byBlock(Block.CRAFTER),
+      CrafterPlacementRule::new
+    );
+
+    public static final PlacementGroup LEVER = INSTANCE.group(
+      INSTANCE.byBlock(Block.LEVER),
+      LeverPlacementRule::new
+    );
+
+    public static final PlacementGroup REDSTONE_STUFF = INSTANCE.group(
+      INSTANCE.all(
+        INSTANCE.byBlock(Block.COMPARATOR),
+        INSTANCE.byBlock(Block.REPEATER)
+      ),
+      RedstoneStuffPlacementRule::new
+    );
+
+    public static final PlacementGroup FARMLAND = INSTANCE.group(
+      INSTANCE.byBlock(Block.FARMLAND),
+      FarmlandPlacementRule::new
+    );
+
+    public static final PlacementGroup SNOWY = INSTANCE.group(
+      INSTANCE.all(
+        INSTANCE.byBlock(Block.GRASS_BLOCK),
+        INSTANCE.byBlock(Block.PODZOL),
+        INSTANCE.byBlock(Block.MYCELIUM)
+      ),
+      SnowyUpdateRule::new
+    );
+
+    public static final PlacementGroup MUSHROOM = INSTANCE.group(
+      INSTANCE.all(
+        INSTANCE.byBlock(Block.MUSHROOM_STEM),
+        INSTANCE.byBlock(Block.BROWN_MUSHROOM_BLOCK),
+        INSTANCE.byBlock(Block.RED_MUSHROOM_BLOCK)
+      ),
+      MushroomPlacementRule::new
+    );
+
+    public static final PlacementGroup RAIL = INSTANCE.group(
+      INSTANCE.byBlock(Block.RAIL),
+      RailPlacementRule::new
+    );
+
+    public static final PlacementGroup FEATURE_RAIL = INSTANCE.group(
+      INSTANCE.all(
+        INSTANCE.byBlock(Block.ACTIVATOR_RAIL),
+        INSTANCE.byBlock(Block.DETECTOR_RAIL),
+        INSTANCE.byBlock(Block.POWERED_RAIL)
+      ),
+      FeatureRailPlacementRule::new
+    );
+
+    public static final PlacementGroup GRINDSTONE = INSTANCE.group(
+      INSTANCE.all(
+        INSTANCE.byBlock(Block.GRINDSTONE)
+      ),
+      GrindstonePlacementRule::new
     );
 
     @Override

@@ -1,6 +1,5 @@
 package net.minestom.vanilla.blocks.placement;
 
-import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
@@ -11,7 +10,6 @@ import net.minestom.vanilla.common.item.DroppedItemFactory;
 import net.minestom.vanilla.common.tag.BlockTags;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -19,25 +17,15 @@ public class TorchPlacementRule extends BlockPlacementRule {
 
     private final Registry<Block> tagManager = Block.staticRegistry();
 
-    private final List<Block> fences = toList(tagManager.getTag(Key.key("minecraft:fences")));
-    private final List<Block> walls = toList(tagManager.getTag(Key.key("minecraft:walls")));
-    private final Set<Block> glassPanes = BlockTags.getInstance().getTaggedWith("blocksandstuff:glass_panes");
+    private final Set<Block> glassPanes = BlockTags.getInstance().getTaggedWith("vri:glass_panes");
 
     private final RegistryTag<Block> nonFullButPlaceable = RegistryTag.direct(
         new ArrayList<>() {{
-            addAll(fences);
-            addAll(walls);
+            addAll(Block.values().stream().filter(it -> it.name().endsWith("_fence")).toList());
+            addAll(Block.values().stream().filter(it -> it.name().endsWith("_wall")).toList());
             addAll(glassPanes);
         }}
     );
-
-    private static List<Block> toList(RegistryTag<Block> tag) {
-        List<Block> list = new ArrayList<>();
-        if (tag != null) {
-            tag.forEach(it -> list.add(it.asValue()));
-        }
-        return list;
-    }
 
     public TorchPlacementRule(Block block) {
         super(block);

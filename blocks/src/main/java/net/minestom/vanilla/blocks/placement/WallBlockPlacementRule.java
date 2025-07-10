@@ -1,40 +1,27 @@
 package net.minestom.vanilla.blocks.placement;
 
-import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
-import net.minestom.server.registry.Registry;
 import net.minestom.server.registry.RegistryTag;
-import net.minestom.server.registry.TagKey;
 import net.minestom.vanilla.blocks.placement.common.AbstractConnectingBlockPlacementRule;
 import net.minestom.vanilla.common.tag.BlockTags;
 import net.minestom.vanilla.common.utils.FluidUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 public class WallBlockPlacementRule extends AbstractConnectingBlockPlacementRule {
-    private final Registry<Block> blockRegistry = Block.staticRegistry();
-    private final List<Block> walls = toList(blockRegistry.getTag(TagKey.ofHash("minecraft:walls")));
-    private final Set<Block> glassPanes = BlockTags.getInstance().getTaggedWith("blocksandstuff:glass_panes");
+
+    private final Set<Block> glassPanes = BlockTags.getInstance().getTaggedWith("vri:glass_panes");
     private final Set<Block> fenceGates = BlockTags.getInstance().getTaggedWith("minecraft:fence_gates");
     private final RegistryTag<Block> canConnect = RegistryTag.direct(
         new ArrayList<>() {{
-            addAll(walls);
+            addAll(Block.values().stream().filter(it -> it.name().endsWith("_wall")).toList());
             addAll(glassPanes);
             addAll(fenceGates);
         }}
     );
-
-    private static List<Block> toList(RegistryTag<Block> tag) {
-        List<Block> list = new ArrayList<>();
-        if (tag != null) {
-            tag.forEach(it -> list.add(it.asValue()));
-        }
-        return list;
-    }
 
     public WallBlockPlacementRule(Block block) {
         super(block);

@@ -23,7 +23,7 @@ public class StrippingBehaviorRule implements BlockHandler {
 
     @Override
     public Key getKey() {
-        return Key.key("blocksandstuff:stripping_behavior");
+        return Key.key("vri:stripping_behavior");
     }
 
     @Override

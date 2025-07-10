@@ -10,15 +10,12 @@ import net.minestom.vanilla.blocks.placement.common.AbstractConnectingBlockPlace
 import net.minestom.vanilla.blocks.placement.util.States;
 
 public class FencePlacementRule extends AbstractConnectingBlockPlacementRule {
-    private final RegistryTag<Block> fences;
-    private final RegistryTag<Block> woodenFences;
-    private final RegistryTag<Block> fenceGates;
+    private final RegistryTag<Block> fences = tagManager.getTag(Key.key("minecraft:fences"));
+    private final RegistryTag<Block> woodenFences = tagManager.getTag(Key.key("minecraft:wooden_fences"));
+    private final RegistryTag<Block> fenceGates = tagManager.getTag(Key.key("minecraft:fence_gates"));
 
     public FencePlacementRule(Block block) {
         super(block);
-        this.fences = tagManager.getTag(Key.key("minecraft:fences"));
-        this.woodenFences = tagManager.getTag(Key.key("minecraft:wooden_fences"));
-        this.fenceGates = tagManager.getTag(Key.key("minecraft:fence_gates"));
     }
 
     @Override
@@ -37,7 +34,7 @@ public class FencePlacementRule extends AbstractConnectingBlockPlacementRule {
 
         boolean isFaceFull = instanceBlock.registry().collisionShape().isFaceFull(blockFace);
 
-        return (!cannotConnect.contains(block) && isFaceFull) ||
+        return (!cannotConnect.contains(instanceBlock) && isFaceFull) ||
                (canConnectToFence && !isBlockNetherBrickFence) ||
                canFenceGateConnect ||
                (isBlockNetherBrickFence && isInstanceBlockNetherBrickFence);

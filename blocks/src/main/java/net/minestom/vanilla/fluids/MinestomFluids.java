@@ -27,7 +27,7 @@ public class MinestomFluids {
     private static boolean enabled = false;
     public static final Map<Instance, Map<Long, Set<Point>>> UPDATES = new ConcurrentHashMap<>();
 
-    private static final DynamicRegistry<Fluid> registry = DynamicRegistry.create(Key.key("blocksandstuff:fluids"));
+    private static final DynamicRegistry<Fluid> registry = DynamicRegistry.create(Key.key("vri:fluids"));
 
     public static DynamicRegistry<Fluid> getRegistry() {
         return registry;

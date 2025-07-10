@@ -4,24 +4,32 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.registry.Registry;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.registry.RegistryTag;
 import net.minestom.server.registry.TagKey;
 import net.minestom.vanilla.common.item.DroppedItemFactory;
 import net.minestom.vanilla.common.utils.FluidUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 public class SugarCanePlacementRule extends BlockPlacementRule {
     private final @NotNull Registry<Block> blockRegistry = Block.staticRegistry();
 
-    private final List<Block> dirt = toList(blockRegistry.getTag(TagKey.ofHash("#minecraft:dirt")));
-    private final List<Block> sand = toList(blockRegistry.getTag(TagKey.ofHash("#minecraft:sand")));
+    private final RegistryKey<Block> sand = blockRegistry.getKey(TagKey.ofHash("#minecraft:sand").key());
 
     private final RegistryTag<Block> plantable = RegistryTag.direct(
       new ArrayList<>() {{
-          addAll(dirt);
-          addAll(sand);
+          add(Block.DIRT);
+          add(Block.COARSE_DIRT);
+          add(Block.GRASS_BLOCK);
+          add(Block.ROOTED_DIRT);
+          add(Block.MUD);
+          add(Block.PODZOL);
+          add(Block.MYCELIUM);
+          add(Block.MOSS_BLOCK);
+          add(sand);
       }}
     );
 
@@ -31,14 +39,6 @@ public class SugarCanePlacementRule extends BlockPlacementRule {
         Map.entry(1, 0),
         Map.entry(-1, 0)
     );
-
-    private static List<Block> toList(RegistryTag<Block> tag) {
-        List<Block> list = new ArrayList<>();
-        if (tag != null) {
-            tag.forEach(it -> list.add(it.asValue()));
-        }
-        return list;
-    }
 
     public SugarCanePlacementRule(Block block) {
         super(block);

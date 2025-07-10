@@ -3,12 +3,15 @@ package net.minestom.vanilla.blocks.placement.common;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.registry.Registry;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.registry.RegistryTag;
 import net.minestom.vanilla.blocks.placement.util.States;
 
@@ -16,13 +19,10 @@ public abstract class AbstractConnectingBlockPlacementRule extends BlockPlacemen
 
     protected final Registry<Block> tagManager = Block.staticRegistry();
 
-    protected final List<Block> leaves = toList(tagManager.getTag(Key.key("minecraft:leaves")));
-    protected final List<Block> shulkerBoxes = toList(tagManager.getTag(Key.key("minecraft:shulker_boxes")));
-
     protected final RegistryTag<Block> cannotConnect = RegistryTag.direct(
       new ArrayList<>() {{
-        addAll(leaves);
-        addAll(shulkerBoxes);
+        addAll(Block.values().stream().filter(it -> it.name().endsWith("_leaves")).toList());
+        addAll(Block.values().stream().filter(it -> it.name().endsWith("_shulker_box")).toList());
         add(Block.BARRIER);
         add(Block.CARVED_PUMPKIN);
         add(Block.JACK_O_LANTERN);
@@ -30,14 +30,6 @@ public abstract class AbstractConnectingBlockPlacementRule extends BlockPlacemen
         add(Block.PUMPKIN);
       }}
     );
-
-    private static List<Block> toList(RegistryTag<Block> tag) {
-        List<Block> list = new ArrayList<>();
-        if (tag != null) {
-            tag.forEach(it -> list.add(it.asValue()));
-        }
-        return list;
-    }
 
     protected AbstractConnectingBlockPlacementRule(Block block) {
         super(block);
