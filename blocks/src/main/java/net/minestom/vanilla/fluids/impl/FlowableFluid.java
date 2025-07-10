@@ -145,22 +145,16 @@ public abstract class FlowableFluid extends Fluid {
             Block fromBlock
     ) {
         if (block.isLiquid()) {
-            switch (face) {
-                case UP:
-                    return fromBlock.isLiquid() || block.isSolid() || block.isAir();
-                case DOWN:
-                    return fromBlock.isLiquid() || fromBlock.isSolid() || fromBlock.isAir();
-                default:
-                    return true;
-            }
+          return switch (face) {
+            case UP -> fromBlock.isLiquid() || block.isSolid() || block.isAir();
+            case DOWN -> fromBlock.isLiquid() || fromBlock.isSolid() || fromBlock.isAir();
+            default -> true;
+          };
         } else {
-            switch (face) {
-                case UP:
-                case DOWN:
-                    return block.isSolid() || block.isAir();
-                default:
-                    return block.isSolid() || block.isAir();
-            }
+          return switch (face) {
+            case UP, DOWN -> block.isSolid() || block.isAir();
+            default -> block.isSolid() || block.isAir();
+          };
         }
     }
 

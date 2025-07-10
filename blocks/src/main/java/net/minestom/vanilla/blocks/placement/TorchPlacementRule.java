@@ -39,7 +39,7 @@ public class TorchPlacementRule extends BlockPlacementRule {
         Block block = instance.getBlock(position);
         boolean isFullFace = !getIsNotFullFace(instance, position, blockFace);
         // Certain blocks like fences and walls don't have full faces on the top but torches can be placed on them
-        return isFullFace || (blockFace != BlockFace.TOP && nonFullButPlaceable.contains(block));
+        return isFullFace || (blockFace == BlockFace.TOP && nonFullButPlaceable.contains(block));
     }
 
     @Override

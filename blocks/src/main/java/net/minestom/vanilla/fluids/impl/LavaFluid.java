@@ -34,7 +34,7 @@ public class LavaFluid extends FlowableFluid {
         boolean isUltrawarm = MinecraftServer.getDimensionTypeRegistry().get(instance.getDimensionType()).ultrawarm();
         return isUltrawarm ?
             FluidUtils.getRelativeTicks(10) :
-            FluidUtils.getRelativeTicks(15);
+            FluidUtils.getRelativeTicks(30);
     }
 
     @Override

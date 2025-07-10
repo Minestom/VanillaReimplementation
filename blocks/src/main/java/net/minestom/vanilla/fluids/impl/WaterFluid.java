@@ -20,7 +20,7 @@ public class WaterFluid extends FlowableFluid {
 
     @Override
     public int getNextTickDelay(Instance instance, Point point, Block block) {
-        return FluidUtils.getRelativeTicks(10);
+        return FluidUtils.getRelativeTicks(5);
     }
 
     @Override

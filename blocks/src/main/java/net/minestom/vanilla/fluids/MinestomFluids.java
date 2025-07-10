@@ -18,14 +18,12 @@ import net.minestom.vanilla.fluids.impl.WaterFluid;
 import net.minestom.vanilla.fluids.listener.FluidPlacementEvent;
 import net.minestom.vanilla.fluids.pickup.FluidPickupListener;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Map;
 
 public class MinestomFluids {
     private static boolean enabled = false;
-    public static final Map<Instance, Map<Long, Set<Point>>> UPDATES = new ConcurrentHashMap<>();
+public static final Map<Instance, Map<Long, Set<Point>>> UPDATES = Collections.synchronizedMap(new WeakHashMap<>());
 
     private static final DynamicRegistry<Fluid> registry = DynamicRegistry.create(Key.key("vri:fluids"));
 
