@@ -12,6 +12,7 @@ import net.minestom.server.registry.RegistryTag;
 import net.minestom.server.registry.TagKey;
 import net.minestom.server.tag.Tag;
 import net.minestom.vanilla.blocks.event.PlayerOpenSignEditorEvent;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -26,12 +27,12 @@ public class SignEditRule implements BlockHandler {
     }
 
     @Override
-    public Key getKey() {
+    public @NotNull Key getKey() {
         return block.key();
     }
 
     @Override
-    public Collection<Tag<?>> getBlockEntityTags() {
+    public @NotNull Collection<Tag<?>> getBlockEntityTags() {
         return Arrays.asList(
             Tag.NBT("front_text"),
             Tag.NBT("back_text"),

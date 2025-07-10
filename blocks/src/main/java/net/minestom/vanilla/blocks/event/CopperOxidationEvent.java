@@ -7,6 +7,7 @@ import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import org.jetbrains.annotations.NotNull;
 
 public class CopperOxidationEvent implements Event, CancellableEvent, BlockEvent, InstanceEvent {
     private final Block block;
@@ -46,17 +47,17 @@ public class CopperOxidationEvent implements Event, CancellableEvent, BlockEvent
     }
 
     @Override
-    public Block getBlock() {
+    public @NotNull Block getBlock() {
         return block;
     }
 
     @Override
-    public BlockVec getBlockPosition() {
+    public @NotNull BlockVec getBlockPosition() {
         return position;
     }
 
     @Override
-    public Instance getInstance() {
+    public @NotNull Instance getInstance() {
         return instance;
     }
 }

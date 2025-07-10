@@ -5,6 +5,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.utils.Direction;
 import net.minestom.vanilla.common.utils.DirectionUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,7 +18,7 @@ public class GateOpenRule implements BlockHandler {
     }
 
     @Override
-    public Key getKey() {
+    public @NotNull Key getKey() {
         return block != null ? block.key() : getKey().key();
     }
 

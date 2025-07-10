@@ -4,6 +4,7 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
+import org.jetbrains.annotations.NotNull;
 
 public class DoorOpenRule implements BlockHandler {
     private final Block baseDoorBlock;
@@ -13,7 +14,7 @@ public class DoorOpenRule implements BlockHandler {
     }
 
     @Override
-    public Key getKey() {
+    public @NotNull Key getKey() {
         return baseDoorBlock.key();
     }
 

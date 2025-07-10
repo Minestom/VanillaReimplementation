@@ -10,6 +10,7 @@ import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.vanilla.blocks.event.CopperOxidationEvent;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,7 +55,7 @@ public class CopperOxidationRule implements BlockHandler {
     }
 
     @Override
-    public Key getKey() {
+    public @NotNull Key getKey() {
         return Key.key("vri:copper_oxidation");
     }
 
@@ -63,7 +64,7 @@ public class CopperOxidationRule implements BlockHandler {
     }
 
     @Override
-    public void tick(Tick tick) {
+    public void tick(@NotNull Tick tick) {
         if (ThreadLocalRandom.current().nextInt(10000) > 1) return;
 
         Instance instance = tick.getInstance();

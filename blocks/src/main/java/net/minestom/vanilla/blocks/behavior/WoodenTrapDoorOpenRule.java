@@ -3,6 +3,7 @@ package net.minestom.vanilla.blocks.behavior;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
+import org.jetbrains.annotations.NotNull;
 
 public class WoodenTrapDoorOpenRule implements BlockHandler {
     private final Block block;
@@ -12,7 +13,7 @@ public class WoodenTrapDoorOpenRule implements BlockHandler {
     }
 
     @Override
-    public Key getKey() {
+    public @NotNull Key getKey() {
         return block != null ? block.key() : getKey().key();
     }
 

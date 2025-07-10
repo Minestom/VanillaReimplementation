@@ -27,6 +27,6 @@ public class BlockBehaviorRuleRegistrations {
             }
         }
 
-        logger.info("Registered " + count + " handlers");
+      logger.info("Registered {} handlers", count);
     }
 }

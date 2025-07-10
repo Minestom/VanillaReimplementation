@@ -5,6 +5,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.coordinate.Point;
+import org.jetbrains.annotations.NotNull;
 
 public class FluidPlacementRule extends BlockPlacementRule {
 
@@ -30,7 +31,7 @@ public class FluidPlacementRule extends BlockPlacementRule {
     }
 
     @Override
-    public Block blockUpdate(UpdateState updateState) {
+    public @NotNull Block blockUpdate(UpdateState updateState) {
         Instance instance = (Instance) updateState.instance();
         Point point = updateState.blockPosition();
         Block block = updateState.currentBlock();

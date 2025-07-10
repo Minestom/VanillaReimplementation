@@ -15,19 +15,12 @@ import java.util.stream.StreamSupport;
 public class DirectionUtils {
 
     public static String getAxis(Direction direction) {
-        switch (direction) {
-            case UP:
-            case DOWN:
-                return "y";
-            case NORTH:
-            case SOUTH:
-                return "z";
-            case EAST:
-            case WEST:
-                return "x";
-            default:
-                return "";
-        }
+      return switch (direction) {
+        case UP, DOWN -> "y";
+        case NORTH, SOUTH -> "z";
+        case EAST, WEST -> "x";
+        default -> "";
+      };
     }
 
     public static Direction getHorizontalPlacementDirection(PlacementState state) {
@@ -109,13 +102,13 @@ public class DirectionUtils {
     }
 
     public static Direction rotateR(Direction direction) {
-        switch (direction) {
-            case NORTH: return Direction.EAST;
-            case EAST: return Direction.SOUTH;
-            case SOUTH: return Direction.WEST;
-            case WEST: return Direction.NORTH;
-            default: return direction;
-        }
+      return switch (direction) {
+        case NORTH -> Direction.EAST;
+        case EAST -> Direction.SOUTH;
+        case SOUTH -> Direction.WEST;
+        case WEST -> Direction.NORTH;
+        default -> direction;
+      };
     }
 
     public static Direction rotateL(Direction direction) {
@@ -123,20 +116,13 @@ public class DirectionUtils {
     }
 
     public static float getYaw(Direction direction) {
-        switch (direction) {
-            case UP:
-            case DOWN:
-                return 0f;
-            case NORTH:
-                return 180f;
-            case EAST:
-                return -90f;
-            case SOUTH:
-                return 0f;
-            case WEST:
-                return 90f;
-            default:
-                return 0f;
-        }
+      return switch (direction) {
+        case UP, DOWN -> 0f;
+        case NORTH -> 180f;
+        case EAST -> -90f;
+        case SOUTH -> 0f;
+        case WEST -> 90f;
+        default -> 0f;
+      };
     }
 }

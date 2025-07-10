@@ -6,6 +6,7 @@ import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.event.trait.PlayerInstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import org.jetbrains.annotations.NotNull;
 
 public class FluidPickupEvent implements CancellableEvent, PlayerInstanceEvent {
     private final Instance instance;
@@ -56,12 +57,12 @@ public class FluidPickupEvent implements CancellableEvent, PlayerInstanceEvent {
     }
 
     @Override
-    public Instance getInstance() {
+    public @NotNull Instance getInstance() {
         return instance;
     }
 
     @Override
-    public Player getPlayer() {
+    public @NotNull Player getPlayer() {
         return player;
     }
 }

@@ -6,6 +6,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
+import org.jetbrains.annotations.NotNull;
 
 public class GenericWorkStationRule implements BlockHandler {
     private final Block block;
@@ -19,7 +20,7 @@ public class GenericWorkStationRule implements BlockHandler {
     }
 
     @Override
-    public Key getKey() {
+    public @NotNull Key getKey() {
         return block.key();
     }
 

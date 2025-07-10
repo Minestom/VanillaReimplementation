@@ -8,6 +8,7 @@ import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.registry.RegistryTag;
 import net.minestom.server.registry.TagKey;
 import net.minestom.vanilla.blocks.event.CakeEatEvent;
+import org.jetbrains.annotations.NotNull;
 
 public class CakeEatRule implements BlockHandler {
     private final Block block;
@@ -19,7 +20,7 @@ public class CakeEatRule implements BlockHandler {
     }
 
     @Override
-    public Key getKey() {
+    public @NotNull Key getKey() {
         return block.key();
     }
 

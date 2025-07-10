@@ -9,6 +9,7 @@ import net.minestom.vanilla.blocks.event.CakeEatEvent;
 import net.minestom.vanilla.blocks.placement.CandlePlacementRule;
 import net.minestom.vanilla.common.item.DroppedItemFactory;
 import net.minestom.vanilla.common.utils.BlockUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class CandleCakeRule implements BlockHandler {
     }
 
     @Override
-    public Key getKey() {
+    public @NotNull Key getKey() {
         return block.key();
     }
 

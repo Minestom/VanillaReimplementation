@@ -8,6 +8,7 @@ import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.event.trait.PlayerInstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import org.jetbrains.annotations.NotNull;
 
 public class PlayerOpenSignEditorEvent implements Event, BlockEvent, CancellableEvent, PlayerInstanceEvent {
     private final Player player;
@@ -22,17 +23,17 @@ public class PlayerOpenSignEditorEvent implements Event, BlockEvent, Cancellable
     }
 
     @Override
-    public Block getBlock() {
+    public @NotNull Block getBlock() {
         return block;
     }
 
     @Override
-    public BlockVec getBlockPosition() {
+    public @NotNull BlockVec getBlockPosition() {
         return blockPosition;
     }
 
     @Override
-    public Player getPlayer() {
+    public @NotNull Player getPlayer() {
         return player;
     }
 
@@ -47,7 +48,7 @@ public class PlayerOpenSignEditorEvent implements Event, BlockEvent, Cancellable
     }
 
     @Override
-    public Instance getInstance() {
+    public @NotNull Instance getInstance() {
         return player.getInstance();
     }
 }

@@ -6,6 +6,7 @@ import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import org.jetbrains.annotations.NotNull;
 
 public class BlockFluidReplacementEvent implements BlockEvent, InstanceEvent, CancellableEvent {
     private final Instance inst;
@@ -20,17 +21,17 @@ public class BlockFluidReplacementEvent implements BlockEvent, InstanceEvent, Ca
     }
 
     @Override
-    public Block getBlock() {
+    public @NotNull Block getBlock() {
         return blk;
     }
 
     @Override
-    public BlockVec getBlockPosition() {
+    public @NotNull BlockVec getBlockPosition() {
         return pos;
     }
 
     @Override
-    public Instance getInstance() {
+    public @NotNull Instance getInstance() {
         return inst;
     }
 

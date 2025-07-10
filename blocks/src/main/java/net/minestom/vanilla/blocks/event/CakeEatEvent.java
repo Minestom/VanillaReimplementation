@@ -8,6 +8,7 @@ import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.event.trait.PlayerInstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import org.jetbrains.annotations.NotNull;
 
 public class CakeEatEvent implements Event, PlayerInstanceEvent, CancellableEvent, BlockEvent {
     private final Player player;
@@ -22,17 +23,17 @@ public class CakeEatEvent implements Event, PlayerInstanceEvent, CancellableEven
     }
 
     @Override
-    public Player getPlayer() {
+    public @NotNull Player getPlayer() {
         return player;
     }
 
     @Override
-    public Block getBlock() {
+    public @NotNull Block getBlock() {
         return block;
     }
 
     @Override
-    public BlockVec getBlockPosition() {
+    public @NotNull BlockVec getBlockPosition() {
         return blockPosition;
     }
 
@@ -47,7 +48,7 @@ public class CakeEatEvent implements Event, PlayerInstanceEvent, CancellableEven
     }
 
     @Override
-    public Instance getInstance() {
+    public @NotNull Instance getInstance() {
         return player.getInstance();
     }
 }
