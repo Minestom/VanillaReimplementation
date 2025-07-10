@@ -8,11 +8,20 @@ import net.minestom.server.registry.Registry;
 import net.minestom.server.registry.RegistryTag;
 import net.minestom.vanilla.common.item.DroppedItemFactory;
 import net.minestom.vanilla.common.tag.BlockTags;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Set;
 
+/**
+ * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
+ * Original source: https://github.com/everbuild-org/blocks-and-stuff
+ * <p>
+ * Original authors: ChrisB, AEinNico, CreepyX
+ * <p>
+ * Ported from Kotlin to Java and adapted for use in this project with modifications.
+ */
 public class TorchPlacementRule extends BlockPlacementRule {
 
     private final Registry<Block> tagManager = Block.staticRegistry();
@@ -85,7 +94,7 @@ public class TorchPlacementRule extends BlockPlacementRule {
     }
 
     @Override
-    public Block blockUpdate(UpdateState updateState) {
+    public @NotNull Block blockUpdate(UpdateState updateState) {
         String facingProp = updateState.currentBlock().getProperty("facing");
         BlockFace supportingFace = (facingProp != null)
                 ? BlockFace.valueOf(facingProp.toUpperCase(Locale.ROOT)).getOppositeFace()

@@ -9,6 +9,14 @@ import java.util.Collection;
 import java.util.List;
 
 /**
+ *
+ * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
+ * Original source: https://github.com/everbuild-org/blocks-and-stuff
+ * <p>
+ * Original authors: ChrisB, AEinNico, CreepyX
+ * <p>
+ * Ported from Kotlin to Java and adapted for use in this project with modifications.
+ * <p>
  * Base class for rule sets that manage block groups and associated functionality
  * @param <GroupImpl> The implementation type for the group
  * @param <Functor> The function type associated with the group

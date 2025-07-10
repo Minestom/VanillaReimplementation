@@ -6,7 +6,16 @@ import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.utils.Direction;
 import net.minestom.vanilla.common.utils.DirectionUtils;
+import org.jetbrains.annotations.NotNull;
 
+/**
+ * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
+ * Original source: https://github.com/everbuild-org/blocks-and-stuff
+ * <p>
+ * Original authors: ChrisB, AEinNico, CreepyX
+ * <p>
+ * Ported from Kotlin to Java and adapted for use in this project with modifications.
+ */
 public class BedPlacementRule extends BlockPlacementRule {
 
     public BedPlacementRule(Block block) {
@@ -14,7 +23,7 @@ public class BedPlacementRule extends BlockPlacementRule {
     }
 
     @Override
-    public Block blockPlace(PlacementState placementState) {
+    public Block blockPlace(@NotNull PlacementState placementState) {
         Direction direction = DirectionUtils.getNearestHorizontalLookingDirection(placementState).opposite();
         var additionalReplacementBlock = placementState.placePosition().add(direction.vec());
 
@@ -37,7 +46,7 @@ public class BedPlacementRule extends BlockPlacementRule {
     }
 
     @Override
-    public Block blockUpdate(UpdateState updateState) {
+    public @NotNull Block blockUpdate(UpdateState updateState) {
         Direction facing = Direction.valueOf(
             updateState.currentBlock()
                 .getProperty("facing")

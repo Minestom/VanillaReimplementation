@@ -7,10 +7,19 @@ import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.utils.Direction;
 import net.minestom.vanilla.common.utils.DirectionUtils;
 import net.minestom.vanilla.common.utils.FluidUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
+ * Original source: https://github.com/everbuild-org/blocks-and-stuff
+ * <p>
+ * Original authors: ChrisB, AEinNico, CreepyX
+ * <p>
+ * Ported from Kotlin to Java and adapted for use in this project with modifications.
+ */
 public class ChestPlacementRule extends BlockPlacementRule {
 
     public ChestPlacementRule(Block block) {
@@ -68,7 +77,7 @@ public class ChestPlacementRule extends BlockPlacementRule {
     }
 
     @Override
-    public Block blockUpdate(UpdateState updateState) {
+    public @NotNull Block blockUpdate(UpdateState updateState) {
         String type = updateState.currentBlock().getProperty("type");
         if ("single".equals(type)) {
             return super.blockUpdate(updateState);

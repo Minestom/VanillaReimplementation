@@ -6,6 +6,16 @@ import net.minestom.server.utils.Direction;
 import net.minestom.vanilla.blocks.placement.common.AbstractRailPlacementRule;
 import net.minestom.vanilla.common.utils.DirectionUtils;
 
+import java.util.Collections;
+
+/**
+ * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
+ * Original source: https://github.com/everbuild-org/blocks-and-stuff
+ * <p>
+ * Original authors: ChrisB, AEinNico, CreepyX
+ * <p>
+ * Ported from Kotlin to Java and adapted for use in this project with modifications.
+ */
 public class FeatureRailPlacementRule extends AbstractRailPlacementRule {
 
     public FeatureRailPlacementRule(Block block) {
@@ -43,8 +53,8 @@ public class FeatureRailPlacementRule extends AbstractRailPlacementRule {
         }
 
         RailShape shape = connectVertical(
-            RailShape.fromSides(java.util.Arrays.asList(
-                BlockFace.fromDirection(lockedDirection != null ? lockedDirection : primaryDirection)
+            RailShape.fromSides(Collections.singletonList(
+              BlockFace.fromDirection(lockedDirection != null ? lockedDirection : primaryDirection)
             )),
             placementState
         );

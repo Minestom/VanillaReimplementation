@@ -14,6 +14,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+/**
+ * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
+ * Original source: https://github.com/everbuild-org/blocks-and-stuff
+ * <p>
+ * Original authors: ChrisB, AEinNico, CreepyX
+ * <p>
+ * Ported from Kotlin to Java and adapted for use in this project with modifications.
+ */
 public class SugarCanePlacementRule extends BlockPlacementRule {
     private final @NotNull Registry<Block> blockRegistry = Block.staticRegistry();
 
@@ -53,7 +61,7 @@ public class SugarCanePlacementRule extends BlockPlacementRule {
     }
 
     @Override
-    public Block blockUpdate(UpdateState updateState) {
+    public @NotNull Block blockUpdate(UpdateState updateState) {
         if (!isSupported(updateState.instance(), updateState.blockPosition())) {
             DroppedItemFactory.maybeDrop(updateState);
             return Block.AIR;

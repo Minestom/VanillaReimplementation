@@ -21,9 +21,17 @@ import net.minestom.vanilla.fluids.pickup.FluidPickupListener;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
+ * Original source: https://github.com/everbuild-org/blocks-and-stuff
+ * <p>
+ * Original authors: ChrisB, AEinNico, CreepyX
+ * <p>
+ * Ported from Kotlin to Java and adapted for use in this project with modifications.
+ */
 public class MinestomFluids {
     private static boolean enabled = false;
-public static final Map<Instance, Map<Long, Set<Point>>> UPDATES = Collections.synchronizedMap(new WeakHashMap<>());
+    public static final Map<Instance, Map<Long, Set<Point>>> UPDATES = Collections.synchronizedMap(new WeakHashMap<>());
 
     private static final DynamicRegistry<Fluid> registry = DynamicRegistry.create(Key.key("vri:fluids"));
 

@@ -20,6 +20,14 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
+ * Original source: https://github.com/everbuild-org/blocks-and-stuff
+ * <p>
+ * Original authors: ChrisB, AEinNico, CreepyX
+ * <p>
+ * Ported from Kotlin to Java and adapted for use in this project with modifications.
+ */
 public abstract class FlowableFluid extends Fluid {
 
     protected FlowableFluid(Block defaultBlock, Material bucket) {
@@ -133,7 +141,13 @@ public abstract class FlowableFluid extends Fluid {
         }
 
         int newLevel = highestLevel - getLevelDecreasePerBlock(instance);
-        return newLevel <= 0 ? Block.AIR : getFlowing(newLevel, false);
+        if (newLevel <= 0) {
+            if (block.registry().isReplaceable()) {
+                return getFlowing(1, false);
+            }
+            return Block.AIR;
+        }
+        return getFlowing(newLevel, false);
     }
 
     private boolean receivesFlow(
@@ -183,7 +197,7 @@ public abstract class FlowableFluid extends Fluid {
                     directionBlock
             )) continue;
 
-            boolean down = holeMap.computeIfAbsent(id, (Short2BooleanFunction) s -> {
+            boolean down = holeMap.computeIfAbsent(id, s -> {
                 Point downPoint = directionPoint.add(0.0, -1.0, 0.0);
                 return canFlowDown(
                         instance, getFlowing(getLevel(updatedBlock), false),
@@ -271,7 +285,7 @@ public abstract class FlowableFluid extends Fluid {
             Instance instance, Block flowing, Point point,
             Block block, Point fromPoint, Block fromBlock
     ) {
-        if (!getDirections(flowing).contains(Direction.DOWN)) return false;
+        if (!getDirections(flowing).contains(net.minestom.server.utils.Direction.DOWN)) return false;
         if (!this.receivesFlow(Direction.DOWN, instance, point, block, fromPoint, fromBlock)) return false;
         if (MinestomFluids.getFluidOnBlock(fromBlock) == this) return true;
         return this.canFill(instance, fromPoint, fromBlock, flowing);
@@ -357,4 +371,3 @@ public abstract class FlowableFluid extends Fluid {
         );
     }
 }
-

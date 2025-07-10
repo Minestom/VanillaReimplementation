@@ -8,6 +8,15 @@ import net.minestom.vanilla.blocks.placement.*;
 
 import java.util.function.Function;
 
+
+/**
+ * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
+ * Original source: https://github.com/everbuild-org/blocks-and-stuff
+ * <p>
+ * Original authors: ChrisB, AEinNico, CreepyX
+ * <p>
+ * Ported from Kotlin to Java and adapted for use in this project with modifications.
+ */
 public class VanillaPlacementRules extends VanillaRuleset<PlacementGroup, Function<Block, BlockPlacementRule>> {
 
     public static final VanillaPlacementRules INSTANCE = new VanillaPlacementRules();

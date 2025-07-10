@@ -7,7 +7,16 @@ import net.minestom.server.registry.RegistryTag;
 import net.minestom.server.registry.TagKey;
 import net.minestom.server.utils.Direction;
 import net.minestom.vanilla.common.utils.DirectionUtils;
+import org.jetbrains.annotations.NotNull;
 
+/**
+ * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
+ * Original source: https://github.com/everbuild-org/blocks-and-stuff
+ * <p>
+ * Original authors: ChrisB, AEinNico, CreepyX
+ * <p>
+ * Ported from Kotlin to Java and adapted for use in this project with modifications.
+ */
 public class FenceGatePlacementRule extends BlockPlacementRule {
     private final RegistryTag<Block> walls;
 
@@ -17,7 +26,7 @@ public class FenceGatePlacementRule extends BlockPlacementRule {
     }
 
     @Override
-    public Block blockPlace(PlacementState state) {
+    public Block blockPlace(@NotNull PlacementState state) {
         Direction direction = DirectionUtils.getNearestHorizontalLookingDirection(state).opposite();
         Block block = state.block()
             .withProperty("facing", direction.toString().toLowerCase());
@@ -26,7 +35,7 @@ public class FenceGatePlacementRule extends BlockPlacementRule {
     }
 
     @Override
-    public Block blockUpdate(UpdateState updateState) {
+    public @NotNull Block blockUpdate(UpdateState updateState) {
         return integrateInWalls(updateState.instance(), updateState.blockPosition(), updateState.currentBlock());
     }
 

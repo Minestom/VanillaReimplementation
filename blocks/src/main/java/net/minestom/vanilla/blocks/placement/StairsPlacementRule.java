@@ -9,10 +9,19 @@ import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.utils.Direction;
 import net.minestom.vanilla.blocks.placement.util.States;
 import net.minestom.vanilla.common.utils.FluidUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
+ * Original source: https://github.com/everbuild-org/blocks-and-stuff
+ * <p>
+ * Original authors: ChrisB, AEinNico, CreepyX
+ * <p>
+ * Ported from Kotlin to Java and adapted for use in this project with modifications.
+ */
 public class StairsPlacementRule extends BlockPlacementRule {
 
     public StairsPlacementRule(Block block) {
@@ -20,7 +29,7 @@ public class StairsPlacementRule extends BlockPlacementRule {
     }
 
     @Override
-    public Block blockUpdate(UpdateState updateState) {
+    public @NotNull Block blockUpdate(UpdateState updateState) {
         return updateState.currentBlock().withProperty(
             States.SHAPE,
             getShape(updateState.instance(), updateState.currentBlock(), updateState.blockPosition())

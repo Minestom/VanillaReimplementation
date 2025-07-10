@@ -4,7 +4,16 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
+import org.jetbrains.annotations.NotNull;
 
+/**
+ * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
+ * Original source: https://github.com/everbuild-org/blocks-and-stuff
+ * <p>
+ * Original authors: ChrisB, AEinNico, CreepyX
+ * <p>
+ * Ported from Kotlin to Java and adapted for use in this project with modifications.
+ */
 public class SnowyUpdateRule extends BlockPlacementRule {
 
     public SnowyUpdateRule(Block block) {
@@ -12,7 +21,7 @@ public class SnowyUpdateRule extends BlockPlacementRule {
     }
 
     @Override
-    public Block blockUpdate(UpdateState updateState) {
+    public @NotNull Block blockUpdate(UpdateState updateState) {
         String snowy = getSnowyState(updateState.instance(), updateState.blockPosition());
         return updateState.currentBlock().withProperty("snowy", snowy);
     }

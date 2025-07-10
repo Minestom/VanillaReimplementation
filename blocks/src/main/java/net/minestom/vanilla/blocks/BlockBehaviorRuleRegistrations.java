@@ -5,6 +5,14 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.vanilla.blocks.group.VanillaBlockBehaviour;
 import net.minestom.vanilla.blocks.group.behaviour.BehaviourGroup;
 
+/**
+ * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
+ * Original source: https://github.com/everbuild-org/blocks-and-stuff
+ * <p>
+ * Original authors: ChrisB, AEinNico, CreepyX
+ * <p>
+ * Ported from Kotlin to Java and adapted for use in this project with modifications.
+ */
 public class BlockBehaviorRuleRegistrations {
     private static final ComponentLogger logger = MinecraftServer.LOGGER;
 

@@ -5,7 +5,16 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.vanilla.common.item.DroppedItemFactory;
+import org.jetbrains.annotations.NotNull;
 
+/**
+ * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
+ * Original source: https://github.com/everbuild-org/blocks-and-stuff
+ * <p>
+ * Original authors: ChrisB, AEinNico, CreepyX
+ * <p>
+ * Ported from Kotlin to Java and adapted for use in this project with modifications.
+ */
 public class TopAttachedVinePlacementRule extends BlockPlacementRule {
 
     public TopAttachedVinePlacementRule(Block block) {
@@ -21,7 +30,7 @@ public class TopAttachedVinePlacementRule extends BlockPlacementRule {
     }
 
     @Override
-    public Block blockUpdate(UpdateState updateState) {
+    public @NotNull Block blockUpdate(UpdateState updateState) {
         if (!validatePosition(updateState.instance(), updateState.blockPosition())) {
             DroppedItemFactory.maybeDrop(updateState);
             return Block.AIR;

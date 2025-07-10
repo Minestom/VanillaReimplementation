@@ -9,6 +9,14 @@ import net.minestom.server.utils.Direction;
 import net.minestom.vanilla.blocks.placement.common.AbstractConnectingBlockPlacementRule;
 import net.minestom.vanilla.blocks.placement.util.States;
 
+/**
+ * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
+ * Original source: https://github.com/everbuild-org/blocks-and-stuff
+ * <p>
+ * Original authors: ChrisB, AEinNico, CreepyX
+ * <p>
+ * Ported from Kotlin to Java and adapted for use in this project with modifications.
+ */
 public class FencePlacementRule extends AbstractConnectingBlockPlacementRule {
     private final RegistryTag<Block> fences = tagManager.getTag(Key.key("minecraft:fences"));
     private final RegistryTag<Block> woodenFences = tagManager.getTag(Key.key("minecraft:wooden_fences"));
