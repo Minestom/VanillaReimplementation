@@ -20,9 +20,9 @@ include("datapack")
 include("loot-table")
 
 pluginManagement {
-    repositories {
-        mavenCentral()
-        maven("https://repo.spongepowered.org/repository/maven-public")
-        maven("https://repo.spongepowered.org/repository/maven-snapshots")
-    }
+  repositories {
+    mavenCentral()
+    maven("https://repo.spongepowered.org/repository/maven-public")
+    maven("https://repo.spongepowered.org/repository/maven-snapshots")
+  }
 }
