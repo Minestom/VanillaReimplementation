@@ -1,63 +1,57 @@
 package net.minestom.vanilla.fluids.impl;
 
-import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.BlockVec;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.Material;
-import net.minestom.server.utils.Direction;
-import net.minestom.vanilla.fluids.FluidUtils;
+import net.minestom.vanilla.fluids.common.FlowableFluid;
+import net.minestom.vanilla.fluids.common.FluidState;
+import net.minestom.vanilla.fluids.event.FluidBlockBreakEvent;
+import org.jetbrains.annotations.Nullable;
 
-/**
- * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
- * Original source: https://github.com/everbuild-org/blocks-and-stuff
- * <p>
- * Original authors: ChrisB, AEinNico, CreepyX
- * <p>
- * Ported from Kotlin to Java and adapted for use in this project with modifications.
- */
 public class WaterFluid extends FlowableFluid {
-
-    public WaterFluid(Block defaultBlock, Material bucket) {
-        super(defaultBlock, bucket);
-    }
-
-    @Override
-    protected boolean isInfinite() {
-        return true;
-    }
-
-    @Override
-    public int getNextTickDelay(Instance instance, Point point, Block block) {
-        return FluidUtils.getRelativeTicks(5);
-    }
-
-    @Override
-    protected int getHoleRadius(Instance instance) {
-        return 4;
-    }
-
-    @Override
-    protected int getLevelDecreasePerBlock(Instance instance) {
-        return 1;
-    }
-
-    @Override
-    public double getHeight(Block block, Instance instance, Point point) {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    @Override
-    protected double getBlastResistance() {
-        return 100.0;
-    }
-
-    @Override
-    public boolean canBeReplacedWith(Instance instance, Point point, Fluid other, Direction direction) {
-        return direction == Direction.DOWN && this == other;
-    }
-
-    @Override
-    public boolean isInTile(Block block) {
-        return super.isInTile(block) || "true".equals(block.getProperty("waterlogged"));
-    }
+	public WaterFluid() {
+		super(Block.WATER, Material.WATER_BUCKET);
+	}
+	
+	@Override
+	protected boolean isInfinite() {
+		return true;
+	}
+	
+	@Override
+	protected @Nullable FluidState onBreakingBlock(Instance instance, BlockVec point,
+																								 BlockFace direction, Block block, FluidState newState) {
+		FluidBlockBreakEvent event = new FluidBlockBreakEvent(instance, point, direction, block, newState);
+		EventDispatcher.call(event);
+		return event.isCancelled() ? null : event.getNewState();
+	}
+	
+	@Override
+	protected int getHoleRadius(Instance instance) {
+		return 4;
+	}
+	
+	@Override
+	public int getLevelDecreasePerBlock(Instance instance) {
+		return 1;
+	}
+	
+	@Override
+	public int getNextTickDelay(Instance instance, BlockVec point) {
+		return 5;
+	}
+	
+	@Override
+	protected boolean canBeReplacedWith(Instance instance, BlockVec point, FluidState currentState,
+	                                    FluidState newState, BlockFace direction) {
+		return direction == BlockFace.BOTTOM && !newState.isWater();
+	}
+	
+	@Override
+	protected double getBlastResistance() {
+		return 100;
+	}
 }

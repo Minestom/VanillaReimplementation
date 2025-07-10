@@ -128,8 +128,8 @@ public class Survival {
         BlockPlacementRuleRegistrations.registerDefault();
         BlockBehaviorRuleRegistrations.registerDefault();
         PlacedHandlerRegistration.registerDefault();
-        MinestomFluids.enableFluids();
-        MinestomFluids.enableVanillaFluids();
+        MinestomFluids.init();
+        process.eventHandler().addChild(MinestomFluids.events());
     }
 
     private void broadcast(@NotNull Component message) {

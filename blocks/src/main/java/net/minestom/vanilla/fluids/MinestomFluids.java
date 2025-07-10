@@ -1,141 +1,156 @@
 package net.minestom.vanilla.fluids;
 
-import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceTickEvent;
+import net.minestom.server.event.player.PlayerBlockBreakEvent;
+import net.minestom.server.event.player.PlayerBlockInteractEvent;
+import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.Material;
-import net.minestom.server.registry.DynamicRegistry;
-import net.minestom.server.registry.RegistryKey;
+import net.minestom.server.tag.Tag;
+import net.minestom.vanilla.fluids.common.Fluid;
+import net.minestom.vanilla.fluids.common.FluidState;
+import net.minestom.vanilla.fluids.common.WaterlogHandler;
 import net.minestom.vanilla.fluids.impl.EmptyFluid;
-import net.minestom.vanilla.fluids.impl.Fluid;
 import net.minestom.vanilla.fluids.impl.LavaFluid;
 import net.minestom.vanilla.fluids.impl.WaterFluid;
-import net.minestom.vanilla.fluids.listener.FluidPlacementEvent;
-import net.minestom.vanilla.fluids.pickup.FluidPickupListener;
+import net.minestom.vanilla.fluids.placement.FluidPlacementRule;
+import net.minestom.vanilla.fluids.placement.LavaPlacementRule;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
- * Original source: https://github.com/everbuild-org/blocks-and-stuff
- * <p>
- * Original authors: ChrisB, AEinNico, CreepyX
- * <p>
- * Ported from Kotlin to Java and adapted for use in this project with modifications.
- */
 public class MinestomFluids {
-    private static boolean enabled = false;
-    public static final Map<Instance, Map<Long, Set<Point>>> UPDATES = Collections.synchronizedMap(new WeakHashMap<>());
+	public static final Fluid WATER = new WaterFluid();
+	public static final Fluid LAVA = new LavaFluid();
+	public static final Fluid EMPTY = new EmptyFluid();
+	
+	public static final FluidState AIR_STATE = new FluidState(Block.AIR, EMPTY);
+	
+	private static final Map<Integer, WaterlogHandler> WATERLOG_HANDLERS = new ConcurrentHashMap<>();
+	
+	private static final Tag<Map<Long, Set<BlockVec>>> TICK_UPDATES = Tag.Transient("fluid-tick-updates");
+	
+	public static Fluid get(Block block) {
+		if (block.compare(Block.WATER) || FluidState.isWaterlogged(block)) {
+			return WATER;
+		} else if (block.compare(Block.LAVA)) {
+			return LAVA;
+		} else {
+			return EMPTY;
+		}
+	}
+	
+	public static void tick(InstanceTickEvent event) {
+		Instance instance = event.getInstance();
+		long age = instance.getWorldAge();
+		
+		var updates = instance.getTag(TICK_UPDATES);
+		if (updates == null) {
+			updates = new ConcurrentHashMap<>();
+			instance.setTag(TICK_UPDATES, updates);
+		}
+		
+		Set<BlockVec> currentUpdate = updates.remove(age);
+		if (currentUpdate == null) return;
+		
+		for (BlockVec point : currentUpdate) {
+			tick(event.getInstance(), point);
+		}
+	}
+	
+	public static void tick(Instance instance, BlockVec point) {
+		FluidState state = FluidState.of(instance.getBlock(point));
+		state.fluid().onTick(instance, point, state);
+	}
+	
+	public static void scheduleTick(Instance instance, BlockVec point, FluidState state) {
+		scheduleTick(instance, point, state.fluid().getNextTickDelay(instance, point));
+	}
+	
+	public static void scheduleTick(Instance instance, BlockVec point, int tickDelay) {
+		if (tickDelay == -1) return;
+		
+		var updates = instance.getTag(TICK_UPDATES);
+		if (updates == null) {
+			updates = new ConcurrentHashMap<>();
+			instance.setTag(TICK_UPDATES, updates);
+		}
+		
+		long newAge = instance.getWorldAge() + tickDelay;
+		updates.computeIfAbsent(newAge, l -> new HashSet<>()).add(point);
+	}
+	
+	public static void registerWaterlog(Block block, WaterlogHandler handler) {
+		WATERLOG_HANDLERS.put(block.id(), handler);
+	}
+	
+	public static WaterlogHandler getWaterlog(Block block) {
+		return WATERLOG_HANDLERS.get(block.id());
+	}
+	
+	public static void init() {
+		MinecraftServer.getBlockManager().registerBlockPlacementRule(new FluidPlacementRule(Block.WATER));
+		MinecraftServer.getBlockManager().registerBlockPlacementRule(new LavaPlacementRule(Block.LAVA));
 
-    private static final DynamicRegistry<Fluid> registry = DynamicRegistry.create(Key.key("vri:fluids"));
+		MinecraftServer.getGlobalEventHandler().addListener(PlayerBlockInteractEvent.class, event -> {
+		    Material itemMaterial = event.getPlayer().getItemInHand(event.getHand()).material();
+		    Block block = event.getBlock();
+		    Instance instance = event.getInstance();
+		    BlockVec position = event.getBlockPosition();
 
-    public static DynamicRegistry<Fluid> getRegistry() {
-        return registry;
-    }
+		    if (itemMaterial == Material.WATER_BUCKET) {
+		        WaterlogHandler handler = MinestomFluids.getWaterlog(block);
+		        if (handler != null) {
+		            handler.placeFluid(instance, position, MinestomFluids.WATER.getDefaultState());
+		        } else {
+		            instance.placeBlock(new BlockHandler.Placement(Block.WATER, instance, position.relative(event.getBlockFace())));
+		        }
+		    } else if (itemMaterial == Material.BUCKET) {
+		        WaterlogHandler handler = MinestomFluids.getWaterlog(block);
+		        FluidState state = FluidState.of(block);
+		        if (handler != null && handler.canRemoveFluid(instance, position, state)) {
+		            instance.setBlock(position, FluidState.setWaterlogged(block, false));
+		        } else if (block.isLiquid()) {
+		            event.getPlayer().setItemInHand(event.getHand(), state.fluid().getBucket());
+		            instance.setBlock(position, Block.AIR);
+		        }
+		    } else if (itemMaterial == Material.LAVA_BUCKET) {
+		        instance.placeBlock(new BlockHandler.Placement(Block.LAVA, instance, position.relative(event.getBlockFace())));
+		    }
+		});
 
-    public static final RegistryKey<Fluid> EMPTY = registry.register("minecraft:empty", new EmptyFluid());
+		MinecraftServer.getGlobalEventHandler().addListener(PlayerBlockBreakEvent.class, event -> {
+		    if (FluidState.isWaterlogged(event.getBlock())) {
+		        event.setResultBlock(Block.WATER);
+		    }
+		});
 
-    public static RegistryKey<Fluid> getFluidOnBlock(Block block) {
-        for (Fluid fluid : registry.values()) {
-            if (fluid.isInTile(block)) {
-                return registry.getKey(fluid);
-            }
-        }
-        return EMPTY;
-    }
+		MinecraftServer.getGlobalEventHandler().addListener(PlayerBlockPlaceEvent.class, event -> {
+		    Block originalBlock = event.getInstance().getBlock(event.getBlockPosition());
+		    Fluid fluid = MinestomFluids.get(originalBlock);
+		    if (fluid != MinestomFluids.EMPTY && FluidState.isSource(originalBlock) && FluidState.canBeWaterlogged(event.getBlock())) {
+		        event.setBlock(FluidState.setWaterlogged(event.getBlock(), true));
+		    }
+		});
 
-    public static Fluid getFluidInstanceOnBlock(Block block) {
-        for (Fluid fluid : registry.values()) {
-            if (fluid.isInTile(block)) {
-                return fluid;
-            }
-        }
-        return registry.get(EMPTY);
-    }
-
-    public static void onTick(InstanceTickEvent event) {
-        Map<Long, Set<Point>> instanceUpdates = UPDATES.computeIfAbsent(event.getInstance(), k -> new ConcurrentHashMap<>());
-        Set<Point> currentUpdate = instanceUpdates.get(event.getInstance().getWorldAge());
-
-        if (currentUpdate == null) return;
-
-        for (Point point : currentUpdate) {
-            processFluidTick(event.getInstance(), point);
-        }
-
-        UPDATES.get(event.getInstance()).remove(event.getInstance().getWorldAge());
-    }
-
-    public static void processFluidTick(Instance instance, Point point) {
-        Block block = instance.getBlock(point);
-        Fluid fluid = registry.get(getFluidOnBlock(block));
-
-        fluid.onTick(instance, point, block);
-        scheduleTick(instance, point, block);
-    }
-
-    public static void scheduleTick(Instance instance, Point point, Block block) {
-        int tickDelay = registry.get(getFluidOnBlock(block))
-            .getNextTickDelay(instance, point, block);
-
-        if (tickDelay == -1) return;
-
-        long newAge = instance.getWorldAge() + tickDelay;
-        UPDATES.computeIfAbsent(instance, k -> new ConcurrentHashMap<>())
-            .computeIfAbsent(newAge, k -> new HashSet<>())
-            .add(point);
-    }
-
-    private static EventNode<Event> events() {
-        EventNode<Event> node = EventNode.all("fluid-events");
-        node.addListener(InstanceTickEvent.class, MinestomFluids::onTick);
-        node.addChild(FluidPickupListener.getFluidPickupEventNode());
-
-        // Setup fluid placement event
-        FluidPlacementEvent.setupFluidPlacementEvent();
-
-        return node;
-    }
-
-    // Breaking water logging comment preserved
-    /*
-    private static void registerWaterloggedPlacementRules() {
-        Block.values().forEach(block -> {
-            if (MinecraftServer.getTagManager().getTag(Tag.BasicType.BLOCKS, "minecraft:stairs")
-                    .contains(block.key())) {
-                block.possibleStates().forEach(state -> {
-                    String property = state.getProperty("waterlogged");
-                    if (property != null && property.equals("true")) {
-                        System.out.println("registered " + block.name());
-                        MinecraftServer.getBlockManager().registerBlockPlacementRule(new FluidPlacementRule(block));
-                    } else {
-                        System.out.println("property is null");
-                    }
-                });
-            }
-        });
-    }
-    */
-
-    public static void enableFluids() {
-        if (enabled) return;
-
-        enabled = true;
-        MinecraftServer.getBlockManager().registerBlockPlacementRule(new FluidPlacementRule(Block.WATER));
-        MinecraftServer.getBlockManager().registerBlockPlacementRule(new FluidPlacementRule(Block.LAVA));
-        MinecraftServer.getBlockManager().registerBlockPlacementRule(new FluidPlacementRule(Block.AIR));
-        MinecraftServer.getGlobalEventHandler().addChild(events());
-    }
-
-    public static void enableVanillaFluids() {
-        if (!enabled) enableFluids();
-        registry.register("minecraft:water", new WaterFluid(Block.WATER, Material.WATER_BUCKET));
-        registry.register("minecraft:lava", new LavaFluid(Block.LAVA, Material.LAVA_BUCKET));
-    }
+		for (Block block : Block.values()) {
+			if (FluidState.canBeWaterlogged(block)) {
+				registerWaterlog(block, WaterlogHandler.DEFAULT);
+			}
+		}
+	}
+	
+	public static EventNode<Event> events() {
+		EventNode<Event> node = EventNode.all("fluid-events");
+		node.addListener(InstanceTickEvent.class, MinestomFluids::tick);
+		return node;
+	}
 }

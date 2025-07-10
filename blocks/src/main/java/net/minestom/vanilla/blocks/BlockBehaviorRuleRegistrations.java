@@ -19,7 +19,23 @@ public class BlockBehaviorRuleRegistrations {
     private static final VanillaBlockBehaviour BLOCK_BEHAVIOUR = VanillaBlockBehaviour.INSTANCE;
 
     public static void registerDefault() {
-        register(BLOCK_BEHAVIOUR.ALL.toArray(new BehaviourGroup[0]));
+        register(VanillaBlockBehaviour.CRAFTING_TABLE);
+        register(VanillaBlockBehaviour.ANVIL);
+        register(VanillaBlockBehaviour.BREWING_STAND);
+        register(VanillaBlockBehaviour.LOOM);
+        register(VanillaBlockBehaviour.GRINDSTONE);
+        register(VanillaBlockBehaviour.SMITHING_TABLE);
+        register(VanillaBlockBehaviour.CARTOGRAPHY_TABLE);
+        register(VanillaBlockBehaviour.STONECUTTER);
+        register(VanillaBlockBehaviour.ENCHANTING_TABLE);
+        register(VanillaBlockBehaviour.TRAPDOOR);
+        register(VanillaBlockBehaviour.FENCE_GATE);
+        register(VanillaBlockBehaviour.COPPER);
+        register(VanillaBlockBehaviour.WOODEN_DOORS);
+        register(VanillaBlockBehaviour.SIGNS);
+        register(VanillaBlockBehaviour.CAKE);
+        register(VanillaBlockBehaviour.CANDLE_CAKE);
+        register(VanillaBlockBehaviour.STRIPPABLE_WOOD);
     }
 
     public static void register(BehaviourGroup... blockGroups) {
