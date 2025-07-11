@@ -2,7 +2,6 @@ package net.minestom.vanilla.blocks.placement;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.vanilla.common.item.DroppedItemFactory;
 import org.jetbrains.annotations.NotNull;

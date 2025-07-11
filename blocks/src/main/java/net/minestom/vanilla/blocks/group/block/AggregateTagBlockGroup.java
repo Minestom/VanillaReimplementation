@@ -3,9 +3,7 @@ package net.minestom.vanilla.blocks.group.block;
 import net.minestom.server.instance.block.Block;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 /**
  *

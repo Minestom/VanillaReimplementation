@@ -10,9 +10,10 @@ import net.minestom.server.registry.TagKey;
 import net.minestom.vanilla.common.item.DroppedItemFactory;
 import net.minestom.vanilla.common.utils.FluidUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.

@@ -1,10 +1,11 @@
 package net.minestom.vanilla.blocks.group.placement;
 
-import java.util.function.Function;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.vanilla.blocks.group.block.BlockGroup;
 import net.minestom.vanilla.blocks.group.block.IntoBlockGroup;
+
+import java.util.function.Function;
 
 /**
  *

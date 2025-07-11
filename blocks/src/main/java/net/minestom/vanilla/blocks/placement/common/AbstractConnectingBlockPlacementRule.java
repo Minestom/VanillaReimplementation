@@ -1,8 +1,5 @@
 package net.minestom.vanilla.blocks.placement.common;
 
-import java.util.ArrayList;
-import java.util.Map;
-
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
@@ -10,6 +7,9 @@ import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.registry.Registry;
 import net.minestom.server.registry.RegistryTag;
 import net.minestom.vanilla.blocks.placement.util.States;
+
+import java.util.ArrayList;
+import java.util.Map;
 
 
 /**

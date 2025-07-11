@@ -2,13 +2,13 @@ package net.minestom.vanilla.blocks.behavior;
 
 import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.BlockHandler;
-import net.minestom.server.coordinate.BlockVec;
-import net.minestom.server.event.EventDispatcher;
 import net.minestom.vanilla.blocks.event.CopperOxidationEvent;
 import org.jetbrains.annotations.NotNull;
 

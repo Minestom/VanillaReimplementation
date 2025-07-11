@@ -1,7 +1,6 @@
 package net.minestom.vanilla.blocks.placement;
 
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 
 /**

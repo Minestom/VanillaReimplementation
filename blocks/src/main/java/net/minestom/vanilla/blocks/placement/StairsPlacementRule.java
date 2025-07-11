@@ -1,6 +1,5 @@
 package net.minestom.vanilla.blocks.placement;
 
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -10,9 +9,6 @@ import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.utils.Direction;
 import net.minestom.vanilla.blocks.placement.util.States;
 import net.minestom.vanilla.common.utils.FluidUtils;
-import net.minestom.vanilla.fluids.common.FluidState;
-import net.minestom.vanilla.fluids.common.WaterlogHandler;
-import net.minestom.vanilla.fluids.placement.FluidPlacementRule;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;

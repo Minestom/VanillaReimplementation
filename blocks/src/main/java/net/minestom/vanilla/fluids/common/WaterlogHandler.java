@@ -2,9 +2,7 @@ package net.minestom.vanilla.fluids.common;
 
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.vanilla.fluids.MinestomFluids;
 
 public interface WaterlogHandler {
