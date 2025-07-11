@@ -1,0 +1,44 @@
+package net.minestom.vanilla.blocks.behavior;
+
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockHandler;
+import net.minestom.server.inventory.Inventory;
+import net.minestom.server.inventory.InventoryType;
+import org.jetbrains.annotations.NotNull;
+
+/**
+ * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
+ * Original source: https://github.com/everbuild-org/blocks-and-stuff
+ * <p>
+ * Original authors: ChrisB, AEinNico, CreepyX
+ * <p>
+ * Ported from Kotlin to Java and adapted for use in this project with modifications.
+ */
+public class GenericWorkStationRule implements BlockHandler {
+    private final Block block;
+    private final InventoryType type;
+    private final String title;
+
+    public GenericWorkStationRule(Block block, InventoryType type, String title) {
+        this.block = block;
+        this.type = type;
+        this.title = title;
+    }
+
+    @Override
+    public @NotNull Key getKey() {
+        return block.key();
+    }
+
+    @Override
+    public boolean onInteract(Interaction interaction) {
+        if (interaction.getPlayer().isSneaking() && !interaction.getPlayer().getItemInMainHand().isAir()) {
+            return BlockHandler.super.onInteract(interaction);
+        }
+
+        interaction.getPlayer().openInventory(new Inventory(type, Component.translatable(title)));
+        return false;
+    }
+}

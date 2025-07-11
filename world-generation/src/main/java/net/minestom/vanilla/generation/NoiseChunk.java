@@ -13,6 +13,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
+ * Original source: https://github.com/everbuild-org/blocks-and-stuff
+ *
+ * Original authors: ChrisB, AEinNico, CreepyX
+ *
+ * Ported from Kotlin to Java and adapted for use in this project with modifications.
+ */
 public class NoiseChunk {
     public final int cellWidth;
     public final int cellHeight;

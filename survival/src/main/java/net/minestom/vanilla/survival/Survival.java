@@ -8,6 +8,7 @@ import net.minestom.server.ServerProcess;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.item.ItemDropEvent;
@@ -26,8 +27,12 @@ import net.minestom.server.item.component.EnchantmentList;
 import net.minestom.server.item.enchant.Enchantment;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.server.world.DimensionType;
+import net.minestom.vanilla.blocks.BlockBehaviorRuleRegistrations;
+import net.minestom.vanilla.blocks.BlockPlacementRuleRegistrations;
+import net.minestom.vanilla.blocks.PlacedHandlerRegistration;
 import net.minestom.vanilla.crafting.CraftingFeature;
 import net.minestom.vanilla.crafting.Recipe;
+import net.minestom.vanilla.fluids.MinestomFluids;
 import net.minestom.vanilla.logging.Logger;
 import net.minestom.vanilla.loot.LootFeature;
 import net.minestom.vanilla.loot.LootTable;
@@ -93,6 +98,7 @@ public class Survival {
 
         }).addListener(PlayerSpawnEvent.class, event -> {
             final Player player = event.getPlayer();
+            player.setGameMode(GameMode.CREATIVE);
 
             if (event.isFirstSpawn()) {
                 this.broadcast(Component.translatable("multiplayer.player.joined", NamedTextColor.YELLOW).arguments(player.getName()));
@@ -118,6 +124,12 @@ public class Survival {
             Vec velocity = playerPos.direction().mul(6);
             itemEntity.setVelocity(velocity);
         });
+
+        BlockPlacementRuleRegistrations.registerDefault();
+        BlockBehaviorRuleRegistrations.registerDefault();
+        PlacedHandlerRegistration.registerDefault();
+        MinestomFluids.init();
+        process.eventHandler().addChild(MinestomFluids.events());
     }
 
     private void broadcast(@NotNull Component message) {
