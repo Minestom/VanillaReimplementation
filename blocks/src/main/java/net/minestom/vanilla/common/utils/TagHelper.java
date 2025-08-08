@@ -9,6 +9,7 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.registry.Registry;
 import net.minestom.server.registry.RegistryTag;
+import net.minestom.server.registry.TagKey;
 import org.jetbrains.annotations.NotNull;
 
 public class TagHelper {
@@ -30,6 +31,16 @@ public class TagHelper {
     return data.contains(element);
   }
 
+  public Set<Block> getHashed(String tag) {
+    RegistryTag<Block> data = staticRegistry.getTag(TagKey.ofHash(tag));
+    if (data == null) return new HashSet<>();
+
+    return StreamSupport.stream(data.spliterator(), false)
+        .map(obj -> Block.fromKey(obj.key()))
+        .filter(Objects::nonNull)
+        .collect(Collectors.toSet());
+  }
+
   public Set<Block> getTaggedWith(String tag) {
     RegistryTag<Block> data = staticRegistry.getTag(Key.key(tag));
     if (data == null) return new HashSet<>();
@@ -39,5 +50,8 @@ public class TagHelper {
         .filter(Objects::nonNull)
         .collect(Collectors.toSet());
   }
+
+
+
 
 }

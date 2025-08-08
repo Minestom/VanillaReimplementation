@@ -26,7 +26,7 @@ public class BambooPlantPlacementRule extends BlockPlacementRule {
 
     public BambooPlantPlacementRule(Block block) {
         super(block);
-        this.plantableOn = TagHelper.getInstance().getTaggedWith("minecraft:bamboo_plantable_on");
+        this.plantableOn = TagHelper.getInstance().getHashed("#bamboo_plantable_on");
         this.bamboo =  Set.of(
             Block.BAMBOO,
             Block.BAMBOO_SAPLING
