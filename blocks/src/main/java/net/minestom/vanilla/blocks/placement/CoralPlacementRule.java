@@ -19,20 +19,19 @@ import java.util.Map;
  * Ported from Kotlin to Java and adapted for use in this project with modifications.
  */
 public class CoralPlacementRule extends BlockPlacementRule {
-    private static final Map<Block, Block> WALL_CORALS = new HashMap<>();
 
-    static {
-        WALL_CORALS.put(Block.TUBE_CORAL_FAN, Block.TUBE_CORAL_WALL_FAN);
-        WALL_CORALS.put(Block.BRAIN_CORAL_FAN, Block.BRAIN_CORAL_WALL_FAN);
-        WALL_CORALS.put(Block.BUBBLE_CORAL_FAN, Block.BUBBLE_CORAL_WALL_FAN);
-        WALL_CORALS.put(Block.FIRE_CORAL_FAN, Block.FIRE_CORAL_WALL_FAN);
-        WALL_CORALS.put(Block.HORN_CORAL_FAN, Block.HORN_CORAL_WALL_FAN);
-        WALL_CORALS.put(Block.DEAD_TUBE_CORAL_FAN, Block.DEAD_TUBE_CORAL_WALL_FAN);
-        WALL_CORALS.put(Block.DEAD_BRAIN_CORAL_FAN, Block.DEAD_BRAIN_CORAL_WALL_FAN);
-        WALL_CORALS.put(Block.DEAD_BUBBLE_CORAL_FAN, Block.DEAD_BUBBLE_CORAL_WALL_FAN);
-        WALL_CORALS.put(Block.DEAD_FIRE_CORAL_FAN, Block.DEAD_FIRE_CORAL_WALL_FAN);
-        WALL_CORALS.put(Block.DEAD_HORN_CORAL_FAN, Block.DEAD_HORN_CORAL_WALL_FAN);
-    }
+    private static final Map<Block, Block> WALL_CORALS = Map.of(
+        Block.TUBE_CORAL_FAN, Block.TUBE_CORAL_WALL_FAN,
+        Block.BRAIN_CORAL_FAN, Block.BRAIN_CORAL_WALL_FAN,
+        Block.BUBBLE_CORAL_FAN, Block.BUBBLE_CORAL_WALL_FAN,
+        Block.FIRE_CORAL_FAN, Block.FIRE_CORAL_WALL_FAN,
+        Block.HORN_CORAL_FAN, Block.HORN_CORAL_WALL_FAN,
+        Block.DEAD_TUBE_CORAL_FAN, Block.DEAD_TUBE_CORAL_WALL_FAN,
+        Block.DEAD_BRAIN_CORAL_FAN, Block.DEAD_BRAIN_CORAL_WALL_FAN,
+        Block.DEAD_BUBBLE_CORAL_FAN, Block.DEAD_BUBBLE_CORAL_WALL_FAN,
+        Block.DEAD_FIRE_CORAL_FAN, Block.DEAD_FIRE_CORAL_WALL_FAN,
+        Block.DEAD_HORN_CORAL_FAN, Block.DEAD_HORN_CORAL_WALL_FAN
+    );
 
     public CoralPlacementRule(Block block) {
         super(block);

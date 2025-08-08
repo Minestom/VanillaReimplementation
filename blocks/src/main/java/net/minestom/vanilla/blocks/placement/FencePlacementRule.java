@@ -1,5 +1,6 @@
 package net.minestom.vanilla.blocks.placement;
 
+import java.util.Set;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
@@ -8,6 +9,7 @@ import net.minestom.server.registry.RegistryTag;
 import net.minestom.server.utils.Direction;
 import net.minestom.vanilla.blocks.placement.common.AbstractConnectingBlockPlacementRule;
 import net.minestom.vanilla.blocks.placement.util.States;
+import net.minestom.vanilla.common.utils.TagHelper;
 
 /**
  * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
@@ -18,9 +20,10 @@ import net.minestom.vanilla.blocks.placement.util.States;
  * Ported from Kotlin to Java and adapted for use in this project with modifications.
  */
 public class FencePlacementRule extends AbstractConnectingBlockPlacementRule {
-    private final RegistryTag<Block> fences = tagManager.getTag(Key.key("minecraft:fences"));
-    private final RegistryTag<Block> woodenFences = tagManager.getTag(Key.key("minecraft:wooden_fences"));
-    private final RegistryTag<Block> fenceGates = tagManager.getTag(Key.key("minecraft:fence_gates"));
+
+    private final Set<Block> fences = TagHelper.getInstance().getTaggedWith("minecraft:fences");
+    private final Set<Block> woodenFences = TagHelper.getInstance().getTaggedWith("minecraft:wooden_fences");
+    private final Set<Block> fenceGates = TagHelper.getInstance().getTaggedWith("minecraft:fence_gates");
 
     public FencePlacementRule(Block block) {
         super(block);

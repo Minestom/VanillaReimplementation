@@ -1,10 +1,12 @@
 package net.minestom.vanilla.blocks.placement;
 
+import java.util.Set;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.registry.RegistryTag;
 import net.minestom.server.registry.TagKey;
 import net.minestom.vanilla.common.item.DroppedItemFactory;
+import net.minestom.vanilla.common.utils.TagHelper;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -16,11 +18,11 @@ import org.jetbrains.annotations.NotNull;
  * Ported from Kotlin to Java and adapted for use in this project with modifications.
  */
 public class GroundedPlantBlockPlacementRule extends BlockPlacementRule {
-    private final RegistryTag<Block> dirtBlocks;
+    private final Set<Block> dirtBlocks;
 
     public GroundedPlantBlockPlacementRule(Block block) {
         super(block);
-        this.dirtBlocks = Block.staticRegistry().getTag(TagKey.ofHash("#minecraft:dirt"));
+        this.dirtBlocks = TagHelper.getInstance().getHashed("#minecraft:dirt");
     }
 
     @Override

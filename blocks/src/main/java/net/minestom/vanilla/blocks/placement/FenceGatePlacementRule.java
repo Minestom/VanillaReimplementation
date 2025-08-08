@@ -1,5 +1,6 @@
 package net.minestom.vanilla.blocks.placement;
 
+import java.util.Set;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
@@ -7,6 +8,7 @@ import net.minestom.server.registry.RegistryTag;
 import net.minestom.server.registry.TagKey;
 import net.minestom.server.utils.Direction;
 import net.minestom.vanilla.common.utils.DirectionUtils;
+import net.minestom.vanilla.common.utils.TagHelper;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -18,11 +20,11 @@ import org.jetbrains.annotations.NotNull;
  * Ported from Kotlin to Java and adapted for use in this project with modifications.
  */
 public class FenceGatePlacementRule extends BlockPlacementRule {
-    private final RegistryTag<Block> walls;
+    private final Set<Block> walls;
 
     public FenceGatePlacementRule(Block block) {
         super(block);
-        this.walls = Block.staticRegistry().getTag(TagKey.ofHash("#minecraft:walls"));
+        this.walls = TagHelper.getInstance().getHashed("#minecraft:walls");
     }
 
     @Override

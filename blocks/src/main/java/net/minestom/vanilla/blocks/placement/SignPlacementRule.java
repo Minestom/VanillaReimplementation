@@ -25,22 +25,21 @@ import java.util.Map;
  * Ported from Kotlin to Java and adapted for use in this project with modifications.
  */
 public class SignPlacementRule extends BlockPlacementRule {
-    private static final Map<Block, Block> WALL_SIGNS = new HashMap<>();
-    private final RegistryTag<Block> wallSigns;
 
-    static {
-        WALL_SIGNS.put(Block.ACACIA_SIGN, Block.ACACIA_WALL_SIGN);
-        WALL_SIGNS.put(Block.BAMBOO_SIGN, Block.BAMBOO_WALL_SIGN);
-        WALL_SIGNS.put(Block.BIRCH_SIGN, Block.BIRCH_WALL_SIGN);
-        WALL_SIGNS.put(Block.CHERRY_SIGN, Block.CHERRY_WALL_SIGN);
-        WALL_SIGNS.put(Block.CRIMSON_SIGN, Block.CRIMSON_WALL_SIGN);
-        WALL_SIGNS.put(Block.DARK_OAK_SIGN, Block.DARK_OAK_WALL_SIGN);
-        WALL_SIGNS.put(Block.JUNGLE_SIGN, Block.JUNGLE_WALL_SIGN);
-        WALL_SIGNS.put(Block.MANGROVE_SIGN, Block.MANGROVE_WALL_SIGN);
-        WALL_SIGNS.put(Block.OAK_SIGN, Block.OAK_WALL_SIGN);
-        WALL_SIGNS.put(Block.SPRUCE_SIGN, Block.SPRUCE_WALL_SIGN);
-        WALL_SIGNS.put(Block.WARPED_SIGN, Block.WARPED_WALL_SIGN);
-    }
+    private static final Map<Block, Block> WALL_SIGNS = Map.ofEntries(
+        Map.entry(Block.ACACIA_SIGN, Block.ACACIA_WALL_SIGN),
+        Map.entry(Block.BAMBOO_SIGN, Block.BAMBOO_WALL_SIGN),
+        Map.entry(Block.BIRCH_SIGN, Block.BIRCH_WALL_SIGN),
+        Map.entry(Block.CHERRY_SIGN, Block.CHERRY_WALL_SIGN),
+        Map.entry(Block.CRIMSON_SIGN, Block.CRIMSON_WALL_SIGN),
+        Map.entry(Block.DARK_OAK_SIGN, Block.DARK_OAK_WALL_SIGN),
+        Map.entry(Block.JUNGLE_SIGN, Block.JUNGLE_WALL_SIGN),
+        Map.entry(Block.MANGROVE_SIGN, Block.MANGROVE_WALL_SIGN),
+        Map.entry(Block.OAK_SIGN, Block.OAK_WALL_SIGN),
+        Map.entry(Block.SPRUCE_SIGN, Block.SPRUCE_WALL_SIGN),
+        Map.entry(Block.WARPED_SIGN, Block.WARPED_WALL_SIGN)
+    );
+    private final RegistryTag<Block> wallSigns;
 
     public SignPlacementRule(Block block) {
         super(block);

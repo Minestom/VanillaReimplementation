@@ -25,7 +25,7 @@ public class WallBlockPlacementRule extends AbstractConnectingBlockPlacementRule
     private final Set<Block> fenceGates = TagHelper.getInstance().getTaggedWith("minecraft:fence_gates");
     private final RegistryTag<Block> canConnect = RegistryTag.direct(
         new ArrayList<>() {{
-            addAll(Block.values().stream().filter(it -> it.name().endsWith("_wall")).toList());
+            addAll(TagHelper.getInstance().getHashed("#walls"));
             addAll(BlockUtil.getGlassPanes());
             addAll(fenceGates);
         }}

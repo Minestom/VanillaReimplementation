@@ -24,7 +24,7 @@ public class VerticalSlimBlockPlacementRule extends AbstractConnectingBlockPlace
 
     private final RegistryTag<Block> canConnect = RegistryTag.direct(
         new ArrayList<>() {{
-            addAll(Block.values().stream().filter(it -> it.name().endsWith("_wall")).toList());
+            addAll(TagHelper.getInstance().getHashed("#walls"));
             addAll(BlockUtil.getGlassPanes());
         }}
     );

@@ -7,6 +7,7 @@ import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.registry.RegistryTag;
 import net.minestom.vanilla.common.item.DroppedItemFactory;
 import net.minestom.vanilla.common.utils.BlockUtil;
+import net.minestom.vanilla.common.utils.TagHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -24,8 +25,8 @@ public class TorchPlacementRule extends BlockPlacementRule {
 
     private final RegistryTag<Block> nonFullButPlaceable = RegistryTag.direct(
         new ArrayList<>() {{
-            addAll(Block.values().stream().filter(it -> it.name().endsWith("_fence")).toList());
-            addAll(Block.values().stream().filter(it -> it.name().endsWith("_wall")).toList());
+            addAll(TagHelper.getInstance().getHashed("#fences"));
+            addAll(TagHelper.getInstance().getHashed("#walls"));
             addAll(BlockUtil.getGlassPanes());
         }}
     );

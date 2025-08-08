@@ -9,6 +9,7 @@ import net.minestom.server.registry.RegistryTag;
 import net.minestom.server.registry.TagKey;
 import net.minestom.vanilla.common.item.DroppedItemFactory;
 import net.minestom.vanilla.common.utils.FluidUtils;
+import net.minestom.vanilla.common.utils.TagHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -24,22 +25,19 @@ import java.util.Set;
  * Ported from Kotlin to Java and adapted for use in this project with modifications.
  */
 public class SugarCanePlacementRule extends BlockPlacementRule {
-    private final @NotNull Registry<Block> blockRegistry = Block.staticRegistry();
-
-    private final RegistryKey<Block> sand = blockRegistry.getKey(TagKey.ofHash("#minecraft:sand").key());
 
     private final RegistryTag<Block> plantable = RegistryTag.direct(
-      new ArrayList<>() {{
-          add(Block.DIRT);
-          add(Block.COARSE_DIRT);
-          add(Block.GRASS_BLOCK);
-          add(Block.ROOTED_DIRT);
-          add(Block.MUD);
-          add(Block.PODZOL);
-          add(Block.MYCELIUM);
-          add(Block.MOSS_BLOCK);
-          add(sand);
-      }}
+        new ArrayList<>() {{
+            add(Block.DIRT);
+            add(Block.COARSE_DIRT);
+            add(Block.GRASS_BLOCK);
+            add(Block.ROOTED_DIRT);
+            add(Block.MUD);
+            add(Block.PODZOL);
+            add(Block.MYCELIUM);
+            add(Block.MOSS_BLOCK);
+            addAll(TagHelper.getInstance().getHashed("#sand"));
+        }}
     );
 
     private static final Set<Map.Entry<Integer, Integer>> VON_NEUMANN = Set.of(

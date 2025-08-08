@@ -20,7 +20,7 @@ import java.util.Map;
  */
 public class CandlePlacementRule extends BlockPlacementRule {
 
-    private static final Map<Block, Block> CAKE_VARIANTS = Map.copyOf(Map.ofEntries(
+    private static final Map<Block, Block> CAKE_VARIANTS = Map.ofEntries(
         Map.entry(Block.CANDLE, Block.CANDLE_CAKE),
         Map.entry(Block.WHITE_CANDLE, Block.WHITE_CANDLE_CAKE),
         Map.entry(Block.ORANGE_CANDLE, Block.ORANGE_CANDLE_CAKE),
@@ -38,7 +38,7 @@ public class CandlePlacementRule extends BlockPlacementRule {
         Map.entry(Block.GREEN_CANDLE, Block.GREEN_CANDLE_CAKE),
         Map.entry(Block.RED_CANDLE, Block.RED_CANDLE_CAKE),
         Map.entry(Block.BLACK_CANDLE, Block.BLACK_CANDLE_CAKE)
-    ));
+    );
 
     public static Map<Block, Block> getCakeVariants() {
         return CAKE_VARIANTS;

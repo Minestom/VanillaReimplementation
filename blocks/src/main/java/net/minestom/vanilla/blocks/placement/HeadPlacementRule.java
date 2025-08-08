@@ -19,16 +19,14 @@ import java.util.Map;
  * Ported from Kotlin to Java and adapted for use in this project with modifications.
  */
 public class HeadPlacementRule extends BlockPlacementRule {
-    private static final Map<Block, Block> WALL_VARIANTS = new HashMap<>();
-
-    static {
-        WALL_VARIANTS.put(Block.PLAYER_HEAD, Block.PLAYER_WALL_HEAD);
-        WALL_VARIANTS.put(Block.SKELETON_SKULL, Block.SKELETON_WALL_SKULL);
-        WALL_VARIANTS.put(Block.WITHER_SKELETON_SKULL, Block.WITHER_SKELETON_WALL_SKULL);
-        WALL_VARIANTS.put(Block.ZOMBIE_HEAD, Block.ZOMBIE_WALL_HEAD);
-        WALL_VARIANTS.put(Block.CREEPER_HEAD, Block.CREEPER_WALL_HEAD);
-        WALL_VARIANTS.put(Block.DRAGON_HEAD, Block.DRAGON_WALL_HEAD);
-    }
+    private static final Map<Block, Block> WALL_VARIANTS = Map.of(
+        Block.PLAYER_HEAD, Block.PLAYER_WALL_HEAD,
+        Block.SKELETON_SKULL, Block.SKELETON_WALL_SKULL,
+        Block.WITHER_SKELETON_SKULL, Block.WITHER_SKELETON_WALL_SKULL,
+        Block.ZOMBIE_HEAD, Block.ZOMBIE_WALL_HEAD,
+        Block.CREEPER_HEAD, Block.CREEPER_WALL_HEAD,
+        Block.DRAGON_HEAD, Block.DRAGON_WALL_HEAD
+    );
 
     public HeadPlacementRule(Block block) {
         super(block);
