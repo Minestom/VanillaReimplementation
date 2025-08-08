@@ -5,6 +5,10 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.fluids.MinestomFluids;
 
+/**
+ * MinestomFluids implementation adapted from https://github.com/TogAr2/MinestomFluids
+ * Original author: TogAr2
+ */
 public interface WaterlogHandler {
 	WaterlogHandler DEFAULT = new WaterlogHandler() {};
 	

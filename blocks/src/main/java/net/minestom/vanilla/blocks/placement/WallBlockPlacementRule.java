@@ -5,11 +5,12 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.registry.RegistryTag;
 import net.minestom.vanilla.blocks.placement.common.AbstractConnectingBlockPlacementRule;
-import net.minestom.vanilla.common.tag.BlockTags;
+import net.minestom.vanilla.common.utils.BlockUtil;
 import net.minestom.vanilla.common.utils.FluidUtils;
 
 import java.util.ArrayList;
 import java.util.Set;
+import net.minestom.vanilla.common.utils.TagHelper;
 
 /**
  * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
@@ -21,12 +22,11 @@ import java.util.Set;
  */
 public class WallBlockPlacementRule extends AbstractConnectingBlockPlacementRule {
 
-    private final Set<Block> glassPanes = BlockTags.getInstance().getTaggedWith("vri:glass_panes");
-    private final Set<Block> fenceGates = BlockTags.getInstance().getTaggedWith("minecraft:fence_gates");
+    private final Set<Block> fenceGates = TagHelper.getInstance().getTaggedWith("minecraft:fence_gates");
     private final RegistryTag<Block> canConnect = RegistryTag.direct(
         new ArrayList<>() {{
             addAll(Block.values().stream().filter(it -> it.name().endsWith("_wall")).toList());
-            addAll(glassPanes);
+            addAll(BlockUtil.getGlassPanes());
             addAll(fenceGates);
         }}
     );

@@ -8,6 +8,10 @@ import net.minestom.server.item.Material;
 import net.minestom.vanilla.fluids.common.Fluid;
 import net.minestom.vanilla.fluids.common.FluidState;
 
+/**
+ * MinestomFluids implementation adapted from https://github.com/TogAr2/MinestomFluids
+ * Original author: TogAr2
+ */
 public class EmptyFluid extends Fluid {
 	
 	public EmptyFluid() {

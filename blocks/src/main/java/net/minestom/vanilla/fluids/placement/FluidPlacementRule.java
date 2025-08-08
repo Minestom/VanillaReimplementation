@@ -8,6 +8,10 @@ import net.minestom.vanilla.fluids.MinestomFluids;
 import net.minestom.vanilla.fluids.common.FluidState;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * MinestomFluids implementation adapted from https://github.com/TogAr2/MinestomFluids
+ * Original author: TogAr2
+ */
 public class FluidPlacementRule extends BlockPlacementRule {
 	public FluidPlacementRule(@NotNull Block block) {
 		super(block);

@@ -8,6 +8,10 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * MinestomFluids implementation adapted from https://github.com/TogAr2/MinestomFluids
+ * Original author: TogAr2
+ */
 public class LavaSolidifyEvent implements InstanceEvent, CancellableEvent {
 	private final Instance instance;
 	private final BlockVec blockPosition;

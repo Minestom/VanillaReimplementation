@@ -4,15 +4,13 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
-import net.minestom.server.registry.Registry;
 import net.minestom.server.registry.RegistryTag;
 import net.minestom.vanilla.common.item.DroppedItemFactory;
-import net.minestom.vanilla.common.tag.BlockTags;
+import net.minestom.vanilla.common.utils.BlockUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.Set;
 
 /**
  * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.
@@ -24,15 +22,11 @@ import java.util.Set;
  */
 public class TorchPlacementRule extends BlockPlacementRule {
 
-    private final Registry<Block> tagManager = Block.staticRegistry();
-
-    private final Set<Block> glassPanes = BlockTags.getInstance().getTaggedWith("vri:glass_panes");
-
     private final RegistryTag<Block> nonFullButPlaceable = RegistryTag.direct(
         new ArrayList<>() {{
             addAll(Block.values().stream().filter(it -> it.name().endsWith("_fence")).toList());
             addAll(Block.values().stream().filter(it -> it.name().endsWith("_wall")).toList());
-            addAll(glassPanes);
+            addAll(BlockUtil.getGlassPanes());
         }}
     );
 

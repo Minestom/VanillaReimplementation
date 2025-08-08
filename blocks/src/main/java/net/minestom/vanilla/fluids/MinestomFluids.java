@@ -1,5 +1,7 @@
 package net.minestom.vanilla.fluids;
 
+import java.util.Collections;
+import java.util.WeakHashMap;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.event.Event;
@@ -27,14 +29,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * MinestomFluids implementation adapted from https://github.com/TogAr2/MinestomFluids
+ * Original author: TogAr2
+ */
 public class MinestomFluids {
 	public static final Fluid WATER = new WaterFluid();
 	public static final Fluid LAVA = new LavaFluid();
 	public static final Fluid EMPTY = new EmptyFluid();
 	
 	public static final FluidState AIR_STATE = new FluidState(Block.AIR, EMPTY);
-	
-	private static final Map<Integer, WaterlogHandler> WATERLOG_HANDLERS = new ConcurrentHashMap<>();
+
+	private static final Map<Integer, WaterlogHandler> WATERLOG_HANDLERS = Collections.synchronizedMap(new WeakHashMap<>());
 	
 	private static final Tag<Map<Long, Set<BlockVec>>> TICK_UPDATES = Tag.Transient("fluid-tick-updates");
 	

@@ -40,3 +40,5 @@ world/
 /datapack-tests/mojang-data
 /mojang-data/1.20.4
 /mojang-data/1.21.1
+
+.DS_Store

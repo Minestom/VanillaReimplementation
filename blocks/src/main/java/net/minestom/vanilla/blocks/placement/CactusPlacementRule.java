@@ -5,7 +5,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.utils.Direction;
 import net.minestom.vanilla.common.item.DroppedItemFactory;
-import net.minestom.vanilla.common.tag.BlockTags;
+import net.minestom.vanilla.common.utils.TagHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
@@ -23,7 +23,7 @@ public class CactusPlacementRule extends BlockPlacementRule {
 
     public CactusPlacementRule(Block block) {
         super(block);
-        this.plantableOn = BlockTags.getInstance().getTaggedWith("minecraft:sand");
+        this.plantableOn =  TagHelper.getInstance().getTaggedWith("minecraft:sand");
     }
 
     @Override

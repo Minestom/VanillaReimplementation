@@ -5,9 +5,9 @@ import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.vanilla.blocks.behavior.*;
 import net.minestom.vanilla.blocks.group.behaviour.BehaviourGroup;
-import net.minestom.vanilla.blocks.group.block.BlockGroup;
 
 import java.util.function.Function;
+import net.minestom.vanilla.blocks.group.block.BlockGroup;
 
 /**
  * This file contains code ported from Kotlin to Java, adapted from the Blocks and Stuff project.

@@ -26,37 +26,35 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class CopperOxidationRule implements BlockHandler {
     private final Block block;
-    public static final Map<Block, Block> oxidationStages = new HashMap<>();
+    public static final Map<Block, Block> oxidationStages = Map.copyOf(new HashMap<>() {{
+        put(Block.COPPER_BLOCK, Block.EXPOSED_COPPER);
+        put(Block.EXPOSED_COPPER, Block.WEATHERED_COPPER);
+        put(Block.WEATHERED_COPPER, Block.OXIDIZED_COPPER);
 
-    static {
-        oxidationStages.put(Block.COPPER_BLOCK, Block.EXPOSED_COPPER);
-        oxidationStages.put(Block.EXPOSED_COPPER, Block.WEATHERED_COPPER);
-        oxidationStages.put(Block.WEATHERED_COPPER, Block.OXIDIZED_COPPER);
+        put(Block.CUT_COPPER, Block.EXPOSED_CUT_COPPER);
+        put(Block.EXPOSED_CUT_COPPER, Block.WEATHERED_CUT_COPPER);
+        put(Block.WEATHERED_CUT_COPPER, Block.OXIDIZED_CUT_COPPER);
 
-        oxidationStages.put(Block.CUT_COPPER, Block.EXPOSED_CUT_COPPER);
-        oxidationStages.put(Block.EXPOSED_CUT_COPPER, Block.WEATHERED_CUT_COPPER);
-        oxidationStages.put(Block.WEATHERED_CUT_COPPER, Block.OXIDIZED_CUT_COPPER);
+        put(Block.CUT_COPPER_STAIRS, Block.EXPOSED_CUT_COPPER_STAIRS);
+        put(Block.EXPOSED_CUT_COPPER_STAIRS, Block.WEATHERED_CUT_COPPER_STAIRS);
+        put(Block.WEATHERED_CUT_COPPER_STAIRS, Block.OXIDIZED_CUT_COPPER_STAIRS);
 
-        oxidationStages.put(Block.CUT_COPPER_STAIRS, Block.EXPOSED_CUT_COPPER_STAIRS);
-        oxidationStages.put(Block.EXPOSED_CUT_COPPER_STAIRS, Block.WEATHERED_CUT_COPPER_STAIRS);
-        oxidationStages.put(Block.WEATHERED_CUT_COPPER_STAIRS, Block.OXIDIZED_CUT_COPPER_STAIRS);
+        put(Block.CUT_COPPER_SLAB, Block.EXPOSED_CUT_COPPER_SLAB);
+        put(Block.EXPOSED_CUT_COPPER_SLAB, Block.WEATHERED_CUT_COPPER_SLAB);
+        put(Block.WEATHERED_CUT_COPPER_SLAB, Block.OXIDIZED_CUT_COPPER_SLAB);
 
-        oxidationStages.put(Block.CUT_COPPER_SLAB, Block.EXPOSED_CUT_COPPER_SLAB);
-        oxidationStages.put(Block.EXPOSED_CUT_COPPER_SLAB, Block.WEATHERED_CUT_COPPER_SLAB);
-        oxidationStages.put(Block.WEATHERED_CUT_COPPER_SLAB, Block.OXIDIZED_CUT_COPPER_SLAB);
+        put(Block.CHISELED_COPPER, Block.EXPOSED_CHISELED_COPPER);
+        put(Block.EXPOSED_CHISELED_COPPER, Block.WEATHERED_CHISELED_COPPER);
+        put(Block.WEATHERED_CHISELED_COPPER, Block.OXIDIZED_CHISELED_COPPER);
 
-        oxidationStages.put(Block.CHISELED_COPPER, Block.EXPOSED_CHISELED_COPPER);
-        oxidationStages.put(Block.EXPOSED_CHISELED_COPPER, Block.WEATHERED_CHISELED_COPPER);
-        oxidationStages.put(Block.WEATHERED_CHISELED_COPPER, Block.OXIDIZED_CHISELED_COPPER);
+        put(Block.COPPER_GRATE, Block.EXPOSED_COPPER_GRATE);
+        put(Block.EXPOSED_COPPER_GRATE, Block.WEATHERED_COPPER_GRATE);
+        put(Block.WEATHERED_COPPER_GRATE, Block.OXIDIZED_COPPER_GRATE);
 
-        oxidationStages.put(Block.COPPER_GRATE, Block.EXPOSED_COPPER_GRATE);
-        oxidationStages.put(Block.EXPOSED_COPPER_GRATE, Block.WEATHERED_COPPER_GRATE);
-        oxidationStages.put(Block.WEATHERED_COPPER_GRATE, Block.OXIDIZED_COPPER_GRATE);
-
-        oxidationStages.put(Block.COPPER_BULB, Block.EXPOSED_COPPER_BULB);
-        oxidationStages.put(Block.EXPOSED_COPPER_BULB, Block.WEATHERED_COPPER_BULB);
-        oxidationStages.put(Block.WEATHERED_COPPER_BULB, Block.OXIDIZED_COPPER_BULB);
-    }
+        put(Block.COPPER_BULB, Block.EXPOSED_COPPER_BULB);
+        put(Block.EXPOSED_COPPER_BULB, Block.WEATHERED_COPPER_BULB);
+        put(Block.WEATHERED_COPPER_BULB, Block.OXIDIZED_COPPER_BULB);
+    }});
 
     public CopperOxidationRule(Block block) {
         this.block = block;

@@ -11,6 +11,10 @@ import net.minestom.vanilla.fluids.common.FluidState;
 import net.minestom.vanilla.fluids.event.FluidBlockBreakEvent;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * MinestomFluids implementation adapted from https://github.com/TogAr2/MinestomFluids
+ * Original author: TogAr2
+ */
 public class WaterFluid extends FlowableFluid {
 	public WaterFluid() {
 		super(Block.WATER, Material.WATER_BUCKET);

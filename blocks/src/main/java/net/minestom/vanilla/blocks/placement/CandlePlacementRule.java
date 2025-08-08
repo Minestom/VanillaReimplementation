@@ -19,30 +19,29 @@ import java.util.Map;
  * Ported from Kotlin to Java and adapted for use in this project with modifications.
  */
 public class CandlePlacementRule extends BlockPlacementRule {
-    private static final Map<Block, Block> CANDLE_CAKE = new HashMap<>();
 
-    static {
-        CANDLE_CAKE.put(Block.CANDLE, Block.CANDLE_CAKE);
-        CANDLE_CAKE.put(Block.WHITE_CANDLE, Block.WHITE_CANDLE_CAKE);
-        CANDLE_CAKE.put(Block.ORANGE_CANDLE, Block.ORANGE_CANDLE_CAKE);
-        CANDLE_CAKE.put(Block.MAGENTA_CANDLE, Block.MAGENTA_CANDLE_CAKE);
-        CANDLE_CAKE.put(Block.LIGHT_BLUE_CANDLE, Block.LIGHT_BLUE_CANDLE_CAKE);
-        CANDLE_CAKE.put(Block.YELLOW_CANDLE, Block.YELLOW_CANDLE_CAKE);
-        CANDLE_CAKE.put(Block.LIME_CANDLE, Block.LIME_CANDLE_CAKE);
-        CANDLE_CAKE.put(Block.PINK_CANDLE, Block.PINK_CANDLE_CAKE);
-        CANDLE_CAKE.put(Block.GRAY_CANDLE, Block.GRAY_CANDLE_CAKE);
-        CANDLE_CAKE.put(Block.LIGHT_GRAY_CANDLE, Block.LIGHT_GRAY_CANDLE_CAKE);
-        CANDLE_CAKE.put(Block.CYAN_CANDLE, Block.CYAN_CANDLE_CAKE);
-        CANDLE_CAKE.put(Block.PURPLE_CANDLE, Block.PURPLE_CANDLE_CAKE);
-        CANDLE_CAKE.put(Block.BLUE_CANDLE, Block.BLUE_CANDLE_CAKE);
-        CANDLE_CAKE.put(Block.BROWN_CANDLE, Block.BROWN_CANDLE_CAKE);
-        CANDLE_CAKE.put(Block.GREEN_CANDLE, Block.GREEN_CANDLE_CAKE);
-        CANDLE_CAKE.put(Block.RED_CANDLE, Block.RED_CANDLE_CAKE);
-        CANDLE_CAKE.put(Block.BLACK_CANDLE, Block.BLACK_CANDLE_CAKE);
-    }
+    private static final Map<Block, Block> CAKE_VARIANTS = Map.copyOf(Map.ofEntries(
+        Map.entry(Block.CANDLE, Block.CANDLE_CAKE),
+        Map.entry(Block.WHITE_CANDLE, Block.WHITE_CANDLE_CAKE),
+        Map.entry(Block.ORANGE_CANDLE, Block.ORANGE_CANDLE_CAKE),
+        Map.entry(Block.MAGENTA_CANDLE, Block.MAGENTA_CANDLE_CAKE),
+        Map.entry(Block.LIGHT_BLUE_CANDLE, Block.LIGHT_BLUE_CANDLE_CAKE),
+        Map.entry(Block.YELLOW_CANDLE, Block.YELLOW_CANDLE_CAKE),
+        Map.entry(Block.LIME_CANDLE, Block.LIME_CANDLE_CAKE),
+        Map.entry(Block.PINK_CANDLE, Block.PINK_CANDLE_CAKE),
+        Map.entry(Block.GRAY_CANDLE, Block.GRAY_CANDLE_CAKE),
+        Map.entry(Block.LIGHT_GRAY_CANDLE, Block.LIGHT_GRAY_CANDLE_CAKE),
+        Map.entry(Block.CYAN_CANDLE, Block.CYAN_CANDLE_CAKE),
+        Map.entry(Block.PURPLE_CANDLE, Block.PURPLE_CANDLE_CAKE),
+        Map.entry(Block.BLUE_CANDLE, Block.BLUE_CANDLE_CAKE),
+        Map.entry(Block.BROWN_CANDLE, Block.BROWN_CANDLE_CAKE),
+        Map.entry(Block.GREEN_CANDLE, Block.GREEN_CANDLE_CAKE),
+        Map.entry(Block.RED_CANDLE, Block.RED_CANDLE_CAKE),
+        Map.entry(Block.BLACK_CANDLE, Block.BLACK_CANDLE_CAKE)
+    ));
 
-    public static Map<Block, Block> getCANDLE_CAKE() {
-        return CANDLE_CAKE;
+    public static Map<Block, Block> getCakeVariants() {
+        return CAKE_VARIANTS;
     }
 
     public CandlePlacementRule(Block block) {
@@ -56,7 +55,7 @@ public class CandlePlacementRule extends BlockPlacementRule {
 
         // Handle placing candle on cake
         if (blockBelow.compare(Block.CAKE, Block.Comparator.ID)) {
-            Block candleCake = CANDLE_CAKE.get(block);
+            Block candleCake = CAKE_VARIANTS.get(block);
             if (candleCake == null) {
                 return null;
             }

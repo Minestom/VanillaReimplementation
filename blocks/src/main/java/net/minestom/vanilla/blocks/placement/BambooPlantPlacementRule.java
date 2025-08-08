@@ -1,10 +1,13 @@
 package net.minestom.vanilla.blocks.placement;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
+import net.minestom.server.registry.Registry;
 import net.minestom.vanilla.common.item.DroppedItemFactory;
-import net.minestom.vanilla.common.tag.BlockTags;
+import net.minestom.vanilla.common.utils.TagHelper;
+import net.minestom.vanilla.tag.Tags.Blocks;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
@@ -23,8 +26,11 @@ public class BambooPlantPlacementRule extends BlockPlacementRule {
 
     public BambooPlantPlacementRule(Block block) {
         super(block);
-        this.plantableOn = BlockTags.getInstance().getTaggedWith("minecraft:bamboo_plantable_on");
-        this.bamboo = BlockTags.getInstance().getTaggedWith("vri:bamboo");
+        this.plantableOn = TagHelper.getInstance().getTaggedWith("minecraft:bamboo_plantable_on");
+        this.bamboo =  Set.of(
+            Block.BAMBOO,
+            Block.BAMBOO_SAPLING
+        );
     }
 
     @Override

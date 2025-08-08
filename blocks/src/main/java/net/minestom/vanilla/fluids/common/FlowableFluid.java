@@ -62,6 +62,10 @@ public abstract class FlowableFluid extends Fluid {
 
 	/**
 	 * Flows to the sides whenever possible, or to a hole if found
+	 * <p></p>
+	 * MinestomFluids implementation adapted from https://github.com/TogAr2/MinestomFluids
+	 * Original author: TogAr2
+	 *
 	 */
 	private void flowSides(Instance instance, BlockVec point, FluidState flowing) {
 		int newLevel = flowing.getLevel() - getLevelDecreasePerBlock(instance);

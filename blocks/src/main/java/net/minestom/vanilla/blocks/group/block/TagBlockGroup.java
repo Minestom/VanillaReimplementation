@@ -2,9 +2,9 @@ package net.minestom.vanilla.blocks.group.block;
 
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.Block;
-import net.minestom.vanilla.common.tag.BlockTags;
 
 import java.util.Collection;
+import net.minestom.vanilla.common.utils.TagHelper;
 
 /**
  *
@@ -30,6 +30,6 @@ public class TagBlockGroup implements BlockGroup {
 
     @Override
     public Collection<Block> allMatching() {
-        return BlockTags.getInstance().getTaggedWith(key.asString());
+        return  TagHelper.getInstance().getTaggedWith(key.asString());
     }
 }

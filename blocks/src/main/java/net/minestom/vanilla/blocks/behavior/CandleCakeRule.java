@@ -24,14 +24,15 @@ import java.util.Map;
  */
 public class CandleCakeRule implements BlockHandler {
     private final Block block;
-    private static final Map<Block, Block> CAKE_CANDLE = new HashMap<>();
-
-    static {
-        // Reverse the map from CandlePlacementRule
-        for (Map.Entry<Block, Block> entry : CandlePlacementRule.getCANDLE_CAKE().entrySet()) {
-            CAKE_CANDLE.put(entry.getValue(), entry.getKey());
-        }
-    }
+    private static final Map<Block, Block> CAKE_VARIANTS = CandlePlacementRule.getCakeVariants()
+        .entrySet()
+        .stream()
+        .collect(java.util.stream.Collectors.toMap(
+            Map.Entry::getValue,
+            Map.Entry::getKey,
+            (a, b) -> b,
+            java.util.LinkedHashMap::new
+        ));
 
     public CandleCakeRule(Block block) {
         this.block = block;
@@ -62,7 +63,7 @@ public class CandleCakeRule implements BlockHandler {
                       .withProperty("bites", "1")
                 );
 
-                Block candle = CAKE_CANDLE.get(block);
+                Block candle = CAKE_VARIANTS.get(block);
                 if (candle != null) {
                     DroppedItemFactory.maybeDrop(
                         interaction.getInstance(),

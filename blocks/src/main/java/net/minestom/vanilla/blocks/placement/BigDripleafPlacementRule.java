@@ -5,9 +5,9 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import net.minestom.server.utils.Direction;
 import net.minestom.vanilla.common.item.DroppedItemFactory;
-import net.minestom.vanilla.common.tag.BlockTags;
 import net.minestom.vanilla.common.utils.DirectionUtils;
 import net.minestom.vanilla.common.utils.FluidUtils;
+import net.minestom.vanilla.common.utils.TagHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
@@ -25,7 +25,7 @@ public class BigDripleafPlacementRule extends BlockPlacementRule {
 
     public BigDripleafPlacementRule(Block block) {
         super(block);
-        this.plantableOn = BlockTags.getInstance().getTaggedWith("minecraft:big_dripleaf_placeable");
+        this.plantableOn =  TagHelper.getInstance().getTaggedWith("minecraft:big_dripleaf_placeable");
     }
 
     @Override

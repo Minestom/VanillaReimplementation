@@ -5,6 +5,10 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.vanilla.fluids.MinestomFluids;
 
+/**
+ * MinestomFluids implementation adapted from https://github.com/TogAr2/MinestomFluids
+ * Original author: TogAr2
+ */
 public record FluidState(Block block, Fluid fluid) {
 	public static FluidState of(Block block) {
 		return new FluidState(block, MinestomFluids.get(block));

@@ -11,6 +11,10 @@ import net.minestom.vanilla.fluids.impl.LavaFluid;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * MinestomFluids implementation adapted from https://github.com/TogAr2/MinestomFluids
+ * Original author: TogAr2
+ */
 public class LavaPlacementRule extends FluidPlacementRule {
 	public LavaPlacementRule(@NotNull Block block) {
 		super(block);

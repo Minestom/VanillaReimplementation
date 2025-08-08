@@ -19,6 +19,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * MinestomFluids implementation adapted from https://github.com/TogAr2/MinestomFluids
+ * Original author: TogAr2
+ */
 public class LavaFluid extends FlowableFluid {
 	public static final float MIN_REPLACE_HEIGHT = 0.44444445F;
 	

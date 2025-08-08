@@ -1,5 +1,6 @@
 package net.minestom.vanilla.common.utils;
 
+import java.util.Set;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockManager;
@@ -15,6 +16,30 @@ import net.minestom.server.instance.block.BlockManager;
 public class BlockUtil {
 
     private static final BlockManager blocks = MinecraftServer.getBlockManager();
+
+    private static final Set<Block> glassPanes = Set.of(
+        Block.WHITE_STAINED_GLASS_PANE,
+        Block.LIGHT_GRAY_STAINED_GLASS_PANE,
+        Block.GRAY_STAINED_GLASS_PANE,
+        Block.BLACK_STAINED_GLASS_PANE,
+        Block.BROWN_STAINED_GLASS_PANE,
+        Block.RED_STAINED_GLASS_PANE,
+        Block.ORANGE_STAINED_GLASS_PANE,
+        Block.YELLOW_STAINED_GLASS_PANE,
+        Block.LIME_STAINED_GLASS_PANE,
+        Block.GREEN_STAINED_GLASS_PANE,
+        Block.CYAN_STAINED_GLASS_PANE,
+        Block.LIGHT_BLUE_STAINED_GLASS_PANE,
+        Block.BLUE_STAINED_GLASS_PANE,
+        Block.PURPLE_STAINED_GLASS_PANE,
+        Block.MAGENTA_STAINED_GLASS_PANE,
+        Block.PINK_STAINED_GLASS_PANE,
+        Block.GLASS_PANE
+    );
+
+    public static Set<Block> getGlassPanes() {
+        return glassPanes;
+    }
 
     /**
      * Ensures a block has its default handler
