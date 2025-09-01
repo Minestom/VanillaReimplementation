@@ -112,11 +112,6 @@ public class VanillaBlockBehaviour extends VanillaRuleset<BehaviourGroup, Functi
         GateOpenRule::new
     );
 
-    public static final BehaviourGroup COPPER = INSTANCE.group(
-        INSTANCE.byList(CopperOxidationRule.oxidationStages.keySet()),
-        CopperOxidationRule::new
-    );
-
     public static final BehaviourGroup WOODEN_DOORS = INSTANCE.group(
         INSTANCE.byExclusion(
             INSTANCE.byTag("minecraft:doors"),

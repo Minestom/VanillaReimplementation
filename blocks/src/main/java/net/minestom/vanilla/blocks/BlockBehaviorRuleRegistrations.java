@@ -30,7 +30,6 @@ public class BlockBehaviorRuleRegistrations {
         register(VanillaBlockBehaviour.ENCHANTING_TABLE);
         register(VanillaBlockBehaviour.TRAPDOOR);
         register(VanillaBlockBehaviour.FENCE_GATE);
-        register(VanillaBlockBehaviour.COPPER);
         register(VanillaBlockBehaviour.WOODEN_DOORS);
         register(VanillaBlockBehaviour.SIGNS);
         register(VanillaBlockBehaviour.CAKE);
