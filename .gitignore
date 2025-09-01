@@ -5,6 +5,8 @@
 */build/*
 build/*
 
+mojang-data/*.jar
+
 # Log file
 *.log
 
