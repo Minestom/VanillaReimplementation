@@ -151,6 +151,39 @@ public class JsonUtils {
         return unionStringTypeMap(reader, key, adaptedMap);
     }
 
+    /**
+     * Bridge method to help transition from legacy JSON parsing to codec-based parsing.
+     * This method provides a way to use codec-based parsing while maintaining the same interface
+     * as the legacy unionStringTypeAdapted method.
+     */
+    public static <T> T unionStringTypeCodecBased(JsonReader reader, String key, Codec<T> codec) throws IOException {
+        // Extract the JSON string from the reader for codec processing
+        try {
+            // For now, we'll read the entire JSON into a string and parse it with legacy method
+            // In the future, this would use the codec directly with the Minestom codec system
+            String json = reader.nextSource().readUtf8();
+            
+            // This is a placeholder - in a full implementation, this would use the codec system
+            // to parse the JSON directly without going through the legacy JsonReader
+            throw new UnsupportedOperationException("Full codec integration not yet implemented. Use legacy methods for now.");
+            
+        } catch (Exception e) {
+            throw new IOException("Failed to parse with codec", e);
+        }
+    }
+
+    /**
+     * Utility method to demonstrate how codec-based parsing could work alongside legacy parsing
+     * during the transition period.
+     */
+    public static <T> IoFunction<JsonReader, T> codecAdapter(Codec<T> codec) {
+        return reader -> {
+            // This demonstrates how we could bridge between JsonReader and Codec
+            // In practice, this would need to integrate with Minestom's codec system
+            throw new UnsupportedOperationException("Codec adapter not yet fully implemented");
+        };
+    }
+
     public static <V, T> T unionMapType(JsonReader reader, String key, IoFunction<JsonReader, V> read, Function<V, IoFunction<JsonReader, T>> findReader) throws IOException {
         // Fetch the property
         V property;
