@@ -209,6 +209,46 @@ public class RecipeParsingTests {
     }
 
     @Test
+    public void testCodecStructureCompiles() {
+        // Test that all codec constants are accessible and properly defined
+        assertNotNull(Recipe.CODEC);
+        assertNotNull(Recipe.Ingredient.CODEC);
+        assertNotNull(Recipe.Ingredient.Single.CODEC);
+        assertNotNull(Recipe.Result.CODEC);
+        assertNotNull(Recipe.SingleResult.CODEC);
+        assertNotNull(Recipe.Blasting.CODEC);
+        assertNotNull(Recipe.CampfireCooking.CODEC);
+        assertNotNull(Recipe.Shaped.CODEC);
+        assertNotNull(Recipe.Shapeless.CODEC);
+        assertNotNull(Recipe.Special.ArmorDye.CODEC);
+        assertNotNull(Recipe.Smelting.CODEC);
+        assertNotNull(Recipe.SmithingTrim.CODEC);
+        assertNotNull(Recipe.SmithingTransform.CODEC);
+    }
+
+    @Test
+    public void testCodecBasedParsingCompatibility() throws IOException {
+        String json = """
+                {
+                    "type": "minecraft:crafting_special_armordye",
+                    "group": "armor_dye"
+                }
+                """;
+
+        // Test that the codec-based method produces the same result as legacy method
+        Recipe codecResult = Recipe.fromCodec(json);
+        
+        Buffer buffer = new Buffer().writeUtf8(json);
+        JsonReader reader = JsonReader.of(buffer);
+        Recipe legacyResult = Recipe.fromJson(reader);
+        
+        // Both should produce the same type and properties
+        assertEquals(legacyResult.type(), codecResult.type());
+        assertEquals(legacyResult.group(), codecResult.group());
+        assertEquals(legacyResult.getClass(), codecResult.getClass());
+    }
+
+    @Test
     public void testUnknownRecipeTypeThrowsException() {
         String json = """
                 {
