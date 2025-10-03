@@ -21,6 +21,7 @@ include("loot-table")
 
 pluginManagement {
     repositories {
+        gradlePluginPortal()
         mavenCentral()
         maven("https://repo.spongepowered.org/repository/maven-public")
         maven("https://repo.spongepowered.org/repository/maven-snapshots")
