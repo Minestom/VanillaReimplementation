@@ -2,6 +2,7 @@ package net.minestom.vanilla.datapack.json;
 
 import com.squareup.moshi.JsonReader;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.codec.Codec;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import okio.Buffer;
 import org.jetbrains.annotations.NotNull;
@@ -51,6 +52,13 @@ public class JsonUtils {
             }
             reader.endArray();
             return new List<>(builder.build().toList());
+        }
+
+        static <T> Codec<SingleOrList<T>> codec(Codec<T> elementCodec) {
+            return Codec.either(
+                    elementCodec.transform(Single::new, Single::asObject),
+                    elementCodec.list().transform(List::new, List::asList)
+            ).cast();
         }
 
         record Single<O>(O object) implements SingleOrList<O> {
