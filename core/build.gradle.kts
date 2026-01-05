@@ -14,6 +14,9 @@ dependencies {
     // SLF4j
     api("org.slf4j:slf4j-api:${project.property("slf4j_version")}")
 
+    // Fastutil
+    api("it.unimi.dsi:fastutil:${project.property("fastutil_version")}")
+
     // Json
     api("com.squareup.moshi:moshi:1.14.0")
     api("com.squareup.moshi:moshi-adapters:1.14.0")
