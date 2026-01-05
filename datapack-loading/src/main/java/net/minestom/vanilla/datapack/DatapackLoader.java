@@ -14,6 +14,8 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.enchant.Enchantment;
+import net.minestom.server.registry.TagKey;
+import net.minestom.server.utils.Either;
 import net.minestom.server.utils.Range;
 import net.minestom.vanilla.datapack.advancement.Advancement;
 import net.minestom.vanilla.datapack.dimension.DimensionType;
@@ -38,6 +40,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Consumer;
@@ -72,6 +75,45 @@ public class DatapackLoader {
 
                 @Override
                 public void toJson(@NotNull JsonWriter writer, JsonUtils.SingleOrList<?> value) {
+                }
+            };
+        });
+
+        // Either<SingleOrList<T>, TagKey<T>>
+        builder.add((type, annotations, moshi) -> {
+            if (typeDoesntMatch(type, Either.class) || !(type instanceof ParameterizedType paramType)) return null;
+            Type[] actualTypeArguments = paramType.getActualTypeArguments();
+
+            Type leftType = actualTypeArguments[0];
+            Type rightType = actualTypeArguments[1];
+
+            if (typeDoesntMatch(leftType, JsonUtils.SingleOrList.class)) return null;
+            if (typeDoesntMatch(rightType, TagKey.class) || !(rightType instanceof ParameterizedType paramRightType)) return null;
+
+            Type singleOrListElementType = Types.collectionElementType(leftType, Collection.class);
+            Type tagKeyElementType = paramRightType.getActualTypeArguments()[0];
+
+            if (!singleOrListElementType.equals(tagKeyElementType)) return null;
+
+            return new JsonAdapter<Either<JsonUtils.SingleOrList<?>, TagKey<?>>>() {
+                @Override
+                public Either<JsonUtils.SingleOrList<?>, TagKey<?>> fromJson(@NotNull JsonReader reader) throws IOException {
+                    if (reader.peek() == JsonReader.Token.STRING) {
+                        String key = reader.nextString();
+                        if (key.startsWith("#")) {
+                            return Either.right(TagKey.ofHash(key));
+                        }
+                    }
+                    return Either.left(JsonUtils.SingleOrList.fromJson(singleOrListElementType, reader));
+                }
+
+                @Override
+                public void toJson(@NotNull JsonWriter writer, Either<JsonUtils.SingleOrList<?>, TagKey<?>> value) throws IOException {
+                    switch (value) {
+                        case Either.Left(JsonUtils.SingleOrList<?> ignored) -> {
+                        }
+                        case Either.Right(TagKey<?> tagKey) -> writer.value("#" + tagKey.key().asString());
+                    }
                 }
             };
         });
