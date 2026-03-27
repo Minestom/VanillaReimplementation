@@ -25,6 +25,7 @@ import net.minestom.server.item.book.FilteredText;
 import net.minestom.server.item.component.*;
 import net.minestom.server.item.enchant.Enchantment;
 import net.minestom.server.item.instrument.Instrument;
+import net.minestom.server.network.player.ResolvableProfile;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.potion.PotionType;
 import net.minestom.server.registry.DynamicRegistry;
@@ -621,7 +622,7 @@ public interface LootFunction {
             PlayerSkin skin = player.getSkin();
             if (skin == null) return input;
 
-            return input.with(DataComponents.PROFILE, new HeadProfile(skin));
+            return input.with(DataComponents.PROFILE, new ResolvableProfile(skin));
         }
 
         @Override

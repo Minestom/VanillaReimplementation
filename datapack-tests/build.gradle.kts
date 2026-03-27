@@ -18,7 +18,7 @@ tasks.test {
 }
 
 minecraft {
-    version("1.21.5")
+    version("1.21.11")
     runs {
         server()
     }

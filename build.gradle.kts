@@ -2,24 +2,26 @@ plugins {
     java
     `java-library`
     `maven-publish`
-    id("com.github.harbby.gradle.serviceloader") version ("1.1.8")
-    id("io.github.goooler.shadow") version ("8.1.8")
+    id("com.github.harbby.gradle.serviceloader") version ("1.1.9")
+    id("com.gradleup.shadow") version "8.3.10" apply false
 }
 
 subprojects {
-
     plugins.apply("java")
     plugins.apply("java-library")
     plugins.apply("maven-publish")
     plugins.apply("com.github.harbby.gradle.serviceloader")
-    plugins.apply("io.github.goooler.shadow")
+    plugins.apply("com.gradleup.shadow")
 
     group = "net.minestom.vanilla"
     version = "indev"
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
+        sourceCompatibility = JavaVersion.VERSION_25
+        targetCompatibility = JavaVersion.VERSION_25
 
 //        withJavadocJar()
         withSourcesJar()
@@ -37,6 +39,28 @@ subprojects {
         gradleVersion = rootProject.gradle.gradleVersion
     }
 
+    tasks.withType<JavaCompile>().configureEach {
+        options.release = 25
+    }
+
+    tasks.withType<Test>().configureEach {
+        javaLauncher = javaToolchains.launcherFor {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
+    }
+
+    tasks.withType<JavaExec>().configureEach {
+        javaLauncher = javaToolchains.launcherFor {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
+    }
+
+    tasks.withType<Javadoc>().configureEach {
+        javadocTool = javaToolchains.javadocToolFor {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
+    }
+
     repositories {
         mavenCentral()
         maven(url = "https://jitpack.io")
@@ -44,6 +68,9 @@ subprojects {
     }
 
     dependencies {
+        testImplementation(platform("org.junit:junit-bom:5.13.4"))
+        testImplementation("org.junit.jupiter:junit-jupiter")
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     }
 
     publishing {

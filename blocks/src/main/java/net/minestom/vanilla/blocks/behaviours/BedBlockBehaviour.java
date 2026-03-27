@@ -4,7 +4,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.EntityPose;
 import net.minestom.server.entity.Player;
-import net.minestom.server.entity.metadata.PlayerMeta;
+import net.minestom.server.entity.metadata.avatar.PlayerMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
@@ -12,10 +12,14 @@ import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.MathUtils;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.server.world.DimensionType;
+import net.minestom.server.world.attribute.BedRule;
+import net.minestom.server.world.attribute.EnvironmentAttribute;
+import net.minestom.server.world.attribute.EnvironmentAttributeMap;
 import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
 import net.minestom.vanilla.blocks.VanillaBlocks;
 import net.minestom.vanilla.instance.VanillaExplosion;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
 public class BedBlockBehaviour extends VanillaBlockBehaviour {
@@ -76,10 +80,26 @@ public class BedBlockBehaviour extends VanillaBlockBehaviour {
         Instance instance = interaction.getInstance();
         Point pos = interaction.getBlockPosition();
         Player player = interaction.getPlayer();
+
         var dimensionKey = instance.getDimensionType();
         DimensionType dimension = MinecraftServer.getDimensionTypeRegistry().get(dimensionKey);
+        if (dimension == null) {
+            return false;
+        }
 
-        if (dimension.bedWorks()) {
+        BedRule bedRule = resolveBedRule(dimension);
+        if (bedRule == null) {
+            return false;
+        }
+
+        // Closest replacement for old dimension.bedWorks():
+        // beds "work" if they do not explode in this dimension.
+        if (!bedRule.explodes()) {
+            // Optional: only allow actual sleeping when the rule says so
+            if (bedRule.canSleep() == BedRule.Rule.NEVER) {
+                return false;
+            }
+
             // TODO: make player sleep
             // TODO: checks for mobs
             // TODO: check for day
@@ -114,6 +134,21 @@ public class BedBlockBehaviour extends VanillaBlockBehaviour {
                 .build()
                 .apply(instance);
         return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static @Nullable BedRule resolveBedRule(@NotNull DimensionType dimension) {
+        EnvironmentAttributeMap.Entry<?, ?> rawEntry =
+                dimension.attributes().entries().get(EnvironmentAttribute.BED_RULE);
+
+        if (rawEntry == null) {
+            return null;
+        }
+
+        EnvironmentAttributeMap.Entry<BedRule, Object> entry =
+                (EnvironmentAttributeMap.Entry<BedRule, Object>) rawEntry;
+
+        return entry.modifier().modify(null, entry.argument());
     }
 
     @Override

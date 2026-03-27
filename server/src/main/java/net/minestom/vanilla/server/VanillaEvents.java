@@ -1,5 +1,6 @@
 package net.minestom.vanilla.server;
 
+import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -14,7 +15,6 @@ import net.minestom.server.event.instance.AddEntityToInstanceEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.item.PickupItemEvent;
 import net.minestom.server.event.player.*;
-import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.instance.ExplosionSupplier;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.inventory.PlayerInventory;
@@ -93,7 +93,7 @@ public class VanillaEvents {
         });
 
         if (Boolean.parseBoolean(properties.get("online-mode"))) {
-            MojangAuth.init();
+            MinecraftServer.init(new Auth.Online());
         }
 
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();

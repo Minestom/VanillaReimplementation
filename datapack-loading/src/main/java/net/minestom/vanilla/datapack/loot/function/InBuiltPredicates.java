@@ -352,7 +352,7 @@ interface InBuiltPredicates {
      * • enchantment: Resource location of enchantment.
      * • chances: List of probabilities for enchantment power, indexed from 0.
      */
-    record TableBonus(Key enchantment, List<Float> chances) implements Predicate {
+    record TableBonus(Enchantment enchantment, List<Float> chances) implements Predicate {
         @Override
         public String condition() {
             return "table_bonus";
@@ -362,7 +362,7 @@ interface InBuiltPredicates {
         public boolean test(LootContext context) {
             ItemStack item = context.getOrThrow(LootContext.TOOL);
             EnchantmentList enchants = item.get(DataComponents.ENCHANTMENTS);
-            DynamicRegistry.Key<Enchantment> enchantment = MinestomUtils.getEnchantKey(this.enchantment);
+            net.minestom.server.registry.RegistryKey<Enchantment> enchantment = MinestomUtils.getEnchantKey(this.enchantment);
             int level = enchants == null || !enchants.has(enchantment) ? 0 : enchants.level(enchantment);
 
             return ThreadLocalRandom.current().nextFloat() < chances.get(level);
