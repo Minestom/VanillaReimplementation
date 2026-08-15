@@ -1,7 +1,5 @@
-# NOT READY FOR PRODUCTION
-
-Priority is currently on the core of Minestom (see below). This project has only a very limited list of features.
-Make sure to check out the project board [here](https://github.com/orgs/Minestom/projects/1).
+> [!IMPORTANT]
+> Priority is currently [Minestom](https://github.com/Minestom/Minestom). This project has only a very limited list of features, consider alternatives or implementing your own.
 
 # About Minestom
 
