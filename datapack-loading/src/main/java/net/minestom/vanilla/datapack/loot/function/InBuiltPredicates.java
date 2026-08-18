@@ -9,7 +9,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.component.EnchantmentList;
 import net.minestom.server.item.enchant.Enchantment;
-import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.json.Optional;
@@ -362,7 +362,7 @@ interface InBuiltPredicates {
         public boolean test(LootContext context) {
             ItemStack item = context.getOrThrow(LootContext.TOOL);
             EnchantmentList enchants = item.get(DataComponents.ENCHANTMENTS);
-            DynamicRegistry.Key<Enchantment> enchantment = MinestomUtils.getEnchantKey(this.enchantment);
+            RegistryKey<Enchantment> enchantment = MinestomUtils.getEnchantKey(this.enchantment);
             int level = enchants == null || !enchants.has(enchantment) ? 0 : enchants.level(enchantment);
 
             return ThreadLocalRandom.current().nextFloat() < chances.get(level);

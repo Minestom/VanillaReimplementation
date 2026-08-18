@@ -1,5 +1,6 @@
 package net.minestom.vanilla.utils;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.EntityType;
@@ -31,7 +32,15 @@ public class MinestomUtils {
         return enchants.level(enchant);
     }
 
+    public static int getEnchantLevel(ItemStack itemStack, Key enchantment, int defaultValue) {
+        return getEnchantLevel(itemStack, MinecraftServer.getEnchantmentRegistry().get(enchantment), defaultValue);
+    }
+
     public static RegistryKey<Enchantment> getEnchantKey(Enchantment enchantment) {
         return MinecraftServer.getEnchantmentRegistry().getKey(enchantment);
+    }
+
+    public static RegistryKey<Enchantment> getEnchantKey(Key enchantment) {
+        return getEnchantKey(MinecraftServer.getEnchantmentRegistry().get(enchantment));
     }
 }

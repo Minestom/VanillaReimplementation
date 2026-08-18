@@ -12,7 +12,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.jukebox.JukeboxSong;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.worldevent.WorldEvent;
 import net.minestom.vanilla.blocks.VanillaBlockBehaviour;
@@ -84,8 +84,7 @@ public class JukeboxBlockBehaviour extends VanillaBlockBehaviour {
 
         InventoryManipulation.consumeItemIfNotCreative(player, heldItem, hand);
 
-        JukeboxSong song = heldItem.get(DataComponents.JUKEBOX_PLAYABLE).holder().resolve(MinecraftServer.getJukeboxSongRegistry());
-        DynamicRegistry.Key<JukeboxSong> songKey = MinecraftServer.getJukeboxSongRegistry().getKey(song);
+        RegistryKey<JukeboxSong> songKey = heldItem.get(DataComponents.JUKEBOX_PLAYABLE);
         int songId = MinecraftServer.getJukeboxSongRegistry().getId(songKey);
 
         // TODO: Group packet?

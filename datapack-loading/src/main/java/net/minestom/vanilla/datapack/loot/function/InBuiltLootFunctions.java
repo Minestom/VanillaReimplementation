@@ -20,7 +20,7 @@ import net.minestom.server.item.Material;
 import net.minestom.server.item.component.AttributeList;
 import net.minestom.server.item.component.EnchantmentList;
 import net.minestom.server.item.enchant.Enchantment;
-import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.vanilla.datapack.DatapackLoader;
 import net.minestom.vanilla.datapack.json.JsonUtils;
 import net.minestom.vanilla.datapack.loot.LootTable;
@@ -793,7 +793,7 @@ interface InBuiltLootFunctions {
                 Enchantment enchantment = entry.getKey();
                 int count = entry.getValue().asInt().apply(context::random);
 
-                DynamicRegistry.Key<Enchantment> key = MinestomUtils.getEnchantKey(enchantment);
+                RegistryKey<Enchantment> key = MinestomUtils.getEnchantKey(enchantment);
 
                 if (add) {
                     int previousValue = list.has(key) ? list.level(key) : 0;

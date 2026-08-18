@@ -1,5 +1,5 @@
 plugins {
-    id("org.spongepowered.gradle.vanilla") version "0.2.1-SNAPSHOT"
+    id("org.spongepowered.gradle.vanilla") version "0.2.2"
 }
 
 dependencies {
@@ -18,7 +18,7 @@ tasks.test {
 }
 
 minecraft {
-    version("1.21.5")
+    version("1.21.11")
     runs {
         server()
     }

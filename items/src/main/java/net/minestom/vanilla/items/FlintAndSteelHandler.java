@@ -40,6 +40,7 @@ public class FlintAndSteelHandler implements VanillaItemHandler {
             // BlockFace blockFace, float cursorX, float cursorY, float cursorZ
             instance.placeBlock(new BlockHandler.PlayerPlacement(
                     Block.FIRE,
+                    atFirePosition,
                     instance,
                     firePosition,
                     player,

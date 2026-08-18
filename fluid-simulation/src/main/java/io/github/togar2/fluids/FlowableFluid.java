@@ -2,13 +2,11 @@ package io.github.togar2.fluids;
 
 import it.unimi.dsi.fastutil.shorts.Short2BooleanMap;
 import it.unimi.dsi.fastutil.shorts.Short2BooleanOpenHashMap;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.gamedata.tags.Tag;
-import net.minestom.server.gamedata.tags.TagManager;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
+import net.minestom.server.registry.TagKey;
 import net.minestom.server.utils.Direction;
 
 import java.util.EnumMap;
@@ -242,7 +240,6 @@ public abstract class FlowableFluid extends Fluid {
      */
     private boolean canFill(Instance instance, Point point, Block block, Block flowing) {
         //TODO check waterloggable
-        TagManager tags = MinecraftServer.getTagManager();
         if (block.compare(Block.LADDER)
                 || block.compare(Block.SUGAR_CANE)
                 || block.compare(Block.BUBBLE_COLUMN)
@@ -254,7 +251,7 @@ public abstract class FlowableFluid extends Fluid {
                 || block.compare(Block.SEAGRASS)
                 || block.compare(Block.TALL_SEAGRASS)
                 || block.compare(Block.SEA_PICKLE)
-                || Objects.requireNonNull(tags.getTag(Tag.BasicType.BLOCKS, "minecraft:signs")).contains(block.key())
+                || Objects.requireNonNull(Block.staticRegistry().getTag(TagKey.ofHash("#minecraft:all_signs"))).contains(Objects.requireNonNull(block.asKey()))
                 || block.name().contains("door")
                 || block.name().contains("coral")) {
             return false;
