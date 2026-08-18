@@ -98,13 +98,39 @@ public record Biome(
     /**
      * Represents the effects of a biome.
      */
+    public sealed interface Color {
+        static Color fromJson(JsonReader reader) throws IOException {
+            return JsonUtils.typeMap(reader, token -> switch (token) {
+                case NUMBER -> json -> new IntColor(json.nextInt());
+                case STRING -> json -> new HexColor(json.nextString());
+                case BEGIN_ARRAY -> json -> {
+                    json.beginArray();
+                    java.util.ArrayList<Float> values = new java.util.ArrayList<>();
+                    while (json.hasNext()) {
+                        values.add((float) json.nextDouble());
+                    }
+                    json.endArray();
+                    return new FloatArrayColor(List.copyOf(values));
+                };
+                default -> null;
+            });
+        }
+
+        record IntColor(int value) implements Color {
+        }
+
+        record HexColor(String value) implements Color {
+        }
+
+        record FloatArrayColor(List<Float> value) implements Color {
+        }
+    }
+
     public record Effects(
-            int fog_color,
-            int sky_color,
-            int water_color,
-            int water_fog_color,
-            @Optional Integer foliage_color,
-            @Optional Integer grass_color,
+            Color water_color,
+            @Optional Color foliage_color,
+            @Optional Color dry_foliage_color,
+            @Optional Color grass_color,
             @Optional GrassColorModifier grass_color_modifier,
             @Optional Particle particle,
             @Optional Sound ambient_sound,

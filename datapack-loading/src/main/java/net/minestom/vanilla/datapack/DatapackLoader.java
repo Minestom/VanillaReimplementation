@@ -129,6 +129,7 @@ public class DatapackLoader {
         register(builder, Datapack.Tag.TagValue.ObjectOrTagReference.class, Datapack.Tag.TagValue.ObjectOrTagReference::fromJson);
         register(builder, Biome.Effects.Particle.Options.class, Biome.Effects.Particle.Options::fromJson);
         register(builder, Biome.Sound.class, Biome.Sound::fromJson);
+        register(builder, Biome.Color.class, Biome.Color::fromJson);
         register(builder, Carver.class, Carver::fromJson);
         register(builder, FloatProvider.class, FloatProvider::fromJson);
         register(builder, Biome.CarversList.class, Biome.CarversList::fromJson);

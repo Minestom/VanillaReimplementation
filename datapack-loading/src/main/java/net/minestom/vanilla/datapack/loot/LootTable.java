@@ -44,6 +44,7 @@ public record LootTable(@Nullable String type, @Nullable List<LootFunction> func
                     case "minecraft:tag" -> Pool.Entry.Tag.class;
                     case "minecraft:loot_table" -> Pool.Entry.LootTableNested.class;
                     case "minecraft:dynamic" -> Pool.Entry.Dynamic.class;
+                    case "minecraft:slots" -> Pool.Entry.Slots.class;
                     case "minecraft:empty" -> Pool.Entry.Empty.class;
                     case "minecraft:group" -> Pool.Entry.Group.class;
                     case "minecraft:alternatives" -> Pool.Entry.Alternatives.class;
@@ -179,6 +180,28 @@ public record LootTable(@Nullable String type, @Nullable List<LootFunction> func
                 public List<List<ItemStack>> apply(Datapack datapack, LootContext context) {
                     Block blockEntity = context.get(LootContext.BLOCK_ENTITY);
                     // TODO: Drop chest contents
+                    return List.of(List.of());
+                }
+            }
+
+            /**
+             * slots -> Provides the items contained within slots selected by a slot source.
+             * • slot_source: A slot source describing where the items are located.
+             */
+            record Slots(List<Predicate> conditions,
+                         List<LootFunction> functions,
+                         NumberProvider weight,
+                         NumberProvider quality,
+                         SlotSource slot_source) implements ItemGenerator {
+
+                @Override
+                public Key type() {
+                    return Key.key("minecraft:slots");
+                }
+
+                @Override
+                public List<List<ItemStack>> apply(Datapack datapack, LootContext context) {
+                    // TODO: Resolve slot_source against loot context and produce items.
                     return List.of(List.of());
                 }
             }

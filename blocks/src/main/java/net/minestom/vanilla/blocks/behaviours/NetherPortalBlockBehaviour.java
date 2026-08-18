@@ -141,8 +141,7 @@ public class NetherPortalBlockBehaviour extends VanillaBlockBehaviour implements
         double targetZ = position.z() / 8;
 
         var key = instance.getDimensionType();
-        DimensionType dimension = MinecraftServer.getDimensionTypeRegistry().get(key);
-        if (dimension.effects().equals("nether")) {
+        if (key == DimensionType.THE_NETHER) {
             targetDimension = MinecraftServer.getDimensionTypeRegistry().get(DimensionType.OVERWORLD);
             targetX = position.x() * 8;
             targetZ = position.z() * 8;

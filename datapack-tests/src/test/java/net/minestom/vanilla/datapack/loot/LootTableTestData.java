@@ -163,7 +163,7 @@ public class LootTableTestData {
         expected.put("cauldron", List.of(ItemStack.of(Material.CAULDRON, 1)));
         expected.put("cave_vines", List.of());
         expected.put("cave_vines_plant", List.of());
-        expected.put("chain", List.of(ItemStack.of(Material.CHAIN, 1)));
+        expected.put("iron_chain", List.of(ItemStack.of(Material.IRON_CHAIN, 1)));
         expected.put("cherry_button", List.of(ItemStack.of(Material.CHERRY_BUTTON, 1)));
         expected.put("cherry_door", List.of());
         expected.put("cherry_fence", List.of(ItemStack.of(Material.CHERRY_FENCE, 1)));

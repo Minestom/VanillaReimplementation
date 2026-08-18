@@ -27,6 +27,7 @@ import net.minestom.vanilla.datapack.loot.LootTable;
 import net.minestom.vanilla.datapack.loot.NBTPath;
 import net.minestom.vanilla.datapack.loot.context.LootContext;
 import net.minestom.vanilla.datapack.number.NumberProvider;
+import net.minestom.vanilla.datapack.tags.ConditionsFor;
 import net.minestom.vanilla.tag.Tags;
 import net.minestom.vanilla.utils.JavaUtils;
 import net.minestom.vanilla.utils.MinestomUtils;
@@ -38,6 +39,63 @@ import java.util.random.RandomGenerator;
 
 @SuppressWarnings("unused")
 interface InBuiltLootFunctions {
+    // Replaces any item stack with empty one.
+    record Discard() implements LootFunction {
+
+        @Override
+        public Key function() {
+            return Key.key("minecraft:discard");
+        }
+
+        @Override
+        public ItemStack apply(Context context) {
+            return ItemStack.AIR;
+        }
+    }
+
+    // Conditionally applies different modifier chains based on item_filter.
+    // In 1.21.11+, `modifier` was split into `on_pass` and `on_fail`.
+    record Filtered(ConditionsFor.Item item_filter,
+                    @Nullable JsonUtils.SingleOrList<LootFunction> on_pass,
+                    @Nullable JsonUtils.SingleOrList<LootFunction> on_fail,
+                    @Nullable JsonUtils.SingleOrList<LootFunction> modifier) implements LootFunction {
+
+        @Override
+        public Key function() {
+            return Key.key("minecraft:filtered");
+        }
+
+        @Override
+        public ItemStack apply(Context context) {
+            // TODO: Evaluate item_filter when item predicates are implemented.
+            boolean passesFilter = true;
+            JsonUtils.SingleOrList<LootFunction> selected = passesFilter
+                    ? Objects.requireNonNullElse(on_pass, modifier)
+                    : on_fail;
+
+            ItemStack current = context.itemStack();
+            for (LootFunction function : selected == null ? List.<LootFunction>of() : selected.list()) {
+                final ItemStack input = current;
+                current = function.apply(new Context() {
+                    @Override
+                    public RandomGenerator random() {
+                        return context.random();
+                    }
+
+                    @Override
+                    public ItemStack itemStack() {
+                        return input;
+                    }
+
+                    @Override
+                    public <T> @Nullable T get(LootContext.Trait<T> trait) {
+                        return context.get(trait);
+                    }
+                });
+            }
+            return current;
+        }
+    }
 
     // Applies a predefined bonus formula to the count of the item stack.
     interface ApplyBonus extends LootFunction {
@@ -47,7 +105,7 @@ interface InBuiltLootFunctions {
             return Key.key("minecraft:apply_bonus");
         }
 
-        Key enchantment();
+        Enchantment enchantment();
 
         Key formula();
 
@@ -59,7 +117,7 @@ interface InBuiltLootFunctions {
             ));
         }
 
-        record BinomialWithBonusCount(Key enchantment, Parameters parameters) implements ApplyBonus {
+        record BinomialWithBonusCount(Enchantment enchantment, Parameters parameters) implements ApplyBonus {
             @Override
             public Key formula() {
                 return Key.key("minecraft:binomial_with_bonus_count");
@@ -84,7 +142,7 @@ interface InBuiltLootFunctions {
             }
         }
 
-        record UniformBonusCount(Key enchantment, Parameters parameters) implements ApplyBonus {
+        record UniformBonusCount(Enchantment enchantment, Parameters parameters) implements ApplyBonus {
 
             @Override
             public Key formula() {
@@ -103,7 +161,7 @@ interface InBuiltLootFunctions {
             }
         }
 
-        record OreDrops(Key enchantment) implements ApplyBonus {
+        record OreDrops(Enchantment enchantment) implements ApplyBonus {
 
             @Override
             public Key formula() {
@@ -554,7 +612,7 @@ interface InBuiltLootFunctions {
             int looting;
             if (killer instanceof Player player) {
                 ItemStack mainHand = player.getItemInMainHand();
-                int lootingValue = MinestomUtils.getEnchantLevel(mainHand, Enchantment.LOOTING.key(), 0);
+                int lootingValue = MinestomUtils.getEnchantLevel(mainHand, Enchantment.LOOTING.asValue(), 0);
                 if (lootingValue == 0) return itemStack;
                 looting = lootingValue;
             } else {
@@ -793,7 +851,7 @@ interface InBuiltLootFunctions {
                 Enchantment enchantment = entry.getKey();
                 int count = entry.getValue().asInt().apply(context::random);
 
-                DynamicRegistry.Key<Enchantment> key = MinestomUtils.getEnchantKey(enchantment);
+                net.minestom.server.registry.RegistryKey<Enchantment> key = MinestomUtils.getEnchantKey(enchantment);
 
                 if (add) {
                     int previousValue = list.has(key) ? list.level(key) : 0;

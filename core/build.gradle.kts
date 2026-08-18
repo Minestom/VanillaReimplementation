@@ -18,6 +18,8 @@ dependencies {
     api("com.squareup.moshi:moshi:1.14.0")
     api("com.squareup.moshi:moshi-adapters:1.14.0")
 
+    api("it.unimi.dsi:fastutil:8.5.18")
+
     // Tests
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")

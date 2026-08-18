@@ -29,6 +29,7 @@ hs_err_pid*
 .idea/
 out/
 .gradle/
+.gradel-home/
 
 # Minestom
 /minecraft_data/
