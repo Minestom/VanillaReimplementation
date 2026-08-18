@@ -26,6 +26,7 @@ import net.minestom.server.item.component.EnchantmentList;
 import net.minestom.server.item.enchant.Enchantment;
 import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.server.world.DimensionType;
+import net.minestom.vanilla.commands.VanillaCommandsFeature;
 import net.minestom.vanilla.crafting.CraftingFeature;
 import net.minestom.vanilla.crafting.Recipe;
 import net.minestom.vanilla.logging.Logger;
@@ -73,6 +74,9 @@ public class Survival {
 
         Map<Key, Recipe> recipes = CraftingFeature.buildFromDatapack(process);
         process.eventHandler().addChild(CraftingFeature.createEventNode(recipes, process));
+
+
+        VanillaCommandsFeature.registerAll(process.command());
 
         process.eventHandler().addListener(AsyncPlayerConfigurationEvent.class, event -> {
             final Player player = event.getPlayer();
